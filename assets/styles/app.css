@@ -1,3 +1,46 @@
 body {
     background-color: skyblue;
 }
+
+.navbar {
+    background-color: #fff;
+    min-height: 70px;
+    padding: 10px 0;
+}
+
+.navbar-menu-wrapper {
+    min-height: 50px;
+    flex: 1;
+}
+
+.navbar-nav:first-child {
+    flex: 0 1 auto;
+    display: flex !important;
+}
+
+.welcome-text {
+    font-size: 20px;
+    font-weight: 500;
+    color: #dd0808;
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+    display: block;
+    white-space: nowrap;
+}
+
+.welcome-text span {
+    color: #000;
+    font-weight: bold;
+}
+
+.welcome-sub-text {
+    font-size: 13px;
+    color: #b30d0d;
+    margin: 5px 0 0 0;
+    padding: 0;
+    font-weight: 400;
+    display: block;
+    white-space: nowrap;
+}
+
