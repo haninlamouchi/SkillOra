@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+
+<title>Edit LivrableChallenge</title>
+
+{% block body %}
+    <h1>Edit LivrableChallenge</h1>
+
+    {{ include('livrable_challenge/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_livrable_challenge_index') }}">back to list</a>
+
+    {{ include('livrable_challenge/_delete_form.html.twig') }}
+{% endblock %}

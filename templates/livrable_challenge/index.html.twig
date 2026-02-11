@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+
+<title>LivrableChallenge index</title>
+
+{% block body %}
+    <h1>LivrableChallenge index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Fichier</th>
+                <th>DateSoumission</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for livrable_challenge in livrable_challenges %}
+            <tr>
+                <td>{{ livrable_challenge.id }}</td>
+                <td>{{ livrable_challenge.fichier }}</td>
+                <td>{{ livrable_challenge.dateSoumission ? livrable_challenge.dateSoumission|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_livrable_challenge_show', {'id': livrable_challenge.id}) }}">show</a>
+                    <a href="{{ path('app_livrable_challenge_edit', {'id': livrable_challenge.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_livrable_challenge_new') }}">Create new</a>
+{% endblock %}

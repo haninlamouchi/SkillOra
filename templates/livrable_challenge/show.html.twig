@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<title>LivrableChallenge</title>
+
+{% block body %}
+    <h1>LivrableChallenge</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ livrable_challenge.id }}</td>
+            </tr>
+            <tr>
+                <th>Fichier</th>
+                <td>{{ livrable_challenge.fichier }}</td>
+            </tr>
+            <tr>
+                <th>DateSoumission</th>
+                <td>{{ livrable_challenge.dateSoumission ? livrable_challenge.dateSoumission|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_livrable_challenge_index') }}">back to list</a>
+
+    <a href="{{ path('app_livrable_challenge_edit', {'id': livrable_challenge.id}) }}">edit</a>
+
+    {{ include('livrable_challenge/_delete_form.html.twig') }}
+{% endblock %}

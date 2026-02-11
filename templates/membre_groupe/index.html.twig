@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<title>MembreGroupe index</title>
+
+{% block body %}
+    <h1>MembreGroupe index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Role</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for membre_groupe in membre_groupes %}
+            <tr>
+                <td>{{ membre_groupe.id }}</td>
+                <td>{{ membre_groupe.role }}</td>
+                <td>
+                    <a href="{{ path('app_membre_groupe_show', {'id': membre_groupe.id}) }}">show</a>
+                    <a href="{{ path('app_membre_groupe_edit', {'id': membre_groupe.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_membre_groupe_new') }}">Create new</a>
+{% endblock %}
