@@ -1,0 +1,85 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Comment Supervision{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .supervision-page { padding: 100px 0 80px; background: var(--grey-light); min-height: 100vh; }
+    .supervision-page .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    .sup-hero { background: linear-gradient(135deg, var(--black), var(--grey-dark)); border-radius: var(--radius); padding: 32px 36px; margin-bottom: 28px; text-align: center; position: relative; overflow: hidden; }
+    .sup-hero::before { content: ''; position: absolute; top: -50%; right: -10%; width: 250px; height: 250px; border-radius: 50%; background: var(--red); opacity: 0.08; }
+    .sup-hero h1 { font-size: 1.6rem; font-weight: 800; color: var(--white); margin: 0 0 6px; }
+    .sup-hero p { color: rgba(255,255,255,0.5); font-size: 0.9rem; margin: 0; }
+
+    .stats-pill { background: var(--white); border-radius: var(--radius); padding: 20px 28px; box-shadow: var(--shadow-sm); margin-bottom: 28px; display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .stats-pill span { color: var(--grey); font-size: 0.95rem; font-weight: 600; }
+    .stats-pill strong { color: var(--red); font-size: 1.8rem; font-weight: 800; }
+
+    .comments-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 20px; }
+    .sup-card { background: var(--white); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm); border-left: 4px solid var(--black); transition: var(--transition); }
+    .sup-card:hover { border-left-color: var(--red); box-shadow: var(--shadow-md); }
+    .sup-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--grey-border); }
+    .sup-card-pub { font-weight: 700; color: var(--black); font-size: 0.95rem; margin-bottom: 4px; }
+    .sup-card-author { color: var(--grey); font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
+    .sup-card-role { background: var(--red-light); color: var(--red); padding: 2px 8px; border-radius: var(--radius-pill); font-size: 0.7rem; font-weight: 700; }
+    .sup-card-date { color: var(--grey); font-size: 0.78rem; }
+    .sup-card-content { color: #555; font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px; background: var(--grey-light); padding: 14px; border-radius: var(--radius-sm); }
+    .sup-card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-action { flex: 1; min-width: 100px; padding: 9px 14px; border-radius: 8px; font-weight: 600; font-size: 0.82rem; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; transition: var(--transition); }
+    .btn-act-view { background: var(--black); color: var(--white); }
+    .btn-act-view:hover { background: var(--grey-dark); color: var(--white); text-decoration: none; }
+    .btn-act-reply { background: var(--grey-light); color: var(--grey-dark); border: 1px solid var(--grey-border); }
+    .btn-act-reply:hover { border-color: var(--black); color: var(--black); text-decoration: none; }
+    .btn-act-delete { background: var(--red-light); color: var(--red); }
+    .btn-act-delete:hover { background: var(--red); color: var(--white); text-decoration: none; }
+
+    .empty-state { text-align: center; padding: 60px 20px; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+    .empty-state i { font-size: 2.5rem; color: var(--grey-border); margin-bottom: 16px; display: block; }
+    .empty-state h3 { color: var(--grey); font-size: 1.1rem; margin-bottom: 6px; }
+
+    @media (max-width: 768px) { .comments-grid { grid-template-columns: 1fr; } .supervision-page { padding: 80px 0 40px; } }
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="supervision-page">
+    <div class="container">
+        <div class="sup-hero">
+            <h1>Comment Supervision</h1>
+            <p>Club Manager Area</p>
+        </div>
+        <div class="stats-pill">
+            <span>Total:</span>
+            <strong>{{ commentaires|length }}</strong>
+            <span>comment(s)</span>
+        </div>
+        {% if commentaires is not empty %}
+            <div class="comments-grid">
+                {% for commentaire in commentaires %}
+                    <div class="sup-card">
+                        <div class="sup-card-head">
+                            <div>
+                                <div class="sup-card-pub">{{ commentaire.publication.titre }}</div>
+                                <div class="sup-card-author">{{ commentaire.user.prenom }} {{ commentaire.user.nom }} <span class="sup-card-role">{{ commentaire.user.role|replace({'_': ' '})|upper }}</span></div>
+                            </div>
+                            <div class="sup-card-date"><i class="far fa-clock"></i> {{ commentaire.dateCommentaire|date('d/m/Y H:i') }}</div>
+                        </div>
+                        <div class="sup-card-content">{{ commentaire.contenu }}</div>
+                        <div class="sup-card-actions">
+                            <a href="{{ path('app_forum_show', {'id': commentaire.publication.id, 'userId': userId}) }}" class="btn-action btn-act-view"><i class="fas fa-eye"></i> View</a>
+                            <a href="{{ path('app_responsable_club_commentaire_reply', {'userId': userId, 'commentaireId': commentaire.id}) }}" class="btn-action btn-act-reply"><i class="fas fa-reply"></i> Reply</a>
+                            <a href="{{ path('app_responsable_club_commentaire_delete', {'userId': userId, 'commentaireId': commentaire.id}) }}" class="btn-action btn-act-delete" onclick="return confirm('Delete this comment?')"><i class="far fa-trash-alt"></i> Delete</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="far fa-comment"></i>
+                <h3>No comments yet</h3>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

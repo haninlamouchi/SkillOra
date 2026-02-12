@@ -1,0 +1,75 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}{{ publication.titre }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .show-page { padding: 100px 0 80px; background: var(--grey-light); min-height: 100vh; }
+    .show-page .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+    .show-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; animation: fadeUp 0.5s ease both; }
+    .show-media { width: 100%; max-height: 450px; overflow: hidden; background: var(--black); }
+    .show-media img { width: 100%; max-height: 450px; object-fit: cover; display: block; }
+    .show-media video { width: 100%; max-height: 450px; display: block; }
+
+    .show-body { padding: 32px 36px; }
+    .show-badges { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+    .badge { padding: 5px 14px; border-radius: var(--radius-pill); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-published { background: rgba(39,174,96,0.12); color: #27ae60; }
+    .badge-pending { background: rgba(243,156,18,0.12); color: #f39c12; }
+
+    .show-title { font-size: 1.7rem; font-weight: 800; color: var(--black); margin: 0 0 12px; line-height: 1.35; }
+    .show-meta { display: flex; align-items: center; gap: 20px; color: var(--grey); font-size: 0.85rem; margin-bottom: 24px; flex-wrap: wrap; }
+    .show-meta span { display: inline-flex; align-items: center; gap: 6px; }
+    .show-content { font-size: 0.95rem; line-height: 1.75; color: #444; margin-bottom: 32px; }
+
+    .show-actions { display: flex; gap: 12px; padding-top: 24px; border-top: 1px solid var(--grey-border); flex-wrap: wrap; }
+    .show-actions a { padding: 11px 24px; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.88rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: var(--transition); border: none; cursor: pointer; }
+    .action-back { background: var(--grey-light); color: var(--grey-dark); border: 1px solid var(--grey-border); }
+    .action-back:hover { background: var(--white); border-color: var(--black); color: var(--black); text-decoration: none; }
+    .action-edit { background: var(--darkred); color: var(--white); }
+    .action-edit:hover { background: var(--red); color: var(--white); text-decoration: none; }
+    .action-delete { background: var(--red-light); color: var(--red); }
+    .action-delete:hover { background: var(--red); color: var(--white); text-decoration: none; }
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="show-page">
+    <div class="container">
+        <div class="show-card">
+            {% if publication.fichier %}
+                {% set ext = publication.fichier|split('.')|last|lower %}
+                <div class="show-media">
+                    {% if ext in ['jpg','jpeg','png','gif','webp'] %}
+                        <img src="{{ asset('uploads/publications/' ~ publication.fichier) }}" alt="{{ publication.titre }}">
+                    {% elseif ext in ['mp4','webm','ogg'] %}
+                        <video controls><source src="{{ asset('uploads/publications/' ~ publication.fichier) }}" type="video/{{ ext }}"></video>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <div class="show-body">
+                <div class="show-badges">
+                    <span class="badge badge-type">{{ publication.typecontenu.label }}</span>
+                    <span class="badge {{ publication.status.value == 'publié' ? 'badge-published' : 'badge-pending' }}">
+                        {{ publication.status.label }}
+                    </span>
+                </div>
+                <h1 class="show-title">{{ publication.titre }}</h1>
+                <div class="show-meta">
+                    <span><i class="far fa-calendar"></i> {{ publication.datePublication|date('d/m/Y H:i') }}</span>
+                    <span><i class="far fa-user"></i> {{ publication.user.prenom }} {{ publication.user.nom }}</span>
+                    <span><i class="far fa-comment"></i> {{ publication.commentaires|length }} comment(s)</span>
+                </div>
+                <div class="show-content">{{ publication.contenu|nl2br }}</div>
+                <div class="show-actions">
+      <a href="{{ path('app_publication_index', {u: currentUser.id}) }}" class="action-back"><i class="fas fa-arrow-left"></i> Back</a>
+<a href="{{ path('app_publication_edit', {id: publication.id, u: currentUser.id}) }}" class="action-edit"><i class="fas fa-pen"></i> Edit</a>
+<a href="{{ path('app_publication_delete', {id: publication.id, u: currentUser.id}) }}" class="action-delete" onclick="return confirm('Delete this publication?')"><i class="fas fa-trash"></i> Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

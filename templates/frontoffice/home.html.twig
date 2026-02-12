@@ -1,9 +1,260 @@
 {% extends 'frontoffice/base.html.twig' %}
 
-{% block title %}Accueil{% endblock %}
+{% block title %}Accueil — SkillOra{% endblock %}
+
+{% block stylesheets %}
+<style>
+    /* ═══════════════════════════════════════════
+       HOME PAGE — Dark Red Theme Override
+       Harmonise avec le reste du site (navbar, forum, etc.)
+       ═══════════════════════════════════════════ */
+
+    /* ── PRELOADER ── */
+    .js-preloader .dot { background-color: var(--darkred) !important; }
+    .js-preloader .dots span { background-color: var(--red) !important; }
+
+    /* ── MAIN BANNER / HERO CAROUSEL ── */
+    .main-banner { background-color: var(--grey-light) !important; }
+    .main-banner .item-1,
+    .main-banner .item-2,
+    .main-banner .item-3 { background-color: var(--darkred) !important; }
+    .main-banner .item {
+        background: linear-gradient(135deg, var(--darkred) 0%, var(--darkred-deep) 60%, var(--black) 100%) !important;
+    }
+    .main-banner .item span.category {
+        background-color: var(--red) !important;
+        color: #fff !important;
+        border-radius: var(--radius-pill);
+    }
+    .main-banner .item .buttons .main-button a {
+        background-color: #fff !important;
+        color: var(--darkred) !important;
+        font-weight: 700;
+    }
+    .main-banner .item .buttons .main-button a:hover {
+        background-color: var(--red) !important;
+        color: #fff !important;
+    }
+    .main-banner .item .buttons .icon-button i {
+        background-color: rgba(255,255,255,0.15) !important;
+        color: #fff !important;
+    }
+    .main-banner .item .buttons .icon-button a { color: #fff !important; }
+    .main-banner .owl-nav .owl-prev i,
+    .main-banner .owl-nav .owl-next i {
+        color: var(--darkred) !important;
+        background-color: #fff !important;
+    }
+    .main-banner .owl-nav .owl-prev i:hover,
+    .main-banner .owl-nav .owl-next i:hover {
+        background-color: var(--red) !important;
+        color: #fff !important;
+    }
+
+    /* ── SERVICES SECTION ── */
+    .services .service-item .icon {
+        background-color: var(--darkred) !important;
+    }
+    .services .service-item .main-content {
+        background-color: #fdf2f2 !important;
+        border: 1px solid rgba(139,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+    .services .service-item:hover .main-content {
+        box-shadow: 0 8px 30px rgba(139,0,0,0.12);
+        transform: translateY(-4px);
+    }
+    .services .service-item h4 { color: var(--black) !important; }
+    .services .service-item .main-button a {
+        background-color: var(--darkred) !important;
+        color: #fff !important;
+        font-weight: 600;
+    }
+    .services .service-item .main-button a:hover {
+        background-color: var(--red) !important;
+    }
+
+    /* ── ABOUT US SECTION ── */
+    .about-us:before {
+        background-color: #fdf2f2 !important;
+    }
+    .accordion {
+        background-color: var(--darkred) !important;
+    }
+    .accordion-button:not(.collapsed) {
+        color: var(--darkred) !important;
+        background-color: #fff !important;
+    }
+    .accordion-button::after {
+        background-color: var(--red) !important;
+        color: #fff !important;
+    }
+    .about-us .section-heading h6 {
+        color: var(--darkred) !important;
+    }
+    .about-us .section-heading .main-button a {
+        background-color: var(--darkred) !important;
+        color: #fff !important;
+    }
+    .about-us .section-heading .main-button a:hover {
+        background-color: var(--red) !important;
+    }
+
+    /* ── SECTION HEADINGS (global) ── */
+    .section-heading h6 {
+        color: var(--darkred) !important;
+    }
+    .section-heading h2 em {
+        color: var(--darkred) !important;
+        font-style: normal;
+    }
+
+    /* ── COURSES / EVENTS FILTER ── */
+    .event_filter li a {
+        transition: all 0.3s ease;
+    }
+    .event_filter li a.is_active,
+    .event_filter li a:hover {
+        background-color: var(--darkred) !important;
+        color: #fff !important;
+    }
+    .events_item .thumb span.category {
+        background-color: var(--darkred) !important;
+        color: #fff !important;
+    }
+    .events_item .thumb span.price {
+        background-color: var(--darkred) !important;
+    }
+    .events_item .thumb span.price h6 { color: #fff !important; }
+    .events_item .down-content span.author {
+        color: var(--darkred) !important;
+    }
+    .events_item:hover .down-content h4 {
+        color: var(--darkred) !important;
+    }
+    .events_item:hover .thumb span.price {
+        background-color: var(--red) !important;
+    }
+
+    /* ── FUN FACTS / COUNTER ── */
+    .fun-facts:before {
+        background-color: var(--darkred) !important;
+    }
+
+    /* ── TEAM SECTION ── */
+    .team-member .main-content {
+        background-color: #fdf2f2 !important;
+        border: 1px solid rgba(139,0,0,0.06);
+    }
+    .team-member .main-content span.category {
+        color: var(--darkred) !important;
+    }
+    .team-member .main-content ul li a {
+        color: var(--darkred) !important;
+        background-color: #fff !important;
+    }
+    .team-member .main-content ul li a:hover {
+        background-color: var(--darkred) !important;
+        color: #fff !important;
+    }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials:before {
+        background-color: #fdf2f2 !important;
+    }
+    .testimonials .item {
+        background-color: var(--darkred) !important;
+    }
+    .testimonials .owl-nav .owl-prev i,
+    .testimonials .owl-nav .owl-next i {
+        color: var(--darkred) !important;
+    }
+    .testimonials .owl-nav .owl-prev i:hover,
+    .testimonials .owl-nav .owl-next i:hover {
+        color: var(--red) !important;
+    }
+
+    /* ── EVENTS / SCHEDULE ── */
+    .events .item {
+        background-color: #fdf2f2 !important;
+        border: 1px solid rgba(139,0,0,0.06);
+    }
+    .events .item ul li span.category {
+        color: var(--darkred) !important;
+        background-color: #fff !important;
+    }
+    .events .item ul li h6 {
+        color: var(--darkred) !important;
+    }
+    .events .item a {
+        background-color: var(--darkred) !important;
+        color: #fff !important;
+    }
+    .events .item a:hover {
+        background-color: var(--red) !important;
+    }
+
+    /* ── CONTACT US ── */
+    .contact-us:before {
+        background-color: #fdf2f2 !important;
+    }
+    .contact-us .special-offer span.offer {
+        background-color: var(--darkred) !important;
+        color: #fff !important;
+    }
+    .contact-us .special-offer h6 em {
+        color: var(--darkred) !important;
+    }
+    .contact-us .special-offer h4 em {
+        color: var(--darkred) !important;
+    }
+    .contact-us .special-offer a {
+        background-color: var(--darkred) !important;
+        color: #fff !important;
+    }
+    .contact-us .special-offer a:hover {
+        background-color: var(--red) !important;
+    }
+    .contact-us .contact-us-content {
+        background: linear-gradient(135deg, var(--darkred) 0%, var(--darkred-deep) 100%) !important;
+    }
+    #contact-form button {
+        background-color: #fff !important;
+        color: var(--darkred) !important;
+        font-weight: 700;
+    }
+    #contact-form button:hover {
+        background-color: var(--red) !important;
+        color: #fff !important;
+        opacity: 1 !important;
+    }
+
+    /* ── FOOTER (override template rounded footer) ── */
+    footer {
+        margin-top: 0 !important;
+        border-radius: 0 !important;
+        background: var(--black) !important;
+        border-top: 3px solid var(--darkred) !important;
+        min-height: auto !important;
+        padding: 30px 0 !important;
+    }
+    footer p {
+        line-height: 1.6 !important;
+        color: rgba(255,255,255,0.5) !important;
+        font-size: 0.9rem;
+    }
+    footer::before { display: none !important; }
+
+    /* ── GLOBAL LINK COLOR overrides ── */
+    a { color: var(--darkred); }
+    a:hover { color: var(--red); }
+
+    /* ── SMOOTH SCROLL + body bg ── */
+    html { scroll-behavior: smooth; }
+</style>
+{% endblock %}
 
 {% block body %}
-
 
   <!-- ***** Preloader Start ***** -->
   <div id="js-preloader" class="js-preloader">
@@ -17,8 +268,6 @@
     </div>
   </div>
   <!-- ***** Preloader End ***** -->
-
-
 
   <div class="main-banner" id="top">
     <div class="container">
@@ -194,7 +443,7 @@
     </div>
   </div>
 
-  <section class="section courses" id="courses" >
+  <section class="section courses" id="courses">
     <div class="container">
       <div class="row">
         <div class="col-lg-12 text-center">
@@ -223,7 +472,6 @@
           <div class="events_item">
             <div class="thumb">
               <a href="#"><img src="{{ asset('assets/frontoffice/images/course-01.jpg') }}" alt=""></a>
-  
               <span class="price"><h6><em>$</em>160</h6></span>
             </div>
             <div class="down-content">
@@ -232,7 +480,7 @@
             </div>
           </div>
         </div>
-        <div class="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6  development">
+        <div class="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6 development">
           <div class="events_item">
             <div class="thumb">
               <a href="#"><img src="{{ asset('assets/frontoffice/images/course-02.jpg') }}" alt=""></a>
@@ -392,7 +640,7 @@
         </div>
       </div>
     </div>
-  </div> 
+  </div>
 
   <div class="section testimonials">
     <div class="container">
@@ -400,14 +648,14 @@
         <div class="col-lg-7">
           <div class="owl-carousel owl-testimonials">
             <div class="item">
-              <p>“Please tell your friends or collegues about TemplateMo website. Anyone can access the website to download free templates. Thank you for visiting.”</p>
+              <p>"Please tell your friends or collegues about TemplateMo website. Anyone can access the website to download free templates. Thank you for visiting."</p>
               <div class="author">
                 <span class="category">Full Stack Master</span>
                 <h4>Claude David</h4>
               </div>
             </div>
             <div class="item">
-              <p>“Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis ipsum suspendisse ultrices gravid.”</p>
+              <p>"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis ipsum suspendisse ultrices gravid."</p>
               <div class="author">
                 <img src="{{ asset('assets/frontoffice/images/testimonial-author.jpg') }}" alt="">
                 <span class="category">UI Expert</span>
@@ -415,7 +663,7 @@
               </div>
             </div>
             <div class="item">
-              <p>“Scholar is free website template provided by TemplateMo for educational related websites. This CSS layout is based on Bootstrap v5.3.0 framework.”</p>
+              <p>"Scholar is free website template provided by TemplateMo for educational related websites. This CSS layout is based on Bootstrap v5.3.0 framework."</p>
               <div class="author">
                 <img src="{{ asset('assets/frontoffice/images/testimonial-author.jpg') }}" alt="">
                 <span class="category">Digital Animator</span>
@@ -547,7 +795,7 @@
   <div class="contact-us section" id="contact">
     <div class="container">
       <div class="row">
-        <div class="col-lg-6  align-self-center">
+        <div class="col-lg-6 align-self-center">
           <div class="section-heading">
             <h6>Contact Us</h6>
             <h2>Feel free to contact us anytime</h2>
@@ -591,8 +839,5 @@
       </div>
     </div>
   </div>
-
-
-
 
 {% endblock %}

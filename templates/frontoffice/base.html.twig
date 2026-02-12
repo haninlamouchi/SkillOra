@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Front{% endblock %}</title>
+    <title>{% block title %}SkillOra{% endblock %}</title>
 
     <!-- CSS -->
     <link rel="stylesheet" href="{{ asset('assets/frontoffice/vendor/bootstrap/css/bootstrap.min.css') }}">
@@ -11,29 +11,331 @@
     <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/owl.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/animate.css') }}">
 
+    <style>
+        :root {
+            --red: #e74c3c; --red-dark: #c0392b; --red-light: #fdedec;
+            --red-glow: rgba(231, 76, 60, 0.15);
+            --darkred: #8b0000; --darkred-light: #a81c1c; --darkred-deep: #5a0000;
+            --black: #111111; --grey-dark: #2c2c2c; --grey: #6b6b6b;
+            --grey-light: #f7f8fa; --grey-border: #e5e7eb; --white: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 14px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.1);
+            --shadow-red: 0 4px 20px rgba(139, 0, 0, 0.25);
+            --radius: 16px; --radius-sm: 10px; --radius-pill: 50px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ===== HEADER / NAVBAR ===== */
+        .header-area.header-sticky {
+            position: fixed !important; top: 0 !important; left: 0; right: 0; z-index: 1000;
+            background: var(--black) !important; border-radius: 0 !important;
+            border-bottom: 3px solid var(--darkred) !important;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.4) !important;
+            opacity: 1 !important; transform: none !important; padding: 0 !important;
+        }
+        .header-area.header-sticky .main-nav { background: transparent !important; align-items: center; min-height: 64px; }
+        .header-area.header-sticky .main-nav .logo h1 { font-size: 24px; font-weight: 800; color: var(--darkred) !important; letter-spacing: 2px; }
+        .header-area.header-sticky .main-nav ul.nav { margin-top: 0 !important; border-radius: 0 !important; }
+        .header-area.header-sticky .main-nav .nav li { height: 64px; line-height: 64px; }
+        .header-area.header-sticky .main-nav .nav li a {
+            color: rgba(255,255,255,0.65) !important; font-weight: 500; font-size: 13.5px;
+            padding: 8px 16px; height: auto; line-height: normal; transition: var(--transition);
+            border-bottom: 2px solid transparent;
+        }
+        .header-area.header-sticky .main-nav .nav li a:hover { color: #fff !important; border-bottom-color: var(--red); opacity: 1 !important; background: transparent !important; }
+        .header-area.header-sticky .main-nav .nav li a.active { color: #fff !important; border-bottom-color: var(--red); opacity: 1 !important; background: transparent !important; }
+        .background-header.header-sticky { background: var(--black) !important; border-radius: 0 !important; border-bottom: 3px solid var(--red) !important; box-shadow: 0 2px 20px rgba(139,0,0,0.4) !important; top: 0 !important; padding: 0 !important; }
+        .background-header .main-nav .logo, .background-header .main-nav #search { margin-top: 0 !important; }
+        .background-header .main-nav .nav { margin-top: 0 !important; }
+        .background-header .main-nav .nav li { height: 64px !important; line-height: 64px !important; }
+
+        /* ===== DROPDOWN ===== */
+        .nav-dropdown { position: relative; }
+        .nav-dropdown > a::after { content: ' \f107'; font-family: 'Font Awesome 5 Free'; font-weight: 900; font-size: 0.7rem; margin-left: 5px; }
+        .nav-dropdown-menu {
+            position: absolute; top: 100%; left: 0; min-width: 220px;
+            background: var(--black); border: 1px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--red); border-radius: 0 0 10px 10px;
+            box-shadow: 0 8px 24px rgba(139,0,0,0.5);
+            opacity: 0; visibility: hidden; transform: translateY(8px);
+            transition: all 0.25s ease; z-index: 2000;
+            padding: 8px 0; list-style: none; margin: 0;
+        }
+        .nav-dropdown:hover .nav-dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+        .nav-dropdown-menu li { height: auto !important; line-height: normal !important; }
+        .nav-dropdown-menu li a {
+            display: block; padding: 10px 20px !important; font-size: 13px !important;
+            color: rgba(255,255,255,0.6) !important; border-bottom: none !important;
+            transition: var(--transition); white-space: nowrap;
+        }
+        .nav-dropdown-menu li a:hover { color: #fff !important; background: rgba(231,76,60,0.2) !important; padding-left: 24px !important; }
+        .nav-dropdown-menu li a i { width: 20px; text-align: center; margin-right: 8px; color: var(--red); font-size: 0.8rem; }
+        .nav-dropdown-menu .dropdown-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 6px 0; }
+
+        /* ===== USER PILL ===== */
+        .nav-user-pill {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(231,76,60,0.15); border: 1px solid rgba(231,76,60,0.3);
+            padding: 5px 14px 5px 10px; border-radius: 50px; margin-left: 8px;
+            font-size: 12.5px !important; color: #fff !important; font-weight: 600;
+            cursor: default; height: auto !important; line-height: normal !important;
+        }
+        .nav-user-pill .user-avatar {
+            width: 26px; height: 26px; border-radius: 50%; background: var(--red);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 700;
+        }
+        .nav-user-pill .user-role { color: rgba(255,255,255,0.5); font-size: 11px; font-weight: 400; margin-left: 2px; }
+
+        /* ===== HERO BOXES (dark red) ===== */
+        .page-hero, .form-hero, .rc-hero, .sup-hero, .forum-hero {
+            background: linear-gradient(135deg, var(--darkred) 0%, var(--darkred-deep) 100%) !important;
+            border-radius: var(--radius); padding: 36px 40px; margin-bottom: 28px;
+            position: relative; overflow: hidden;
+        }
+        .page-hero::before, .form-hero::before, .rc-hero::before, .sup-hero::before, .forum-hero::before {
+            content: ''; position: absolute; top: -50%; right: -10%; width: 300px; height: 300px;
+            border-radius: 50%; background: var(--red); opacity: 0.1;
+        }
+        .page-hero h1, .form-hero h1, .rc-hero h1, .sup-hero h1, .forum-hero h1 {
+            color: var(--white); font-weight: 800; margin: 0 0 6px; position: relative; z-index: 1;
+        }
+        .page-hero p, .form-hero p, .rc-hero p, .sup-hero p, .forum-hero p {
+            color: rgba(255,255,255,0.6); font-size: 0.9rem; margin: 0; position: relative; z-index: 1;
+        }
+
+        .show-card-header {
+            background: linear-gradient(135deg, var(--darkred) 0%, var(--darkred-deep) 100%) !important;
+            padding: 32px 36px; position: relative;
+        }
+        .show-card-header::before { content: ''; position: absolute; top: -50%; right: -10%; width: 200px; height: 200px; border-radius: 50%; background: var(--red); opacity: 0.08; }
+
+        .pub-card-head {
+            background: linear-gradient(135deg, var(--darkred) 0%, var(--darkred-deep) 100%) !important;
+        }
+
+        /* ===== SHARED FORM STYLES ===== */
+        .form-card { background: var(--white); border-radius: var(--radius); padding: 32px 36px; box-shadow: var(--shadow-sm); animation: fadeUp 0.5s ease both; }
+        .form-help { background: var(--red-light); border-left: 4px solid var(--red); padding: 14px 18px; border-radius: var(--radius-sm); margin-bottom: 24px; font-size: 0.88rem; color: var(--red-dark); }
+        .form-help i { margin-right: 6px; }
+        .form-group { margin-bottom: 22px; }
+        .form-group label, .form-card label { display: block; color: var(--black); font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; }
+
+        .form-card input[type="text"], .form-card input[type="email"], .form-card input[type="password"],
+        .form-card input[type="number"], .form-card input[type="date"], .form-card input[type="time"],
+        .form-card input[type="datetime-local"], .form-card input[type="file"],
+        .form-card textarea, .form-card select {
+            width: 100%; padding: 12px 16px; border: 2px solid var(--grey-border); border-radius: var(--radius-sm);
+            font-size: 0.9rem; background: var(--grey-light); color: var(--black); transition: var(--transition);
+            box-sizing: border-box; font-family: inherit;
+        }
+        .form-card input:focus, .form-card textarea:focus, .form-card select:focus {
+            outline: none; border-color: var(--red); background: var(--white); box-shadow: 0 0 0 3px var(--red-glow);
+        }
+        .form-card textarea { min-height: 140px; resize: vertical; }
+        .form-card select {
+            cursor: pointer; appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e74c3c' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px;
+        }
+
+        .form-actions { display: flex; gap: 12px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--grey-border); }
+        .btn-back-form { flex: 1; background: var(--grey-light); color: var(--grey-dark); padding: 12px 20px; border-radius: var(--radius-sm); border: 1px solid var(--grey-border); font-weight: 700; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition); }
+        .btn-back-form:hover { border-color: var(--black); color: var(--black); text-decoration: none; }
+        .btn-submit { flex: 2; background: var(--darkred); color: var(--white); padding: 12px 28px; border-radius: var(--radius-sm); border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-submit:hover { background: var(--red); transform: translateY(-2px); box-shadow: var(--shadow-red); }
+
+        .btn-new {
+            background: var(--darkred); color: var(--white); padding: 13px 30px; border-radius: var(--radius-sm);
+            border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 10px; transition: var(--transition); position: relative; z-index: 1;
+        }
+        .btn-new:hover { background: var(--red); transform: translateY(-2px); box-shadow: var(--shadow-red); color: var(--white); text-decoration: none; }
+
+        .btn-add { background: var(--darkred); color: var(--white); padding: 11px 24px; border-radius: var(--radius-sm); text-decoration: none; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; transition: var(--transition); border: none; }
+        .btn-add:hover { background: var(--red); color: var(--white); text-decoration: none; transform: translateY(-2px); box-shadow: var(--shadow-red); }
+
+        /* ===== SHARED SEARCH BAR ===== */
+        .search-bar {
+            background: var(--white); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px;
+            box-shadow: var(--shadow-sm); display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+        }
+        .search-bar input {
+            flex: 1; min-width: 200px; padding: 11px 16px; border: 2px solid var(--grey-border);
+            border-radius: var(--radius-sm); font-size: 0.9rem; background: var(--grey-light);
+            color: var(--black); transition: var(--transition);
+        }
+        .search-bar input:focus { outline: none; border-color: var(--red); background: var(--white); box-shadow: 0 0 0 3px var(--red-glow); }
+        .search-bar input::placeholder { color: #b0b0b0; }
+        .search-bar select {
+            padding: 11px 14px; border: 2px solid var(--grey-border); border-radius: var(--radius-sm);
+            font-size: 0.9rem; background: var(--white); color: var(--grey-dark); cursor: pointer; min-width: 150px; transition: var(--transition);
+        }
+        .search-bar select:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px var(--red-glow); }
+        .btn-reset {
+            background: none; border: 2px solid var(--grey-border); border-radius: var(--radius-sm);
+            padding: 11px 18px; cursor: pointer; color: var(--grey); font-size: 0.85rem; font-weight: 600; transition: var(--transition);
+        }
+        .btn-reset:hover { border-color: var(--red); color: var(--red); background: var(--red-light); }
+
+        /* ===== SHARED BADGES ===== */
+        .badge-type { background: var(--darkred); color: var(--white); padding: 5px 14px; border-radius: var(--radius-pill); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
+        .show-badge { position: absolute; top: 18px; right: 20px; background: var(--red); color: var(--white); padding: 5px 16px; border-radius: var(--radius-pill); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .pub-card-badge { position: absolute; top: 12px; right: 14px; background: var(--red); color: var(--white); padding: 3px 12px; border-radius: var(--radius-pill); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+        .badge-status.published, .status-published, .show-status.published { background: rgba(39, 174, 96, 0.12); color: #27ae60; }
+        .badge-status.pending, .status-pending, .show-status.pending { background: rgba(243, 156, 18, 0.12); color: #f39c12; }
+
+        /* ===== SHARED ACTION BUTTONS ===== */
+        .btn-show { background: var(--black); color: var(--white); }
+        .btn-show:hover { background: var(--darkred); color: var(--white); text-decoration: none; }
+        .btn-edit, .btn-card-edit { background: var(--grey-light); color: var(--grey-dark); border: 1px solid var(--grey-border); }
+        .btn-edit:hover, .btn-card-edit:hover { border-color: var(--black); color: var(--black); text-decoration: none; background: var(--white); }
+        .btn-del, .btn-card-delete { background: transparent; color: var(--red); border: 1px solid var(--red-light); }
+        .btn-del:hover, .btn-card-delete:hover { background: var(--red); color: var(--white); text-decoration: none; border-color: var(--red); }
+        .btn-card-view, .btn-act-view { background: var(--darkred); color: var(--white); }
+        .btn-card-view:hover, .btn-act-view:hover { background: var(--red); color: var(--white); text-decoration: none; }
+
+        /* ===== DELETE ZONE ===== */
+        .delete-zone { margin-top: 32px; padding-top: 24px; border-top: 2px dashed var(--red); }
+        .delete-warning { background: var(--red-light); border-left: 4px solid var(--red); padding: 16px 18px; border-radius: var(--radius-sm); margin-bottom: 16px; color: var(--red-dark); font-size: 0.88rem; line-height: 1.5; }
+        .delete-warning strong { display: block; margin-bottom: 6px; font-size: 0.95rem; }
+        .btn-delete { width: 100%; background: var(--red); color: var(--white); padding: 12px 28px; border-radius: var(--radius-sm); border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-delete:hover { background: var(--red-dark); transform: translateY(-2px); }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state { text-align: center; padding: 80px 30px; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+        .empty-state-icon { width: 90px; height: 90px; border-radius: 50%; background: var(--red-light); margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; color: var(--red); }
+        .empty-state h3 { color: var(--black); font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
+        .empty-state p { color: var(--grey); font-size: 0.95rem; margin-bottom: 28px; }
+        .empty-state i { font-size: 2.5rem; color: var(--grey-border); margin-bottom: 16px; display: block; }
+
+        /* ===== FORUM POST CARDS ===== */
+        .post-avatar {
+            background: linear-gradient(135deg, var(--darkred), var(--red)) !important;
+            box-shadow: 0 3px 10px rgba(139,0,0,0.2);
+        }
+        .post-role.role-etudiant { background: #fef2f2; color: var(--darkred); }
+        .post-type-badge { background: #fef2f2; color: var(--darkred); }
+        .post-comments i { color: var(--darkred); }
+        .btn-voir {
+            background: linear-gradient(135deg, var(--darkred), var(--red)) !important;
+            box-shadow: 0 3px 12px rgba(139,0,0,0.2);
+        }
+        .btn-voir:hover { box-shadow: 0 6px 20px rgba(139,0,0,0.3); }
+
+        /* ===== COMMENTS ===== */
+        .comment-avatar { background: var(--darkred); }
+        .comment-avatar.own { background: var(--red); }
+        .comments-count { background: var(--darkred); }
+        .comment-card.own-comment { border-left: 4px solid var(--darkred); }
+
+        /* ===== CURRENT FILE ===== */
+        .current-file { margin: 12px 0; padding: 16px; background: var(--grey-light); border-left: 4px solid var(--darkred); border-radius: var(--radius-sm); }
+        .current-file strong { display: block; color: var(--black); margin-bottom: 10px; font-size: 0.9rem; }
+        .current-file img, .current-file video { max-width: 100%; max-height: 280px; border-radius: var(--radius-sm); display: block; }
+        .current-file small { display: block; margin-top: 8px; color: var(--grey); font-size: 0.82rem; }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ===== FOOTER ===== */
+        footer { background: var(--black) !important; border-top: 3px solid var(--darkred); }
+        footer p { color: rgba(255,255,255,0.5); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .page-hero, .form-hero, .rc-hero, .sup-hero { padding: 28px 24px; }
+            .search-bar { flex-direction: column; }
+            .search-bar input, .search-bar select { width: 100%; }
+            .form-card { padding: 24px 20px; }
+            .form-actions { flex-direction: column; }
+        }
+    </style>
+
     {% block stylesheets %}{% endblock %}
 </head>
 
 <body>
 
+{# ===== Resolve user ===== #}
+{% set _user = null %}
+{% if currentUser is defined and currentUser %}
+    {% set _user = currentUser %}
+{% elseif navUser is defined and navUser %}
+    {% set _user = navUser %}
+{% endif %}
+{% set _uq = _user ? '?u=' ~ _user.id : '' %}
+
 <!-- ===== HEADER ===== -->
-<header class="header-area header-sticky">
+<header class="header-area header-sticky" style="background-color: #111111;">
     <div class="container">
         <div class="row">
             <div class="col-12">
                 <nav class="main-nav">
-                    <!-- Logo -->
-                    <a href="#" class="logo">
-                        <h1>Scholar</h1>
+                    <a href="{% if _user %}{{ path('front_home_user', {userId: _user.id}) }}{% else %}{{ path('front_home') }}{% endif %}" class="logo">
+                        <h1 style="color: #8b0000;">SkillOra</h1>
                     </a>
 
-                    <!-- Menu -->
                     <ul class="nav">
-                        <li><a href="#" class="active">Home</a></li>
-                        <li><a href="#services">Services</a></li>
-                        <li><a href="#courses">Courses</a></li>
-                        <li><a href="#team">Team</a></li>
-                        <li><a href="#contact">Contact</a></li>
+                        <li>
+                            <a href="{% if _user %}{{ path('front_home_user', {userId: _user.id}) }}{% else %}{{ path('front_home') }}{% endif %}" class="active">Home</a>
+                        </li>
+
+                        {% if _user %}
+                            {% if _user.role == 'etudiant' %}
+                                <li><a href="{{ path('front_home_user', {userId: _user.id}) }}#services">Courses</a></li>
+                                <li><a href="{{ path('front_home_user', {userId: _user.id}) }}#courses">Projects</a></li>
+                                <li class="nav-dropdown">
+                                    <a href="#">Forum</a>
+                                    <ul class="nav-dropdown-menu">
+                                        <li><a href="{{ path('app_forum_index') }}{{ _uq }}"><i class="far fa-comments"></i> Browse Forum</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('app_publication_index') }}{{ _uq }}"><i class="far fa-file-alt"></i> My Publications</a></li>
+                                        <li><a href="{{ path('app_publication_new', {id: _user.id}) }}{{ _uq }}"><i class="fas fa-plus"></i> New Publication</a></li>
+                                    </ul>
+                                </li>
+
+                            {% elseif _user.role == 'responsable_club' %}
+                                <li><a href="{{ path('front_home_user', {userId: _user.id}) }}#services">Courses</a></li>
+                                <li><a href="{{ path('front_home_user', {userId: _user.id}) }}#courses">Projects</a></li>
+                                <li class="nav-dropdown">
+                                    <a href="#">Forum</a>
+                                    <ul class="nav-dropdown-menu">
+                                        <li><a href="{{ path('app_forum_index') }}{{ _uq }}"><i class="far fa-comments"></i> Browse Forum</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('app_responsable_club_publication_index') }}{{ _uq }}"><i class="far fa-file-alt"></i> My Publications</a></li>
+                                        <li><a href="{{ path('app_responsable_club_publication_new', {id: _user.id}) }}{{ _uq }}"><i class="fas fa-plus"></i> New Publication</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('app_responsable_club_commentaire_index', {userId: _user.id}) }}"><i class="fas fa-shield-alt"></i> Supervise Comments</a></li>
+                                    </ul>
+                                </li>
+
+                            {% elseif _user.role == 'admin' %}
+                                <li><a href="{{ path('admin_dashboard') }}">Dashboard</a></li>
+                                <li class="nav-dropdown">
+                                    <a href="#">Forum</a>
+                                    <ul class="nav-dropdown-menu">
+                                        <li><a href="{{ path('app_forum_index') }}{{ _uq }}"><i class="far fa-comments"></i> Browse Forum</a></li>
+                                    </ul>
+                                </li>
+                            {% endif %}
+
+                            <li>
+                                <span class="nav-user-pill">
+                                    <span class="user-avatar">{{ _user.prenom|slice(0,1)|upper }}{{ _user.nom|slice(0,1)|upper }}</span>
+                                    {{ _user.prenom }}
+                                    <span class="user-role">({{ _user.role|replace({'_': ' '})|title }})</span>
+                                </span>
+                            </li>
+
+                        {% else %}
+                            <li><a href="#services">Courses</a></li>
+                            <li><a href="#courses">Projects</a></li>
+                            <li><a href="{{ path('app_forum_index') }}">Forum</a></li>
+                            <li><a href="#contact">Contact</a></li>
+                        {% endif %}
                     </ul>
 
                     <a class="menu-trigger">
@@ -44,25 +346,17 @@
         </div>
     </div>
 </header>
-<!-- ===== HEADER END ===== -->
 
-<!-- ===== PAGE CONTENT ===== -->
 {% block body %}{% endblock %}
-<!-- ===== PAGE CONTENT END ===== -->
 
-<!-- ===== FOOTER ===== -->
 <footer>
     <div class="container">
         <div class="col-lg-12 text-center">
-            <p>
-                © {{ "now"|date("Y") }} Scholar. All rights reserved.
-            </p>
+            <p>&copy; {{ "now"|date("Y") }} SkillOra. All rights reserved.</p>
         </div>
     </div>
 </footer>
-<!-- ===== FOOTER END ===== -->
 
-<!-- JS -->
 <script src="{{ asset('assets/frontoffice/vendor/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('assets/frontoffice/vendor/bootstrap/js/bootstrap.min.js') }}"></script>
 <script src="{{ asset('assets/frontoffice/js/isotope.min.js') }}"></script>

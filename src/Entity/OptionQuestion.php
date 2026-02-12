@@ -3,44 +3,34 @@
 namespace App\Entity;
 
 use App\Repository\OptionQuestionRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OptionQuestionRepository::class)]
+#[ORM\Table(name: 'OptionQuestion')]
 class OptionQuestion
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'id_OptionQuestion')]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'optionQuestions')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Question $question = null;
-
-    #[ORM\Column(length: 200)]
+    #[ORM\Column(length: 255)]
     private ?string $contenu = null;
 
-    #[ORM\Column(options: ['default' => false])]
-    private bool $estCorrect = false;
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private ?bool $estCorrect = false;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
     private ?int $ordre = null;
+
+    #[ORM\ManyToOne(targetEntity: Question::class, inversedBy: 'optionQuestions')]
+    #[ORM\JoinColumn(name: 'id_Question', referencedColumnName: 'id_Question', nullable: false, onDelete: 'CASCADE')]
+    private ?Question $question = null;
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getQuestion(): ?Question
-    {
-        return $this->question;
-    }
-
-    public function setQuestion(?Question $question): static
-    {
-        $this->question = $question;
-
-        return $this;
     }
 
     public function getContenu(): ?string
@@ -51,11 +41,10 @@ class OptionQuestion
     public function setContenu(string $contenu): static
     {
         $this->contenu = $contenu;
-
         return $this;
     }
 
-    public function isEstCorrect(): bool
+    public function isEstCorrect(): ?bool
     {
         return $this->estCorrect;
     }
@@ -63,20 +52,6 @@ class OptionQuestion
     public function setEstCorrect(bool $estCorrect): static
     {
         $this->estCorrect = $estCorrect;
-
-        return $this;
-    }
-
-    // Preferred aliases (optional for callers)
-    public function isCorrect(): bool
-    {
-        return $this->estCorrect;
-    }
-
-    public function setCorrect(bool $correct): static
-    {
-        $this->estCorrect = $correct;
-
         return $this;
     }
 
@@ -88,7 +63,17 @@ class OptionQuestion
     public function setOrdre(?int $ordre): static
     {
         $this->ordre = $ordre;
+        return $this;
+    }
 
+    public function getQuestion(): ?Question
+    {
+        return $this->question;
+    }
+
+    public function setQuestion(?Question $question): static
+    {
+        $this->question = $question;
         return $this;
     }
 }

@@ -1,0 +1,662 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Forum Management — Comments{% endblock %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --sk-primary: #131212;
+        --sk-primary-dark: #040404;
+        --sk-primary-light: #1e1d1d;
+    }
+
+    .page-header { margin-bottom: 1.5rem; }
+    .page-header h3 { font-size: 1.5rem; font-weight: 700; color: #bf0000; }
+    .page-header .badge-count {
+        background: #bf0000; color: #fff; font-size: .85rem;
+        padding: .35em .75em; border-radius: 50px; margin-left: .5rem; vertical-align: middle;
+    }
+
+    /* Tabs */
+    .forum-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; }
+    .forum-tab {
+        padding: .7rem 1.6rem; font-weight: 600; font-size: .9rem; text-decoration: none;
+        border: 2px solid #eee; color: #666; background: #fafafa; transition: all .2s;
+    }
+    .forum-tab:first-child { border-radius: 10px 0 0 10px; }
+    .forum-tab:last-child  { border-radius: 0 10px 10px 0; }
+    .forum-tab.active { background: var(--sk-primary); color: #fff; border-color: var(--sk-primary); }
+    .forum-tab:not(.active):hover { background: #f0f0f0; color: #333; }
+
+    .com-card { border: none; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .com-card .card-body { padding: 0; }
+
+    .com-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .875rem; }
+    .com-table thead th {
+        background: linear-gradient(135deg, var(--sk-primary), var(--sk-primary-light));
+        color: #fff; font-weight: 600; padding: .85rem 1rem; white-space: nowrap;
+        border: none; text-transform: uppercase; font-size: .75rem; letter-spacing: .5px;
+    }
+    .com-table thead th:first-child { border-radius: 12px 0 0 0; }
+    .com-table thead th:last-child  { border-radius: 0 12px 0 0; }
+    .com-table tbody tr { transition: background .15s; }
+    .com-table tbody tr:hover { background: #fdf2f2; }
+    .com-table tbody td {
+        padding: .75rem 1rem; vertical-align: middle;
+        border-bottom: 1px solid #f0f0f0; color: #333;
+    }
+    .com-table tbody tr:last-child td { border-bottom: none; }
+
+    .contenu-cell {
+        max-width: 320px; line-height: 1.45; color: #444; font-size: .85rem;
+    }
+    .contenu-cell .contenu-text {
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* Publication cell — clickable card */
+    .pub-cell { cursor: pointer; }
+    .pub-cell-inner {
+        display: flex; align-items: center; gap: .6rem;
+        padding: .4rem .6rem; border-radius: 8px; transition: background .15s;
+    }
+    .pub-cell-inner:hover { background: #f5f5f5; }
+    .pub-cell-thumb {
+        width: 36px; height: 36px; border-radius: 6px; object-fit: cover;
+        border: 1px solid #eee; flex-shrink: 0;
+    }
+    .pub-cell-placeholder {
+        width: 36px; height: 36px; border-radius: 6px; background: #f0f0f0;
+        display: flex; align-items: center; justify-content: center;
+        color: #bbb; font-size: 1rem; flex-shrink: 0;
+    }
+    .pub-cell-info { min-width: 0; }
+    .pub-cell-title {
+        font-weight: 600; font-size: .82rem; color: #bf0000;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;
+    }
+    .pub-cell-meta {
+        font-size: .72rem; color: #999; white-space: nowrap;
+    }
+
+    .user-cell { white-space: nowrap; }
+    .user-cell .avatar {
+        width: 30px; height: 30px; border-radius: 50%; background: var(--sk-primary);
+        color: #fff; display: inline-flex; align-items: center; justify-content: center;
+        font-size: .7rem; font-weight: 700; margin-right: .4rem; vertical-align: middle;
+    }
+
+    .btn-action {
+        width: 34px; height: 34px; border-radius: 8px;
+        display: inline-flex; align-items: center; justify-content: center;
+        border: none; font-size: .9rem; transition: transform .15s, box-shadow .15s; cursor: pointer;
+    }
+    .btn-action:hover { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,.15); }
+    .btn-eye    { background: var(--sk-primary); color: #fff; }
+    .btn-eye:hover    { background: var(--sk-primary-dark); color: #fff; }
+    .btn-edit   { background: #f0ad4e; color: #fff; }
+    .btn-edit:hover   { background: #d9952b; color: #fff; }
+    .btn-delete { background: #dc3545; color: #fff; }
+    .btn-delete:hover { background: #b02a37; color: #fff; }
+    .badge-role { padding: .25em .6em; border-radius: 20px; font-size: .7rem; font-weight: 600; margin-left: .3rem; vertical-align: middle; }
+    .badge-role-etudiant { background: #e3f2fd; color: #1565c0; }
+    .badge-role-rc { background: #fce4ec; color: #c62828; }
+    .badge-role-admin { background: #f3e5f5; color: #6a1b9a; }
+
+    .empty-state { text-align: center; padding: 4rem 2rem; color: #999; }
+    .empty-state i { font-size: 3rem; margin-bottom: 1rem; color: #ddd; }
+
+    /* ── Badges (reused in popup) ── */
+    .badge-publie { background: #d4edda; color: #155724; font-weight: 600; padding: .3em .7em; border-radius: 20px; font-size: .78rem; }
+    .badge-attente { background: #fff3cd; color: #856404; font-weight: 600; padding: .3em .7em; border-radius: 20px; font-size: .78rem; }
+    .badge-type { padding: .3em .65em; border-radius: 20px; font-size: .75rem; font-weight: 600; }
+    .badge-type-image { background: #e8f4fd; color: #0c5460; }
+    .badge-type-video { background: #f3e5f5; color: #6a1b9a; }
+    .badge-type-texte { background: #f0f0f0; color: #555; }
+
+    /* ── Search & Sort toolbar ── */
+    .forum-toolbar {
+        display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; flex-wrap: wrap;
+    }
+    .forum-toolbar .search-box {
+        flex: 1; min-width: 220px; position: relative;
+    }
+    .forum-toolbar .search-box input[type="search"] {
+        width: 100%; border: 2px solid #eee; border-radius: 10px; padding: .6rem 1rem .6rem 2.5rem;
+        font-size: .88rem; transition: border-color .2s; background: #fff;
+    }
+    .forum-toolbar .search-box input[type="search"]:focus {
+        border-color: #bf0000; box-shadow: 0 0 0 3px rgba(191,0,0,.08); outline: none;
+    }
+    .forum-toolbar .search-box > i {
+        position: absolute; left: .85rem; top: 50%; transform: translateY(-50%);
+        color: #aaa; font-size: 1rem; pointer-events: none; z-index: 2;
+    }
+    .forum-toolbar .search-box .clear-search {
+        position: absolute; right: .6rem; top: 50%; transform: translateY(-50%);
+        background: none; border: none; color: #bbb; font-size: 1.1rem; cursor: pointer;
+        display: none; padding: 0; line-height: 1;
+    }
+    .forum-toolbar .search-box .clear-search.visible { display: block; }
+    .forum-toolbar .search-box .clear-search:hover { color: #bf0000; }
+    .forum-toolbar .sort-group {
+        display: flex; align-items: center; gap: .5rem;
+    }
+    .forum-toolbar .sort-group label {
+        font-size: .8rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: .5px;
+        white-space: nowrap; margin: 0;
+    }
+    .forum-toolbar .sort-group select {
+        border: 2px solid #eee; border-radius: 8px; padding: .45rem .8rem;
+        font-size: .85rem; background: #fff; cursor: pointer; transition: border-color .2s;
+        color: #333;
+    }
+    .forum-toolbar .sort-group select:focus { border-color: #bf0000; outline: none; }
+    .forum-toolbar .sort-dir-btn {
+        background: var(--sk-primary); color: #fff; border: none; border-radius: 8px;
+        width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 1rem; transition: background .2s;
+    }
+    .forum-toolbar .sort-dir-btn:hover { background: #bf0000; }
+    .search-results-info {
+        font-size: .82rem; color: #888; margin-bottom: .8rem;
+    }
+    .search-results-info strong { color: #bf0000; }
+    .search-results-info a { color: #bf0000; text-decoration: none; font-weight: 600; }
+    .search-results-info a:hover { text-decoration: underline; }
+
+    /* ── Confirm overlay ── */
+    .confirm-overlay {
+        display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6);
+        z-index: 99999; align-items: center; justify-content: center;
+    }
+    .confirm-overlay.active { display: flex; }
+    .confirm-box {
+        background: #fff; border-radius: 14px; padding: 2rem 2.5rem; text-align: center;
+        box-shadow: 0 12px 40px rgba(0,0,0,.25); max-width: 380px; width: 90%;
+    }
+    .confirm-box i { font-size: 2.5rem; color: #dc3545; margin-bottom: .8rem; }
+    .confirm-box h5 { font-weight: 700; margin-bottom: .5rem; }
+    .confirm-box p { color: #666; font-size: .9rem; margin-bottom: 1.5rem; }
+    .confirm-box .btn-cancel {
+        background: #f0f0f0; color: #333; border: none; padding: .5rem 1.5rem;
+        border-radius: 8px; font-weight: 600; margin-right: .5rem; cursor: pointer;
+    }
+    .confirm-box .btn-confirm-delete {
+        background: #dc3545; color: #fff; border: none; padding: .5rem 1.5rem;
+        border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block;
+    }
+    .confirm-box .btn-confirm-delete:hover { background: #b02a37; }
+
+    /* ── Edit comment overlay ── */
+    .edit-overlay {
+        display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6);
+        z-index: 99998; align-items: center; justify-content: center; padding: 2rem;
+    }
+    .edit-overlay.active { display: flex; }
+    .edit-box {
+        background: #fff; border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.25);
+        max-width: 520px; width: 95%;
+    }
+    .edit-box-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 1.2rem 1.8rem; border-bottom: 1px solid #eee;
+    }
+    .edit-box-header h5 { font-weight: 700; margin: 0; color: #bf0000; font-size: 1rem; }
+    .edit-box-header .close-edit {
+        background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #999;
+    }
+    .edit-box-header .close-edit:hover { color: #333; }
+    .edit-box-body { padding: 1.5rem 1.8rem; }
+    .edit-box-body label {
+        display: block; font-weight: 600; font-size: .85rem; margin-bottom: .35rem; color: #333;
+    }
+    .edit-box-body textarea {
+        width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: .65rem .85rem;
+        font-size: .9rem; resize: vertical; min-height: 110px; transition: border-color .2s;
+        font-family: inherit;
+    }
+    .edit-box-body textarea:focus { border-color: #bf0000; box-shadow: 0 0 0 3px rgba(191,0,0,.1); outline: none; }
+    .edit-box-body .com-meta {
+        display: flex; gap: 1.5rem; margin-bottom: 1rem; font-size: .8rem; color: #888; flex-wrap: wrap;
+    }
+    .edit-box-body .com-meta span { display: flex; align-items: center; gap: .3rem; }
+    .edit-box-body .com-meta i { font-size: .95rem; }
+    .edit-box-footer {
+        display: flex; justify-content: flex-end; gap: .6rem;
+        padding: 1rem 1.8rem; border-top: 1px solid #eee;
+    }
+    .edit-box-footer .btn-cancel-edit {
+        background: #f0f0f0; color: #333; border: none; padding: .5rem 1.4rem;
+        border-radius: 8px; font-weight: 600; cursor: pointer;
+    }
+    .edit-box-footer .btn-save-edit {
+        background: #bf0000; color: #fff; border: none; padding: .5rem 1.4rem;
+        border-radius: 8px; font-weight: 600; cursor: pointer; transition: background .2s;
+    }
+    .edit-box-footer .btn-save-edit:hover { background: #960000; }
+
+    /* ── Publication detail popup ── */
+    .pub-detail-overlay {
+        display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7);
+        z-index: 99997; align-items: center; justify-content: center; padding: 2rem;
+    }
+    .pub-detail-overlay.active { display: flex; }
+    .pub-detail-box {
+        background: #fff; border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.25);
+        max-width: 600px; width: 95%; max-height: 90vh; overflow-y: auto;
+    }
+    .pub-detail-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 1.2rem 1.8rem; border-bottom: 1px solid #eee;
+    }
+    .pub-detail-header h5 { font-weight: 700; margin: 0; color: #bf0000; font-size: 1.05rem; }
+    .pub-detail-header .close-pub {
+        background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #999;
+    }
+    .pub-detail-header .close-pub:hover { color: #333; }
+    .pub-detail-body { padding: 1.5rem 1.8rem; }
+    .pub-detail-body .pub-info-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: .8rem 1.5rem; margin-bottom: 1.2rem;
+    }
+    .pub-detail-body .pub-info-item label {
+        display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .5px;
+        color: #999; font-weight: 600; margin-bottom: .15rem;
+    }
+    .pub-detail-body .pub-info-item span {
+        font-size: .88rem; color: #333; font-weight: 500;
+    }
+    .pub-detail-body .pub-contenu-section {
+        margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f0f0f0;
+    }
+    .pub-detail-body .pub-contenu-section h6 {
+        font-size: .75rem; text-transform: uppercase; letter-spacing: .5px;
+        color: #999; font-weight: 600; margin-bottom: .5rem;
+    }
+    .pub-detail-body .pub-contenu-section p {
+        font-size: .88rem; color: #444; line-height: 1.6; margin: 0;
+        max-height: 150px; overflow-y: auto;
+    }
+    .pub-detail-body .pub-media-section {
+        margin-top: 1.2rem; text-align: center;
+    }
+    .pub-detail-body .pub-media-section img {
+        max-width: 100%; max-height: 300px; border-radius: 10px;
+        box-shadow: 0 4px 16px rgba(0,0,0,.1); object-fit: contain;
+    }
+    .pub-detail-body .pub-media-section video {
+        max-width: 100%; max-height: 300px; border-radius: 10px;
+        box-shadow: 0 4px 16px rgba(0,0,0,.1);
+    }
+
+    @media (max-width: 768px) {
+        .com-table thead { display: none; }
+        .com-table tbody tr {
+            display: block; margin-bottom: 1rem; border: 1px solid #eee;
+            border-radius: 10px; padding: .75rem;
+        }
+        .com-table tbody td {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: .4rem .5rem; border-bottom: 1px solid #f8f8f8;
+        }
+        .com-table tbody td::before {
+            content: attr(data-label); font-weight: 600; color: var(--sk-primary);
+            margin-right: 1rem; font-size: .78rem; text-transform: uppercase;
+        }
+        .pub-detail-body .pub-info-grid { grid-template-columns: 1fr; }
+        .forum-toolbar { flex-direction: column; align-items: stretch; }
+        .forum-toolbar .sort-group { justify-content: flex-start; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+        <h3>
+            <i class="mdi mdi-forum-outline"></i>
+            Forum Management — Comments
+        </h3>
+    </div>
+</div>
+
+{# ── Tabs ── #}
+<div class="forum-tabs">
+    <a href="{{ path('admin_forum_publications') }}" class="forum-tab">
+        <i class="mdi mdi-file-document-outline"></i> Publications
+    </a>
+    <a href="{{ path('admin_forum_commentaires') }}" class="forum-tab active">
+        <i class="mdi mdi-comment-text-outline"></i> Commentaires
+        <span class="badge-count">{{ commentaires|length }}</span>
+    </a>
+</div>
+
+{# ── Search & Sort Toolbar ── #}
+<div class="forum-toolbar">
+    <div class="search-box">
+        <i class="mdi mdi-magnify"></i>
+        <form id="comSearchForm" method="get" action="{{ path('admin_forum_commentaires') }}" style="margin:0;">
+            <input type="hidden" name="sort" value="{{ sort }}">
+            <input type="hidden" name="dir" value="{{ dir }}">
+            <input type="search" name="q" value="{{ search }}" placeholder="Rechercher par commentaire, auteur, publication..."
+                   id="comSearchInput" autocomplete="off">
+            <button type="button" class="clear-search {{ search ? 'visible' }}" onclick="clearComSearch()">&times;</button>
+        </form>
+    </div>
+    <div class="sort-group">
+        <label>Trier par</label>
+        <select id="comSortSelect" onchange="applyComSort()">
+            <option value="dateCommentaire" {{ sort == 'dateCommentaire' ? 'selected' }}>Date</option>
+            <option value="auteur" {{ sort == 'auteur' ? 'selected' }}>Auteur</option>
+            <option value="publication" {{ sort == 'publication' ? 'selected' }}>Publication</option>
+            <option value="id" {{ sort == 'id' ? 'selected' }}>ID</option>
+        </select>
+        <button class="sort-dir-btn" id="comDirBtn" onclick="toggleComDir()" title="Changer l'ordre">
+            <i class="mdi mdi-sort-{{ dir == 'ASC' ? 'ascending' : 'descending' }}"></i>
+        </button>
+    </div>
+</div>
+
+{% if search %}
+<div class="search-results-info">
+    <i class="mdi mdi-information-outline"></i>
+    <strong>{{ commentaires|length }}</strong> résultat(s) pour « <strong>{{ search }}</strong> »
+    — <a href="{{ path('admin_forum_commentaires') }}">Effacer la recherche</a>
+</div>
+{% endif %}
+
+<div class="card com-card">
+    <div class="card-body">
+        {% if commentaires is empty %}
+            <div class="empty-state">
+                <i class="mdi mdi-comment-remove-outline"></i>
+                <h5>Aucun commentaire</h5>
+                <p>{% if search %}Aucun résultat pour « {{ search }} ».{% else %}Il n'y a aucun commentaire pour le moment.{% endif %}</p>
+            </div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="com-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Commentaire</th>
+                            <th>Auteur</th>
+                            <th>Publication</th>
+                            <th>Date</th>
+                            <th style="text-align:center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for com in commentaires %}
+                        <tr>
+                            <td data-label="ID">{{ com.id }}</td>
+                            <td data-label="Commentaire">
+                                <div class="contenu-cell">
+                                    <div class="contenu-text" title="{{ com.contenu }}">{{ com.contenu }}</div>
+                                </div>
+                            </td>
+                            <td data-label="Auteur" class="user-cell">
+                                <span class="avatar">{{ com.user.prenom|first|upper }}{{ com.user.nom|first|upper }}</span>
+                                {{ com.user.prenom }} {{ com.user.nom }}
+                                {% if com.user.role == 'etudiant' %}
+                                    <span class="badge-role badge-role-etudiant">Étudiant</span>
+                                {% elseif com.user.role == 'responsable_club' %}
+                                    <span class="badge-role badge-role-rc">Responsable Club</span>
+                                {% elseif com.user.role == 'admin' %}
+                                    <span class="badge-role badge-role-admin">Admin</span>
+                                {% endif %}
+                            </td>
+                            <td data-label="Publication" class="pub-cell" onclick="openPubDetail({{ com.publication.id }})">
+                                <div class="pub-cell-inner">
+                                    {% if com.publication.typecontenu.value == 'image' and com.publication.fichier %}
+                                        <img src="{{ asset('uploads/publications/' ~ com.publication.fichier) }}" class="pub-cell-thumb" alt="">
+                                    {% elseif com.publication.typecontenu.value == 'video' %}
+                                        <div class="pub-cell-placeholder"><i class="mdi mdi-play-circle-outline"></i></div>
+                                    {% else %}
+                                        <div class="pub-cell-placeholder"><i class="mdi mdi-text-box-outline"></i></div>
+                                    {% endif %}
+                                    <div class="pub-cell-info">
+                                        <div class="pub-cell-title" title="{{ com.publication.titre }}">{{ com.publication.titre }}</div>
+                                        <div class="pub-cell-meta">
+                                            {{ com.publication.user.prenom }} {{ com.publication.user.nom }}
+                                            {% if com.publication.user.role == 'etudiant' %}
+                                                <span class="badge-role badge-role-etudiant" style="font-size:.65rem;">Étudiant</span>
+                                            {% elseif com.publication.user.role == 'responsable_club' %}
+                                                <span class="badge-role badge-role-rc" style="font-size:.65rem;">Responsable Club</span>
+                                            {% endif %}
+                                            · {{ com.publication.datePublication|date('d/m/Y') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td data-label="Date">{{ com.dateCommentaire|date('d/m/Y H:i') }}</td>
+                            <td data-label="Actions" style="text-align:center; white-space:nowrap;">
+                                <button class="btn-action btn-eye" title="Voir la publication"
+                                        onclick="openPubDetail({{ com.publication.id }})">
+                                    <i class="mdi mdi-eye-outline"></i>
+                                </button>
+                                <button class="btn-action btn-edit" title="Modifier"
+                                        onclick="openEditCom({{ com.id }})">
+                                    <i class="mdi mdi-pencil-outline"></i>
+                                </button>
+                                <button class="btn-action btn-delete" title="Supprimer"
+                                        onclick="confirmDeleteCom({{ com.id }})">
+                                    <i class="mdi mdi-trash-can-outline"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{# ══════════════════════════════════════════════════ #}
+{#  PUBLICATION DETAIL POPUPS (one per unique pub)   #}
+{# ══════════════════════════════════════════════════ #}
+{% set seenPubs = [] %}
+{% for com in commentaires %}
+    {% if com.publication.id not in seenPubs %}
+        {% set seenPubs = seenPubs|merge([com.publication.id]) %}
+        {% set pub = com.publication %}
+        <div class="pub-detail-overlay" id="pubDetail-{{ pub.id }}">
+            <div class="pub-detail-box">
+                <div class="pub-detail-header">
+                    <h5><i class="mdi mdi-file-document-outline"></i> Publication #{{ pub.id }}</h5>
+                    <button class="close-pub" onclick="closePubDetail({{ pub.id }})">&times;</button>
+                </div>
+                <div class="pub-detail-body">
+                    {# Media preview #}
+                    {% if pub.fichier %}
+                        <div class="pub-media-section">
+                            {% if pub.typecontenu.value == 'image' %}
+                                <img src="{{ asset('uploads/publications/' ~ pub.fichier) }}" alt="{{ pub.titre }}">
+                            {% elseif pub.typecontenu.value == 'video' %}
+                                <video src="{{ asset('uploads/publications/' ~ pub.fichier) }}" controls></video>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    {# Info grid #}
+                    <div class="pub-info-grid" style="margin-top:1.2rem;">
+                        <div class="pub-info-item">
+                            <label>Titre</label>
+                            <span><strong>{{ pub.titre }}</strong></span>
+                        </div>
+                        <div class="pub-info-item">
+                            <label>Auteur</label>
+                            <span>
+                                {{ pub.user.prenom }} {{ pub.user.nom }}
+                                {% if pub.user.role == 'etudiant' %}
+                                    <span class="badge-role badge-role-etudiant">Étudiant</span>
+                                {% elseif pub.user.role == 'responsable_club' %}
+                                    <span class="badge-role badge-role-rc">Responsable Club</span>
+                                {% elseif pub.user.role == 'admin' %}
+                                    <span class="badge-role badge-role-admin">Admin</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="pub-info-item">
+                            <label>Statut</label>
+                            <span>
+                                {% if pub.status.value == 'publié' %}
+                                    <span class="badge-publie">Publié</span>
+                                {% else %}
+                                    <span class="badge-attente">En attente</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="pub-info-item">
+                            <label>Date de publication</label>
+                            <span>{{ pub.datePublication|date('d/m/Y H:i') }}</span>
+                        </div>
+                        <div class="pub-info-item">
+                            <label>Commentaires</label>
+                            <span><strong>{{ pub.commentaires|length }}</strong></span>
+                        </div>
+                    </div>
+
+                    {# Contenu #}
+                    <div class="pub-contenu-section">
+                        <h6>Contenu</h6>
+                        <p>{{ pub.contenu }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endfor %}
+
+{# ── Delete Confirm ── #}
+<div class="confirm-overlay" id="deleteOverlay">
+    <div class="confirm-box">
+        <i class="mdi mdi-alert-circle-outline"></i>
+        <h5>Confirmer la suppression</h5>
+        <p>Voulez-vous vraiment supprimer ce commentaire ?</p>
+        <button class="btn-cancel" onclick="closeDeleteCom()">Annuler</button>
+        <a id="deleteComLink" href="#" class="btn-confirm-delete">Supprimer</a>
+    </div>
+</div>
+
+{# ── Edit Overlays ── #}
+{% for com in commentaires %}
+<div class="edit-overlay" id="editComOverlay-{{ com.id }}">
+    <div class="edit-box">
+        <div class="edit-box-header">
+            <h5><i class="mdi mdi-pencil-outline"></i> Modifier le commentaire #{{ com.id }}</h5>
+            <button class="close-edit" onclick="closeEditCom({{ com.id }})">&times;</button>
+        </div>
+        <form action="{{ path('admin_forum_commentaire_edit', {id: com.id}) }}" method="post">
+            <div class="edit-box-body">
+                <div class="com-meta">
+                    <span><i class="mdi mdi-account-outline"></i> {{ com.user.prenom }} {{ com.user.nom }}</span>
+                    <span><i class="mdi mdi-calendar-outline"></i> {{ com.dateCommentaire|date('d/m/Y H:i') }}</span>
+                    <span><i class="mdi mdi-file-document-outline"></i> {{ com.publication.titre|length > 25 ? com.publication.titre|slice(0,25) ~ '…' : com.publication.titre }}</span>
+                </div>
+                <label for="editContenu-{{ com.id }}">Contenu du commentaire</label>
+                <textarea name="contenu" id="editContenu-{{ com.id }}" required>{{ com.contenu }}</textarea>
+            </div>
+            <div class="edit-box-footer">
+                <button type="button" class="btn-cancel-edit" onclick="closeEditCom({{ com.id }})">Annuler</button>
+                <button type="submit" class="btn-save-edit"><i class="mdi mdi-content-save-outline"></i> Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    /* ── Publication detail popup ── */
+    function openPubDetail(id) {
+        var el = document.getElementById('pubDetail-' + id);
+        if (el) {
+            el.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    function closePubDetail(id) {
+        var el = document.getElementById('pubDetail-' + id);
+        if (el) {
+            el.classList.remove('active');
+            var video = el.querySelector('video');
+            if (video) video.pause();
+            document.body.style.overflow = '';
+        }
+    }
+    document.querySelectorAll('.pub-detail-overlay').forEach(function(o) {
+        o.addEventListener('click', function(e) {
+            if (e.target === this) {
+                var id = this.id.replace('pubDetail-', '');
+                closePubDetail(id);
+            }
+        });
+    });
+
+    /* ── Delete ── */
+    function confirmDeleteCom(id) {
+        document.getElementById('deleteComLink').href = '{{ path("admin_forum_commentaire_delete", {id:0}) }}'.replace('/0/', '/' + id + '/');
+        document.getElementById('deleteOverlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeDeleteCom() {
+        document.getElementById('deleteOverlay').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    document.getElementById('deleteOverlay').addEventListener('click', function(e) { if (e.target === this) closeDeleteCom(); });
+
+    /* ── Edit ── */
+    function openEditCom(id) {
+        document.getElementById('editComOverlay-' + id).classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeEditCom(id) {
+        document.getElementById('editComOverlay-' + id).classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    document.querySelectorAll('.edit-overlay').forEach(function(o) {
+        o.addEventListener('click', function(e) { if (e.target === this) { this.classList.remove('active'); document.body.style.overflow = ''; } });
+    });
+
+    /* ── Escape ── */
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeDeleteCom();
+            document.querySelectorAll('.edit-overlay.active, .pub-detail-overlay.active').forEach(function(el) {
+                el.classList.remove('active');
+                var video = el.querySelector('video');
+                if (video) video.pause();
+            });
+            document.body.style.overflow = '';
+        }
+    });
+
+    /* ── Search & Sort ── */
+    function clearComSearch() {
+        document.getElementById('comSearchInput').value = '';
+        document.getElementById('comSearchForm').submit();
+    }
+    function applyComSort() {
+        var form = document.getElementById('comSearchForm');
+        form.querySelector('input[name="sort"]').value = document.getElementById('comSortSelect').value;
+        form.submit();
+    }
+    function toggleComDir() {
+        var form = document.getElementById('comSearchForm');
+        var dirInput = form.querySelector('input[name="dir"]');
+        dirInput.value = dirInput.value === 'ASC' ? 'DESC' : 'ASC';
+        form.submit();
+    }
+    document.getElementById('comSearchInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('comSearchForm').submit(); }
+    });
+    document.getElementById('comSearchInput').addEventListener('input', function() {
+        var btn = document.querySelector('#comSearchForm .clear-search');
+        if (btn) btn.classList.toggle('visible', this.value.length > 0);
+    });
+</script>
+{% endblock %}

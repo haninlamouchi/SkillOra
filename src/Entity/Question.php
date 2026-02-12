@@ -9,34 +9,26 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: QuestionRepository::class)]
+#[ORM\Table(name: 'Question')]
 class Question
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'id_Question')]
     private ?int $id = null;
-
-    #[ORM\ManyToOne(inversedBy: 'questions')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Quiz $quiz = null;
-
-    /**
-     * @var Collection<int, OptionQuestion>
-     */
-    #[ORM\OneToMany(
-        targetEntity: OptionQuestion::class,
-        mappedBy: 'question',
-        cascade: ['persist', 'remove'],
-        orphanRemoval: true
-    )]
-    #[ORM\OrderBy(['ordre' => 'ASC', 'id' => 'ASC'])]
-    private Collection $optionQuestions;
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $contenu = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
     private ?int $points = null;
+
+    #[ORM\ManyToOne(targetEntity: Quiz::class, inversedBy: 'questions')]
+    #[ORM\JoinColumn(name: 'id_Quiz', referencedColumnName: 'id_Quiz', nullable: false, onDelete: 'CASCADE')]
+    private ?Quiz $quiz = null;
+
+    #[ORM\OneToMany(targetEntity: OptionQuestion::class, mappedBy: 'question', orphanRemoval: true)]
+    private Collection $optionQuestions;
 
     public function __construct()
     {
@@ -48,6 +40,28 @@ class Question
         return $this->id;
     }
 
+    public function getContenu(): ?string
+    {
+        return $this->contenu;
+    }
+
+    public function setContenu(string $contenu): static
+    {
+        $this->contenu = $contenu;
+        return $this;
+    }
+
+    public function getPoints(): ?int
+    {
+        return $this->points;
+    }
+
+    public function setPoints(?int $points): static
+    {
+        $this->points = $points;
+        return $this;
+    }
+
     public function getQuiz(): ?Quiz
     {
         return $this->quiz;
@@ -56,7 +70,6 @@ class Question
     public function setQuiz(?Quiz $quiz): static
     {
         $this->quiz = $quiz;
-
         return $this;
     }
 
@@ -74,43 +87,16 @@ class Question
             $this->optionQuestions->add($optionQuestion);
             $optionQuestion->setQuestion($this);
         }
-
         return $this;
     }
 
     public function removeOptionQuestion(OptionQuestion $optionQuestion): static
     {
         if ($this->optionQuestions->removeElement($optionQuestion)) {
-            // set the owning side to null (unless already changed)
             if ($optionQuestion->getQuestion() === $this) {
                 $optionQuestion->setQuestion(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getContenu(): ?string
-    {
-        return $this->contenu;
-    }
-
-    public function setContenu(string $contenu): static
-    {
-        $this->contenu = $contenu;
-
-        return $this;
-    }
-
-    public function getPoints(): ?int
-    {
-        return $this->points;
-    }
-
-    public function setPoints(?int $points): static
-    {
-        $this->points = $points;
-
         return $this;
     }
 }

@@ -3,10 +3,31 @@
     <li class="nav-item">
       <a class="nav-link" href="{{ path('admin_dashboard') }}">
         <i class="mdi mdi-grid-large menu-icon"></i>
-        <span class="menu-title">Dashboard</span>
+        <span class="menu-title" style="color: black; font-weight: bold; font-size: 1.2rem;">Dashboard</span>
       </a>
     </li>
-    <li class="nav-item nav-category">UI Elements</li>
+
+    <li class="nav-item nav-category">Management</li>
+
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#forum-menu" aria-expanded="false" aria-controls="forum-menu">
+        <i class="menu-icon mdi mdi-forum-outline" style="color: black; font-size: 1.2rem;"></i>
+        <span class="menu-title" style="color: black;">Forum Management</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="forum-menu">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ path('admin_forum_publications') }}" style="color: darkred; font-size: 1rem;">Publications</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ path('admin_forum_commentaires') }}" style="color: darkred;font-size: 1rem;">Comments</a>
+          </li>
+        </ul>
+      </div>
+    </li>
+
+<!--    <li class="nav-item nav-category">UI Elements</li>
     <li class="nav-item">
       <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
         <i class="menu-icon mdi mdi-floor-plan"></i>
@@ -91,5 +112,5 @@
         <span class="menu-title">Documentation</span>
       </a>
     </li>
-  </ul>
-</nav>
+  </ul>-->
+</nav> 

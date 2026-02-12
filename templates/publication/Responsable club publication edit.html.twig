@@ -1,0 +1,156 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Edit Publication - Club Manager{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .form-page { padding: 100px 0 80px; background: var(--grey-light); min-height: 100vh; }
+    .form-page .container { max-width: 750px; margin: 0 auto; padding: 0 24px; }
+
+    .form-hero { background: linear-gradient(135deg, var(--black), var(--grey-dark)); border-radius: var(--radius); padding: 28px 32px; margin-bottom: 24px; position: relative; overflow: hidden; }
+    .form-hero::before { content: ''; position: absolute; top: -40%; right: -8%; width: 180px; height: 180px; border-radius: 50%; background: var(--red); opacity: 0.1; }
+    .form-hero h1 { font-size: 1.5rem; font-weight: 800; color: var(--white); margin: 0 0 4px; }
+    .form-hero p { color: rgba(255,255,255,0.5); font-size: 0.88rem; margin: 0; }
+
+    .form-card { background: var(--white); border-radius: var(--radius); padding: 32px 36px; box-shadow: var(--shadow-sm); animation: fadeUp 0.5s ease both; }
+    .form-help { background: var(--red-light); border-left: 4px solid var(--red); padding: 14px 18px; border-radius: var(--radius-sm); margin-bottom: 24px; font-size: 0.88rem; color: var(--red-dark); }
+    .form-help i { margin-right: 6px; }
+
+    .form-group { margin-bottom: 22px; }
+    .form-group label, label { display: block; color: var(--black); font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; }
+    input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], input[type="time"], input[type="datetime-local"], input[type="file"], textarea, select {
+        width: 100%; padding: 12px 16px; border: 2px solid var(--grey-border); border-radius: var(--radius-sm); font-size: 0.9rem; background: var(--grey-light); color: #333; transition: var(--transition); box-sizing: border-box; font-family: inherit;
+    }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: var(--red); background: var(--white); box-shadow: 0 0 0 3px rgba(231,76,60,0.15); }
+    textarea { min-height: 140px; resize: vertical; }
+    select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e74c3c' d='M6 9L1 4h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; }
+
+    .current-file { margin: 12px 0; padding: 16px; background: var(--grey-light); border-left: 4px solid var(--black); border-radius: var(--radius-sm); }
+    .current-file strong { display: block; color: var(--black); margin-bottom: 10px; font-size: 0.9rem; }
+    .current-file img { max-width: 100%; max-height: 280px; border-radius: var(--radius-sm); display: block; }
+    .current-file video { max-width: 100%; max-height: 280px; border-radius: var(--radius-sm); display: block; }
+    .current-file small { display: block; margin-top: 8px; color: var(--grey); font-size: 0.82rem; }
+
+    #fichier-container { display: none; }
+    #fichier-container.show { display: block; }
+    .file-info { margin-top: 8px; padding: 10px 14px; background: #ecfdf5; border-left: 4px solid #10b981; border-radius: 6px; font-size: 0.85rem; color: #065f46; }
+
+    .form-actions { display: flex; gap: 12px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--grey-border); }
+    .btn-back-form { flex: 1; background: var(--grey-light); color: var(--grey-dark); padding: 12px 20px; border-radius: var(--radius-sm); border: 1px solid var(--grey-border); font-weight: 700; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition); }
+    .btn-back-form:hover { border-color: var(--black); color: var(--black); text-decoration: none; }
+    .btn-submit { flex: 2; background: var(--red); color: var(--white); padding: 12px 28px; border-radius: var(--radius-sm); border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-submit:hover { background: var(--red-dark); transform: translateY(-2px); }
+
+    .delete-zone { margin-top: 32px; padding-top: 24px; border-top: 2px dashed var(--red); }
+    .delete-warning { background: var(--red-light); border-left: 4px solid var(--red); padding: 16px 18px; border-radius: var(--radius-sm); margin-bottom: 16px; color: var(--red-dark); font-size: 0.88rem; line-height: 1.5; }
+    .delete-warning strong { display: block; margin-bottom: 6px; font-size: 0.95rem; }
+    .btn-delete { width: 100%; background: var(--red); color: var(--white); padding: 12px 28px; border-radius: var(--radius-sm); border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-delete:hover { background: var(--red-dark); transform: translateY(-2px); }
+
+    .invalid-feedback { color: var(--red); font-size: 0.85rem; margin-top: 4px; }
+    .is-invalid { border-color: var(--red) !important; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 768px) { .form-page { padding: 80px 0 40px; } .form-card { padding: 24px 20px; } .form-actions { flex-direction: column; } }
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="form-page">
+    <div class="container">
+        <div class="form-hero">
+            <h1>Edit Publication</h1>
+            <p>Club Manager Area</p>
+        </div>
+        <div class="form-card">
+            <div class="form-help">
+                <i class="fas fa-info-circle"></i>
+                <strong>Info:</strong> Changes will be saved once you click "Update".
+            </div>
+
+            {{ form_start(form) }}
+                <div class="form-group">{{ form_label(form.titre) }}{{ form_widget(form.titre) }}{{ form_errors(form.titre) }}</div>
+                <div class="form-group">{{ form_label(form.contenu) }}{{ form_widget(form.contenu) }}{{ form_errors(form.contenu) }}</div>
+                <div class="form-group">{{ form_label(form.typecontenu) }}{{ form_widget(form.typecontenu) }}{{ form_errors(form.typecontenu) }}</div>
+
+                {% if form.status is defined %}
+                <div class="form-group">{{ form_label(form.status) }}{{ form_widget(form.status) }}{{ form_errors(form.status) }}</div>
+                {% endif %}
+
+                <div class="form-group" id="fichier-container">
+                    {{ form_label(form.fichier) }}
+                    {% if publication.fichier %}
+                        <div class="current-file">
+                            <strong><i class="fas fa-file-image"></i> Current File:</strong>
+                            {% set ext = publication.fichier|split('.')|last|lower %}
+                            {% if ext in ['jpg','jpeg','png','gif','webp'] %}
+                                <img src="{{ asset('uploads/publications/' ~ publication.fichier) }}" alt="Current image">
+                            {% elseif ext in ['mp4','webm','ogg'] %}
+                                <video controls><source src="{{ asset('uploads/publications/' ~ publication.fichier) }}" type="video/{{ ext }}"></video>
+                            {% endif %}
+                            <small>Upload a new file below to replace it</small>
+                        </div>
+                    {% endif %}
+                    {{ form_widget(form.fichier) }}
+                    {{ form_errors(form.fichier) }}
+                    <small style="color:var(--grey);display:block;margin-top:6px;font-size:0.82rem;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Accepted: JPEG, PNG, GIF, WEBP, MP4, MPEG, MOV, AVI, WEBM (Max: 50 MB)
+                    </small>
+                    <div id="file-selected-info" class="file-info" style="display:none;">
+                        <i class="fas fa-check-circle"></i> New file selected: <span id="file-name"></span>
+                    </div>
+                </div>
+
+                                <div class="form-actions">
+                    <a href="{{ path('app_responsable_club_publication_index', {'u': currentUser.id}) }}" class="btn-back-form"><i class="fas fa-arrow-left"></i> Back</a>
+                    <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Update</button>
+                </div>
+            {{ form_end(form) }}
+
+            <div class="delete-zone">
+                <div class="delete-warning">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Danger Zone</strong>
+                    This action is irreversible. Once deleted, all associated data will be permanently lost.
+                </div>
+                <form method="post"
+                      action="{{ path('app_responsable_club_publication_delete', {'id': publication.id, 'u': currentUser.id}) }}"
+                      onsubmit="return confirm('Are you sure you want to delete this publication?\n\nThis action is IRREVERSIBLE!');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ publication.id) }}">
+                    <button type="submit" class="btn-delete"><i class="fas fa-trash-alt"></i> Delete Permanently</button>
+                </form>
+            </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.getElementById('publication_typecontenu');
+    const fichierContainer = document.getElementById('fichier-container');
+    const fichierInput = document.getElementById('publication_fichier');
+    const fileInfo = document.getElementById('file-selected-info');
+    const fileName = document.getElementById('file-name');
+
+    function toggleFichier() {
+        if (!typeSelect) return;
+        const text = (typeSelect.options[typeSelect.selectedIndex]||{}).text||'';
+        if (text.toLowerCase().includes('image') || text.toLowerCase().includes('vid')) {
+            fichierContainer.classList.add('show');
+        } else {
+            fichierContainer.classList.remove('show');
+            if (fichierInput) fichierInput.value = '';
+            if (fileInfo) fileInfo.style.display = 'none';
+        }
+    }
+
+    if (typeSelect) { typeSelect.addEventListener('change', toggleFichier); toggleFichier(); }
+    if (fichierInput) {
+        fichierInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) { fileName.textContent = this.files[0].name; fileInfo.style.display = 'block'; }
+            else { fileInfo.style.display = 'none'; }
+        });
+    }
+});
+</script>
+{% endblock %}

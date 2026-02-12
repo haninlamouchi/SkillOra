@@ -9,11 +9,12 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: FormationRepository::class)]
+#[ORM\Table(name: 'Formation')]
 class Formation
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'id_Formation')]
     private ?int $id = null;
 
     #[ORM\Column(length: 200)]
@@ -23,10 +24,10 @@ class Formation
     private ?string $description = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTime $dateDebut = null;
+    private ?\DateTimeInterface $dateDebut = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTime $dateFin = null;
+    private ?\DateTimeInterface $dateFin = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
@@ -34,24 +35,20 @@ class Formation
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $lienRessources = null;
 
-    #[ORM\ManyToOne(inversedBy: 'formations')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Club::class, inversedBy: 'formations')]
+    #[ORM\JoinColumn(name: 'id_Club', referencedColumnName: 'id_Club', nullable: false, onDelete: 'CASCADE')]
     private ?Club $club = null;
 
-    /**
-     * @var Collection<int, Quiz>
-     */
-    #[ORM\OneToMany(
-        targetEntity: Quiz::class,
-        mappedBy: 'formation',
-        cascade: ['persist', 'remove'],
-        orphanRemoval: true
-    )]
+    #[ORM\OneToMany(targetEntity: Quiz::class, mappedBy: 'formation', orphanRemoval: true)]
     private Collection $quizzes;
+
+    #[ORM\OneToMany(targetEntity: ParticipationFormation::class, mappedBy: 'formation', orphanRemoval: true)]
+    private Collection $participationFormations;
 
     public function __construct()
     {
         $this->quizzes = new ArrayCollection();
+        $this->participationFormations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -67,7 +64,6 @@ class Formation
     public function setTitre(string $titre): static
     {
         $this->titre = $titre;
-
         return $this;
     }
 
@@ -79,31 +75,28 @@ class Formation
     public function setDescription(?string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
-    public function getDateDebut(): ?\DateTime
+    public function getDateDebut(): ?\DateTimeInterface
     {
         return $this->dateDebut;
     }
 
-    public function setDateDebut(?\DateTime $dateDebut): static
+    public function setDateDebut(?\DateTimeInterface $dateDebut): static
     {
         $this->dateDebut = $dateDebut;
-
         return $this;
     }
 
-    public function getDateFin(): ?\DateTime
+    public function getDateFin(): ?\DateTimeInterface
     {
         return $this->dateFin;
     }
 
-    public function setDateFin(?\DateTime $dateFin): static
+    public function setDateFin(?\DateTimeInterface $dateFin): static
     {
         $this->dateFin = $dateFin;
-
         return $this;
     }
 
@@ -115,7 +108,6 @@ class Formation
     public function setImage(?string $image): static
     {
         $this->image = $image;
-
         return $this;
     }
 
@@ -127,7 +119,6 @@ class Formation
     public function setLienRessources(?string $lienRessources): static
     {
         $this->lienRessources = $lienRessources;
-
         return $this;
     }
 
@@ -139,7 +130,6 @@ class Formation
     public function setClub(?Club $club): static
     {
         $this->club = $club;
-
         return $this;
     }
 
@@ -157,19 +147,43 @@ class Formation
             $this->quizzes->add($quiz);
             $quiz->setFormation($this);
         }
-
         return $this;
     }
 
     public function removeQuiz(Quiz $quiz): static
     {
         if ($this->quizzes->removeElement($quiz)) {
-            // set the owning side to null (unless already changed)
             if ($quiz->getFormation() === $this) {
                 $quiz->setFormation(null);
             }
         }
+        return $this;
+    }
 
+    /**
+     * @return Collection<int, ParticipationFormation>
+     */
+    public function getParticipationFormations(): Collection
+    {
+        return $this->participationFormations;
+    }
+
+    public function addParticipationFormation(ParticipationFormation $participationFormation): static
+    {
+        if (!$this->participationFormations->contains($participationFormation)) {
+            $this->participationFormations->add($participationFormation);
+            $participationFormation->setFormation($this);
+        }
+        return $this;
+    }
+
+    public function removeParticipationFormation(ParticipationFormation $participationFormation): static
+    {
+        if ($this->participationFormations->removeElement($participationFormation)) {
+            if ($participationFormation->getFormation() === $this) {
+                $participationFormation->setFormation(null);
+            }
+        }
         return $this;
     }
 }

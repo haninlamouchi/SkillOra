@@ -1,30 +1,273 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Scholar{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}Backoffice{% endblock %}</title>
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/frontoffice/vendor/bootstrap/css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/fontawesome.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/templatemo-scholar.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/owl.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/animate.css') }}">
+    <!-- Vendor CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/css/vendor.bundle.base.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/feather/feather.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/mdi/css/materialdesignicons.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/ti-icons/css/themify-icons.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/font-awesome/css/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/typicons/typicons.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/simple-line-icons/css/simple-line-icons.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/datatables.net-bs4/dataTables.bootstrap4.css') }}">
 
-    {% block styles %}{% endblock %}
+    <!-- Template CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/css/style.css') }}">
+
+    <style>
+        .navbar-nav .dropdown:hover > .dropdown-menu,
+        .navbar-nav .dropdown.show > .dropdown-menu { display: block !important; }
+        .dropdown-menu { min-width: 200px; }
+        .welcome-text { font-size: 20px; font-weight: 600; margin-bottom: 0; line-height: 1.2; }
+        .welcome-sub-text { font-size: 14px; font-weight: 400; color: #6c757d; margin-bottom: 0; }
+        .navbar-nav .nav-item.fw-semibold { display: flex; flex-direction: column; justify-content: center; }
+        .navbar-menu-wrapper { min-height: 70px; }
+        @media (max-width: 991px) { .welcome-text, .welcome-sub-text { display: none !important; } }
+
+        /* ═══════════════════════════════════════════
+           NAVBAR — DARK BLACK THEME
+           ═══════════════════════════════════════════ */
+
+        /* ── Brand wrapper (left side with logo) ── */
+        .navbar .navbar-brand-wrapper {
+            background: #0a0a0a !important;
+        }
+        .navbar .navbar-brand-wrapper .navbar-toggler {
+            color: #ffffff !important;
+        }
+
+        /* ── Menu wrapper (right side with icons) ── */
+        .navbar .navbar-menu-wrapper {
+            background: #111111 !important;
+            color: #d0d0d0 !important;
+        }
+
+        /* ── Nav links & icons — white on black ── */
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .nav-link {
+            color: #e0e0e0 !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .nav-link:hover {
+            color: #ffffff !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .nav-link i {
+            color: #d0d0d0 !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .nav-link:hover i {
+            color: #ffffff !important;
+        }
+
+        /* ── Welcome text ── */
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .welcome-text {
+            color: #ffffff !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .welcome-text .text-dark {
+            color: #ffffff !important;
+        }
+
+        /* ── Search form on dark bg ── */
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .search-form i {
+            color: #bbb !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .search-form input {
+            color: #ffffff !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .search-form input:focus {
+            border-bottom-color: #bf0000 !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .search-form input::placeholder {
+            color: #888 !important;
+        }
+
+        /* ── "Select Category" bordered dropdown trigger ── */
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .dropdown-bordered {
+            background: #1a1a1a !important;
+            border-color: #333 !important;
+            color: #d0d0d0 !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .dropdown-bordered:hover {
+            border-color: #8b0000 !important;
+            color: #fff !important;
+        }
+
+        /* ── Date picker on dark bg ── */
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .navbar-date-picker {
+            background: #1a1a1a !important;
+            border-color: #333 !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .navbar-date-picker .calendar-icon {
+            color: #d0d0d0 !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .navbar-date-picker .input-group-prepend,
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .navbar-date-picker .input-group-prepend > .input-group-text {
+            border-color: #333 !important;
+            background: transparent !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .navbar-date-picker .form-control {
+            color: #d0d0d0 !important;
+            background: transparent !important;
+        }
+
+        /* ── Notification count dot ── */
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .count-indicator .count {
+            background: #bf0000 !important;
+            border-color: #111111 !important;
+        }
+
+        /* ═══════════════════════════════════════════
+           DROPDOWNS — DARKRED + BLACK GRADIENT
+           ═══════════════════════════════════════════ */
+
+        /* ── Main dropdown menu ── */
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu {
+            background: linear-gradient(160deg, #1a0a0a 0%, #0d0d0d 40%, #1a0505 100%) !important;
+            border: 1px solid rgba(139, 0, 0, 0.3) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(139, 0, 0, 0.1) !important;
+            border-radius: 12px !important;
+            overflow: hidden;
+        }
+
+        /* ── Dropdown header (e.g. "You have 4 notifications") ── */
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu .dropdown-item.py-3.border-bottom,
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu > a:first-child {
+            background: linear-gradient(135deg, #2a0a0a, #1a0505) !important;
+            border-bottom: 1px solid rgba(139, 0, 0, 0.25) !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu .dropdown-item.py-3 p,
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu .dropdown-item.py-3 .fw-medium {
+            color: #e8d0d0 !important;
+        }
+
+        /* ── Dropdown items ── */
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu .dropdown-item {
+            color: #ccc !important;
+            border-bottom-color: rgba(139, 0, 0, 0.12) !important;
+            transition: background .2s, color .2s !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu .dropdown-item:hover {
+            background: linear-gradient(90deg, rgba(139, 0, 0, 0.25), rgba(139, 0, 0, 0.08)) !important;
+            color: #ffffff !important;
+        }
+
+        /* ── Preview items in notification/mail dropdowns ── */
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu .preview-item {
+            border-bottom: 1px solid rgba(139, 0, 0, 0.1) !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu .preview-item:hover {
+            background: rgba(139, 0, 0, 0.15) !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu .preview-item .preview-item-content h6,
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu .preview-item .preview-item-content .preview-subject {
+            color: #e0d0d0 !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu .preview-item .preview-item-content p {
+            color: #999 !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu .preview-item .preview-thumbnail i {
+            color: #bf0000 !important;
+        }
+
+        /* ── Badge pill in dropdown ── */
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu .badge-pill {
+            background: #8b0000 !important;
+            color: #fff !important;
+        }
+
+        /* ── User profile dropdown ── */
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown.user-dropdown .dropdown-menu {
+            background: linear-gradient(160deg, #1a0a0a 0%, #0d0d0d 50%, #1a0505 100%) !important;
+            border: 1px solid rgba(139, 0, 0, 0.3) !important;
+            border-radius: 12px !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown.user-dropdown .dropdown-menu .dropdown-header {
+            background: linear-gradient(135deg, #1f0808, #150505) !important;
+            border-bottom: 1px solid rgba(139, 0, 0, 0.2) !important;
+            padding-bottom: 1rem !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown.user-dropdown .dropdown-menu .dropdown-header p.fw-semibold {
+            color: #fff !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown.user-dropdown .dropdown-menu .dropdown-header p.text-muted {
+            color: #999 !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown.user-dropdown .dropdown-menu .dropdown-item {
+            color: #ccc !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown.user-dropdown .dropdown-menu .dropdown-item:hover {
+            background: linear-gradient(90deg, rgba(139, 0, 0, 0.25), rgba(139, 0, 0, 0.08)) !important;
+            color: #fff !important;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown.user-dropdown .dropdown-menu .dropdown-item i {
+            color: #bf0000 !important;
+        }
+
+        /* ── Mobile hamburger toggler ── */
+        .navbar .navbar-menu-wrapper .navbar-toggler {
+            color: #ffffff !important;
+        }
+
+        /* ── Sidebar-dark variant sync ── */
+        .sidebar-dark .navbar .navbar-brand-wrapper {
+            background: #0a0a0a !important;
+        }
+    </style>
+
+    {% block stylesheets %}{% endblock %}
 </head>
 
-<body>
+<body class="with-welcome-text">
+<div class="container-scroller">
+    <!-- NAVBAR -->
+    {% include 'backoffice/partials/_navbar.html.twig' %}
 
-    {% include 'frontoffice/partials/_navbar.html.twig' %}
+    <div class="container-fluid page-body-wrapper">
+        <!-- SIDEBAR -->
+        {% include 'backoffice/partials/_sidebar.html.twig' %}
 
-    {% block body %}{% endblock %}
+        <!-- MAIN PANEL -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                {% block body %}{% endblock %}
+            </div>
+            <!-- FOOTER -->
+            {% include 'backoffice/partials/_footer.html.twig' %}
+        </div>
+    </div>
+</div>
 
-    {% include 'frontoffice/partials/_footer.html.twig' %}
+<!-- Vendor JS -->
+<script src="{{ asset('assets/backoffice/vendors/js/vendor.bundle.base.js') }}"></script>
+<script src="{{ asset('assets/backoffice/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js') }}"></script>
 
-    <!-- JS -->
-    <script src="{{ asset('assets/frontoffice/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<!-- Chart and Progress Libraries -->
+<script src="{{ asset('assets/backoffice/vendors/chart.js/chart.umd.js') }}"></script>
+<script src="{{ asset('assets/backoffice/vendors/progressbar.js/progressbar.min.js') }}"></script>
 
-    {% block scripts %}{% endblock %}
+<!-- Template JS -->
+<script src="{{ asset('assets/backoffice/js/off-canvas.js') }}"></script>
+<script src="{{ asset('assets/backoffice/js/template.js') }}"></script>
+<script src="{{ asset('assets/backoffice/js/settings.js') }}"></script>
+<script src="{{ asset('assets/backoffice/js/hoverable-collapse.js') }}"></script>
+<script src="{{ asset('assets/backoffice/js/todolist.js') }}"></script>
+
+<!-- Custom JS -->
+<script src="{{ asset('assets/backoffice/js/jquery.cookie.js') }}"></script>
+<script src="{{ asset('assets/backoffice/js/dashboard.js') }}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof bootstrap !== 'undefined') {
+        const dropdowns = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+        dropdowns.forEach(element => { new bootstrap.Dropdown(element); });
+    }
+});
+</script>
+
+{% block javascripts %}{% endblock %}
 </body>
 </html>

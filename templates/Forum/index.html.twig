@@ -1,0 +1,160 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Forum{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .forum-page { padding: 100px 0 80px; background: linear-gradient(165deg, #fdf2f2 0%, var(--grey-light) 40%, #fff 100%); min-height: 100vh; }
+    .forum-page .container { max-width: 780px; margin: 0 auto; padding: 0 20px; }
+
+    .forum-hero { text-align: center; }
+    .forum-hero .hero-stats {
+        display: flex; justify-content: center; gap: 32px; margin-top: 22px;
+        position: relative; z-index: 1;
+    }
+    .forum-hero .hero-stat { text-align: center; }
+    .forum-hero .hero-stat-num { font-size: 1.5rem; font-weight: 800; color: #fff; display: block; }
+    .forum-hero .hero-stat-label {
+        font-size: 0.75rem; color: rgba(255,255,255,0.5); text-transform: uppercase;
+        letter-spacing: 1px; font-weight: 600;
+    }
+
+    .post-card {
+        background: #fff; border-radius: 16px; margin-bottom: 20px;
+        overflow: hidden; transition: all 0.3s ease;
+        border: 1px solid rgba(139,0,0,0.06);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .post-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 36px rgba(139,0,0,0.1);
+        border-color: rgba(139,0,0,0.12);
+    }
+    .post-header { padding: 20px 24px 0; display: flex; align-items: center; gap: 14px; }
+    .post-avatar {
+        width: 44px; height: 44px; border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-weight: 800; font-size: 0.85rem; flex-shrink: 0;
+    }
+    .post-user { flex: 1; }
+    .post-user-name {
+        font-weight: 700; font-size: 0.92rem; color: #1a1a1a;
+        display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .post-role { padding: 2px 10px; border-radius: 20px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.3px; }
+    .role-responsable { background: #f3e8ff; color: #7c3aed; }
+    .role-admin { background: #fef3c7; color: #d97706; }
+    .post-date { color: #999; font-size: 0.78rem; margin-top: 2px; }
+
+    .post-body { padding: 16px 24px 20px; }
+    .post-title { font-size: 1.15rem; font-weight: 800; color: #1a1a1a; margin-bottom: 8px; line-height: 1.4; letter-spacing: -0.3px; }
+    .post-type-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 4px 12px; border-radius: 8px;
+        font-size: 0.72rem; font-weight: 700; margin-bottom: 12px;
+        text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .post-type-badge i { font-size: 0.65rem; }
+    .post-excerpt { color: #666; font-size: 0.9rem; line-height: 1.65; margin-bottom: 0; }
+
+    .post-media { margin: 0 24px 18px; border-radius: 14px; overflow: hidden; background: var(--grey-light); }
+    .post-media img, .post-media video { width: 100%; display: block; }
+
+    .post-footer {
+        padding: 16px 24px; border-top: 1px solid #f3f3f3;
+        display: flex; justify-content: space-between; align-items: center; background: #fafafa;
+    }
+    .post-comments { color: #999; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
+    .btn-voir {
+        color: #fff; padding: 9px 22px; border-radius: 10px;
+        text-decoration: none; font-size: 0.82rem; font-weight: 700;
+        transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-voir:hover { transform: translateY(-1px); color: #fff; text-decoration: none; }
+
+    @media (max-width: 768px) {
+        .forum-page { padding: 80px 0 40px; }
+        .forum-hero .hero-stats { gap: 20px; }
+        .post-card { border-radius: 12px; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="forum-page">
+    <div class="container">
+        <div class="forum-hero">
+            <h1>Community Forum</h1>
+            <p>Share ideas, discuss and connect with the community</p>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-num">{{ publications|length }}</span>
+                    <span class="hero-stat-label">Posts</span>
+                </div>
+                <div class="hero-stat">
+                    {% set totalComments = 0 %}
+                    {% for p in publications %}{% set totalComments = totalComments + p.commentaires|length %}{% endfor %}
+                    <span class="hero-stat-num">{{ totalComments }}</span>
+                    <span class="hero-stat-label">Comments</span>
+                </div>
+            </div>
+        </div>
+
+        {% if publications is empty %}
+            <div class="empty-state">
+                <i class="far fa-comments"></i>
+                <h3>No publications yet</h3>
+                <p>Be the first to share something with the community</p>
+            </div>
+        {% else %}
+            {% for publication in publications %}
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar">
+                            {{ publication.user.prenom|slice(0,1)|upper }}{{ publication.user.nom|slice(0,1)|upper }}
+                        </div>
+                        <div class="post-user">
+                            <div class="post-user-name">
+                                {{ publication.user.prenom }} {{ publication.user.nom }}
+                                <span class="post-role {% if publication.user.role == 'etudiant' %}role-etudiant{% elseif publication.user.role == 'responsable_club' %}role-responsable{% else %}role-admin{% endif %}">
+                                    {{ publication.user.role|replace({'_': ' '})|title }}
+                                </span>
+                            </div>
+                            <div class="post-date"><i class="far fa-clock" style="margin-right:4px;"></i>{{ publication.datePublication|date('M d, Y · H:i') }}</div>
+                        </div>
+                    </div>
+
+                    <div class="post-body">
+                        <h3 class="post-title">{{ publication.titre }}</h3>
+                        <span class="post-type-badge">
+                            {% if publication.typecontenu.value == 'image' %}<i class="fas fa-image"></i>
+                            {% elseif publication.typecontenu.value == 'video' %}<i class="fas fa-video"></i>
+                            {% else %}<i class="fas fa-align-left"></i>{% endif %}
+                            {{ publication.typecontenu.label }}
+                        </span>
+                        <div class="post-excerpt">
+                            {{ publication.contenu|length > 280 ? publication.contenu|slice(0,280) ~ '...' : publication.contenu }}
+                        </div>
+                    </div>
+
+                    {% if publication.fichier %}
+                        <div class="post-media">
+                            {% set ext = publication.fichier|split('.')|last|lower %}
+                            {% if ext in ['jpg','jpeg','png','gif','webp'] %}
+                                <img src="{{ asset('uploads/publications/' ~ publication.fichier) }}" alt="{{ publication.titre }}" loading="lazy">
+                            {% elseif ext in ['mp4','webm','ogg'] %}
+                                <video controls><source src="{{ asset('uploads/publications/' ~ publication.fichier) }}" type="video/{{ ext }}"></video>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <div class="post-footer">
+                        <span class="post-comments"><i class="far fa-comment-dots"></i> {{ publication.commentaires|length }} comment(s)</span>
+                        <a href="{{ path('app_forum_show', {'id': publication.id}) }}{% if navUser %}?u={{ navUser.id }}{% endif %}" class="btn-voir">Read More <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

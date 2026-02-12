@@ -1,0 +1,105 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Modifier — {{ publication.titre }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .edit-page-card {
+        max-width: 700px; margin: 2rem auto; border: none;
+        border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    }
+    .edit-page-card .card-header {
+        background: linear-gradient(135deg, #131212, #1e1d1d);
+        color: #fff; border-radius: 14px 14px 0 0; padding: 1.2rem 1.8rem;
+    }
+    .edit-page-card .card-header h4 { margin: 0; font-weight: 700; font-size: 1.15rem; }
+    .edit-page-card .card-body { padding: 1.8rem; }
+    .edit-page-card label { font-weight: 600; font-size: .85rem; color: #333; margin-bottom: .3rem; }
+    .edit-page-card .form-control {
+        border: 1px solid #ddd; border-radius: 8px; padding: .55rem .85rem;
+        font-size: .9rem; transition: border-color .2s;
+    }
+    .edit-page-card .form-control:focus { border-color: #bf0000; box-shadow: 0 0 0 3px rgba(191,0,0,.1); }
+    .current-file-preview {
+        display: flex; align-items: center; gap: .6rem;
+        padding: .5rem .8rem; background: #f9f9f9; border-radius: 8px;
+        font-size: .82rem; color: #555; margin-bottom: .5rem;
+    }
+    .current-file-preview img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; }
+    .btn-back {
+        background: #f0f0f0; color: #333; border: none; padding: .5rem 1.2rem;
+        border-radius: 8px; font-weight: 600; text-decoration: none; font-size: .9rem;
+    }
+    .btn-back:hover { background: #e0e0e0; color: #111; }
+    .btn-save {
+        background: #bf0000; color: #fff; border: none; padding: .5rem 1.5rem;
+        border-radius: 8px; font-weight: 600; font-size: .9rem; cursor: pointer;
+    }
+    .btn-save:hover { background: #960000; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="card edit-page-card">
+    <div class="card-header">
+        <h4><i class="mdi mdi-pencil-outline"></i> Modifier : {{ publication.titre }}</h4>
+    </div>
+    <div class="card-body">
+        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+
+            <div class="mb-3">
+                {{ form_label(form.titre) }}
+                {{ form_widget(form.titre) }}
+                {{ form_errors(form.titre) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.contenu) }}
+                {{ form_widget(form.contenu) }}
+                {{ form_errors(form.contenu) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.typecontenu) }}
+                {{ form_widget(form.typecontenu) }}
+                {{ form_errors(form.typecontenu) }}
+            </div>
+
+            {% if form.status is defined %}
+            <div class="mb-3">
+                {{ form_label(form.status) }}
+                {{ form_widget(form.status) }}
+                {{ form_errors(form.status) }}
+            </div>
+            {% endif %}
+
+            <div class="mb-3">
+                {{ form_label(form.fichier) }}
+                {% if publication.fichier %}
+                    <div class="current-file-preview">
+                        {% if publication.typecontenu.value == 'image' %}
+                            <img src="{{ asset('uploads/publications/' ~ publication.fichier) }}" alt="">
+                        {% else %}
+                            <i class="mdi mdi-file-video-outline" style="font-size:1.2rem; color:#bf0000;"></i>
+                        {% endif %}
+                        <span>{{ publication.fichier }}</span>
+                    </div>
+                {% endif %}
+                {{ form_widget(form.fichier) }}
+                <small class="text-muted">Laisser vide pour garder le fichier actuel.</small>
+                {{ form_errors(form.fichier) }}
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <a href="{{ path('admin_forum_publications') }}" class="btn-back">
+                    <i class="mdi mdi-arrow-left"></i> Retour
+                </a>
+                <button type="submit" class="btn-save">
+                    <i class="mdi mdi-content-save-outline"></i> Enregistrer
+                </button>
+            </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

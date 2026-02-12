@@ -1,0 +1,89 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}New Publication{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .form-page { padding: 100px 0 80px; background: var(--grey-light); min-height: 100vh; }
+    .form-page .container { max-width: 750px; margin: 0 auto; padding: 0 24px; }
+    #fichier-container { display: none; }
+    #fichier-container.show { display: block; }
+    .file-info { margin-top: 8px; padding: 10px 14px; background: #ecfdf5; border-left: 4px solid #10b981; border-radius: 6px; font-size: 0.85rem; color: #065f46; }
+    .invalid-feedback { color: var(--red); font-size: 0.85rem; margin-top: 4px; }
+    .is-invalid { border-color: var(--red) !important; }
+    @media (max-width: 768px) { .form-page { padding: 80px 0 40px; } }
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="form-page">
+    <div class="container">
+        <div class="form-hero">
+            <h1>New Publication</h1>
+            <p>Create a new publication</p>
+        </div>
+        <div class="form-card">
+            <div class="form-help">
+                <i class="fas fa-info-circle"></i>
+                <strong>Info:</strong> Your publication will be submitted for review before being published.
+            </div>
+
+            {{ form_start(form) }}
+                <div class="form-group">{{ form_label(form.titre) }}{{ form_widget(form.titre) }}{{ form_errors(form.titre) }}</div>
+                <div class="form-group">{{ form_label(form.contenu) }}{{ form_widget(form.contenu) }}{{ form_errors(form.contenu) }}</div>
+                <div class="form-group">{{ form_label(form.typecontenu) }}{{ form_widget(form.typecontenu) }}{{ form_errors(form.typecontenu) }}</div>
+
+                <div class="form-group" id="fichier-container">
+                    {{ form_label(form.fichier) }}
+                    {{ form_widget(form.fichier) }}
+                    {{ form_errors(form.fichier) }}
+                    <small style="color:var(--grey);display:block;margin-top:6px;font-size:0.82rem;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Accepted: JPEG, PNG, GIF, WEBP, MP4, MPEG, MOV, AVI, WEBM (Max: 50 MB)
+                    </small>
+                    <div id="file-selected-info" class="file-info" style="display:none;">
+                        <i class="fas fa-check-circle"></i> File selected: <span id="file-name"></span>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{{ path('app_publication_index', {u: currentUser.id}) }}" class="btn-back-form"><i class="fas fa-arrow-left"></i> Back</a>
+                    <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Submit</button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.getElementById('publication_typecontenu');
+    const fichierContainer = document.getElementById('fichier-container');
+    const fichierInput = document.getElementById('publication_fichier');
+    const fileInfo = document.getElementById('file-selected-info');
+    const fileName = document.getElementById('file-name');
+
+    function toggleFichier() {
+        if (!typeSelect) return;
+        const text = (typeSelect.options[typeSelect.selectedIndex]||{}).text||'';
+        if (text.toLowerCase().includes('image') || text.toLowerCase().includes('vid')) {
+            fichierContainer.classList.add('show');
+        } else {
+            fichierContainer.classList.remove('show');
+            if (fichierInput) fichierInput.value = '';
+            if (fileInfo) fileInfo.style.display = 'none';
+        }
+    }
+
+    if (typeSelect) { typeSelect.addEventListener('change', toggleFichier); toggleFichier(); }
+    if (fichierInput) {
+        fichierInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) { fileName.textContent = this.files[0].name; fileInfo.style.display = 'block'; }
+            else { fileInfo.style.display = 'none'; }
+        });
+    }
+});
+</script>
+{% endblock %}

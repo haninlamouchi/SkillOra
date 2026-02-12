@@ -1,0 +1,236 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}My Publications - Club Manager{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .rc-page { padding: 100px 0 80px; background: var(--grey-light); min-height: 100vh; }
+    .rc-page .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    .rc-hero { text-align: center; }
+
+    .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+    .toolbar .search-bar { flex: 1; min-width: 200px; margin-bottom: 0; padding: 0; background: none; box-shadow: none; }
+    .toolbar .search-bar input { padding: 11px 18px; }
+    .toolbar .search-bar button { background: var(--darkred); color: var(--white); border: none; padding: 11px 18px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: var(--transition); }
+    .toolbar .search-bar button:hover { background: var(--red); }
+
+    .filter-row { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+    .filter-row select { padding: 9px 14px; border: 2px solid var(--grey-border); border-radius: 8px; font-size: 0.85rem; background: var(--white); color: #333; cursor: pointer; transition: var(--transition); }
+    .filter-row select:focus { outline: none; border-color: var(--red); }
+
+    .results-count { color: var(--grey); font-size: 0.88rem; margin-bottom: 20px; font-weight: 600; }
+    .results-count strong { color: var(--darkred); font-size: 1.1rem; }
+
+    .pub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+
+    .pub-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; border: 1px solid var(--grey-border); transition: var(--transition); }
+    .pub-card:hover { box-shadow: var(--shadow-md); border-color: transparent; }
+    .pub-card.hidden { display: none; }
+
+    .pub-card-head { padding: 20px 22px; position: relative; }
+    .pub-card-id { position: absolute; top: 12px; left: 14px; background: rgba(255,255,255,0.15); padding: 3px 12px; border-radius: var(--radius-pill); font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.7); }
+    .pub-card-title { color: var(--white); font-size: 1.1rem; font-weight: 700; margin: 18px 0 8px; line-height: 1.35; }
+    .pub-card-date { color: rgba(255,255,255,0.5); font-size: 0.8rem; display: flex; align-items: center; gap: 6px; }
+
+    .pub-card-body { padding: 20px 22px; }
+    .pub-card-media { margin-bottom: 14px; border-radius: var(--radius-sm); overflow: hidden; background: var(--grey-light); }
+    .pub-card-media img, .pub-card-media video { width: 100%; max-height: 220px; object-fit: cover; display: block; }
+    .pub-card-excerpt { color: #555; font-size: 0.9rem; line-height: 1.6; margin-bottom: 14px; }
+
+    .pub-card-status { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: var(--radius-pill); font-weight: 700; font-size: 0.78rem; margin-bottom: 16px; }
+
+    .pub-card-actions { display: flex; gap: 8px; padding-top: 14px; border-top: 1px solid var(--grey-border); flex-wrap: wrap; }
+    .btn-card { flex: 1; min-width: 80px; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 0.82rem; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px; transition: var(--transition); border: none; cursor: pointer; }
+    .btn-card-validate { background: #ecfdf5; color: #059669; }
+    .btn-card-validate:hover { background: #059669; color: var(--white); text-decoration: none; }
+
+    @media (max-width: 768px) { .pub-grid { grid-template-columns: 1fr; } .rc-page { padding: 80px 0 40px; } .toolbar { flex-direction: column; } }
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="rc-page">
+    <div class="container">
+
+        <div class="rc-hero">
+            <h1>Publication Management</h1>
+            <p>Club Manager Area</p>
+        </div>
+
+        <div class="toolbar">
+<a class="btn-add" href="{{ path('app_responsable_club_publication_new', {id: currentUser.id}) }}">
+                <i class="fas fa-plus"></i> New Publication
+            </a>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search by title, content or status...">
+                <button id="btnSearch"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <select id="filterType">
+                <option value="">All Types</option>
+                <option value="article">Article</option>
+                <option value="actualité">News</option>
+                <option value="événement">Event</option>
+                <option value="image">Image</option>
+                <option value="video">Video</option>
+            </select>
+            <select id="filterStatus">
+                <option value="">All Status</option>
+                <option value="en attente">Pending</option>
+                <option value="publié">Published</option>
+            </select>
+            <select id="filterDate">
+                <option value="">All Dates</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+            </select>
+            <select id="sortBy">
+                <option value="date-desc">Date (Newest)</option>
+                <option value="date-asc">Date (Oldest)</option>
+                <option value="title-asc">Title (A-Z)</option>
+                <option value="title-desc">Title (Z-A)</option>
+            </select>
+            <button class="btn-reset" id="btnReset"><i class="fas fa-redo"></i> Reset</button>
+        </div>
+
+        <div class="results-count"><strong id="resultsCount">{{ publications|length }}</strong> publication(s) found</div>
+
+        {% if publications is not empty %}
+            <div class="pub-grid" id="publicationsGrid">
+                {% for publication in publications %}
+                    <div class="pub-card"
+                         data-id="{{ publication.id }}"
+                         data-title="{{ publication.titre|lower }}"
+                         data-content="{{ publication.contenu|lower }}"
+                         data-type="{{ publication.typecontenu.value }}"
+                         data-status="{{ publication.status.value }}"
+                         data-date="{{ publication.datePublication|date('Y-m-d H:i:s') }}">
+
+                        <div class="pub-card-head">
+                            <span class="pub-card-id">#{{ publication.id }}</span>
+                            <span class="pub-card-badge">{{ publication.typecontenu.label }}</span>
+                            <h3 class="pub-card-title">{{ publication.titre }}</h3>
+                            <div class="pub-card-date"><i class="far fa-calendar-alt"></i> {{ publication.datePublication|date('d/m/Y H:i') }}</div>
+                        </div>
+
+                        <div class="pub-card-body">
+                            {% if publication.fichier %}
+                                <div class="pub-card-media">
+                                    {% set ext = publication.fichier|split('.')|last|lower %}
+                                    {% if ext in ['jpg','jpeg','png','gif','webp'] %}
+                                        <img src="{{ asset('uploads/publications/' ~ publication.fichier) }}" alt="{{ publication.titre }}" loading="lazy">
+                                    {% elseif ext in ['mp4','webm','ogg'] %}
+                                        <video controls><source src="{{ asset('uploads/publications/' ~ publication.fichier) }}" type="video/{{ ext }}"></video>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+
+                            <div class="pub-card-excerpt">{{ publication.contenu|slice(0, 150) }}{% if publication.contenu|length > 150 %}...{% endif %}</div>
+
+                            <span class="pub-card-status {{ publication.status.value == 'publié' ? 'status-published' : 'status-pending' }}">
+                                <i class="fas fa-{{ publication.status.value == 'publié' ? 'check-circle' : 'clock' }}"></i>
+                                {{ publication.status.value == 'publié' ? 'Published' : 'Pending' }}
+                            </span>
+
+                            <div class="pub-card-actions">
+<a class="btn-card btn-card-view" href="{{ path('app_responsable_club_publication_show', {'id': publication.id, 'u': currentUser.id}) }}"><i class="far fa-eye"></i> View</a>
+                                <a class="btn-card btn-card-edit" href="{{ path('app_responsable_club_publication_edit', {'id': publication.id, 'u': currentUser.id}) }}"><i class="far fa-edit"></i> Edit</a>
+                                {% if publication.status.value == 'en attente' %}
+                                    <a class="btn-card btn-card-validate" href="{{ path('app_responsable_club_publication_valider', {'id': publication.id, 'u': currentUser.id}) }}" onclick="return confirm('Publish this publication?')"><i class="fas fa-check"></i> Validate</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>No publications yet</h3>
+                <p style="color:#aaa;font-size:0.9rem;">Start by creating your first publication!</p>
+                <a class="btn-add" href="{{ path('app_responsable_club_publication_new', {id: currentUser.id}) }}" style="margin-top:16px;display:inline-flex;"><i class="fas fa-plus"></i> Create First Publication</a>
+            </div>
+        {% endif %}
+
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const filterType = document.getElementById('filterType');
+    const filterStatus = document.getElementById('filterStatus');
+    const filterDate = document.getElementById('filterDate');
+    const sortBy = document.getElementById('sortBy');
+    const btnSearch = document.getElementById('btnSearch');
+    const btnReset = document.getElementById('btnReset');
+    const resultsCount = document.getElementById('resultsCount');
+
+    function matchesDateFilter(dateStr, filter) {
+        if (!filter) return true;
+        const d = new Date(dateStr), now = new Date();
+        switch(filter) {
+            case 'today': return d.toDateString() === now.toDateString();
+            case 'week': return d >= new Date(now.getTime() - 7*24*60*60*1000);
+            case 'month': return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            case 'year': return d.getFullYear() === now.getFullYear();
+            default: return true;
+        }
+    }
+
+    function performSearch() {
+        const term = searchInput.value.toLowerCase().trim();
+        const tF = filterType.value, sF = filterStatus.value, dF = filterDate.value;
+        let count = 0;
+        document.querySelectorAll('.pub-card').forEach(function(c) {
+            const t = c.dataset.title||'', co = c.dataset.content||'', ty = c.dataset.type||'', st = c.dataset.status||'', dt = c.dataset.date||'';
+            const ok = (!term || t.includes(term) || co.includes(term) || st.includes(term))
+                && (!tF || ty === tF) && (!sF || st === sF) && matchesDateFilter(dt, dF);
+            c.classList.toggle('hidden', !ok);
+            c.style.display = ok ? '' : 'none';
+            if (ok) count++;
+        });
+        resultsCount.textContent = count;
+        sortPubs();
+    }
+
+    function sortPubs() {
+        const grid = document.getElementById('publicationsGrid');
+        if (!grid) return;
+        const cards = Array.from(grid.querySelectorAll('.pub-card:not(.hidden)'));
+        cards.sort(function(a, b) {
+            const aD = new Date(a.dataset.date), bD = new Date(b.dataset.date);
+            switch(sortBy.value) {
+                case 'date-desc': return bD - aD;
+                case 'date-asc': return aD - bD;
+                case 'title-asc': return (a.dataset.title||'').localeCompare(b.dataset.title||'');
+                case 'title-desc': return (b.dataset.title||'').localeCompare(a.dataset.title||'');
+                default: return 0;
+            }
+        });
+        cards.forEach(function(c){ grid.appendChild(c); });
+    }
+
+    btnSearch.addEventListener('click', performSearch);
+    searchInput.addEventListener('keypress', function(e){ if(e.key==='Enter') performSearch(); });
+    filterType.addEventListener('change', performSearch);
+    filterStatus.addEventListener('change', performSearch);
+    filterDate.addEventListener('change', performSearch);
+    sortBy.addEventListener('change', performSearch);
+
+    btnReset.addEventListener('click', function() {
+        searchInput.value=''; filterType.value=''; filterStatus.value=''; filterDate.value=''; sortBy.value='date-desc';
+        document.querySelectorAll('.pub-card').forEach(function(c){ c.classList.remove('hidden'); c.style.display=''; });
+        resultsCount.textContent = document.querySelectorAll('.pub-card').length;
+        sortPubs();
+    });
+});
+</script>
+{% endblock %}
