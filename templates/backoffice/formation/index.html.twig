@@ -1,0 +1,18 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Home{% endblock %}
+
+{% block body %}
+
+<section class="">
+    <div class="container">
+        <h2>Welcome to Scholar Platform</h2>
+        <div class="container">
+            {% for f in formations %}
+                <h4>{{ f.title }}</h4>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}
