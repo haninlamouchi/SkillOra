@@ -1,0 +1,338 @@
+{{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'user-form'}}) }}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.nom,'Last Name', {'label_attr': {'class': 'form-label'}}) }}
+            <span class="required">*</span>
+            {{ form_widget(form.nom, {'attr': {'class': 'form-control' ~ (form.nom.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': 'Entrez le nom'}}) }}
+            {% if form.nom.vars.errors|length > 0 %}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.nom) }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.prenom, 'First Name', {'label_attr': {'class': 'form-label'}}) }}
+            <span class="required">*</span>
+            {{ form_widget(form.prenom, {'attr': {'class': 'form-control' ~ (form.prenom.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': 'Entrez le prénom'}}) }}
+            {% if form.prenom.vars.errors|length > 0 %}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.prenom) }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="form-group">
+    {{ form_label(form.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
+    <span class="required">*</span>
+    {{ form_widget(form.email, {'attr': {'class': 'form-control' ~ (form.email.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': 'exemple@email.com'}}) }}
+    {% if form.email.vars.errors|length > 0 %}
+        <div class="invalid-feedback">
+            {{ form_errors(form.email) }}
+        </div>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.password, 'Password', {'label_attr': {'class': 'form-label'}}) }}
+            <span class="required">*</span>
+            {{ form_widget(form.password, {'attr': {'class': 'form-control' ~ (form.password.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': '••••••••'}}) }}
+            {% if form.password.vars.errors|length > 0 %}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.password) }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.role, 'Role', {'label_attr': {'class': 'form-label'}}) }}
+            <span class="required">*</span>
+            {{ form_widget(form.role, {'attr': {'class': 'form-control' ~ (form.role.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+            {% if form.role.vars.errors|length > 0 %}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.role) }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.telephone, 'Phone Number', {'label_attr': {'class': 'form-label'}}) }}
+            <span class="required">*</span>
+            {{ form_widget(form.telephone, {'attr': {'class': 'form-control' ~ (form.telephone.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': '+216 XX XXX XXX'}}) }}
+            {% if form.telephone.vars.errors|length > 0 %}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.telephone) }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.dateNaissance, 'Date of Birth', {'label_attr': {'class': 'form-label'}}) }}
+            <span class="required">*</span>
+            {{ form_widget(form.dateNaissance, {'attr': {'class': 'form-control' ~ (form.dateNaissance.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+            {% if form.dateNaissance.vars.errors|length > 0 %}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.dateNaissance) }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="form-group">
+    {{ form_label(form.dateInscription, 'Registration Date', {'label_attr': {'class': 'form-label'}}) }}
+    <span class="required">*</span>
+    {{ form_widget(form.dateInscription, {'attr': {'class': 'form-control' ~ (form.dateInscription.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+    {% if form.dateInscription.vars.errors|length > 0 %}
+        <div class="invalid-feedback">
+            {{ form_errors(form.dateInscription) }}
+        </div>
+    {% endif %}
+</div>
+
+<div class="form-group">
+    {{ form_label(form.photo, 'Profile Picture', {'label_attr': {'class': 'form-label'}}) }}
+    <span class="required">*</span>
+    {{ form_widget(form.photo, {'attr': {'class': 'form-control' ~ (form.photo.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+    {% if form.photo.vars.errors|length > 0 %}
+        <div class="invalid-feedback">
+            {{ form_errors(form.photo) }}
+        </div>
+    {% endif %}
+    <small class="form-help">Accepted formats: JPG, PNG, GIF (Max: 2 MB)</small>
+</div>
+
+<div class="form-actions">
+    <button type="submit" class="btn btn-primary">
+        {{ button_label|default('💾 Enregistrer') }}
+    </button>
+</div>
+
+{{ form_end(form) }}
+
+<style>
+    /* Container du formulaire */
+    .user-form {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    /* Groupes de formulaire */
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    /* Labels */
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+        font-size: 14px;
+    }
+
+    /* Astérisque rouge pour les champs obligatoires */
+    .required {
+        color: #dc3545;
+        margin-left: 3px;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    /* Champs de formulaire */
+    .form-control {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: #c62828;
+        box-shadow: 0 0 0 0.2rem rgba(198, 40, 40, 0.15);
+        outline: none;
+    }
+
+    /* Champs invalides */
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        background-color: #fff5f5;
+        padding-right: calc(1.5em + 0.75rem);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+
+    /* Messages d'erreur */
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 0.5rem;
+        font-weight: 500;
+        background-color: #ffe6e6;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        border-left: 3px solid #dc3545;
+    }
+
+    .invalid-feedback ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .invalid-feedback li {
+        padding: 0.25rem 0;
+        line-height: 1.5;
+    }
+
+    .invalid-feedback li:before {
+        content: "⚠ ";
+        margin-right: 5px;
+    }
+
+    /* Texte d'aide */
+    .form-help {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 0.5rem;
+        display: block;
+        font-style: italic;
+    }
+
+    /* Actions du formulaire */
+    .form-actions {
+        border-top: 2px solid #eee;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* Boutons */
+    .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 15px;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-primary {
+        background-color: #c62828;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #b71c1c;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(198, 40, 40, 0.3);
+    }
+
+    /* Style pour les select */
+    select.form-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23333' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        padding-right: 2.5rem;
+    }
+
+    select.form-control.is-invalid {
+        background-position: right 2.5rem center, right calc(0.375em + 0.1875rem) center;
+    }
+
+    /* Style pour les inputs de type file */
+    input[type="file"].form-control {
+        padding: 0.5rem;
+        cursor: pointer;
+    }
+
+    input[type="file"].form-control::file-selector-button {
+        padding: 0.5rem 1rem;
+        margin-right: 1rem;
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        color: #333;
+    }
+
+    input[type="file"].form-control::file-selector-button:hover {
+        background-color: #e2e6ea;
+        border-color: #c62828;
+    }
+
+    /* Style pour les inputs de type date */
+    input[type="date"].form-control {
+        cursor: pointer;
+    }
+
+    /* Gestion des erreurs Symfony */
+    .form-error-message {
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .user-form {
+            padding: 0;
+        }
+
+        .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+        
+        .col-md-6 {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+
+    /* Animation au focus */
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    .form-control.is-invalid {
+        animation: shake 0.5s;
+    }
+</style>

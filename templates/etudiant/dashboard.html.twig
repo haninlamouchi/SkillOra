@@ -1,0 +1,460 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Dashboard - Skillora{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            padding-top: 0 !important;
+            margin: 0;
+        }
+        
+        .header-area {
+            display: none !important;
+        }
+        
+        .custom-header {
+            background: linear-gradient(135deg, #c10609 0%, #8b0507 100%);
+            box-shadow: 0 2px 15px rgba(193, 6, 9, 0.3);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 9999;
+            padding: 15px 0;
+        }
+        
+        .custom-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-right: 50px; /* ← AJOUTÉ : Plus d'espace à droite */
+        }
+        
+        .custom-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .custom-header .logo .logo-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+        }
+        
+        .custom-header .logo .logo-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        
+        .custom-header .logo h1 {
+            color: white;
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        /* PROFIL - Photo encore plus à droite */
+        .custom-header .user-info {
+            position: relative;
+            margin-left: auto;
+            margin-right: 0; /* ← Collé au bord droit */
+        }
+
+        .custom-header .profile-trigger {
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .custom-header .profile-trigger:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .custom-header .user-avatar {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: block;
+        }
+
+        .custom-header .user-avatar-placeholder {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #c10609;
+            font-size: 20px;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+
+        /* Menu déroulant */
+        .profile-dropdown {
+            position: absolute;
+            top: 75px;
+            right: 0; /* ← Aligné avec la photo */
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            min-width: 240px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s;
+            z-index: 10000;
+        }
+
+        .profile-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .profile-dropdown-header {
+            text-align: center;
+            padding: 20px 15px;
+            border-bottom: 2px solid #f5f5f5;
+        }
+
+        .profile-dropdown-header img,
+        .profile-dropdown-header .avatar-placeholder {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            display: block;
+            object-fit: cover;
+        }
+
+        .profile-dropdown-header .avatar-placeholder {
+            background: linear-gradient(135deg, #c10609 0%, #8b0507 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .profile-dropdown-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 5px 0;
+        }
+
+        .profile-dropdown-header p {
+            color: #666;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .profile-dropdown-menu {
+            padding: 8px;
+        }
+
+        .profile-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .profile-dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: #c10609;
+        }
+
+        .profile-dropdown-item i {
+            font-size: 18px;
+            width: 22px;
+            text-align: center;
+        }
+
+        .profile-dropdown-item.logout {
+            color: #c10609;
+            border-top: 1px solid #f5f5f5;
+            margin-top: 5px;
+        }
+
+        .profile-dropdown-item.logout:hover {
+            background-color: #ffe6e6;
+        }
+
+        .dropdown-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9998;
+            display: none;
+        }
+
+        .dropdown-overlay.show {
+            display: block;
+        }
+        
+        footer {
+            display: none !important;
+        }
+        
+        .custom-footer {
+            background-color: #000000;
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            margin-top: 0;
+        }
+        
+        .custom-footer p {
+            color: white;
+            margin: 0;
+        }
+
+        .dashboard-section {
+            padding: 110px 0 60px 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f1eaea 0%, #e5dada 100%);
+            margin: 0;
+        }
+        
+        .dashboard-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 40px rgba(193, 6, 9, 0.15);
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            border-top: 5px solid #c10609;
+        }
+        
+        .welcome-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #c10609;
+        }
+        
+        .welcome-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #c10609;
+            margin-bottom: 10px;
+        }
+
+        .welcome-header p {
+            color: #666;
+            font-size: 18px;
+        }
+
+        .welcome-header .role-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #c10609 0%, #8b0507 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px;
+            border-radius: 10px;
+            border-left: 4px solid #c10609;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(193, 6, 9, 0.2);
+        }
+
+        .stat-card h3 {
+            color: #c10609;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .custom-header .container {
+                padding-right: 20px;
+            }
+
+            .custom-header .logo h1 {
+                font-size: 24px;
+            }
+            
+            .custom-header .logo .logo-circle {
+                width: 55px;
+                height: 55px;
+            }
+            
+            .dashboard-container {
+                padding: 30px 20px;
+            }
+            
+            .welcome-header h1 {
+                font-size: 28px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-dropdown {
+                right: 0;
+                min-width: 220px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="custom-header">
+    <div class="container">
+        <div class="logo">
+            <div class="logo-circle">
+                <img src="{{ asset('images/logo-skillora.png') }}" alt="Skillora Logo">
+            </div>
+            <h1>Skillora</h1>
+        </div>
+
+        <div class="user-info">
+            <div class="profile-trigger" onclick="toggleProfileDropdown()">
+                {% if user.photo %}
+                    <img src="{{ asset('uploads/photos/' ~ user.photo) }}" alt="{{ user.prenom }}" class="user-avatar">
+                {% else %}
+                    <div class="user-avatar-placeholder">
+                        {{ user.prenom|slice(0, 1)|upper }}{{ user.nom|slice(0, 1)|upper }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="profile-dropdown" id="profileDropdown">
+                <div class="profile-dropdown-header">
+                    {% if user.photo %}
+                        <img src="{{ asset('uploads/photos/' ~ user.photo) }}" alt="{{ user.prenom }}">
+                    {% else %}
+                        <div class="avatar-placeholder">
+                            {{ user.prenom|slice(0, 1)|upper }}{{ user.nom|slice(0, 1)|upper }}
+                        </div>
+                    {% endif %}
+                    <h3>{{ user.prenom }} {{ user.nom }}</h3>
+                    <p>{{ user.email }}</p>
+                </div>
+
+                <div class="profile-dropdown-menu">
+                    <a href="{{ path('app_user_show', {id: user.id}) }}" class="profile-dropdown-item">
+                        <i>👤</i>
+                        <span>My Profile</span>
+                    </a>
+
+                    <a href="{{ path('app_user_edit', {id: user.id}) }}" class="profile-dropdown-item">
+                        <i>✏️</i>
+                        <span>Edit Profile</span>
+                    </a>
+
+                    <a href="{{ path('app_logout') }}" class="profile-dropdown-item logout">
+                        <i>🚪</i>
+                        <span>Log Out</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="dropdown-overlay" id="dropdownOverlay" onclick="closeProfileDropdown()"></div>
+
+<div class="dashboard-section">
+    <div class="container">
+        <div class="dashboard-container">
+            <div class="welcome-header">
+                <h1>👋 Welcome, {{ user.prenom }} !</h1>
+                <p>Glad to see you again on Skillora</p>
+                <span class="role-badge">STUDENT</span>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>📚 My Courses</h3>
+                    <p>Access all your ongoing courses</p>
+                </div>
+
+                <div class="stat-card">
+                    <h3>📊 My Challenges</h3>
+                    <p>Track your challenges</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="custom-footer">
+    <div class="container">
+        <p>© {{ "now"|date("Y") }} Skillora - Apprendre, grandir, réussir ✨</p>
+    </div>
+</div>
+
+<script>
+    function toggleProfileDropdown() {
+        const dropdown = document.getElementById('profileDropdown');
+        const overlay = document.getElementById('dropdownOverlay');
+        dropdown.classList.toggle('show');
+        overlay.classList.toggle('show');
+    }
+
+    function closeProfileDropdown() {
+        const dropdown = document.getElementById('profileDropdown');
+        const overlay = document.getElementById('dropdownOverlay');
+        dropdown.classList.remove('show');
+        overlay.classList.remove('show');
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeProfileDropdown();
+    });
+</script>
+{% endblock %}

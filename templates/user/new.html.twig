@@ -1,0 +1,305 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Inscription - Skillora{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Supprimer l'espace blanc en haut */
+        body {
+            padding-top: 0 !important;
+            margin: 0;
+        }
+        
+        /* Cacher le header original */
+        .header-area {
+            display: none !important;
+        }
+        
+        /* Nouveau header rouge personnalisé */
+        .custom-header {
+            background: linear-gradient(135deg, #c10609 0%, #8b0507 100%);
+            box-shadow: 0 2px 15px rgba(193, 6, 9, 0.3);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 9999;
+            padding: 15px 0;
+        }
+        
+        .custom-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .custom-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        /* Logo dans un cercle - AJUSTÉ */
+        .custom-header .logo .logo-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+        }
+        
+        .custom-header .logo .logo-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        
+        .custom-header .logo h1 {
+            color: white;
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .custom-header .nav {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 30px;
+        }
+        
+        .custom-header .nav li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .custom-header .nav li a:hover,
+        .custom-header .nav li a.active {
+            background-color: rgba(241, 234, 234, 0.2);
+            color: #f1eaea;
+        }
+        
+        /* Cacher le footer original */
+        footer {
+            display: none !important;
+        }
+        
+        /* Nouveau footer noir personnalisé */
+        .custom-footer {
+            background-color: #000000;
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            margin-top: 0;
+        }
+        
+        .custom-footer p {
+            color: white;
+            margin: 0;
+        }
+
+        .user-form-section {
+            padding: 110px 0 60px 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f1eaea 0%, #e5dada 100%);
+            margin: 0;
+        }
+        
+        .form-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 40px rgba(193, 6, 9, 0.15);
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            border-top: 5px solid #c10609;
+        }
+        
+        .page-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #c10609;
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #c10609;
+            margin-bottom: 10px;
+        }
+        
+        .page-header p {
+            color: #b4b4b6;
+            margin: 0;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #b4b4b6;
+            padding: 12px 15px;
+            font-size: 14px;
+            transition: all 0.3s;
+            width: 100%;
+            background-color: #f1eaea;
+        }
+        
+        .form-control:focus {
+            border-color: #c10609;
+            box-shadow: 0 0 0 0.2rem rgba(193, 6, 9, 0.25);
+            outline: none;
+            background-color: white;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #c10609 0%, #8b0507 100%);
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s;
+            cursor: pointer;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #8b0507 0%, #6a0405 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(193, 6, 9, 0.4);
+        }
+        
+        .btn-back {
+            background-color: #b4b4b6;
+            color: #000000;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-left: 10px;
+        }
+        
+        .btn-back:hover {
+            background-color: #9a9a9c;
+            color: #000000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(180, 180, 182, 0.3);
+            text-decoration: none;
+        }
+        
+        .form-actions {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #b4b4b6;
+            text-align: right;
+        }
+        
+        .required-field::after {
+            content: " *";
+            color: #c10609;
+        }
+        
+        .form-help {
+            font-size: 12px;
+            color: #b4b4b6;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #c10609;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .custom-header .nav {
+                display: none;
+            }
+            
+            .custom-header .logo h1 {
+                font-size: 24px;
+            }
+            
+            .custom-header .logo .logo-circle {
+                width: 55px;
+                height: 55px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<!-- HEADER PERSONNALISÉ ROUGE -->
+<div class="custom-header">
+    <div class="container">
+        <div class="logo">
+            <div class="logo-circle">
+                <img src="{{ asset('images/logo-skillora.png') }}" alt="Skillora Logo">
+            </div>
+            <h1>Skillora</h1>
+        </div>
+    </div>
+</div>
+
+<!-- CONTENU DU FORMULAIRE -->
+<div class="user-form-section">
+    <div class="container">
+        <div class="form-container">
+            <div class="page-header">
+                <h1>📚 Register on Skillora</h1>
+                <p>Join our learning and success platform</p>
+            </div>
+
+            {{ include('user/_form.html.twig', {'button_label': 'Create My Account'}) }}
+
+            
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER PERSONNALISÉ NOIR -->
+<div class="custom-footer">
+    <div class="container">
+        <p>© {{ "now"|date("Y") }} Skillora - Apprendre, grandir, réussir ✨</p>
+    </div>
+</div>
+{% endblock %}

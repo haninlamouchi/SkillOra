@@ -1,0 +1,422 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Profile - {{ user.prenom }} {{ user.nom }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Supprimer l'espace blanc en haut */
+        body {
+            padding-top: 0 !important;
+            margin: 0;
+        }
+        
+        /* Cacher le header original */
+        .header-area {
+            display: none !important;
+        }
+        
+        /* Nouveau header rouge personnalisé */
+        .custom-header {
+            background: linear-gradient(135deg, #c10609 0%, #8b0507 100%);
+            box-shadow: 0 2px 15px rgba(193, 6, 9, 0.3);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 9999;
+            padding: 15px 0;
+        }
+        
+        .custom-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .custom-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        /* Logo dans un cercle */
+        .custom-header .logo .logo-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+        }
+        
+        .custom-header .logo .logo-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        
+        .custom-header .logo h1 {
+            color: white;
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        /* Cacher le footer original */
+        footer {
+            display: none !important;
+        }
+        
+        /* Nouveau footer noir personnalisé */
+        .custom-footer {
+            background-color: #000000;
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            margin-top: 0;
+        }
+        
+        .custom-footer p {
+            color: white;
+            margin: 0;
+        }
+
+        .user-profile-section {
+            padding: 110px 0 60px 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f1eaea 0%, #e5dada 100%);
+            margin: 0;
+        }
+        
+        .profile-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 40px rgba(193, 6, 9, 0.15);
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            border-top: 5px solid #c10609;
+        }
+        
+        .page-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #c10609;
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #c10609;
+            margin-bottom: 10px;
+        }
+        
+        .page-header p {
+            color: #b4b4b6;
+            margin: 0;
+        }
+
+        .profile-content {
+            display: flex;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .profile-photo-section {
+            flex: 0 0 250px;
+            text-align: center;
+        }
+
+        .profile-photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #c10609;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(193, 6, 9, 0.3);
+        }
+
+        .profile-photo-placeholder {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #c10609 0%, #8b0507 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 72px;
+            font-weight: 700;
+            border: 5px solid #c10609;
+            margin: 0 auto 15px;
+            box-shadow: 0 5px 15px rgba(193, 6, 9, 0.3);
+        }
+
+        .role-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #c10609 0%, #8b0507 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .profile-info-section {
+            flex: 1;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        .info-table tr {
+            background-color: #f1eaea;
+            transition: all 0.3s;
+        }
+
+        .info-table tr:hover {
+            background-color: #e5dada;
+            transform: translateX(5px);
+        }
+
+        .info-table th {
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 700;
+            color: #c10609;
+            width: 40%;
+            border-radius: 8px 0 0 8px;
+        }
+
+        .info-table td {
+            padding: 15px 20px;
+            color: #333;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .action-buttons {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #b4b4b6;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #c10609 0%, #8b0507 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #8b0507 0%, #6a0405 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(193, 6, 9, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #b4b4b6;
+            color: #000000;
+        }
+
+        .btn-secondary:hover {
+            background-color: #9a9a9c;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(180, 180, 182, 0.3);
+            text-decoration: none;
+            color: #000000;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(220, 53, 69, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .custom-header .logo h1 {
+                font-size: 24px;
+            }
+            
+            .custom-header .logo .logo-circle {
+                width: 55px;
+                height: 55px;
+            }
+
+            .profile-content {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .profile-photo-section {
+                flex: none;
+            }
+
+            .info-table th,
+            .info-table td {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<!-- HEADER PERSONNALISÉ ROUGE -->
+<div class="custom-header">
+    <div class="container">
+        <div class="logo">
+            <div class="logo-circle">
+                <img src="{{ asset('images/logo-skillora.png') }}" alt="Skillora Logo">
+            </div>
+            <h1>Skillora</h1>
+        </div>
+    </div>
+</div>
+
+<!-- CONTENU DU PROFIL -->
+<div class="user-profile-section">
+    <div class="container">
+        <div class="profile-container">
+            <div class="page-header">
+                <h1>👤 User Profile</h1>
+                <p>View user information</p>
+            </div>
+
+            <div class="profile-content">
+                <!-- Section Photo -->
+                <div class="profile-photo-section">
+                    {% if user.photo %}
+                        <img src="{{ asset('uploads/photos/' ~ user.photo) }}" 
+                             alt="Photo of {{ user.prenom }}" 
+                             class="profile-photo">
+                    {% else %}
+                        <div class="profile-photo-placeholder">
+                            {{ user.prenom|slice(0, 1)|upper }}{{ user.nom|slice(0, 1)|upper }}
+                        </div>
+                    {% endif %}
+                    
+                    <span class="role-badge">
+                        {% if user.role == 'admin' %}
+                            👑 ADMIN
+                        {% elseif user.role == 'responsable_club' %}
+                            🏢 CLUB MANAGER
+                        {% else %}
+                            🎓 STUDENT
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- Section Informations -->
+                <div class="profile-info-section">
+                    <table class="info-table">
+                        <tbody>
+                            <tr>
+                                <th>📋 ID</th>
+                                <td>{{ user.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>👤 Last Name</th>
+                                <td>{{ user.nom }}</td>
+                            </tr>
+                            <tr>
+                                <th>👤 First Name</th>
+                                <td>{{ user.prenom }}</td>
+                            </tr>
+                            <tr>
+                                <th>📧 Email</th>
+                                <td>{{ user.email }}</td>
+                            </tr>
+                            <tr>
+                                <th>📞 Phone</th>
+                                <td>{{ user.telephone }}</td>
+                            </tr>
+                            <tr>
+                                <th>🎂 Date of Birth</th>
+                                <td>{{ user.dateNaissance ? user.dateNaissance|date('d/m/Y') : 'Not specified' }}</td>
+                            </tr>
+                            <tr>
+                                <th>📅 Registration Date</th>
+                                <td>{{ user.dateInscription ? user.dateInscription|date('d/m/Y H:i') : '' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="action-buttons">
+                {# Bouton Back dynamique selon le rôle #}
+                {% if user.role == 'admin' %}
+                <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">
+                    ← Back  To My Profil
+                    </a>
+                {% elseif user.role == 'responsable_club' %}
+                    <a href="{{ path('app_responsable_dashboard') }}" class="btn btn-secondary">
+                    ← Back  To My Profil
+                </a>
+                {% else %}
+                    <a href="{{ path('app_etudiant_dashboard') }}" class="btn btn-secondary">
+                    ← Back  To My Profil
+                </a>
+                {% endif %}
+                <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-primary">
+                    ✏️ Edit Profile
+                </a>
+                <form method="post" action="{{ path('app_user_delete', {'id': user.id}) }}" 
+                      style="display:inline" 
+                      onsubmit="return confirm('Are you sure you want to delete this user?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                    <button type="submit" class="btn btn-danger">🗑️ Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER PERSONNALISÉ NOIR -->
+<div class="custom-footer">
+    <div class="container">
+        <p>© {{ "now"|date("Y") }} Skillora - Apprendre, grandir, réussir ✨</p>
+    </div>
+</div>
+{% endblock %}

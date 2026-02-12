@@ -1,0 +1,261 @@
+<form method="post" class="login-form" novalidate>
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error.messageKey|trans(error.messageData, 'security') }}
+        </div>
+    {% endif %}
+
+    {% if app.user %}
+        <div class="alert alert-info">
+            Vous êtes connecté en tant que {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Se déconnecter</a>
+        </div>
+    {% endif %}
+
+    <div class="form-group">
+        <label for="inputEmail" class="form-label">Email</label>
+        <span class="required">*</span>
+        <input type="email" 
+               value="{{ last_username }}" 
+               name="_username" 
+               id="inputEmail" 
+               class="form-control" 
+               autocomplete="email" 
+               required 
+               autofocus
+               placeholder="exemple@email.com">
+    </div>
+
+    <div class="form-group">
+        <label for="inputPassword" class="form-label">Password</label>
+        <span class="required">*</span>
+        <input type="password" 
+               name="_password" 
+               id="inputPassword" 
+               class="form-control" 
+               autocomplete="current-password" 
+               required
+               placeholder="••••••••">
+    </div>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+            🔐 Log In
+        </button>
+    </div>
+
+    <div class="form-footer">
+        <p>Don't have an account yet? <a href="{{ path('app_user_new') }}" class="link-primary">Sign up here</a></p>
+    </div>
+</form>
+
+<style>
+    /* Container du formulaire */
+    .login-form {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    /* Groupes de formulaire */
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    /* Labels */
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+        font-size: 14px;
+    }
+
+    /* Astérisque rouge pour les champs obligatoires */
+    .required {
+        color: #dc3545;
+        margin-left: 3px;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    /* Champs de formulaire */
+    .form-control {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: #c62828;
+        box-shadow: 0 0 0 0.2rem rgba(198, 40, 40, 0.15);
+        outline: none;
+    }
+
+    /* Checkbox personnalisée */
+    .custom-control {
+        position: relative;
+        display: block;
+        padding-left: 1.5rem;
+    }
+
+    .custom-control-input {
+        position: absolute;
+        left: 0;
+        z-index: -1;
+        width: 1rem;
+        height: 1.25rem;
+        opacity: 0;
+    }
+
+    .custom-control-label {
+        position: relative;
+        margin-bottom: 0;
+        vertical-align: top;
+        cursor: pointer;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .custom-control-label::before {
+        position: absolute;
+        top: 0.25rem;
+        left: -1.5rem;
+        display: block;
+        width: 1rem;
+        height: 1rem;
+        pointer-events: none;
+        content: "";
+        background-color: #fff;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .custom-control-input:checked ~ .custom-control-label::before {
+        background-color: #c62828;
+        border-color: #c62828;
+    }
+
+    .custom-control-label::after {
+        position: absolute;
+        top: 0.25rem;
+        left: -1.5rem;
+        display: block;
+        width: 1rem;
+        height: 1rem;
+        content: "";
+        background: no-repeat 50% / 50% 50%;
+    }
+
+    .custom-control-input:checked ~ .custom-control-label::after {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z'/%3e%3c/svg%3e");
+    }
+
+    /* Actions du formulaire */
+    .form-actions {
+        border-top: 2px solid #eee;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* Boutons */
+    .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 15px;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        width: 100%;
+    }
+
+    .btn-primary {
+        background-color: #c62828;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #b71c1c;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(198, 40, 40, 0.3);
+    }
+
+    /* Pied du formulaire */
+    .form-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #eee;
+    }
+
+    .form-footer p {
+        margin: 0.5rem 0;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .link-primary {
+        color: #c62828;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .link-primary:hover {
+        color: #b71c1c;
+        text-decoration: underline;
+    }
+
+    .link-secondary {
+        color: #666;
+        text-decoration: none;
+        font-size: 13px;
+    }
+
+    .link-secondary:hover {
+        color: #c62828;
+        text-decoration: underline;
+    }
+
+    /* Alerts */
+    .alert {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .alert-danger {
+        background-color: #ffe6e6;
+        border: 2px solid #dc3545;
+        color: #dc3545;
+        border-left: 4px solid #dc3545;
+    }
+
+    .alert-info {
+        background-color: #e7f3ff;
+        border: 2px solid #0066cc;
+        color: #0066cc;
+        border-left: 4px solid #0066cc;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .login-form {
+            padding: 0;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>

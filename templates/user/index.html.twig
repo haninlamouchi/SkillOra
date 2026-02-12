@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User index</title>
+    <style>
+        .profile-photo {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .no-photo {
+            width: 50px;
+            height: 50px;
+            background-color: #ddd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #666;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table th, .table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .table th {
+            background-color: #f4f4f4;
+        }
+        .btn {
+            padding: 5px 10px;
+            margin: 2px;
+            text-decoration: none;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .btn-show {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .btn-edit {
+            background-color: #ffc107;
+            color: white;
+        }
+        .btn-new {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+{% block body %}
+    <h1>Liste des Utilisateurs</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Photo</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th>Téléphone</th>
+                <th>Date Naissance</th>
+                <th>Date Inscription</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>
+                    {% if user.photo %}
+                        <img src="{{ asset('uploads/photos/' ~ user.photo) }}" 
+                             alt="Photo de {{ user.prenom }} {{ user.nom }}" 
+                             class="profile-photo">
+                    {% else %}
+                        <div class="no-photo">
+                            {{ user.prenom[0]|upper }}{{ user.nom[0]|upper }}
+                        </div>
+                    {% endif %}
+                </td>
+                <td>{{ user.nom }}</td>
+                <td>{{ user.prenom }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    {% if user.role == 'admin' %}
+                        <span style="color: red; font-weight: bold;">Administrateur</span>
+                    {% elseif user.role == 'responsable_club' %}
+                        <span style="color: blue; font-weight: bold;">Responsable Club</span>
+                    {% elseif user.role == 'etudiant' %}
+                        <span style="color: green; font-weight: bold;">Étudiant</span>
+                    {% else %}
+                        {{ user.role }}
+                    {% endif %}
+                </td>
+                <td>{{ user.telephone ?? 'N/A' }}</td>
+                <td>{{ user.dateNaissance ? user.dateNaissance|date('d/m/Y') : 'N/A' }}</td>
+                <td>{{ user.dateInscription ? user.dateInscription|date('d/m/Y H:i') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_user_show', {'id': user.id}) }}" class="btn btn-show">Voir</a>
+                    <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-edit">Modifier</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="10" style="text-align: center;">Aucun utilisateur trouvé</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_user_new') }}" class="btn btn-new">Créer un nouvel utilisateur</a>
+{% endblock %}
+</body>
+</html>
