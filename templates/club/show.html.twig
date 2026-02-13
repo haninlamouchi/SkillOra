@@ -1,0 +1,338 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}{{ club.nom }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --primary-red: #c10609;
+            --secondary-gray: #b4b4b6;
+            --dark-black: #000000;
+        }
+
+        .page-container {
+            min-height: 100vh;
+            background-color: var(--light-beige);
+        }
+
+        .top-bar {
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary-red) 0%, var(--dark-black) 100%);
+        }
+
+        .content-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .breadcrumb a {
+            color: var(--primary-red);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--dark-black);
+        }
+
+        .breadcrumb span:not(:last-child) {
+            color: var(--secondary-gray);
+        }
+
+        .breadcrumb span:last-child {
+            color: var(--dark-black);
+            font-weight: 600;
+        }
+
+        .club-card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-red) 0%, #8b0000 100%);
+            padding: 3rem 3rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .card-header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .id-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .card-body {
+            padding: 3rem;
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .info-item {
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--light-beige);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary-red);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.75rem;
+        }
+
+        .info-item p {
+            font-size: 1.25rem;
+            line-height: 1.8;
+            color: var(--dark-black);
+            margin: 0;
+        }
+
+        .info-item a {
+            color: var(--primary-red);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .info-item a:hover {
+            color: var(--dark-black);
+            text-decoration: underline;
+        }
+
+        .card-footer {
+            padding: 2rem 3rem 3rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 180px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.2rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            border: 2px solid;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--secondary-gray);
+            border-color: var(--secondary-gray);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-gray);
+            color: #ffffff;
+            border-color: var(--secondary-gray);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-red);
+            color: #ffffff;
+            border-color: var(--primary-red);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-black);
+            border-color: var(--dark-black);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .card-footer form {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .card-footer form button {
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.2rem 2rem;
+            border-radius: 12px;
+            background-color: transparent;
+            color: var(--primary-red);
+            border: 2px solid var(--primary-red);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .card-footer form button:hover {
+            background-color: var(--primary-red);
+            color: #ffffff;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(193, 6, 9, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 2rem 1rem;
+            }
+
+            .card-header {
+                flex-direction: column;
+                text-align: center;
+                padding: 2rem;
+            }
+
+            .card-header h1 {
+                font-size: 2rem;
+            }
+
+            .card-body {
+                padding: 2rem;
+            }
+
+            .info-item p {
+                font-size: 1.1rem;
+            }
+
+            .card-footer {
+                padding: 1.5rem 2rem 2rem;
+                flex-direction: column;
+            }
+
+            .btn,
+            .card-footer form button {
+                width: 100%;
+                min-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .info-item {
+                padding-bottom: 1.5rem;
+            }
+
+            .info-item p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="page-container">
+        <div class="top-bar"></div>
+        
+        <div class="content-wrapper">
+            <div class="breadcrumb">
+                <a href="{{ path('app_club_index') }}">Clubs</a>
+                <span>/</span>
+                <span>{{ club.nom }}</span>
+            </div>
+
+            <div class="club-card">
+                <div class="card-header">
+                    <h1>{{ club.nom }}</h1>
+                    <span class="id-badge">#{{ club.id }}</span>
+                </div>
+
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Description</label>
+                            <p>{{ club.description }}</p>
+                        </div>
+
+                        <div class="info-item">
+                            <label>Date de création</label>
+                            <p>{{ club.dateCreation ? club.dateCreation|date('d/m/Y') : '—' }}</p>
+                        </div>
+
+                        <div class="info-item">
+                            <label>Email</label>
+                            <p><a href="mailto:{{ club.email }}">{{ club.email }}</a></p>
+                        </div>
+
+                        <div class="info-item">
+                            <label>Site Web</label>
+                            <p>
+                                {% if club.siteWeb %}
+                                    <a href="{{ club.siteWeb }}" target="_blank">{{ club.siteWeb }}</a>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <a href="{{ path('app_club_index') }}" class="btn btn-secondary">
+                        Retour
+                    </a>
+                    <a href="{{ path('app_club_edit', {'id': club.id}) }}" class="btn btn-primary">
+                        Modifier
+                    </a>
+                    {{ include('club/_delete_form.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

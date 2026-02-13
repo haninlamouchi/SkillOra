@@ -1,0 +1,89 @@
+{{ form_start(form, {'attr': {'class': 'club-form-container'}, 'multipart': true}) }}
+<div class="club-form-card">
+
+    <div class="club-form-header">
+        <h1>Créer un nouveau Club</h1>
+        <p>Remplissez les informations du club</p>
+    </div>
+
+    <div class="form-group">
+        <label for="{{ form.nom.vars.id }}">Nom du Club <span class="required">*</span></label>
+        {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.nom) }}
+    </div>
+
+    <div class="form-group">
+        <label for="{{ form.description.vars.id }}">Description <span class="required">*</span></label>
+        {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.description) }}
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="{{ form.dateCreation.vars.id }}">Date de Création <span class="required">*</span></label>
+            {{ form_widget(form.dateCreation, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.dateCreation) }}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.email.vars.id }}">Email du Club <span class="required">*</span></label>
+            {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.email) }}
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="{{ form.responsable.vars.id }}">Responsable <span class="required">*</span></label>
+            {{ form_widget(form.responsable, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.responsable) }}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.siteWeb.vars.id }}">Site Web</label>
+            {{ form_widget(form.siteWeb, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.siteWeb) }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="{{ form.logo.vars.id }}">Logo du Club</label>
+        {{ form_widget(form.logo, {'attr': {'class': 'form-control', 'accept': 'image/*'}}) }}
+        <img id="logo-preview" src="" alt="Aperçu du logo" style="display:none; max-width:150px; margin-top:10px;">
+        {{ form_errors(form.logo) }}
+    </div>
+
+    <div class="btn-container">
+        <button type="submit" class="btn btn-primary">
+            {{ button_label|default('✓ Créer le Club') }}
+        </button>
+    </div>
+</div>
+{{ form_end(form) }}
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const logoInput = document.querySelector('#{{ form.logo.vars.id }}');
+        const preview = document.getElementById('logo-preview');
+        if (logoInput) {
+            // show existing logo for edit
+            {% if club is defined and club.logo %}
+                preview.src = '{{ asset('uploads/logos/' ~ club.logo) }}';
+                preview.style.display = 'block';
+            {% endif %}
+
+            logoInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    preview.style.display = 'block';
+                    preview.src = URL.createObjectURL(file);
+                } else {
+                    preview.style.display = 'none';
+                    preview.src = '';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

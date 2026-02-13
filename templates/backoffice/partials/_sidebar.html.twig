@@ -1,0 +1,34 @@
+<nav class="sidebar sidebar-offcanvas" id="sidebar">
+  <ul class="nav">
+    <li class="nav-item">
+      <a class="nav-link" href="{{ path('admin_dashboard') }}">
+        <i class="mdi mdi-grid-large menu-icon"></i>
+        <span class="menu-title" style="color: black; font-weight: bold; font-size: 1.2rem;">Dashboard</span>
+      </a>
+    </li>
+
+    <li class="nav-item nav-category">Management</li>
+
+    {# Section gestion des clubs #}
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#club-menu" aria-expanded="false" aria-controls="club-menu">
+        <i class="menu-icon mdi mdi-account-multiple" style="color: black; font-size: 1.2rem;"></i>
+        <span class="menu-title" style="color: black;">Club Management</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="club-menu">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ path('app_club_index') }}" style="color: darkred; font-size: 1rem;">Liste des Clubs</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ path('app_club_new') }}" style="color: darkred; font-size: 1rem;">Ajouter un Club</a>
+          </li>
+        </ul>
+      </div>
+    </li>
+
+    {# Autres sections de gestion peuvent être ajoutées ici par vos collègues #}
+
+  </ul>
+</nav>

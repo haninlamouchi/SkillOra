@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}modifier Club{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/css/club-form.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+{% endblock %}
+
+ {% block body %}
+<div class="club-form-wrapper">
+    {{ include('club/_form.html.twig', {'button_label': 'modifier'}) }}
+    
+    <div class="back-link">
+        <a href="{{ path('app_club_index') }}">← Retour à la liste</a>
+    </div>
+</div>
+
+    {{ include('club/_delete_form.html.twig') }}
+{% endblock %}
+
+
+
+
+
+

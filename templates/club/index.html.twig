@@ -1,0 +1,110 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Gestion des Clubs{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/css/club-index.css') }}">
+    <style>
+        /* Fallback inline si le fichier CSS n'est pas chargé */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="clubs-container">
+    <div class="clubs-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="mdi mdi-account-multiple"></i>
+                Gestion des Clubs
+            </h1>
+            <a href="{{ path('app_club_new') }}" class="btn-add-club">
+                <i class="mdi mdi-plus-circle"></i>
+                Ajouter un Club
+            </a>
+        </div>
+    </div>
+
+    <div class="clubs-content">
+        {% if clubs is empty %}
+            <div class="empty-state">
+                <i class="mdi mdi-alert-circle-outline"></i>
+                <h3>Aucun club trouvé</h3>
+                <p>Commencez par créer votre premier club</p>
+                <a href="{{ path('app_club_new') }}" class="btn-primary">
+                    <i class="mdi mdi-plus"></i>
+                    Créer un club
+                </a>
+            </div>
+        {% else %}
+            <div class="clubs-grid">
+                {% for club in clubs %}
+                    <div class="club-card">
+                        <div class="club-card-header">
+                            {% if club.logo %}
+                                <img src="{{ club.logo }}" alt="{{ club.nom }}" class="club-logo">
+                            {% else %}
+                                <div class="club-logo-placeholder">
+                                    <i class="mdi mdi-account-group"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="club-card-body">
+                            <h3 class="club-name">{{ club.nom }}</h3>
+                            
+                            <p class="club-description">
+                                {{ club.description|length > 100 ? club.description|slice(0, 100) ~ '...' : club.description }}
+                            </p>
+                            
+                            <div class="club-info">
+                                {% if club.email %}
+                                    <div class="info-item">
+                                        <i class="mdi mdi-email"></i>
+                                        <span>{{ club.email }}</span>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if club.siteWeb %}
+                                    <div class="info-item">
+                                        <i class="mdi mdi-web"></i>
+                                        <a href="{{ club.siteWeb }}" target="_blank" class="club-website">
+                                            {{ club.siteWeb|length > 30 ? club.siteWeb|slice(0, 30) ~ '...' : club.siteWeb }}
+                                        </a>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if club.dateCreation %}
+                                    <div class="info-item">
+                                        <i class="mdi mdi-calendar"></i>
+                                        <span>Créé le {{ club.dateCreation|date('d/m/Y') }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="club-card-footer">
+                            <a href="{{ path('app_club_show', {'id': club.id}) }}" class="btn-action btn-view">
+                                <i class="mdi mdi-eye"></i>
+                                Voir
+                            </a>
+                            <a href="{{ path('app_club_edit', {'id': club.id}) }}" class="btn-action btn-edit">
+                                <i class="mdi mdi-pencil"></i>
+                                Modifier
+                            </a>
+                            <form method="post" action="{{ path('app_club_delete', {'id': club.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce club ?');" style="margin: 0;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ club.id) }}">
+                                <button type="submit" class="btn-action btn-delete">
+                                    <i class="mdi mdi-delete"></i>
+                                    Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

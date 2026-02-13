@@ -1,0 +1,359 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block stylesheets %}
+    <!-- Vendor CSS 
+
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/css/vendor.bundle.base.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/feather/feather.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/mdi/css/materialdesignicons.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/ti-icons/css/themify-icons.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/font-awesome/css/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/typicons/typicons.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/simple-line-icons/css/simple-line-icons.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/vendors/datatables.net-bs4/dataTables.bootstrap4.css') }}">
+-->
+{% endblock %}
+
+{% block body %}
+<!-- Promo Banner -->
+
+<div class="row p-0 m-0 proBanner" id="proBanner">
+    <div class="col-md-12 p-0 m-0">
+        <div class="card-body card-body-padding px-3 d-flex align-items-center justify-content-between">
+            <div class="ps-lg-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <p class="mb-0 fw-medium me-3 buy-now-text">Bienvenue sur votre tableau de bord SkillOra</p>
+                </div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between">
+                <button id="bannerClose" class="btn border-0 p-0">
+                    <i class="ti-close text-white"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="row mt-4">
+    <div class="col-sm-12">
+        <div class="statistics-details d-flex align-items-center justify-content-between flex-wrap">
+            <div>
+                <p class="statistics-title">Bounce Rate</p>
+                <h3 class="rate-percentage">32.53%</h3>
+                <p class="text-danger d-flex"><i class="mdi mdi-menu-down"></i><span>-0.5%</span></p>
+            </div>
+            <div>
+                <p class="statistics-title">Page Views</p>
+                <h3 class="rate-percentage">7,682</h3>
+                <p class="text-success d-flex"><i class="mdi mdi-menu-up"></i><span>+0.1%</span></p>
+            </div>
+            <div>
+                <p class="statistics-title">New Sessions</p>
+                <h3 class="rate-percentage">68.8</h3>
+                <p class="text-danger d-flex"><i class="mdi mdi-menu-down"></i><span>68.8</span></p>
+            </div>
+            <div class="d-none d-md-block">
+                <p class="statistics-title">Avg. Time on Site</p>
+                <h3 class="rate-percentage">2m:35s</h3>
+                <p class="text-success d-flex"><i class="mdi mdi-menu-down"></i><span>+0.8%</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Area -->
+<div class="row mt-4">
+    <!-- Left Column -->
+    <div class="col-lg-8 d-flex flex-column">
+        <!-- Market Overview Card -->
+        <div class="row flex-grow">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card card-rounded">
+                    <div class="card-body">
+                        <div class="d-sm-flex justify-content-between align-items-start">
+                            <div>
+                                <h4 class="card-title card-title-dash">Market Overview</h4>
+                                <p class="card-subtitle card-subtitle-dash">Analyse des performances ce mois</p>
+                            </div>
+                            <div>
+                                <div class="dropdown">
+                                    <button class="btn btn-light dropdown-toggle toggle-dark btn-lg mb-0 me-0" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Ce mois </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+                                        <h6 class="dropdown-header">Sélection</h6>
+                                        <a class="dropdown-item" href="#">Ce mois</a>
+                                        <a class="dropdown-item" href="#">Le mois dernier</a>
+                                        <a class="dropdown-item" href="#">Cette année</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-sm-flex align-items-center mt-1 justify-content-between">
+                            <div class="d-sm-flex align-items-center mt-4 justify-content-between">
+                                <h2 class="me-2 fw-bold">$36,2531.00</h2>
+                                <h4 class="me-2">USD</h4>
+                                <h4 class="text-success">(+1.37%)</h4>
+                            </div>
+                            <div class="me-3">
+                                <div id="marketingOverview-legend"></div>
+                            </div>
+                        </div>
+                        <div class="chartjs-bar-wrapper mt-3">
+                            <canvas id="marketingOverview"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Requests Table -->
+        <div class="row flex-grow">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card card-rounded">
+                    <div class="card-body">
+                        <div class="d-sm-flex justify-content-between align-items-start">
+                            <div>
+                                <h4 class="card-title card-title-dash">Requêtes en attente</h4>
+                                <p class="card-subtitle card-subtitle-dash">Vous avez 50+ nouvelles requêtes</p>
+                            </div>
+                            <div>
+                                <button class="btn btn-primary btn-lg text-white mb-0 me-0" type="button"><i class="mdi mdi-account-plus"></i>&nbsp;Ajouter un membre</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive mt-1">
+                            <table class="table select-table">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <div class="form-check form-check-flat mt-0">
+                                                <label class="form-check-label">
+                                                    <input type="checkbox" class="form-check-input" aria-checked="false" id="check-all"><i class="input-helper"></i></label>
+                                            </div>
+                                        </th>
+                                        <th>Client</th>
+                                        <th>Entreprise</th>
+                                        <th>Progression</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check form-check-flat mt-0">
+                                                <label class="form-check-label">
+                                                    <input type="checkbox" class="form-check-input" aria-checked="false"><i class="input-helper"></i></label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <img src="{{ asset('assets/backoffice/images/faces/face1.jpg') }}" alt="">
+                                                <div>
+                                                    <h6>Brandon Washington</h6>
+                                                    <p>Admin Principal</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <h6>Nom Entreprise 1</h6>
+                                            <p>Type entreprise</p>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <div class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap">
+                                                    <p class="text-success">79%</p>
+                                                    <p>85/162</p>
+                                                </div>
+                                                <div class="progress progress-md">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 85%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="badge badge-opacity-warning">En cours</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check form-check-flat mt-0">
+                                                <label class="form-check-label">
+                                                    <input type="checkbox" class="form-check-input" aria-checked="false"><i class="input-helper"></i></label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <img src="{{ asset('assets/backoffice/images/faces/face2.jpg') }}" alt="">
+                                                <div>
+                                                    <h6>Laura Brooks</h6>
+                                                    <p>Admin Principal</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <h6>Nom Entreprise 2</h6>
+                                            <p>Type entreprise</p>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <div class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap">
+                                                    <p class="text-success">65%</p>
+                                                    <p>85/162</p>
+                                                </div>
+                                                <div class="progress progress-md">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="badge badge-opacity-warning">En cours</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check form-check-flat mt-0">
+                                                <label class="form-check-label">
+                                                    <input type="checkbox" class="form-check-input" aria-checked="false"><i class="input-helper"></i></label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <img src="{{ asset('assets/backoffice/images/faces/face3.jpg') }}" alt="">
+                                                <div>
+                                                    <h6>Wayne Murphy</h6>
+                                                    <p>Admin Principal</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <h6>Nom Entreprise 3</h6>
+                                            <p>Type entreprise</p>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <div class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap">
+                                                    <p class="text-success">65%</p>
+                                                    <p>85/162</p>
+                                                </div>
+                                                <div class="progress progress-md">
+                                                    <div class="progress-bar bg-warning" role="progressbar" style="width: 38%" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="badge badge-opacity-warning">En cours</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-lg-4 d-flex flex-column">
+        <!-- Todo List Card -->
+        <div class="row flex-grow">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card card-rounded">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="card-title card-title-dash">Todo list</h4>
+                            <div class="add-items d-flex mb-0">
+                                <button class="add btn btn-icons btn-rounded btn-primary todo-list-add-btn text-white me-0"><i class="mdi mdi-plus"></i></button>
+                            </div>
+                        </div>
+                        <div class="list-wrapper">
+                            <ul class="todo-list todo-list-rounded">
+                                <li class="d-block">
+                                    <div class="form-check w-100">
+                                        <label class="form-check-label">
+                                            <input class="checkbox" type="checkbox"> Tâche importante à compléter <i class="input-helper rounded"></i>
+                                        </label>
+                                        <div class="d-flex mt-2">
+                                            <div class="ps-4 text-small me-3">24 Juin 2024</div>
+                                            <div class="badge badge-opacity-warning me-3">À demain</div>
+                                            <i class="mdi mdi-flag ms-2 flag-color"></i>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="d-block">
+                                    <div class="form-check w-100">
+                                        <label class="form-check-label">
+                                            <input class="checkbox" type="checkbox" checked> Tâche complétée <i class="input-helper rounded"></i>
+                                        </label>
+                                        <div class="d-flex mt-2">
+                                            <div class="ps-4 text-small me-3">23 Juin 2024</div>
+                                            <div class="badge badge-opacity-success me-3">Terminé</div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Card -->
+        <div class="row flex-grow">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card card-rounded">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="card-title card-title-dash">Répartition par Type</h4>
+                        </div>
+                        <div>
+                            <canvas class="my-auto" id="doughnutChart"></canvas>
+                        </div>
+                        <div id="doughnutChart-legend" class="mt-5 text-center"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave Report Card -->
+        <div class="row flex-grow">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card card-rounded">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h4 class="card-title card-title-dash">Rapport Congés</h4>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <canvas id="leaveReport"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    <!-- Vendor JS -->
+    <script src="{{ asset('assets/backoffice/vendors/js/vendor.bundle.base.js') }}"></script>
+    <script src="{{ asset('assets/backoffice/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js') }}"></script>
+    
+    <!-- Chart and Progress Libraries -->
+    <script src="{{ asset('assets/backoffice/vendors/chart.js/chart.umd.js') }}"></script>
+    <script src="{{ asset('assets/backoffice/vendors/progressbar.js/progressbar.min.js') }}"></script>
+    
+    <!-- Template JS -->
+    <script src="{{ asset('assets/backoffice/js/off-canvas.js') }}"></script>
+    <script src="{{ asset('assets/backoffice/js/template.js') }}"></script>
+    <script src="{{ asset('assets/backoffice/js/settings.js') }}"></script>
+    <script src="{{ asset('assets/backoffice/js/hoverable-collapse.js') }}"></script>
+    <script src="{{ asset('assets/backoffice/js/todolist.js') }}"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ asset('assets/backoffice/js/jquery.cookie.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('assets/backoffice/js/dashboard.js') }}"></script>
+{% endblock %}
