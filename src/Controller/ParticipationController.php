@@ -54,6 +54,20 @@ final class ParticipationController extends AbstractController
         ]);
     }
 
+    #[Route('/search', name: 'app_participation_search', methods: ['GET'])]
+    public function search(Request $request, ParticipationRepository $repo): Response
+    {
+        $challenge = $request->query->get('challenge');
+        $groupe = $request->query->get('groupe');
+
+        $participations = $repo->searchParticipations($challenge, $groupe);
+
+        return $this->render('participation/index.html.twig', [
+            'participations' => $participations,
+        ]);
+    }
+
+
     #[Route('/{id}', name: 'app_participation_show', methods: ['GET'])]
     public function show(Participation $participation): Response
     {

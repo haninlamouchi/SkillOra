@@ -5,6 +5,15 @@
 {% block body %}
     <h1>Challenge index</h1>
 
+    {# Formulaire de recherche #}
+    <form method="get" action="{{ path('challenge_search') }}" class="mb-3">
+        <input type="text" name="titre" placeholder="Titre" value="{{ app.request.get('titre') }}">
+        <input type="date" name="dateDebut" value="{{ app.request.get('dateDebut') }}">
+        <input type="date" name="dateFin" value="{{ app.request.get('dateFin') }}">
+        <button type="submit">Rechercher</button>
+        <a href="{{ path('challenge_search') }}">Réinitialiser</a>
+    </form>
+
     <table class="table">
         <thead>
             <tr>

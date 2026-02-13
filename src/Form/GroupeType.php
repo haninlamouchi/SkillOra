@@ -20,6 +20,7 @@ class GroupeType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Groupe::class,
+            'attr' => ['novalidate' => 'novalidate'],
         ]);
     }
 }

@@ -39,6 +39,7 @@ class MembreGroupeType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => MembreGroupe::class,
+            'attr' => ['novalidate' => 'novalidate'],
         ]);
     }
 }

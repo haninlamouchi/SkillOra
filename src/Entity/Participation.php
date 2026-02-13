@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ParticipationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ParticipationRepository::class)]
 class Participation
@@ -14,15 +15,19 @@ class Participation
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: "La date de participation est obligatoire.")]
+    #[Assert\Type(\DateTime::class, message: "La date doit être valide.")]
     private ?\DateTime $dateParticipation = null;
 
     #[ORM\ManyToOne(inversedBy: 'participations')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: "Le challenge est obligatoire.")]
     private ?Challenge $challenge = null;
 
 
     #[ORM\ManyToOne(inversedBy: 'participations')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: "Le groupe est obligatoire.")]
     private ?Groupe $groupe = null;
 
 

@@ -16,6 +16,44 @@ class ChallengeRepository extends ServiceEntityRepository
         parent::__construct($registry, Challenge::class);
     }
 
+
+
+      /**
+     * Recherche avancée de challenges
+     *
+     * @param string|null $titre
+     * @param \DateTimeInterface|null $dateDebutMin
+     * @param \DateTimeInterface|null $dateFinMax
+     * @return Challenge[]
+     */
+    public function searchChallenges(?string $titre, ?\DateTimeInterface $dateDebutMin, ?\DateTimeInterface $dateFinMax): array
+    {
+        $qb = $this->createQueryBuilder('c');
+
+        if ($titre) {
+            $qb->andWhere('c.titre LIKE :titre')
+               ->setParameter('titre', '%'.$titre.'%');
+        }
+
+        if ($dateDebutMin) {
+            $qb->andWhere('c.dateDebut >= :dateDebutMin')
+               ->setParameter('dateDebutMin', $dateDebutMin);
+        }
+
+        if ($dateFinMax) {
+            $qb->andWhere('c.dateFin <= :dateFinMax')
+               ->setParameter('dateFinMax', $dateFinMax);
+        }
+
+        $qb->orderBy('c.dateDebut', 'ASC'); // Tri par date de début
+
+        return $qb->getQuery()->getResult();
+    }
+}
+
+
+
+
 //    /**
 //     * @return Challenge[] Returns an array of Challenge objects
 //     */
@@ -40,4 +78,4 @@ class ChallengeRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
-}
+

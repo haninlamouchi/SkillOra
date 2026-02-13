@@ -5,6 +5,14 @@
 {% block body %}
     <h1>Groupe index</h1>
 
+    <form method="get" action="{{ path('app_groupe_search') }}">
+        <input type="text" name="nomGroupe" placeholder="Nom du groupe" value="{{ app.request.get('nomGroupe') }}">
+        <input type="text" name="membre" placeholder="Nom du membre" value="{{ app.request.get('membre') }}">
+        <button type="submit">Filtrer</button>
+        <a href="{{ path('app_groupe_index') }}">Reset</a>
+    </form>
+
+
     <table class="table">
         <thead>
             <tr>

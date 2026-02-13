@@ -16,6 +16,27 @@ class GroupeRepository extends ServiceEntityRepository
         parent::__construct($registry, Groupe::class);
     }
 
+    public function searchGroupes(?string $nomGroupe, ?string $membre): array
+    {  
+        $qb = $this->createQueryBuilder('g')
+            ->leftJoin('g.membres', 'm')
+            ->leftJoin('m.user', 'u')
+            ->addSelect('m','u');
+
+        if ($nomGroupe) {
+            $qb->andWhere('g.nomGroupe LIKE :nom')
+                ->setParameter('nom', '%'.$nomGroupe.'%');
+        }
+
+        if ($membre) {
+            $qb->andWhere('u.nom LIKE :membre')
+                ->setParameter('membre', '%'.$membre.'%');
+    }
+
+    return $qb->getQuery()->getResult();
+}
+
+
 //    /**
 //     * @return Groupe[] Returns an array of Groupe objects
 //     */

@@ -4,11 +4,19 @@ namespace App\Entity;
 
 use App\Repository\MembreGroupeRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 
 #[ORM\Entity(repositoryClass: MembreGroupeRepository::class)]
 #[ORM\Table(name: 'membre_groupe', uniqueConstraints: [
     new ORM\UniqueConstraint(name: 'user_groupe_unique', columns: ['user_id', 'groupe_id'])
 ])]
+#[UniqueEntity(
+    fields: ['user', 'groupe'],
+    message: "Cet utilisateur est déjà membre de ce groupe."
+)]
+
 class MembreGroupe
 {
     #[ORM\Id]
@@ -17,15 +25,25 @@ class MembreGroupe
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: "Le rôle est obligatoire.")]
+    #[Assert\Choice(
+        choices: ['membre', 'chef'],
+        message: "Le rôle doit être soit 'membre' soit 'chef'."
+    )]
     private ?string $role = 'membre';
 
     #[ORM\ManyToOne(inversedBy: 'membresGroupes')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: "L'utilisateur est obligatoire.")]
     private ?User $user = null;
 
 
     #[ORM\ManyToOne(inversedBy: 'membres')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: "Le groupe est obligatoire.")]
+
+
+
     private ?Groupe $groupe = null;
 
      public function __toString(): string

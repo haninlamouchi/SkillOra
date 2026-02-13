@@ -7,6 +7,10 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+
+
 
 
 #[ORM\Entity(repositoryClass: ChallengeRepository::class)]
@@ -18,22 +22,43 @@ class Challenge
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le titre est obligatoire")]
+    #[Assert\Length(
+        min: 3,
+        max: 255,
+        minMessage: "Le titre doit contenir au moins {{ limit }} caractères",
+        maxMessage: "Le titre ne doit pas dépasser {{ limit }} caractères"
+    )]
     private ?string $titre = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: "La description est obligatoire")]
+    #[Assert\Length(
+        min: 10,
+        minMessage: "La description doit contenir au moins {{ limit }} caractères"
+    )]
+
     private ?string $description = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Assert\NotNull(message: "La date de début est obligatoire")]
     private ?\DateTimeInterface $dateDebut = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Assert\NotNull(message: "La date de fin est obligatoire")]
+    #[Assert\GreaterThan(
+        propertyPath: "dateDebut",
+        message: "La date de fin doit être après la date de début"
+    )]
     private ?\DateTimeInterface $dateFin = null;
 
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max:255)]
     private ?string $image = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max:255)]
     private ?string $fichierCahierCharges = null;
 
     #[ORM\OneToMany(mappedBy: 'challenge', targetEntity: Participation::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
@@ -86,7 +111,7 @@ class Challenge
         return $this->dateDebut;
     }
 
-    public function setDateDebut(\DateTime $dateDebut): static
+    public function setDateDebut(\DateTimeInterface $dateDebut): static
     {
         $this->dateDebut = $dateDebut;
 

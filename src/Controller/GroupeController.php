@@ -42,7 +42,21 @@ final class GroupeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_groupe_show', methods: ['GET'])]
+    #[Route('/search', name: 'app_groupe_search')]
+    public function search(Request $request, GroupeRepository $groupeRepository): Response
+   {
+        $nomGroupe = $request->query->get('nomGroupe');
+        $membre = $request->query->get('membre');
+
+        $groupes = $groupeRepository->searchGroupes($nomGroupe, $membre);
+
+        return $this->render('groupe/index.html.twig', [
+            'groupes' => $groupes,
+        ]);
+    }
+
+
+    #[Route('/{id}', name: 'app_groupe_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(Groupe $groupe): Response
     {
         return $this->render('groupe/show.html.twig', [
@@ -50,7 +64,7 @@ final class GroupeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_groupe_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_groupe_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function edit(Request $request, Groupe $groupe, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(GroupeType::class, $groupe);
@@ -68,7 +82,7 @@ final class GroupeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_groupe_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_groupe_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function delete(Request $request, Groupe $groupe, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$groupe->getId(), $request->getPayload()->getString('_token'))) {

@@ -5,6 +5,13 @@
 {% block body %}
     <h1>Participation index</h1>
 
+    <form method="get" action="{{ path('app_participation_search') }}">
+        <input type="text" name="challenge" placeholder="Titre challenge">
+        <input type="text" name="groupe" placeholder="Nom groupe">
+        <button type="submit">Rechercher</button>
+    </form>
+
+
     <table class="table">
         <thead>
             <tr>

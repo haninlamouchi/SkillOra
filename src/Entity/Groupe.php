@@ -6,9 +6,16 @@ use App\Repository\GroupeRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 
 
 #[ORM\Entity(repositoryClass: GroupeRepository::class)]
+#[UniqueEntity(
+    fields: ['nomGroupe'],
+    message: "Ce nom de groupe existe déjà."
+)]
 class Groupe
 {
     #[ORM\Id]
@@ -17,6 +24,14 @@ class Groupe
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le nom du groupe est obligatoire.")]
+    #[Assert\Length(
+        min: 3,
+        max: 100,
+        minMessage: "Le nom doit contenir au moins {{ limit }} caractères.",
+        maxMessage: "Le nom ne doit pas dépasser {{ limit }} caractères."
+    )]
+
     private ?string $nomGroupe = null;
 
     #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: Participation::class)]

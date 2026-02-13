@@ -16,6 +16,27 @@ class ParticipationRepository extends ServiceEntityRepository
         parent::__construct($registry, Participation::class);
     }
 
+    public function searchParticipations(?string $challenge, ?string $groupe): array
+{
+    $qb = $this->createQueryBuilder('p')
+        ->leftJoin('p.challenge', 'c')
+        ->leftJoin('p.groupe', 'g')
+        ->addSelect('c', 'g');
+
+    if ($challenge) {
+        $qb->andWhere('c.titre LIKE :challenge')
+           ->setParameter('challenge', '%'.$challenge.'%');
+    }
+
+    if ($groupe) {
+        $qb->andWhere('g.nomGroupe LIKE :groupe')
+           ->setParameter('groupe', '%'.$groupe.'%');
+    }
+
+    return $qb->getQuery()->getResult();
+}
+
+
 //    /**
 //     * @return Participation[] Returns an array of Participation objects
 //     */
