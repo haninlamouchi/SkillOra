@@ -1,0 +1,390 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}{{ formation.titre }} | SkillOra{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .formation-hero {
+        background: linear-gradient(135deg, #5a0000 0%, #8b1a1a 50%, #a52a2a 100%);
+        padding: 80px 0 50px;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+    .formation-hero::before {
+        content: '';
+        position: absolute;
+        width: 500px; height: 500px;
+        top: -150px; right: -100px;
+        background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .formation-hero h1 { font-size: 2.2rem; font-weight: 700; }
+    .formation-hero .breadcrumb a { color: rgba(255,255,255,0.7); text-decoration: none; }
+    .formation-hero .breadcrumb-item.active { color: rgba(255,255,255,0.9); }
+    .formation-hero .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.5); }
+
+    .formation-content { padding: 50px 0 80px; background: #f5f5f7; }
+
+    .info-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    .info-card .card-header {
+        background: #fff;
+        border-bottom: 2px solid #f0f0f0;
+        font-weight: 700;
+        font-size: 1.1rem;
+        padding: 1.2rem 1.5rem;
+    }
+    .info-card .card-body { padding: 1.5rem; }
+
+    .detail-row { padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { font-weight: 600; color: #666; font-size: 0.9rem; }
+    .detail-value { color: #333; }
+
+    .sidebar-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        text-align: center;
+        overflow: hidden;
+    }
+    .sidebar-card img { width: 100%; max-height: 250px; object-fit: cover; }
+    .sidebar-card .img-placeholder {
+        height: 200px;
+        background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+        display: flex; align-items: center; justify-content: center;
+    }
+    .stat-item h3 { font-size: 1.8rem; font-weight: 700; color: #5a0000; margin-bottom: 0; }
+    .stat-item span { font-size: 0.85rem; color: #888; }
+
+    .btn-participate {
+        background: #5a0000; color: #fff; border: none;
+        border-radius: 10px; padding: 14px 0; font-size: 1.1rem;
+        font-weight: 700; width: 100%; transition: all 0.3s;
+    }
+    .btn-participate:hover {
+        background: #7a1a1a; color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(90,0,0,0.3);
+    }
+    .btn-participate:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-participated {
+        background: #28a745; color: #fff; border: none;
+        border-radius: 10px; padding: 14px 0; font-size: 1.1rem;
+        font-weight: 700; width: 100%;
+    }
+
+    .btn-quiz {
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+        color: #fff; border: none; border-radius: 10px;
+        padding: 14px 0; font-size: 1.1rem;
+        font-weight: 700; width: 100%; transition: all 0.3s;
+    }
+    .btn-quiz:hover {
+        background: linear-gradient(135deg, #0b5ed7, #084298);
+        color: #fff; transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(13,110,253,0.3);
+    }
+
+    .quiz-card {
+        border: none; border-radius: 12px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .quiz-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .quiz-icon {
+        width: 50px; height: 50px;
+        background: linear-gradient(135deg, #5a0000, #8b1a1a);
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-size: 1.3rem;
+    }
+
+    /* ── Video Section ── */
+    .video-card {
+        border: none; border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        transition: transform 0.2s, box-shadow 0.2s;
+        background: #fff;
+    }
+    .video-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .video-card video {
+        width: 100%;
+        max-height: 220px;
+        background: #000;
+        display: block;
+    }
+    .video-card .video-info {
+        padding: 14px 18px;
+    }
+    .video-card .video-info h6 {
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin-bottom: 4px;
+        color: #333;
+    }
+    .video-card .video-info p {
+        font-size: 0.82rem;
+        color: #888;
+        margin: 0;
+        line-height: 1.4;
+    }
+    .video-icon {
+        width: 50px; height: 50px;
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-size: 1.3rem;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+{# ═══════════════════════════════════════════
+    HERO
+═══════════════════════════════════════════ #}
+<section class="formation-hero">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ path('front_home') }}">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('front_formation_index') }}">Formations</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ formation.titre }}</li>
+            </ol>
+        </nav>
+        <h1>{{ formation.titre }}</h1>
+        <div class="d-flex gap-3 mt-3">
+            {% if formation.club %}
+                <span class="badge bg-light text-dark px-3 py-2 rounded-pill">{{ formation.club }}</span>
+            {% endif %}
+            {% if formation.dateDebut %}
+                <span class="badge bg-light text-dark px-3 py-2 rounded-pill">
+                    <i class="fa fa-calendar me-1"></i>{{ formation.dateDebut|date('d/m/Y') }}
+                    {% if formation.dateFin %} — {{ formation.dateFin|date('d/m/Y') }}{% endif %}
+                </span>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{# ═══════════════════════════════════════════
+    CONTENT
+═══════════════════════════════════════════ #}
+<section class="formation-content">
+    <div class="container">
+
+        {# Flash messages #}
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type }} alert-dismissible fade show mb-4" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="row g-4">
+            {# ── Main Content ── #}
+            <div class="col-lg-8">
+
+                {# Details Card #}
+                <div class="card info-card mb-4">
+                    <div class="card-header">
+                        <i class="fa fa-info-circle me-2" style="color: #5a0000"></i>À propos de cette formation
+                    </div>
+                    <div class="card-body">
+                        <p style="line-height: 1.8; color: #555">
+                            {{ formation.description ?? 'Aucune description disponible pour cette formation.' }}
+                        </p>
+
+                        <div class="row mt-4">
+                            <div class="col-sm-6">
+                                <div class="detail-row">
+                                    <div class="detail-label">Date de début</div>
+                                    <div class="detail-value">{{ formation.dateDebut ? formation.dateDebut|date('d F Y') : '—' }}</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="detail-row">
+                                    <div class="detail-label">Date de fin</div>
+                                    <div class="detail-value">{{ formation.dateFin ? formation.dateFin|date('d F Y') : '—' }}</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="detail-row">
+                                    <div class="detail-label">Club</div>
+                                    <div class="detail-value">{{ formation.club ?? '—' }}</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="detail-row">
+                                    <div class="detail-label">Ressources</div>
+                                    <div class="detail-value">
+                                        {% if formation.lienRessources %}
+                                            <a href="{{ formation.lienRessources }}" target="_blank" style="color: #5a0000">
+                                                <i class="fa fa-external-link me-1"></i>Accéder
+                                            </a>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# ── Videos Section ── #}
+                {% if formation.videos|length > 0 %}
+                <div class="card info-card mb-4">
+                    <div class="card-header">
+                        <i class="fa fa-play-circle me-2" style="color: #e74c3c"></i>Vidéos de la formation ({{ formation.videos|length }})
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% for video in formation.videos %}
+                            <div class="col-md-6">
+                                <div class="video-card">
+                                    <video controls preload="metadata" poster="">
+                                        <source src="{{ asset(video.videoPath) }}" type="video/mp4">
+                                        Votre navigateur ne supporte pas la lecture vidéo.
+                                    </video>
+                                    <div class="video-info">
+                                        <h6><i class="fa fa-play-circle me-1" style="color: #e74c3c"></i>{{ video.titre }}</h6>
+                                        {% if video.description %}
+                                            <p>{{ video.description|length > 100 ? video.description|slice(0, 100) ~ '…' : video.description }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# ── Quizzes Section ── #}
+                {% if formation.quizzes|length > 0 %}
+                <div class="card info-card mb-4">
+                    <div class="card-header">
+                        <i class="fa fa-question-circle me-2" style="color: #5a0000"></i>Quiz disponibles ({{ formation.quizzes|length }})
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% for quiz in formation.quizzes %}
+                            <div class="col-md-6">
+                                <div class="card quiz-card p-3">
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div class="quiz-icon flex-shrink-0">
+                                            <i class="fa fa-question"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="fw-bold mb-1">{{ quiz.titre }}</h6>
+                                            {% if quiz.description %}
+                                                <p class="text-muted small mb-2">{{ quiz.description|length > 80 ? quiz.description|slice(0, 80) ~ '…' : quiz.description }}</p>
+                                            {% endif %}
+                                            <div class="d-flex gap-3 text-muted small mb-2">
+                                                <span><i class="fa fa-list-ol me-1"></i>{{ quiz.questions|length }} questions</span>
+                                                {% if quiz.duree %}
+                                                    <span><i class="fa fa-clock-o me-1"></i>{{ quiz.duree }} min</span>
+                                                {% endif %}
+                                            </div>
+                                            {% if hasParticipated %}
+                                                <a href="{{ path('front_quiz_start', {formationId: formation.id, id: quiz.id}) }}" class="btn btn-sm px-4" style="background: linear-gradient(135deg, #5a0000, #8b1a1a); color: #fff; border-radius: 8px; font-weight: 600;">
+                                                    <i class="fa fa-bolt me-1"></i> Passer le quiz
+                                                </a>
+                                            {% else %}
+                                                <button class="btn btn-sm btn-secondary px-4" disabled title="Participez d'abord à la formation" style="border-radius: 8px;">
+                                                    <i class="fa fa-lock me-1"></i> Participez d'abord
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            {# ── Sidebar ── #}
+            <div class="col-lg-4">
+                {# Image + Stats #}
+                <div class="card sidebar-card mb-4">
+                    {% if formation.image %}
+                        <img src="{{ asset(formation.image) }}" alt="{{ formation.titre }}">
+                    {% else %}
+                        <div class="img-placeholder">
+                            <i class="fa fa-graduation-cap" style="font-size: 3rem; color: #ccc"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="d-flex justify-content-around py-3">
+                            <div class="stat-item">
+                                <h3>{{ formation.participations|length }}</h3>
+                                <span>Participants</span>
+                            </div>
+                            <div class="stat-item">
+                                <h3>{{ formation.quizzes|length }}</h3>
+                                <span>Quiz</span>
+                            </div>
+                            <div class="stat-item">
+                                <h3>{{ formation.videos|length }}</h3>
+                                <span>Vidéos</span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        {# Participate Button #}
+                        {% if app.user %}
+                            {% if hasParticipated %}
+                                <button class="btn btn-participated mb-3" disabled>
+                                    <i class="fa fa-check me-2"></i>Déjà inscrit
+                                </button>
+                            {% else %}
+                                <form action="{{ path('front_formation_participate', {id: formation.id}) }}" method="post">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('participate' ~ formation.id) }}">
+                                    <button type="submit" class="btn btn-participate mb-3">
+                                        <i class="fa fa-user-plus me-2"></i>Participer
+                                    </button>
+                                </form>
+                            {% endif %}
+
+                            {# Quiz buttons #}
+                            {% if hasParticipated and formation.quizzes|length > 0 %}
+                                {% for quiz in formation.quizzes %}
+                                    <a href="{{ path('front_quiz_start', {formationId: formation.id, id: quiz.id}) }}" class="btn btn-quiz mb-2">
+                                        <i class="fa fa-bolt me-2"></i>{{ quiz.titre }}
+                                    </a>
+                                {% endfor %}
+                            {% endif %}
+                        {% else %}
+                            <a href="#" class="btn btn-participate mb-3" onclick="alert('Veuillez vous connecter pour participer.'); return false;">
+                                <i class="fa fa-sign-in me-2"></i>Connectez-vous pour participer
+                            </a>
+                        {% endif %}
+
+                        {# Back link #}
+                        <a href="{{ path('front_formation_index') }}" class="btn btn-outline-secondary w-100 mt-2" style="border-radius: 10px">
+                            <i class="fa fa-arrow-left me-2"></i>Retour aux formations
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

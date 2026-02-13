@@ -83,4 +83,9 @@ class Club
     {
         return $this->removeFormation($ye);
     }
+
+    public function __toString(): string
+    {
+        return 'Club #' . $this->id;
+    }
 }

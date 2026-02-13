@@ -16,6 +16,28 @@ class Formation
     #[ORM\Column]
     private ?int $id = null;
 
+    /**
+     * @var Collection<int, Video>
+     */
+    #[ORM\OneToMany(
+        targetEntity: Video::class,
+        mappedBy: 'formation',
+        cascade: ['persist', 'remove'],
+        orphanRemoval: true
+    )]
+    private Collection $videos;
+
+    /**
+     * @var Collection<int, ParticipationFormation>
+     */
+    #[ORM\OneToMany(
+        targetEntity: ParticipationFormation::class,
+        mappedBy: 'formation',
+        cascade: ['persist', 'remove'],
+        orphanRemoval: true
+    )]
+    private Collection $participations;
+
     #[ORM\Column(length: 200)]
     private ?string $titre = null;
 
@@ -35,7 +57,7 @@ class Formation
     private ?string $lienRessources = null;
 
     #[ORM\ManyToOne(inversedBy: 'formations')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Club $club = null;
 
     /**
@@ -52,6 +74,8 @@ class Formation
     public function __construct()
     {
         $this->quizzes = new ArrayCollection();
+        $this->videos = new ArrayCollection();
+        $this->participations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -171,5 +195,72 @@ class Formation
         }
 
         return $this;
+    }
+
+    // --- Videos ---
+
+    /**
+     * @return Collection<int, Video>
+     */
+    public function getVideos(): Collection
+    {
+        return $this->videos;
+    }
+
+    public function addVideo(Video $video): static
+    {
+        if (!$this->videos->contains($video)) {
+            $this->videos->add($video);
+            $video->setFormation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVideo(Video $video): static
+    {
+        if ($this->videos->removeElement($video)) {
+            if ($video->getFormation() === $this) {
+                $video->setFormation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    // --- Participations ---
+
+    /**
+     * @return Collection<int, ParticipationFormation>
+     */
+    public function getParticipations(): Collection
+    {
+        return $this->participations;
+    }
+
+    public function addParticipation(ParticipationFormation $participation): static
+    {
+        if (!$this->participations->contains($participation)) {
+            $this->participations->add($participation);
+            $participation->setFormation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParticipation(ParticipationFormation $participation): static
+    {
+        if ($this->participations->removeElement($participation)) {
+            if ($participation->getFormation() === $this) {
+                $participation->setFormation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->titre ?? '';
     }
 }

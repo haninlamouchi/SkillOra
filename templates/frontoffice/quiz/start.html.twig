@@ -1,0 +1,641 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}{{ quiz.titre }} | SkillOra{% endblock %}
+
+{% block stylesheets %}
+<style>
+    /* ═══════════════════════════════════════════
+       W3SCHOOLS-STYLE QUIZ — SkillOra
+    ═══════════════════════════════════════════ */
+
+    .quiz-hero {
+        background: linear-gradient(135deg, #5a0000 0%, #8b1a1a 50%, #a52a2a 100%);
+        padding: 80px 0 40px;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+    .quiz-hero::before {
+        content: '';
+        position: absolute;
+        width: 400px; height: 400px;
+        top: -100px; right: -100px;
+        background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .quiz-hero h1 { font-size: 1.8rem; font-weight: 700; }
+    .quiz-hero .breadcrumb a { color: rgba(255,255,255,0.7); text-decoration: none; }
+    .quiz-hero .breadcrumb-item.active { color: rgba(255,255,255,0.9); }
+    .quiz-hero .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.5); }
+
+    .quiz-stage { padding: 40px 0 80px; background: #f5f5f7; min-height: 70vh; }
+
+    /* ── Top Bar ── */
+    .quiz-top-bar {
+        background: #fff;
+        border-radius: 16px;
+        padding: 20px 28px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+        margin-bottom: 30px;
+    }
+    .quiz-progress-track {
+        height: 10px;
+        background: #e9ecef;
+        border-radius: 5px;
+        overflow: hidden;
+        margin-bottom: 14px;
+    }
+    .quiz-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #5a0000, #d4443e);
+        border-radius: 5px;
+        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        width: 0%;
+    }
+    .quiz-meta { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .quiz-meta-item { display: flex; align-items: center; gap: 6px; font-size: 0.88rem; color: #666; }
+    .quiz-meta-item i { color: #5a0000; font-size: 1rem; }
+    .quiz-meta-item strong { color: #333; }
+
+    /* ── Question Slide ── */
+    .question-slide {
+        display: none;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.4s ease;
+    }
+    .question-slide.active {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* ── Question Card ── */
+    .q-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 4px 30px rgba(0,0,0,0.07);
+        overflow: hidden;
+    }
+    .q-card-header {
+        background: linear-gradient(135deg, #5a0000, #8b1a1a);
+        padding: 24px 32px;
+        color: #fff;
+    }
+    .q-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255,255,255,0.15);
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+    .q-card-header h2 {
+        font-size: 1.35rem;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1.5;
+    }
+    .q-card-body { padding: 28px 32px 32px; }
+
+    /* ── Answer Buttons (W3Schools style: list of buttons) ── */
+    .answer-list { list-style: none; padding: 0; margin: 0; }
+    .answer-item {
+        border: 3px solid #e0e0e0;
+        border-radius: 14px;
+        padding: 16px 22px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: #fff;
+        user-select: none;
+        position: relative;
+    }
+    .answer-item:hover:not(.locked) {
+        border-color: #c49090;
+        background: #fef8f8;
+        transform: translateX(4px);
+    }
+
+    .answer-letter {
+        width: 40px; height: 40px;
+        border-radius: 10px;
+        border: 2px solid #ddd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1rem;
+        color: #999;
+        flex-shrink: 0;
+        transition: all 0.3s;
+    }
+    .answer-text {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #444;
+        flex-grow: 1;
+    }
+    .answer-icon {
+        font-size: 1.3rem;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    /* ── Correct answer ── */
+    .answer-item.correct {
+        border-color: #28a745;
+        background: #d4edda;
+    }
+    .answer-item.correct .answer-letter {
+        background: #28a745;
+        border-color: #28a745;
+        color: #fff;
+    }
+    .answer-item.correct .answer-text { color: #155724; font-weight: 600; }
+    .answer-item.correct .answer-icon { opacity: 1; color: #28a745; }
+
+    /* ── Wrong answer ── */
+    .answer-item.wrong {
+        border-color: #dc3545;
+        background: #f8d7da;
+    }
+    .answer-item.wrong .answer-letter {
+        background: #dc3545;
+        border-color: #dc3545;
+        color: #fff;
+    }
+    .answer-item.wrong .answer-text { color: #721c24; font-weight: 600; }
+    .answer-item.wrong .answer-icon { opacity: 1; color: #dc3545; }
+
+    /* ── Locked state (after answer) ── */
+    .answer-item.locked {
+        cursor: default;
+        pointer-events: none;
+    }
+
+    /* ── Feedback banner ── */
+    .feedback-banner {
+        display: none;
+        border-radius: 12px;
+        padding: 16px 22px;
+        margin-top: 20px;
+        font-weight: 600;
+        font-size: 1rem;
+        animation: fadeIn 0.3s ease;
+    }
+    .feedback-banner.show { display: flex; align-items: center; gap: 12px; }
+    .feedback-banner.fb-correct {
+        background: #d4edda;
+        border: 2px solid #28a745;
+        color: #155724;
+    }
+    .feedback-banner.fb-wrong {
+        background: #f8d7da;
+        border: 2px solid #dc3545;
+        color: #721c24;
+    }
+    .feedback-banner i { font-size: 1.5rem; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Navigation ── */
+    .quiz-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 24px;
+    }
+    .btn-quiz-nav {
+        border: none;
+        border-radius: 14px;
+        padding: 14px 36px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-next-q {
+        background: linear-gradient(135deg, #5a0000, #8b1a1a);
+        color: #fff;
+        display: none;
+    }
+    .btn-next-q.show { display: inline-flex; }
+    .btn-next-q:hover {
+        background: linear-gradient(135deg, #7a1a1a, #a52a2a);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(90,0,0,0.3);
+        color: #fff;
+    }
+    .btn-finish {
+        background: linear-gradient(135deg, #28a745, #20c043);
+        color: #fff;
+        border: none;
+        border-radius: 14px;
+        padding: 14px 40px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: none;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-finish.show { display: inline-flex; }
+    .btn-finish:hover {
+        background: linear-gradient(135deg, #218838, #1ea83b);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40,167,69,0.3);
+        color: #fff;
+    }
+
+    /* ── Score counter ── */
+    .live-score {
+        background: #fff;
+        border-radius: 12px;
+        padding: 8px 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        font-weight: 700;
+        color: #5a0000;
+    }
+
+    /* ── Question dots ── */
+    .question-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 24px;
+    }
+    .q-dot {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        border: 2px solid #ddd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #999;
+        cursor: pointer;
+        transition: all 0.25s;
+        background: #fff;
+    }
+    .q-dot.current { border-color: #5a0000; background: #5a0000; color: #fff; transform: scale(1.1); }
+    .q-dot.dot-correct { border-color: #28a745; background: #28a745; color: #fff; }
+    .q-dot.dot-wrong { border-color: #dc3545; background: #dc3545; color: #fff; }
+    .q-dot.dot-correct.current, .q-dot.dot-wrong.current { border-color: #5a0000; }
+</style>
+{% endblock %}
+
+{% block body %}
+
+{# ══════════════ HERO ══════════════ #}
+<section class="quiz-hero">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ path('front_home') }}">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('front_formation_index') }}">Formations</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('front_formation_show', {id: formation.id}) }}">{{ formation.titre }}</a></li>
+                <li class="breadcrumb-item active">{{ quiz.titre }}</li>
+            </ol>
+        </nav>
+        <h1><i class="fa fa-bolt me-2"></i>{{ quiz.titre }}</h1>
+        {% if quiz.description %}
+            <p class="mt-2" style="opacity:0.85;max-width:600px">{{ quiz.description }}</p>
+        {% endif %}
+    </div>
+</section>
+
+{# ══════════════ QUIZ STAGE ══════════════ #}
+<section class="quiz-stage">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-9 col-xl-8">
+
+                {# Top Bar #}
+                <div class="quiz-top-bar">
+                    <div class="quiz-progress-track">
+                        <div class="quiz-progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="quiz-meta">
+                        <div class="quiz-meta-item">
+                            <i class="fa fa-list-ol"></i>
+                            <span>Question <strong id="currentQNum">1</strong> / <strong>{{ quiz.questions|length }}</strong></span>
+                        </div>
+                        <div class="quiz-meta-item live-score">
+                            <i class="fa fa-check-circle" style="color:#28a745"></i>
+                            <span>Score : <strong id="liveScore">0</strong> /
+                            {% set totalPts = 0 %}
+                            {% for q in quiz.questions %}{% set totalPts = totalPts + (q.points ?? 1) %}{% endfor %}
+                            <strong>{{ totalPts }}</strong></span>
+                        </div>
+                        <div class="quiz-meta-item">
+                            <i class="fa fa-star"></i>
+                            <span><strong id="answeredNum">0</strong> / {{ quiz.questions|length }} répondues</span>
+                        </div>
+                    </div>
+                </div>
+
+                {# Hidden form for final submission #}
+                <form action="{{ path('front_quiz_submit', {formationId: formation.id, id: quiz.id}) }}" method="post" id="quizForm">
+                    <input type="hidden" name="_token" value="{{ csrf_token('quiz_submit' ~ quiz.id) }}">
+                    <div id="hiddenAnswers"></div>
+                </form>
+
+                {# Question Slides #}
+                {% set letters = ['A', 'B', 'C', 'D', 'E', 'F'] %}
+                {% for question in quiz.questions %}
+                <div class="question-slide{% if loop.first %} active{% endif %}"
+                     data-index="{{ loop.index0 }}"
+                     data-question-id="{{ question.id }}"
+                     data-correct-option="{{ correctAnswers[question.id] ?? '' }}"
+                     data-points="{{ question.points ?? 1 }}">
+                    <div class="q-card">
+                        <div class="q-card-header">
+                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                <div>
+                                    <span class="q-badge">
+                                        <i class="fa fa-question-circle"></i>
+                                        Question {{ loop.index }} sur {{ quiz.questions|length }}
+                                    </span>
+                                    <h2>{{ question.contenu }}</h2>
+                                </div>
+                                <span class="q-badge">
+                                    <i class="fa fa-star"></i>
+                                    {{ question.points ?? 1 }} pt{{ (question.points ?? 1) > 1 ? 's' : '' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="q-card-body">
+                            <ul class="answer-list">
+                                {% for option in question.optionQuestions %}
+                                <li class="answer-item"
+                                    data-option-id="{{ option.id }}"
+                                    data-question-id="{{ question.id }}">
+                                    <span class="answer-letter">{{ letters[loop.index0] ?? loop.index }}</span>
+                                    <span class="answer-text">{{ option.contenu }}</span>
+                                    <span class="answer-icon">
+                                        <i class="fa fa-check-circle"></i>
+                                    </span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+
+                            {# Feedback banner #}
+                            <div class="feedback-banner" id="feedback_{{ question.id }}">
+                                <i class="fa"></i>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Navigation #}
+                    <div class="quiz-nav">
+                        <div></div>
+                        {% if loop.last %}
+                            <button type="button" class="btn-finish" id="btnFinish_{{ question.id }}" onclick="submitQuiz()">
+                                <i class="fa fa-check-circle"></i> Voir mon résultat
+                            </button>
+                        {% else %}
+                            <button type="button" class="btn-quiz-nav btn-next-q" id="btnNext_{{ question.id }}" onclick="nextQuestion()">
+                                Suivant <i class="fa fa-arrow-right"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+
+                {# Question dots #}
+                <div class="question-dots" id="questionDots">
+                    {% for question in quiz.questions %}
+                        <div class="q-dot{% if loop.first %} current{% endif %}" data-index="{{ loop.index0 }}">
+                            {{ loop.index }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+    'use strict';
+
+    var totalQuestions = {{ quiz.questions|length }};
+    var slides = document.querySelectorAll('.question-slide');
+    var dots   = document.querySelectorAll('.q-dot');
+    var progressFill = document.getElementById('progressFill');
+    var currentQNum  = document.getElementById('currentQNum');
+    var answeredNum  = document.getElementById('answeredNum');
+    var liveScoreEl  = document.getElementById('liveScore');
+    var hiddenAnswers = document.getElementById('hiddenAnswers');
+
+    var currentIndex = 0;
+    var answers = {};   // { questionId: optionId }
+    var liveScore = 0;
+    var answered = {};  // { questionId: true } — tracks which questions are answered
+
+    var STORAGE_KEY = 'skillora_quiz_{{ quiz.id }}_progress';
+
+    // ── Restore from localStorage ──
+    (function restoreProgress() {
+        try {
+            var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+            if (!saved) return;
+            // Replay saved answers silently
+            for (var qId in saved) {
+                if (!saved.hasOwnProperty(qId)) continue;
+                var slide = document.querySelector('.question-slide[data-question-id="' + qId + '"]');
+                if (!slide) continue;
+                var item = slide.querySelector('.answer-item[data-option-id="' + saved[qId] + '"]');
+                if (item && !answered[qId]) item.click();
+            }
+        } catch (e) {}
+    })();
+
+    function saveProgress() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(answers)); } catch (e) {}
+    }
+
+    function clearProgress() {
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    }
+
+    // ── Click an answer ──
+    document.querySelectorAll('.answer-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+            var slide = this.closest('.question-slide');
+            var qId = slide.dataset.questionId;
+
+            // Don't allow re-answering
+            if (answered[qId]) return;
+            answered[qId] = true;
+
+            var correctOptionId = slide.dataset.correctOption;
+            var points = parseInt(slide.dataset.points) || 1;
+            var selectedOptionId = this.dataset.optionId;
+            var isCorrect = (selectedOptionId === correctOptionId);
+
+            // Store answer
+            answers[qId] = selectedOptionId;
+            syncHiddenForm();
+            saveProgress();
+
+            // Lock all items in this slide
+            slide.querySelectorAll('.answer-item').forEach(function (ai) {
+                ai.classList.add('locked');
+            });
+
+            // Highlight selected option
+            if (isCorrect) {
+                this.classList.add('correct');
+                this.querySelector('.answer-icon').innerHTML = '<i class="fa fa-check-circle"></i>';
+            } else {
+                this.classList.add('wrong');
+                this.querySelector('.answer-icon').innerHTML = '<i class="fa fa-times-circle"></i>';
+
+                // Also highlight the correct one in green
+                slide.querySelectorAll('.answer-item').forEach(function (ai) {
+                    if (ai.dataset.optionId === correctOptionId) {
+                        ai.classList.add('correct');
+                        ai.querySelector('.answer-icon').innerHTML = '<i class="fa fa-check-circle"></i>';
+                    }
+                });
+            }
+
+            // Show feedback banner
+            var fb = document.getElementById('feedback_' + qId);
+            fb.classList.add('show');
+            if (isCorrect) {
+                fb.classList.add('fb-correct');
+                fb.querySelector('i').className = 'fa fa-check-circle';
+                fb.querySelector('span').textContent = 'Correct ! +' + points + ' point' + (points > 1 ? 's' : '');
+                liveScore += points;
+            } else {
+                fb.classList.add('fb-wrong');
+                fb.querySelector('i').className = 'fa fa-times-circle';
+                fb.querySelector('span').textContent = 'Incorrect. La bonne réponse est mise en vert.';
+            }
+
+            // Update live score
+            liveScoreEl.textContent = liveScore;
+
+            // Update dots
+            var dot = dots[currentIndex];
+            dot.classList.remove('current');
+            dot.classList.add(isCorrect ? 'dot-correct' : 'dot-wrong');
+            dot.classList.add('current');
+
+            // Show next / finish button
+            var btnNext = document.getElementById('btnNext_' + qId);
+            var btnFinish = document.getElementById('btnFinish_' + qId);
+            if (btnNext) btnNext.classList.add('show');
+            if (btnFinish) btnFinish.classList.add('show');
+
+            updateMeta();
+        });
+    });
+
+    // ── Next question ──
+    window.nextQuestion = function () {
+        if (currentIndex >= totalQuestions - 1) return;
+
+        slides[currentIndex].classList.remove('active');
+        slides[currentIndex].style.display = 'none';
+
+        currentIndex++;
+
+        slides[currentIndex].style.display = 'block';
+        slides[currentIndex].style.opacity = '0';
+        slides[currentIndex].style.transform = 'translateY(20px)';
+        void slides[currentIndex].offsetWidth;
+        slides[currentIndex].classList.add('active');
+        slides[currentIndex].style.opacity = '';
+        slides[currentIndex].style.transform = '';
+
+        updateDots();
+        updateMeta();
+    };
+
+    // ── Submit quiz ──
+    window.submitQuiz = function () {
+        clearProgress();
+        syncHiddenForm();
+        document.getElementById('quizForm').submit();
+    };
+
+    // ── Sync hidden form ──
+    function syncHiddenForm() {
+        hiddenAnswers.innerHTML = '';
+        for (var qId in answers) {
+            if (answers.hasOwnProperty(qId)) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'answers[' + qId + ']';
+                input.value = answers[qId];
+                hiddenAnswers.appendChild(input);
+            }
+        }
+    }
+
+    // ── Update dots ──
+    function updateDots() {
+        dots.forEach(function (dot, i) {
+            dot.classList.remove('current');
+            if (i === currentIndex) dot.classList.add('current');
+        });
+    }
+
+    // ── Update meta ──
+    function updateMeta() {
+        var count = Object.keys(answered).length;
+        var pct = Math.round(((currentIndex + 1) / totalQuestions) * 100);
+        progressFill.style.width = pct + '%';
+        currentQNum.textContent = currentIndex + 1;
+        answeredNum.textContent = count;
+    }
+
+    // ── Keyboard shortcuts ──
+    document.addEventListener('keydown', function (e) {
+        var letterMap = { 'a': 0, 'b': 1, 'c': 2, 'd': 3 };
+        var key = e.key.toLowerCase();
+        if (letterMap[key] !== undefined) {
+            var items = slides[currentIndex].querySelectorAll('.answer-item');
+            if (items[letterMap[key]] && !items[letterMap[key]].classList.contains('locked')) {
+                items[letterMap[key]].click();
+            }
+        }
+        if (e.key === 'ArrowRight' || e.key === 'Enter') {
+            var qId = slides[currentIndex].dataset.questionId;
+            if (answered[qId]) {
+                if (currentIndex < totalQuestions - 1) {
+                    nextQuestion();
+                }
+            }
+        }
+    });
+
+    // Initial
+    updateMeta();
+})();
+</script>
+{% endblock %}

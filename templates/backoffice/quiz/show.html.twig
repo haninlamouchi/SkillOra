@@ -1,0 +1,158 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}{{ quiz.titre }} | Skillora Admin{% endblock %}
+
+{% block body %}
+<main class="admin-content">
+    <div class="container-fluid px-4">
+
+        {# Flash messages #}
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }} alert-dismissible fade show mt-3" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {# Breadcrumb + Header #}
+        <div class="mb-4 mt-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb breadcrumb-sm mb-1">
+                    <li class="breadcrumb-item"><a href="{{ path('app_formation_index') }}">Formations</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('app_formation_show', {id: formation.id}) }}">{{ formation.titre }}</a></li>
+                    <li class="breadcrumb-item active">{{ quiz.titre }}</li>
+                </ol>
+            </nav>
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="page-title"><i class="bi bi-patch-question me-2"></i>{{ quiz.titre }}</h1>
+                <div class="d-flex gap-2">
+                    <a href="{{ path('app_quiz_edit', {formationId: formation.id, id: quiz.id}) }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-pencil-square me-1"></i> Modifier le quiz
+                    </a>
+                    <a href="{{ path('app_formation_show', {id: formation.id}) }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i> Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {# ════════════════════════════════════
+            QUIZ INFO CARDS
+        ════════════════════════════════════ #}
+        <div class="row g-4 mb-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Détails du Quiz</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">Description</div>
+                            <div class="col-sm-8">{{ quiz.description ?? '—' }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">Durée</div>
+                            <div class="col-sm-8">{{ quiz.duree ? quiz.duree ~ ' minutes' : '—' }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">Nombre de questions</div>
+                            <div class="col-sm-8">{{ quiz.questions|length }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">Total des points</div>
+                            <div class="col-sm-8">
+                                {% set totalPoints = 0 %}
+                                {% for q in quiz.questions %}
+                                    {% set totalPoints = totalPoints + (q.points ?? 1) %}
+                                {% endfor %}
+                                {{ totalPoints }} points
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body py-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:80px;height:80px">
+                            <i class="bi bi-patch-question-fill text-primary" style="font-size:2.5rem"></i>
+                        </div>
+                        <h3 class="mb-0">{{ quiz.questions|length }}</h3>
+                        <p class="text-muted mb-0">Questions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ════════════════════════════════════
+            QUESTIONS SECTION
+        ════════════════════════════════════ #}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-list-ol me-2"></i>Questions ({{ quiz.questions|length }})</h5>
+                <a href="{{ path('app_question_new', {formationId: formation.id, quizId: quiz.id}) }}" class="btn btn-skillora btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Ajouter une question
+                </a>
+            </div>
+            <div class="card-body">
+                {% if quiz.questions|length > 0 %}
+                    {% for question in quiz.questions %}
+                    <div class="card border mb-3">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-primary me-2">Q{{ loop.index }}</span>
+                                <strong>{{ question.contenu }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-secondary">{{ question.points ?? 1 }} pt{{ (question.points ?? 1) > 1 ? 's' : '' }}</span>
+                                <a href="{{ path('app_question_edit', {formationId: formation.id, quizId: quiz.id, id: question.id}) }}" class="btn btn-outline-secondary btn-sm" title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form action="{{ path('app_question_delete', {formationId: formation.id, quizId: quiz.id, id: question.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Supprimer cette question ?')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_question' ~ question.id) }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Supprimer">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                {% set letters = ['A', 'B', 'C', 'D', 'E', 'F'] %}
+                                {% for option in question.optionQuestions %}
+                                <div class="list-group-item d-flex align-items-center gap-3 {{ option.estCorrect ? 'list-group-item-success' : '' }}">
+                                    <span class="badge {{ option.estCorrect ? 'bg-success' : 'bg-secondary' }}">{{ letters[loop.index0] ?? loop.index }}</span>
+                                    <span>{{ option.contenu }}</span>
+                                    {% if option.estCorrect %}
+                                        <i class="bi bi-check-circle-fill text-success ms-auto"></i>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-patch-question fs-1 d-block mb-2 opacity-25"></i>
+                        <p class="mb-3">Aucune question dans ce quiz.</p>
+                        <a href="{{ path('app_question_new', {formationId: formation.id, quizId: quiz.id}) }}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-plus-lg me-1"></i> Ajouter la première question
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Back button #}
+        <div class="mb-5">
+            <a href="{{ path('app_formation_show', {id: formation.id}) }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Retour à la formation
+            </a>
+        </div>
+
+    </div>
+</main>
+{% endblock %}

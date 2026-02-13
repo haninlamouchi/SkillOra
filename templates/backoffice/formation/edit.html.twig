@@ -1,0 +1,108 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Modifier Formation | Skillora Admin{% endblock %}
+
+{% block body %}
+<main class="admin-content">
+    <div class="container-fluid px-4">
+
+        {# -- Breadcrumb -- #}
+        <div class="mb-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb breadcrumb-sm mb-1">
+                    <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('app_formation_index') }}">Formations</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('app_formation_show', {id: formation.id}) }}">{{ formation.titre }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Modifier</li>
+                </ol>
+            </nav>
+            <h1 class="page-title">Modifier : {{ formation.titre }}</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                {{ form_row(form.titre) }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_row(form.description) }}
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form_row(form.dateDebut) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_row(form.dateFin) }}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form_row(form.imageFile) }}
+                                {% if formation.image %}
+                                    <div class="mt-2">
+                                        <small class="text-muted d-block mb-1">Image actuelle :</small>
+                                        <img src="{{ formation.image }}" alt="{{ formation.titre }}" class="img-thumbnail" style="max-height: 150px">
+                                    </div>
+                                {% endif %}
+                                <div id="imagePreview" class="mt-2" style="display:none">
+                                    <small class="text-muted d-block mb-1">Nouvelle image :</small>
+                                    <img src="" alt="Preview" class="img-thumbnail" style="max-height: 150px">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_row(form.lienRessources) }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_row(form.club) }}
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ path('app_formation_show', {id: formation.id}) }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Retour
+                            </a>
+                            <button type="submit" class="btn btn-skillora">
+                                <i class="bi bi-check-lg me-1"></i> Enregistrer les modifications
+                            </button>
+                        </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelector('[name="formation[imageFile]"]')?.addEventListener('change', function(e) {
+    const preview = document.getElementById('imagePreview');
+    const img = preview.querySelector('img');
+    if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            img.src = ev.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(this.files[0]);
+    } else {
+        preview.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

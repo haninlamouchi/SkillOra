@@ -1,0 +1,360 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}{{ formation.titre }} | Skillora Admin{% endblock %}
+
+{% block body %}
+<main class="admin-content">
+    <div class="container-fluid px-4">
+
+        {# -- Flash messages -- #}
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }} alert-dismissible fade show mt-3" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {# -- Breadcrumb + Header -- #}
+        <div class="mb-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb breadcrumb-sm mb-1">
+                    <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('app_formation_index') }}">Formations</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ formation.titre }}</li>
+                </ol>
+            </nav>
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="page-title">{{ formation.titre }}</h1>
+                <div class="d-flex gap-2">
+                    <a href="{{ path('app_formation_edit', {id: formation.id}) }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-pencil-square me-1"></i> Modifier
+                    </a>
+                    <a href="{{ path('app_formation_index') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i> Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {# ═══════════════════════════════════════════
+            FORMATION DETAILS
+        ═══════════════════════════════════════════ #}
+        <div class="row g-4 mb-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Détails de la formation</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">Description</div>
+                            <div class="col-sm-8">{{ formation.description ?? '—' }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">Club</div>
+                            <div class="col-sm-8">{{ formation.club ?? '—' }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">Date de début</div>
+                            <div class="col-sm-8">{{ formation.dateDebut ? formation.dateDebut|date('d/m/Y') : '—' }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">Date de fin</div>
+                            <div class="col-sm-8">{{ formation.dateFin ? formation.dateFin|date('d/m/Y') : '—' }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">Lien ressources</div>
+                            <div class="col-sm-8">
+                                {% if formation.lienRessources %}
+                                    <a href="{{ formation.lienRessources }}" target="_blank">{{ formation.lienRessources }}</a>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body py-4">
+                        {% if formation.image %}
+                            <img src="{{ formation.image }}" alt="{{ formation.titre }}" class="img-fluid rounded mb-3" style="max-height: 200px">
+                        {% else %}
+                            <div class="bg-light rounded d-flex align-items-center justify-content-center mb-3" style="height: 200px">
+                                <i class="bi bi-image text-muted" style="font-size: 3rem"></i>
+                            </div>
+                        {% endif %}
+                        <div class="d-flex justify-content-around mt-2">
+                            <div>
+                                <h4 class="mb-0">{{ formation.videos|length }}</h4>
+                                <small class="text-muted">Vidéos</small>
+                            </div>
+                            <div>
+                                <h4 class="mb-0">{{ formation.participations|length }}</h4>
+                                <small class="text-muted">Participants</small>
+                            </div>
+                            <div>
+                                <h4 class="mb-0">{{ formation.quizzes|length }}</h4>
+                                <small class="text-muted">Quiz</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ═══════════════════════════════════════════
+            VIDEOS SECTION
+        ═══════════════════════════════════════════ #}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-camera-video me-2"></i>Vidéos ({{ formation.videos|length }})</h5>
+                <button type="button" class="btn btn-skillora btn-sm" data-bs-toggle="modal" data-bs-target="#addVideoModal">
+                    <i class="bi bi-plus-lg me-1"></i> Ajouter une vidéo
+                </button>
+            </div>
+            <div class="card-body">
+                {% if formation.videos|length > 0 %}
+                    <div class="row g-3">
+                        {% for video in formation.videos %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border">
+                                <div class="card-body">
+                                    <div class="ratio ratio-16x9 mb-3">
+                                        <video controls class="rounded w-100">
+                                            <source src="{{ video.videoPath }}" type="video/mp4">
+                                            Votre navigateur ne supporte pas la vidéo.
+                                        </video>
+                                    </div>
+                                    <h6 class="card-title">{{ video.titre }}</h6>
+                                    {% if video.description %}
+                                        <p class="card-text small text-muted">{{ video.description }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer bg-transparent border-top-0 text-end">
+                                    <form action="{{ path('app_formation_delete_video', {id: formation.id, videoId: video.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Supprimer cette vidéo ?')">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_video' ~ video.id) }}">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-trash3"></i> Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-camera-video-off fs-1 d-block mb-2 opacity-25"></i>
+                        Aucune vidéo pour cette formation.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# ═══════════════════════════════════════════
+            PARTICIPANTS SECTION
+        ═══════════════════════════════════════════ #}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-people me-2"></i>Participants ({{ formation.participations|length }})</h5>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addParticipantModal">
+                    <i class="bi bi-person-plus me-1"></i> Ajouter un participant
+                </button>
+            </div>
+            <div class="card-body p-0">
+                {% if formation.participations|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">#</th>
+                                    <th>Nom complet</th>
+                                    <th>Email</th>
+                                    <th>Rôle</th>
+                                    <th>Date de participation</th>
+                                    <th class="text-end pe-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for participation in formation.participations %}
+                                <tr>
+                                    <td class="ps-4 text-muted">{{ loop.index }}</td>
+                                    <td class="fw-semibold">
+                                        {% if participation.user.photo %}
+                                            <img src="{{ participation.user.photo }}" alt="" class="rounded-circle me-2" width="32" height="32">
+                                        {% else %}
+                                            <i class="bi bi-person-circle me-2 fs-5"></i>
+                                        {% endif %}
+                                        {{ participation.user.fullName }}
+                                    </td>
+                                    <td>{{ participation.user.email }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ participation.user.role == 'admin' ? 'danger' : (participation.user.role == 'responsable_club' ? 'warning' : 'info') }}">
+                                            {{ participation.user.role }}
+                                        </span>
+                                    </td>
+                                    <td>{{ participation.dateParticipation|date('d/m/Y H:i') }}</td>
+                                    <td class="text-end pe-4">
+                                        <form action="{{ path('app_formation_remove_participant', {id: formation.id, participationId: participation.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Retirer ce participant ?')">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('remove_participant' ~ participation.id) }}">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <i class="bi bi-person-dash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-people fs-1 d-block mb-2 opacity-25"></i>
+                        Aucun participant inscrit.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# ═══════════════════════════════════════════
+            QUIZZES SECTION
+        ═══════════════════════════════════════════ #}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-patch-question me-2"></i>Quiz ({{ formation.quizzes|length }})</h5>
+                <a href="{{ path('app_quiz_new', {formationId: formation.id}) }}" class="btn btn-skillora btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Créer un quiz
+                </a>
+            </div>
+            <div class="card-body">
+                {% if formation.quizzes|length > 0 %}
+                    <div class="row g-3">
+                        {% for quiz in formation.quizzes %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; min-width: 48px">
+                                            <i class="bi bi-patch-question-fill text-primary fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="card-title mb-0">{{ quiz.titre }}</h6>
+                                            <small class="text-muted">{{ quiz.questions|length }} question{{ quiz.questions|length > 1 ? 's' : '' }}</small>
+                                        </div>
+                                    </div>
+                                    {% if quiz.description %}
+                                        <p class="card-text small text-muted mb-2">{{ quiz.description|length > 100 ? quiz.description|slice(0, 100) ~ '…' : quiz.description }}</p>
+                                    {% endif %}
+                                    <div class="d-flex gap-2 text-muted small">
+                                        {% if quiz.duree %}
+                                            <span><i class="bi bi-clock me-1"></i>{{ quiz.duree }} min</span>
+                                        {% endif %}
+                                        <span><i class="bi bi-list-check me-1"></i>{{ quiz.questions|length }} Q</span>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent d-flex justify-content-between">
+                                    <a href="{{ path('app_quiz_show', {formationId: formation.id, id: quiz.id}) }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye me-1"></i> Voir
+                                    </a>
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ path('app_quiz_edit', {formationId: formation.id, id: quiz.id}) }}" class="btn btn-outline-secondary btn-sm">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form action="{{ path('app_quiz_delete', {formationId: formation.id, id: quiz.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Supprimer ce quiz et toutes ses questions ?')">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete_quiz' ~ quiz.id) }}">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-patch-question fs-1 d-block mb-2 opacity-25"></i>
+                        Aucun quiz pour cette formation.
+                        <div class="mt-2">
+                            <a href="{{ path('app_quiz_new', {formationId: formation.id}) }}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-plus-lg me-1"></i> Créer le premier quiz
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</main>
+
+{# ═══════════════════════════════════════════════════
+    MODAL: Add Video (Bootstrap)
+═══════════════════════════════════════════════════ #}
+<div class="modal fade" id="addVideoModal" tabindex="-1" aria-labelledby="addVideoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addVideoModalLabel">
+                    <i class="bi bi-camera-video me-2"></i>Ajouter une vidéo
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <form method="post" action="{{ path('app_formation_add_video', {id: formation.id}) }}" enctype="multipart/form-data" novalidate>
+            <div class="modal-body">
+                <div class="mb-3">
+                    {{ form_row(videoForm.titre) }}
+                </div>
+                <div class="mb-3">
+                    {{ form_row(videoForm.videoFile) }}
+                    <small class="text-muted">Formats acceptés : MP4, WebM, OGG, AVI, MOV — Max 100 Mo</small>
+                </div>
+                <div class="mb-3">
+                    {{ form_row(videoForm.description) }}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-skillora">
+                    <i class="bi bi-plus-lg me-1"></i> Ajouter
+                </button>
+            </div>
+            {{ form_end(videoForm) }}
+        </div>
+    </div>
+</div>
+
+{# ═══════════════════════════════════════════════════
+    MODAL: Add Participant (Bootstrap)
+═══════════════════════════════════════════════════ #}
+<div class="modal fade" id="addParticipantModal" tabindex="-1" aria-labelledby="addParticipantModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addParticipantModalLabel">
+                    <i class="bi bi-person-plus me-2"></i>Ajouter un participant
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            {{ form_start(participationForm, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div class="modal-body">
+                <div class="mb-3">
+                    {{ form_row(participationForm.user) }}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-person-plus me-1"></i> Inscrire
+                </button>
+            </div>
+            {{ form_end(participationForm) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

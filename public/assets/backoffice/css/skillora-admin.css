@@ -1,0 +1,715 @@
+/* ============================================================
+   SKILLORA ADMIN — Custom Dashboard Stylesheet
+   Brand color: #5a0000
+   ============================================================ */
+
+/* ---------- CSS Custom Properties ---------- */
+:root {
+    --sk-brand: #5a0000;
+    --sk-brand-light: #7a1a1a;
+    --sk-brand-dark: #3d0000;
+    --sk-brand-soft: rgba(90, 0, 0, 0.08);
+    --sk-brand-softer: rgba(90, 0, 0, 0.04);
+    --sk-danger: #dc3545;
+    --sk-danger-soft: rgba(220, 53, 69, 0.08);
+    --sk-success: #198754;
+    --sk-success-soft: rgba(25, 135, 84, 0.08);
+    --sk-info: #0d6efd;
+    --sk-info-soft: rgba(13, 110, 253, 0.08);
+    --sk-warning: #fd7e14;
+    --sk-warning-soft: rgba(253, 126, 20, 0.08);
+    --sk-body-bg: #f5f6fa;
+    --sk-card-bg: #ffffff;
+    --sk-text: #1e293b;
+    --sk-text-muted: #64748b;
+    --sk-border: #e2e8f0;
+    --sk-radius: 0.625rem;
+    --sk-radius-lg: 0.875rem;
+    --sk-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+    --sk-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    --sk-shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.1);
+    --sk-transition: 0.2s ease;
+}
+
+/* ---------- Global ---------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family:
+        "Inter",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        sans-serif;
+    background-color: var(--sk-body-bg);
+    color: var(--sk-text);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+    text-decoration: none;
+    color: var(--sk-brand);
+    transition: color var(--sk-transition);
+}
+
+a:hover {
+    color: var(--sk-brand-light);
+}
+
+::selection {
+    background-color: var(--sk-brand);
+    color: #fff;
+}
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+.skillora-navbar {
+    background: linear-gradient(
+        135deg,
+        var(--sk-brand-dark) 0%,
+        var(--sk-brand) 60%,
+        var(--sk-brand-light) 100%
+    );
+    padding: 0.6rem 0;
+    border: none;
+    box-shadow: 0 2px 12px rgba(90, 0, 0, 0.25);
+    z-index: 1040;
+}
+
+/* Brand */
+.skillora-navbar .brand-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    color: #fff;
+}
+
+.skillora-navbar .brand-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+}
+
+.skillora-navbar .brand-accent {
+    color: rgba(255, 255, 255, 0.65);
+    font-weight: 400;
+}
+
+/* Nav links */
+.skillora-navbar .nav-link {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.5rem 0.85rem;
+    border-radius: var(--sk-radius);
+    transition: all var(--sk-transition);
+}
+
+.skillora-navbar .nav-link:hover,
+.skillora-navbar .nav-link:focus {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.skillora-navbar .nav-link.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+/* Search */
+.nav-search-form {
+    position: relative;
+}
+
+.nav-search-form .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.nav-search-form .form-control {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 0.825rem;
+    padding: 0.4rem 0.75rem 0.4rem 2.1rem;
+    border-radius: 2rem;
+    width: 180px;
+    transition: all var(--sk-transition);
+}
+
+.nav-search-form .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.nav-search-form .form-control:focus {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: none;
+    width: 220px;
+    color: #fff;
+}
+
+/* Icon buttons */
+.nav-icon-btn {
+    width: 36px;
+    height: 36px;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.72) !important;
+    transition: all var(--sk-transition);
+    padding: 0 !important;
+}
+
+.nav-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff !important;
+}
+
+.notification-dot {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    border: 2px solid var(--sk-brand);
+}
+
+/* Divider */
+.nav-divider {
+    display: inline-block;
+    width: 1px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 0 0.5rem;
+    vertical-align: middle;
+}
+
+/* User avatar */
+.user-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    flex-shrink: 0;
+}
+
+.user-avatar-sm {
+    width: 32px;
+    height: 32px;
+    background: var(--sk-brand-soft);
+    border-color: var(--sk-brand);
+}
+
+.user-avatar-sm .user-initials {
+    color: var(--sk-brand) !important;
+}
+
+.user-initials {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1;
+}
+
+.user-dropdown {
+    padding: 0.35rem 0.5rem !important;
+}
+
+.user-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.user-role {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Dropdown */
+.skillora-navbar .dropdown-menu {
+    border-radius: var(--sk-radius-lg);
+    padding: 0.5rem;
+    min-width: 220px;
+    animation: dropdownFade 0.15s ease;
+}
+
+@keyframes dropdownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.skillora-navbar .dropdown-item {
+    border-radius: var(--sk-radius);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.skillora-navbar .dropdown-item:hover {
+    background: var(--sk-brand-soft);
+    color: var(--sk-brand);
+}
+
+.skillora-navbar .dropdown-item.text-danger:hover {
+    background: var(--sk-danger-soft);
+}
+
+/* ============================================================
+   FOOTER — Fixed at bottom
+   ============================================================ */
+.skillora-footer {
+    background: var(--sk-brand-dark);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    padding: 0.9rem 0;
+    border-top: 3px solid var(--sk-brand);
+    margin-top: auto;
+}
+
+.footer-brand {
+    font-weight: 700;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.footer-accent {
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 400;
+}
+
+.footer-sep {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.footer-link {
+    color: rgba(255, 255, 255, 0.55);
+    font-weight: 500;
+    transition: color var(--sk-transition);
+}
+
+.footer-link:hover {
+    color: #fff;
+}
+
+/* ============================================================
+   ADMIN CONTENT AREA
+   ============================================================ */
+.admin-content {
+    padding: 1.75rem 0 2.5rem;
+}
+
+/* ---------- Page Header ---------- */
+.page-title {
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: var(--sk-text);
+    margin-bottom: 0.15rem;
+    letter-spacing: -0.01em;
+}
+
+.page-subtitle {
+    color: var(--sk-text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Breadcrumb */
+.breadcrumb-sm {
+    font-size: 0.8rem;
+}
+
+.breadcrumb-sm .breadcrumb-item a {
+    color: var(--sk-brand);
+}
+
+.breadcrumb-sm .breadcrumb-item.active {
+    color: var(--sk-text-muted);
+}
+
+.breadcrumb-sm .breadcrumb-item + .breadcrumb-item::before {
+    content: "›";
+    color: var(--sk-text-muted);
+}
+
+/* ---------- Primary Button ---------- */
+.btn-skillora {
+    background: var(--sk-brand);
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.55rem 1.25rem;
+    border-radius: var(--sk-radius);
+    box-shadow: 0 2px 8px rgba(90, 0, 0, 0.25);
+    transition: all var(--sk-transition);
+}
+
+.btn-skillora:hover,
+.btn-skillora:focus {
+    background: var(--sk-brand-light);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(90, 0, 0, 0.35);
+    transform: translateY(-1px);
+}
+
+.btn-skillora:active {
+    background: var(--sk-brand-dark);
+    transform: translateY(0);
+}
+
+/* ---------- Stat Cards ---------- */
+.stat-card {
+    background: var(--sk-card-bg);
+    border-radius: var(--sk-radius-lg);
+    padding: 1.25rem 1.35rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--sk-shadow-sm);
+    border: 1px solid var(--sk-border);
+    transition: box-shadow var(--sk-transition);
+}
+
+.stat-card:hover {
+    box-shadow: var(--sk-shadow);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--sk-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.bg-skillora-soft {
+    background: var(--sk-brand-soft);
+    color: var(--sk-brand);
+}
+
+.bg-info-soft {
+    background: var(--sk-info-soft);
+    color: var(--sk-info);
+}
+
+.bg-success-soft {
+    background: var(--sk-success-soft);
+    color: var(--sk-success);
+}
+
+.bg-warning-soft {
+    background: var(--sk-warning-soft);
+    color: var(--sk-warning);
+}
+
+.stat-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--sk-text);
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 0.78rem;
+    color: var(--sk-text-muted);
+    font-weight: 500;
+    margin-top: 0.1rem;
+}
+
+/* ============================================================
+   TABLE CARD
+   ============================================================ */
+.table-card {
+    background: var(--sk-card-bg);
+    border-radius: var(--sk-radius-lg);
+    border: 1px solid var(--sk-border);
+    box-shadow: var(--sk-shadow-sm);
+    overflow: hidden;
+}
+
+.table-card-header {
+    padding: 1.1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--sk-border);
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.table-card-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--sk-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.table-card-title i {
+    color: var(--sk-brand);
+}
+
+.table-search .input-group-text {
+    border-color: var(--sk-border);
+    color: var(--sk-text-muted);
+}
+
+.table-search .form-control {
+    border-color: var(--sk-border);
+    font-size: 0.825rem;
+    min-width: 200px;
+}
+
+.table-search .form-control:focus {
+    border-color: var(--sk-brand);
+    box-shadow: 0 0 0 3px var(--sk-brand-soft);
+}
+
+.table-card-footer {
+    padding: 0.85rem 1.5rem;
+    border-top: 1px solid var(--sk-border);
+    background: var(--sk-brand-softer);
+}
+
+/* ---------- Table ---------- */
+.skillora-table {
+    font-size: 0.875rem;
+}
+
+.skillora-table thead {
+    background: var(--sk-brand-softer);
+}
+
+.skillora-table thead th {
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--sk-text-muted);
+    padding: 0.85rem 1rem;
+    border-bottom: 2px solid var(--sk-border);
+    white-space: nowrap;
+}
+
+.skillora-table tbody tr {
+    transition: background var(--sk-transition);
+}
+
+.skillora-table tbody tr:hover {
+    background: var(--sk-brand-softer);
+}
+
+.skillora-table tbody td {
+    padding: 0.95rem 1rem;
+    border-bottom: 1px solid var(--sk-border);
+    vertical-align: middle;
+}
+
+/* Formation icon in table */
+.formation-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--sk-radius);
+    background: var(--sk-brand-soft);
+    color: var(--sk-brand);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* Status badge */
+.badge-active {
+    background: var(--sk-success-soft);
+    color: var(--sk-success);
+    font-weight: 600;
+    font-size: 0.72rem;
+    padding: 0.35em 0.75em;
+    border-radius: 2rem;
+    letter-spacing: 0.03em;
+}
+
+/* ============================================================
+   ACTION BUTTONS — Afficher / Modifier / Supprimer
+   ============================================================ */
+
+/* Shared base */
+.btn-action {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.4rem 0.85rem;
+    border-radius: var(--sk-radius);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border: 1.5px solid transparent;
+    transition: all var(--sk-transition);
+    cursor: pointer;
+    line-height: 1.4;
+}
+
+.btn-action:focus {
+    outline: none;
+}
+
+/* Afficher — brand outline */
+.btn-afficher {
+    background: transparent;
+    color: var(--sk-brand);
+    border-color: var(--sk-brand);
+}
+
+.btn-afficher:hover {
+    background: var(--sk-brand);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(90, 0, 0, 0.25);
+    transform: translateY(-1px);
+}
+
+.btn-afficher:active {
+    background: var(--sk-brand-dark);
+    border-color: var(--sk-brand-dark);
+    transform: translateY(0);
+}
+
+/* Modifier — brand filled */
+.btn-modifier {
+    background: var(--sk-brand);
+    color: #fff;
+    border-color: var(--sk-brand);
+}
+
+.btn-modifier:hover {
+    background: var(--sk-brand-light);
+    border-color: var(--sk-brand-light);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(90, 0, 0, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-modifier:active {
+    background: var(--sk-brand-dark);
+    border-color: var(--sk-brand-dark);
+    transform: translateY(0);
+}
+
+/* Supprimer — soft danger */
+.btn-supprimer {
+    background: transparent;
+    color: var(--sk-danger);
+    border-color: var(--sk-danger);
+}
+
+.btn-supprimer:hover {
+    background: var(--sk-danger);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(220, 53, 69, 0.25);
+    transform: translateY(-1px);
+}
+
+.btn-supprimer:active {
+    background: #b02a37;
+    border-color: #b02a37;
+    transform: translateY(0);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 991.98px) {
+    .skillora-navbar .navbar-collapse {
+        background: var(--sk-brand-dark);
+        border-radius: var(--sk-radius-lg);
+        padding: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .nav-search-form .form-control {
+        width: 100%;
+    }
+
+    .nav-search-form .form-control:focus {
+        width: 100%;
+    }
+
+    .nav-divider {
+        display: none;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .page-title {
+        font-size: 1.35rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .table-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .table-search {
+        width: 100%;
+    }
+
+    .table-search .form-control {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .btn-action {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.72rem;
+    }
+}

@@ -1,0 +1,516 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Nos Formations | SkillOra{% endblock %}
+
+{% block stylesheets %}
+<style>
+    /* ── Hero ── */
+    .skillora-hero {
+        background: linear-gradient(135deg, #5a0000 0%, #8b1a1a 50%, #a52a2a 100%);
+        padding: 100px 0 70px;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+    .skillora-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .skillora-hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.5px; }
+    .skillora-hero p { font-size: 1.15rem; opacity: 0.85; max-width: 600px; margin: 0 auto; }
+
+    /* ── Live Search Bar ── */
+    .hero-search {
+        max-width: 600px;
+        margin: 0 auto;
+        position: relative;
+    }
+    .hero-search .form-control {
+        border-radius: 50px;
+        padding: 16px 50px 16px 28px;
+        border: none;
+        font-size: 1.05rem;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    }
+    .hero-search .form-control:focus {
+        box-shadow: 0 8px 30px rgba(0,0,0,0.25), 0 0 0 3px rgba(255,255,255,0.3);
+    }
+    .hero-search .search-icon {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #5a0000;
+        font-size: 1.2rem;
+    }
+    .hero-stats {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 30px;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat .value { font-size: 1.8rem; font-weight: 800; display: block; }
+    .hero-stat .label { font-size: 0.85rem; opacity: 0.7; }
+
+    /* ── Filter Bar ── */
+    .filter-bar {
+        background: #fff;
+        border-radius: 16px;
+        padding: 20px 28px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        margin-top: -35px;
+        position: relative;
+        z-index: 10;
+    }
+    .filter-pill {
+        display: inline-block;
+        padding: 7px 18px;
+        border-radius: 50px;
+        border: 2px solid #e0e0e0;
+        background: #fff;
+        color: #555;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.25s;
+        user-select: none;
+    }
+    .filter-pill:hover { border-color: #5a0000; color: #5a0000; }
+    .filter-pill.active {
+        background: #5a0000;
+        border-color: #5a0000;
+        color: #fff;
+    }
+    .result-count {
+        font-size: 0.9rem;
+        color: #888;
+    }
+    .result-count strong { color: #5a0000; }
+    .sort-select {
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 6px 14px;
+        font-size: 0.85rem;
+        color: #555;
+        cursor: pointer;
+        background: #fff;
+    }
+    .sort-select:focus { border-color: #5a0000; box-shadow: 0 0 0 2px rgba(90,0,0,0.1); }
+
+    /* ── Cards ── */
+    .section-formations { padding: 40px 0 80px; background: #f8f8f8; min-height: 60vh; }
+
+    .formation-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+        background: #fff;
+    }
+    .formation-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(90,0,0,0.12);
+    }
+    .formation-card .card-img-top { height: 200px; object-fit: cover; }
+    .formation-card .card-img-placeholder {
+        height: 200px;
+        background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .formation-card .card-body { padding: 1.5rem; }
+    .formation-card .card-title { font-weight: 700; font-size: 1.1rem; color: #333; }
+    .formation-card .card-text { color: #666; font-size: 0.88rem; line-height: 1.6; }
+
+    .badge-date {
+        background: #5a0000; color: #fff;
+        font-size: 0.72rem; padding: 4px 10px; border-radius: 20px;
+    }
+    .badge-club {
+        background: #f0e6e6; color: #5a0000;
+        font-size: 0.72rem; padding: 4px 10px; border-radius: 20px;
+    }
+    .badge-status-active {
+        background: #d4edda; color: #155724;
+        font-size: 0.72rem; padding: 4px 10px; border-radius: 20px;
+    }
+    .badge-status-completed {
+        background: #e2e3e5; color: #383d41;
+        font-size: 0.72rem; padding: 4px 10px; border-radius: 20px;
+    }
+    .badge-participated {
+        background: #cce5ff; color: #004085;
+        font-size: 0.72rem; padding: 4px 10px; border-radius: 20px;
+    }
+    .stats-icon { display: inline-flex; align-items: center; gap: 4px; font-size: 0.78rem; color: #999; }
+
+    .btn-view-details {
+        background: #5a0000; color: #fff; border: none;
+        border-radius: 10px; padding: 10px 0;
+        font-weight: 600; font-size: 0.92rem;
+        width: 100%; transition: all 0.3s;
+    }
+    .btn-view-details:hover { background: #7a1a1a; color: #fff; transform: translateY(-2px); }
+
+    .btn-skillora-outline {
+        border: 2px solid #5a0000; color: #5a0000;
+        background: transparent; border-radius: 8px;
+        padding: 8px 24px; font-weight: 600;
+        transition: all 0.3s;
+    }
+    .btn-skillora-outline:hover { background: #5a0000; color: #fff; }
+
+    .empty-state { text-align: center; padding: 80px 20px; }
+    .empty-state i { font-size: 4rem; color: #ccc; }
+
+    /* ── Animation ── */
+    .card-fade { opacity: 0; transform: translateY(20px); animation: cardIn 0.4s ease forwards; }
+    @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
+    .hidden-card { display: none !important; }
+</style>
+{% endblock %}
+
+{% block body %}
+
+{# ═══════════════════════════════════════════
+    HERO SECTION
+═══════════════════════════════════════════ #}
+<section class="skillora-hero">
+    <div class="container text-center">
+        <h1 class="mb-3">Explorez nos formations</h1>
+        <p class="mb-4">Développez vos compétences, passez des quiz et obtenez des résultats avec SkillOra</p>
+
+        {# ── Live search (JS-based, no page reload) ── #}
+        <div class="hero-search">
+            <input type="text"
+                   class="form-control"
+                   id="liveSearch"
+                   placeholder="Rechercher par titre, description, club..."
+                   autocomplete="off">
+            <i class="fa fa-search search-icon"></i>
+        </div>
+
+        {# ── Hero Stats ── #}
+        {% set totalParticipants = 0 %}
+        {% for f in formations %}
+            {% set totalParticipants = totalParticipants + f.participations|length %}
+        {% endfor %}
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <span class="value">{{ formations|length }}</span>
+                <span class="label">Formations</span>
+            </div>
+            <div class="hero-stat">
+                <span class="value">{{ totalParticipants }}</span>
+                <span class="label">Participants</span>
+            </div>
+            <div class="hero-stat">
+                {% set totalQuizzes = 0 %}
+                {% for f in formations %}
+                    {% set totalQuizzes = totalQuizzes + f.quizzes|length %}
+                {% endfor %}
+                <span class="value">{{ totalQuizzes }}</span>
+                <span class="label">Quiz</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ═══════════════════════════════════════════
+    FILTER BAR
+═══════════════════════════════════════════ #}
+<div class="container">
+    <div class="filter-bar">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            {# Left: Filter pills #}
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span class="text-muted me-1" style="font-size:0.85rem"><i class="fa fa-filter me-1"></i>Filtrer :</span>
+
+                {# Status filters #}
+                <span class="filter-pill active" data-filter="all">Toutes</span>
+                <span class="filter-pill" data-filter="active"><i class="fa fa-circle text-success me-1" style="font-size:0.5rem"></i> En cours</span>
+                <span class="filter-pill" data-filter="completed"><i class="fa fa-circle text-secondary me-1" style="font-size:0.5rem"></i> Terminées</span>
+                {% if app.user %}
+                    <span class="filter-pill" data-filter="participated"><i class="fa fa-check-circle text-primary me-1" style="font-size:0.7rem"></i> Mes inscriptions</span>
+                {% endif %}
+
+                {# Club filters (dynamic) #}
+                {% set clubs = [] %}
+                {% for f in formations %}
+                    {% if f.club and (f.club ~ '') not in clubs %}
+                        {% set clubs = clubs|merge([f.club ~ '']) %}
+                    {% endif %}
+                {% endfor %}
+                {% if clubs|length > 0 %}
+                    <span class="text-muted mx-1">|</span>
+                    {% for club in clubs %}
+                        <span class="filter-pill" data-club="{{ club }}">{{ club }}</span>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {# Right: Sort + Count #}
+            <div class="d-flex align-items-center gap-3">
+                <span class="result-count" id="resultCount">
+                    <strong>{{ formations|length }}</strong> formation{{ formations|length != 1 ? 's' : '' }}
+                </span>
+                <select class="sort-select" id="sortSelect">
+                    <option value="recent">Plus récentes</option>
+                    <option value="oldest">Plus anciennes</option>
+                    <option value="alpha">A → Z</option>
+                    <option value="popular">Plus populaires</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ═══════════════════════════════════════════
+    FORMATIONS GRID
+═══════════════════════════════════════════ #}
+<section class="section-formations">
+    <div class="container">
+
+        {# Flash messages #}
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type }} alert-dismissible fade show mb-4" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="row g-4" id="formationsGrid">
+            {% for formation in formations %}
+                {% set isActive = formation.dateFin is null or formation.dateFin|date('Y-m-d') >= 'now'|date('Y-m-d') %}
+                <div class="col-md-6 col-lg-4 formation-item card-fade"
+                     data-title="{{ formation.titre|lower }}"
+                     data-description="{{ (formation.description ?? '')|lower }}"
+                     data-club="{{ formation.club ? (formation.club ~ '')|lower : '' }}"
+                     data-status="{{ isActive ? 'active' : 'completed' }}"
+                     data-participated="{{ formation.id in participatedIds ? '1' : '0' }}"
+                     data-date="{{ formation.dateDebut ? formation.dateDebut|date('Y-m-d') : '0000-00-00' }}"
+                     data-participants="{{ formation.participations|length }}"
+                     style="animation-delay: {{ loop.index0 * 0.06 }}s">
+                    <div class="card formation-card h-100">
+                        {# Image #}
+                        {% if formation.image %}
+                            <img src="{{ formation.image }}" class="card-img-top" alt="{{ formation.titre }}">
+                        {% else %}
+                            <div class="card-img-placeholder">
+                                <i class="fa fa-graduation-cap" style="font-size: 3rem; color: #ccc;"></i>
+                            </div>
+                        {% endif %}
+
+                        <div class="card-body d-flex flex-column">
+                            {# Badges #}
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                {% if isActive %}
+                                    <span class="badge-status-active"><i class="fa fa-circle me-1" style="font-size:0.45rem"></i>En cours</span>
+                                {% else %}
+                                    <span class="badge-status-completed"><i class="fa fa-circle me-1" style="font-size:0.45rem"></i>Terminée</span>
+                                {% endif %}
+                                {% if formation.dateDebut %}
+                                    <span class="badge-date">
+                                        <i class="fa fa-calendar me-1"></i>{{ formation.dateDebut|date('d/m/Y') }}
+                                    </span>
+                                {% endif %}
+                                {% if formation.club %}
+                                    <span class="badge-club">{{ formation.club }}</span>
+                                {% endif %}
+                                {% if formation.id in participatedIds %}
+                                    <span class="badge-participated">
+                                        <i class="fa fa-check me-1"></i>Inscrit
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            {# Title #}
+                            <h5 class="card-title mb-1">{{ formation.titre }}</h5>
+
+                            {# Description #}
+                            <p class="card-text flex-grow-1">
+                                {{ formation.description|length > 100 ? formation.description|slice(0, 100) ~ '…' : formation.description ?? 'Aucune description.' }}
+                            </p>
+
+                            {# Stats row #}
+                            <div class="d-flex gap-3 mb-3">
+                                <span class="stats-icon"><i class="fa fa-users"></i> {{ formation.participations|length }}</span>
+                                <span class="stats-icon"><i class="fa fa-play-circle"></i> {{ formation.videos|length }}</span>
+                                <span class="stats-icon"><i class="fa fa-question-circle"></i> {{ formation.quizzes|length }} quiz</span>
+                            </div>
+
+                            {# CTA #}
+                            <a href="{{ path('front_formation_show', {id: formation.id}) }}" class="btn btn-view-details">
+                                Découvrir <i class="fa fa-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {# Empty state (shown/hidden by JS) #}
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <i class="fa fa-search d-block"></i>
+            <h4 class="mt-3 text-muted">Aucune formation trouvée</h4>
+            <p class="text-muted">Essayez d'autres mots-clés ou modifiez vos filtres.</p>
+            <button class="btn btn-skillora-outline mt-2" id="resetFilters">
+                <i class="fa fa-refresh me-1"></i> Réinitialiser les filtres
+            </button>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput  = document.getElementById('liveSearch');
+    const sortSelect   = document.getElementById('sortSelect');
+    const pills        = document.querySelectorAll('.filter-pill');
+    const items        = document.querySelectorAll('.formation-item');
+    const grid         = document.getElementById('formationsGrid');
+    const countEl      = document.getElementById('resultCount');
+    const emptyState   = document.getElementById('emptyState');
+    const resetBtn     = document.getElementById('resetFilters');
+
+    let currentFilter  = 'all';
+    let currentClub    = '';
+
+    // ── Filter Pills ──
+    pills.forEach(pill => {
+        pill.addEventListener('click', function () {
+            const filter = this.dataset.filter;
+            const club   = this.dataset.club;
+
+            if (club !== undefined) {
+                // Club pill
+                if (currentClub === club) {
+                    currentClub = '';
+                    this.classList.remove('active');
+                } else {
+                    document.querySelectorAll('.filter-pill[data-club]').forEach(p => p.classList.remove('active'));
+                    currentClub = club;
+                    this.classList.add('active');
+                }
+            } else if (filter !== undefined) {
+                // Status pill
+                currentFilter = filter;
+                document.querySelectorAll('.filter-pill[data-filter]').forEach(p => p.classList.remove('active'));
+                this.classList.add('active');
+            }
+
+            applyFilters();
+        });
+    });
+
+    // ── Live Search ──
+    searchInput.addEventListener('input', debounce(applyFilters, 200));
+
+    // ── Sort ──
+    sortSelect.addEventListener('change', applySort);
+
+    // ── Reset ──
+    resetBtn.addEventListener('click', function () {
+        searchInput.value = '';
+        currentFilter = 'all';
+        currentClub = '';
+        sortSelect.value = 'recent';
+        pills.forEach(p => p.classList.remove('active'));
+        document.querySelector('.filter-pill[data-filter="all"]').classList.add('active');
+        applyFilters();
+    });
+
+    function applyFilters() {
+        const query = searchInput.value.toLowerCase().trim();
+        let visible = 0;
+
+        items.forEach(item => {
+            const title       = item.dataset.title;
+            const desc        = item.dataset.description;
+            const club        = item.dataset.club;
+            const status      = item.dataset.status;
+            const participated = item.dataset.participated === '1';
+
+            // Text search
+            const matchSearch = !query
+                || title.includes(query)
+                || desc.includes(query)
+                || club.includes(query);
+
+            // Status filter
+            let matchStatus = true;
+            if (currentFilter === 'active')       matchStatus = (status === 'active');
+            else if (currentFilter === 'completed') matchStatus = (status === 'completed');
+            else if (currentFilter === 'participated') matchStatus = participated;
+
+            // Club filter
+            const matchClub = !currentClub || club === currentClub.toLowerCase();
+
+            if (matchSearch && matchStatus && matchClub) {
+                item.classList.remove('hidden-card');
+                visible++;
+            } else {
+                item.classList.add('hidden-card');
+            }
+        });
+
+        countEl.innerHTML = '<strong>' + visible + '</strong> formation' + (visible !== 1 ? 's' : '');
+        emptyState.style.display = visible === 0 ? 'block' : 'none';
+        grid.style.display = visible === 0 ? 'none' : '';
+    }
+
+    function applySort() {
+        const sorted = Array.from(items);
+        const val = sortSelect.value;
+
+        sorted.sort(function (a, b) {
+            switch (val) {
+                case 'recent':
+                    return b.dataset.date.localeCompare(a.dataset.date);
+                case 'oldest':
+                    return a.dataset.date.localeCompare(b.dataset.date);
+                case 'alpha':
+                    return a.dataset.title.localeCompare(b.dataset.title);
+                case 'popular':
+                    return parseInt(b.dataset.participants) - parseInt(a.dataset.participants);
+                default:
+                    return 0;
+            }
+        });
+
+        sorted.forEach(item => grid.appendChild(item));
+    }
+
+    function debounce(fn, delay) {
+        let timer;
+        return function () {
+            clearTimeout(timer);
+            timer = setTimeout(fn, delay);
+        };
+    }
+
+    // Auto-dismiss flash messages
+    document.querySelectorAll('.alert-dismissible').forEach(function (alert) {
+        setTimeout(function () {
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(function () { alert.remove(); }, 500);
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}
