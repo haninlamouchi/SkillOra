@@ -72,7 +72,7 @@
 <body class="with-welcome-text">
 <div class="container-scroller">
     <!-- NAVBAR -->
-    {% include 'backoffice/partials/_navbar.html.twig' %}
+    {{ include('backoffice/partials/_navbar.html.twig', {'user': app.user}) }}
 
     <div class="container-fluid page-body-wrapper">
         <!-- SIDEBAR -->

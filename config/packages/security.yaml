@@ -63,7 +63,7 @@ security:
                 enable_csrf: true
             logout:
                 path: app_logout
-                target: app_login
+                target: front_home
 
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
