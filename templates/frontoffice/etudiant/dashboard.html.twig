@@ -1,0 +1,50 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Dashboard Étudiant{% endblock %}
+
+{% block body %}
+<div class="card">
+    <h2>🎓 Bienvenue Étudiant</h2>
+    <p style="color: #718096; margin: 1rem 0 2rem 0;">Participez aux challenges et soumettez vos livrables</p>
+    
+    <div class="dashboard-grid">
+        
+        <div class="dashboard-card" style="--color-1: #3498db; --color-2: #2980b9;">
+            <div class="icon">🏆</div>
+            <h3>Challenges Disponibles</h3>
+            <p style="margin-bottom: 1.5rem; opacity: 0.9;">Découvrir et participer</p>
+            <a href="{{ path('app_etudiant_challenges') }}" class="btn">
+                Voir tous
+            </a>
+        </div>
+        
+        <div class="dashboard-card" style="--color-1: #9b59b6; --color-2: #8e44ad;">
+            <div class="icon">👥</div>
+            <h3>Mon Groupe</h3>
+            <p style="margin-bottom: 1.5rem; opacity: 0.9;">Gérer les membres</p>
+            <a href="{{ path('app_etudiant_groupe') }}" class="btn">
+                Gérer
+            </a>
+        </div>
+        
+        <div class="dashboard-card" style="--color-1: #e67e22; --color-2: #d35400;">
+            <div class="icon">📤</div>
+            <h3>Mes Participations</h3>
+            <p style="margin-bottom: 1.5rem; opacity: 0.9;">Suivre mes participations</p>
+            <a href="{{ path('app_etudiant_participations') }}" class="btn">
+                Consulter
+            </a>
+        </div>
+
+        <div class="dashboard-card" style="--color-1: #27ae60; --color-2: #229954;">
+            <div class="icon">📁</div>
+            <h3>Mes Livrables</h3>
+            <p style="margin-bottom: 1.5rem; opacity: 0.9;">Soumettre et suivre</p>
+            <a href="{{ path('app_etudiant_livrables') }}" class="btn">
+                Voir tout
+            </a>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

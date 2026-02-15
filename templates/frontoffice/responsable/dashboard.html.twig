@@ -1,0 +1,50 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Dashboard Responsable{% endblock %}
+
+{% block body %}
+<div class="card">
+    <h2>👩‍💼 Bienvenue Responsable</h2>
+    <p style="color: #718096; margin: 1rem 0 2rem 0;">Gérez vos challenges et suivez les participations des étudiants</p>
+    
+    <div class="dashboard-grid">
+        
+        <div class="dashboard-card" style="--color-1: #3498db; --color-2: #2980b9;">
+            <div class="icon">📋</div>
+            <h3>Mes Challenges</h3>
+            <p style="margin-bottom: 1.5rem; opacity: 0.9;">Créer et gérer vos challenges</p>
+            <a href="{{ path('app_responsable_challenges') }}" class="btn">
+                Voir tous
+            </a>
+        </div>
+        
+        <div class="dashboard-card" style="--color-1: #27ae60; --color-2: #229954;">
+            <div class="icon">➕</div>
+            <h3>Nouveau Challenge</h3>
+            <p style="margin-bottom: 1.5rem; opacity: 0.9;">Créer un challenge rapidement</p>
+            <a href="{{ path('app_responsable_challenge_new') }}" class="btn">
+                Créer maintenant
+            </a>
+        </div>
+        
+        <div class="dashboard-card" style="--color-1: #f39c12; --color-2: #d68910;">
+            <div class="icon">👥</div>
+            <h3>Participations</h3>
+            <p style="margin-bottom: 1.5rem; opacity: 0.9;">Suivre les participations</p>
+            <a href="{{ path('app_responsable_participations') }}" class="btn">
+                Consulter
+            </a>
+        </div>
+
+        <div class="dashboard-card" style="--color-1: #9b59b6; --color-2: #8e44ad;">
+            <div class="icon">📊</div>
+            <h3>Livrables</h3>
+            <p style="margin-bottom: 1.5rem; opacity: 0.9;">Valider ou refuser les livrables</p>
+            <a href="{{ path('app_responsable_livrables') }}" class="btn">
+                Voir tout
+            </a>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

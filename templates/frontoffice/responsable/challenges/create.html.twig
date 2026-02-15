@@ -1,0 +1,78 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Créer un Challenge{% endblock %}
+
+{% block body %}
+<div class="card">
+    <a href="{{ path('app_responsable_challenges') }}" 
+       style="color: #e53e3e; text-decoration: none; margin-bottom: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+        ← Retour à la liste
+    </a>
+
+    <h2>➕ Créer un nouveau Challenge</h2>
+    <p style="color: #718096; margin: 0.5rem 0 2rem 0;">Remplissez les informations du challenge</p>
+
+    {{ form_start(form) }}
+        <div style="display: grid; gap: 1.5rem;">
+            
+            <div class="form-group">
+                {{ form_label(form.titre, 'Titre du challenge') }}
+                {{ form_widget(form.titre, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Challenge IA et Machine Learning'}}) }}
+                {{ form_errors(form.titre) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.description, 'Description détaillée') }}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Décrivez les objectifs et le contexte du challenge...'}}) }}
+                {{ form_errors(form.description) }}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    {{ form_label(form.dateDebut, 'Date de début') }}
+                    {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.dateDebut) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.dateFin, 'Date de fin') }}
+                    {{ form_widget(form.dateFin, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.dateFin) }}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    {{ form_label(form.image, 'Image du challenge (optionnel)') }}
+                    <div style="border: 2px dashed #e2e8f0; border-radius: 10px; padding: 1.5rem; text-align: center; background: #f7fafc;">
+                        {{ form_widget(form.image) }}
+                        <p style="color: #a0aec0; font-size: 0.9rem; margin-top: 0.5rem;">JPG, PNG (max 2MB)</p>
+                    </div>
+                    {{ form_errors(form.image) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.fichierCahierCharges, 'Cahier des charges (PDF)') }}
+                    <div style="border: 2px dashed #e2e8f0; border-radius: 10px; padding: 1.5rem; text-align: center; background: #f7fafc;">
+                        {{ form_widget(form.fichierCahierCharges) }}
+                        <p style="color: #a0aec0; font-size: 0.9rem; margin-top: 0.5rem;">PDF uniquement</p>
+                    </div>
+                    {{ form_errors(form.fichierCahierCharges) }}
+                </div>
+            </div>
+
+            {{ form_rest(form) }}
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #e2e8f0;">
+                <button type="submit" class="btn btn-success" style="padding: 1rem 2rem;">
+                    ✅ Créer le Challenge
+                </button>
+                <a href="{{ path('app_responsable_challenges') }}" class="btn btn-secondary" style="padding: 1rem 2rem;">
+                    ❌ Annuler
+                </a>
+            </div>
+        </div>
+    {{ form_end(form) }}
+</div>
+
+{% endblock %}

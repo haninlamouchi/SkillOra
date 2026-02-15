@@ -1,0 +1,64 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Mes Challenges{% endblock %}
+
+{% block body %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h2>📋 Mes Challenges</h2>
+            <p style="color: #718096; margin-top: 0.5rem;">Gérez tous vos challenges</p>
+        </div>
+        <a href="{{ path('app_responsable_challenge_new') }}" class="btn btn-success">
+            ➕ Nouveau Challenge
+        </a>
+    </div>
+
+    {% if challenges is empty %}
+        <div class="empty-state">
+            <div class="icon">📭</div>
+            <p>Aucun challenge créé pour le moment</p>
+            <a href="{{ path('app_responsable_challenge_new') }}" class="btn">
+                Créer votre premier challenge
+            </a>
+        </div>
+    {% else %}
+        <div style="display: grid; gap: 1.5rem;">
+            {% for challenge in challenges %}
+                <div class="challenge-card">
+                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 2rem;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                <h3 style="color: #2d3748; font-size: 1.4rem; margin: 0;">{{ challenge.titre }}</h3>
+                                <span class="badge badge-primary">Actif</span>
+                            </div>
+                            
+                            <p style="color: #718096; margin-bottom: 1rem; line-height: 1.6;">
+                                {{ challenge.description|length > 150 ? challenge.description|slice(0, 150) ~ '...' : challenge.description }}
+                            </p>
+                            
+                            <div style="display: flex; gap: 2rem; font-size: 0.9rem; color: #a0aec0; flex-wrap: wrap;">
+                                <span style="display: flex; align-items: center; gap: 0.3rem;">
+                                    📅 {{ challenge.dateDebut|date('d/m/Y') }}
+                                </span>
+                                <span style="display: flex; align-items: center; gap: 0.3rem;">
+                                    📅 {{ challenge.dateFin|date('d/m/Y') }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 0.75rem; flex-shrink: 0;">
+                            <a href="#" class="btn" style="padding: 0.75rem 1.25rem; white-space: nowrap;">
+                                👁️ Détails
+                            </a>
+                            <a href="#" class="btn btn-warning" style="padding: 0.75rem 1.25rem; white-space: nowrap;">
+                                ✏️ Modifier
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

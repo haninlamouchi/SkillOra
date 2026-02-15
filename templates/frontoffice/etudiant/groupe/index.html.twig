@@ -1,0 +1,58 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Mon Groupe{% endblock %}
+
+{% block body %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2>👥 Mon Groupe</h2>
+        <a href="{{ path('app_etudiant_groupe_new') }}" class="btn btn-success">
+            ➕ Créer un groupe
+        </a>
+    </div>
+
+    {% if groupes is empty %}
+        <div style="text-align: center; padding: 3rem; color: #7f8c8d;">
+            <p style="font-size: 3rem;">👤</p>
+            <p>Vous n'avez pas encore de groupe</p>
+            <a href="{{ path('app_etudiant_groupe_new') }}" class="btn" style="margin-top: 1rem;">
+                Créer votre premier groupe
+            </a>
+        </div>
+    {% else %}
+        <div style="display: grid; gap: 1.5rem;">
+            {% for groupe in groupes %}
+                <div style="border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem;">
+                    <h3 style="color: #2c3e50; margin-bottom: 0.5rem;">{{ groupe.nomGroupe }}</h3>
+                    
+                    <div style="margin: 1rem 0;">
+                        <strong>Membres:</strong>
+                        <div style="margin-top: 0.5rem;">
+                            {% for membre in groupe.membres %}
+                                <span style="background: #ecf0f1; padding: 0.3rem 0.8rem; border-radius: 4px; margin-right: 0.5rem; display: inline-block; margin-bottom: 0.5rem;">
+                                    👤 {{ membre.user.nom }} {{ membre.user.prenom }}
+                                    {% if membre.role == 'chef' %}
+                                        <span style="color: #e74c3c;">★ Chef</span>
+                                    {% endif %}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem; display: flex; gap: 0.75rem;">
+                        <a href="{{ path('app_etudiant_groupe_show', {id: groupe.id}) }}" class="btn" style="padding: 0.5rem 1rem;">
+                            👁️ Voir détails
+                        </a>
+                        <a href="{{ path('app_etudiant_groupe_add_member', {id: groupe.id}) }}" class="btn btn-success" style="padding: 0.5rem 1rem;">
+                            ➕ Ajouter membre
+                        </a>
+                        <a href="{{ path('app_etudiant_groupe_edit', {id: groupe.id}) }}" class="btn btn-warning" style="padding: 0.5rem 1rem;">
+                            ✏️ Modifier
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

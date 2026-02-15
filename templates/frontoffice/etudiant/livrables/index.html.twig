@@ -1,0 +1,83 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Mes Livrables{% endblock %}
+
+{% block body %}
+<div class="card">
+    <h2>📁 Mes Livrables</h2>
+    <p style="color: #718096; margin: 0.5rem 0 2rem 0;">Tous les livrables soumis pour vos challenges</p>
+
+    {% if livrables is empty %}
+        <div class="empty-state">
+            <div class="icon">📭</div>
+            <p>Aucun livrable soumis pour le moment</p>
+            <a href="{{ path('app_etudiant_participations') }}" class="btn" style="margin-top: 1rem;">
+                Voir mes participations
+            </a>
+        </div>
+    {% else %}
+        <div style="display: grid; gap: 1.5rem;">
+            {% for livrable in livrables %}
+                <div class="challenge-card">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex: 1;">
+                            <h3 style="color: #2d3748; font-size: 1.3rem; margin-bottom: 0.75rem;">
+                                {{ livrable.challenge.titre }}
+                            </h3>
+                            
+                            <div style="background: #f7fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                    <div>
+                                        <strong style="color: #4a5568;">👥 Groupe:</strong>
+                                        <p style="margin: 0.25rem 0 0 0; color: #718096;">{{ livrable.groupe.nomGroupe }}</p>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #4a5568;">📅 Soumis le:</strong>
+                                        <p style="margin: 0.25rem 0 0 0; color: #718096;">{{ livrable.dateSoumission|date('d/m/Y à H:i') }}</p>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #4a5568;">📄 Fichier:</strong>
+                                        <p style="margin: 0.25rem 0 0 0; color: #718096;">{{ livrable.fichier }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 1rem;">
+                                <a href="{{ asset('uploads/' ~ livrable.fichier) }}" 
+                                   download
+                                   class="btn" style="padding: 0.75rem 1.5rem;">
+                                    💾 Télécharger
+                                </a>
+                                <span class="badge badge-success" style="padding: 0.75rem 1rem; font-size: 1rem;">
+                                    ✅ En attente de validation
+                                </span>
+                                {% if livrable.statut == 'valide' %}
+                                    <span class="badge badge-success" style="padding: 0.75rem 1rem; font-size: 1rem;">
+                                        ✅ Validé par le responsable
+                                    </span>
+                                {% elseif livrable.statut == 'refuse' %}
+                                    <span class="badge badge-danger" style="padding: 0.75rem 1rem; font-size: 1rem;">
+                                        ❌ Refusé - Vous devez soumettre un nouveau livrable
+                                    </span>
+                                {% else %}
+                                    <span class="badge" style="padding: 0.75rem 1rem; font-size: 1rem; background: linear-gradient(135deg, #f39c12 0%, #d68910 100%); color: white;">
+                                        ⏳ En attente de validation
+                                    </span>
+                                {% endif %}
+                                <form method="post" action="{{ path('app_etudiant_livrable_delete', {id: livrable.id}) }}" 
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce livrable ? Cette action est irréversible !');" 
+                                      style="display: inline;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ livrable.id) }}">
+                                    <button type="submit" class="btn btn-danger" style="padding: 0.75rem 1.5rem;">
+                                        🗑️ Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

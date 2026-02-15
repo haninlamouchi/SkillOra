@@ -2,74 +2,436 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Front{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Plateforme Challenge{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/frontoffice/vendor/bootstrap/css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/fontawesome.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/templatemo-scholar.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/owl.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/animate.css') }}">
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            min-height: 100vh;
+            padding-bottom: 2rem;
+        }
 
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e53e3e;
+        }
+
+        .navbar-brand span {
+            font-size: 1.8rem;
+        }
+
+        .navbar nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .navbar nav a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .navbar nav a:hover {
+            background: #f7fafc;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .navbar nav a.active {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.4);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Card */
+        .card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card h2 {
+            color: #2d3748;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .dashboard-card {
+            background: linear-gradient(135deg, var(--color-1) 0%, var(--color-2) 100%);
+            color: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(45deg);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .dashboard-card .icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+
+        .dashboard-card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-card .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .dashboard-card .btn:hover {
+            background: white;
+            color: var(--color-1);
+            transform: scale(1.05);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.875rem 1.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            box-shadow: 0 4px 12px rgba(237, 137, 54, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+            box-shadow: 0 4px 12px rgba(160, 174, 192, 0.3);
+        }
+
+        /* Challenge Cards */
+        .challenge-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .challenge-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .challenge-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .challenge-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.15);
+            transform: translateY(-5px);
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            color: #22543d;
+            border-left: 4px solid #38a169;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #fed7d7 0%, #fc8181 100%);
+            color: #742a2a;
+            border-left: 4px solid #e53e3e;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .badge-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #718096;
+        }
+
+        .empty-state .icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .navbar nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
     {% block stylesheets %}{% endblock %}
 </head>
-
 <body>
-
-<!-- ===== HEADER ===== -->
-<header class="header-area header-sticky">
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <nav class="main-nav">
-                    <!-- Logo -->
-                    <a href="#" class="logo">
-                        <h1>Scholar</h1>
-                    </a>
-
-                    <!-- Menu -->
-                    <ul class="nav">
-                        <li><a href="#" class="active">Home</a></li>
-                        <li><a href="#services">Services</a></li>
-                        <li><a href="#courses">Courses</a></li>
-                        <li><a href="#team">Team</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                    </ul>
-
-                    <a class="menu-trigger">
-                        <span>Menu</span>
-                    </a>
-                </nav>
+    <div class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <span>🎓</span>
+                <span>SkillOra</span>
             </div>
+            <nav>
+                {% if app.request.pathinfo starts with '/responsable' %}
+                    <a href="{{ path('app_responsable_dashboard') }}" 
+                       {% if app.request.get('_route') == 'app_responsable_dashboard' %}class="active"{% endif %}>
+                        🏠 Dashboard
+                    </a>
+                    <a href="{{ path('app_responsable_challenges') }}" 
+                       {% if app.request.get('_route') starts with 'app_responsable_challenge' %}class="active"{% endif %}>
+                        📋 Mes Challenges
+                    </a>
+                    <a href="{{ path('app_responsable_participations') }}"
+                        {% if app.request.get('_route') starts with 'app_responsable_participation' %}class="active"{% endif %}>
+                        👥 Participations
+                    </a>
+                    <a href="{{ path('app_responsable_livrables') }}"
+                       {% if app.request.get('_route') starts with 'app_responsable_livrable' %}class="active"{% endif %}>
+                        📊 Livrables
+                    </a>
+                {% endif %}
+
+                {% if app.request.pathinfo starts with '/etudiant' %}
+                    <a href="{{ path('app_etudiant_dashboard') }}"
+                       {% if app.request.get('_route') == 'app_etudiant_dashboard' %}class="active"{% endif %}>
+                        🏠 Dashboard
+                    </a>
+                    <a href="{{ path('app_etudiant_challenges') }}"
+                       {% if app.request.get('_route') starts with 'app_etudiant_challenge' %}class="active"{% endif %}>
+                        🏆 Challenges
+                    </a>
+                    <a href="{{ path('app_etudiant_groupe') }}"
+                       {% if app.request.get('_route') == 'app_etudiant_groupe' %}class="active"{% endif %}>
+                        👥 Mon Groupe
+                    </a>
+                    <a href="#">📤 Mes Livrables</a>
+                {% endif %}
+            </nav>
         </div>
     </div>
-</header>
-<!-- ===== HEADER END ===== -->
 
-<!-- ===== PAGE CONTENT ===== -->
-{% block body %}{% endblock %}
-<!-- ===== PAGE CONTENT END ===== -->
-
-<!-- ===== FOOTER ===== -->
-<footer>
     <div class="container">
-        <div class="col-lg-12 text-center">
-            <p>
-                © {{ "now"|date("Y") }} Scholar. All rights reserved.
-            </p>
-        </div>
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">
+                ✅ {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-error">
+                ❌ {{ message }}
+            </div>
+        {% endfor %}
+
+        {% block body %}{% endblock %}
     </div>
-</footer>
-<!-- ===== FOOTER END ===== -->
-
-<!-- JS -->
-<script src="{{ asset('assets/frontoffice/vendor/jquery/jquery.min.js') }}"></script>
-<script src="{{ asset('assets/frontoffice/vendor/bootstrap/js/bootstrap.min.js') }}"></script>
-<script src="{{ asset('assets/frontoffice/js/isotope.min.js') }}"></script>
-<script src="{{ asset('assets/frontoffice/js/owl-carousel.js') }}"></script>
-<script src="{{ asset('assets/frontoffice/js/counter.js') }}"></script>
-<script src="{{ asset('assets/frontoffice/js/custom.js') }}"></script>
-
-{% block javascripts %}{% endblock %}
 </body>
 </html>

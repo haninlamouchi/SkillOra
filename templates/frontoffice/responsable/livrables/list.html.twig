@@ -1,0 +1,94 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Livrables{% endblock %}
+
+{% block body %}
+<div class="card">
+    <h2>📊 Livrables Soumis</h2>
+    <p style="color: #718096; margin: 0.5rem 0 2rem 0;">Tous les livrables en attente de validation</p>
+
+    {% if livrables is empty %}
+        <div class="empty-state">
+            <div class="icon">📭</div>
+            <p>Aucun livrable soumis pour le moment</p>
+        </div>
+    {% else %}
+        <div style="display: grid; gap: 1.5rem;">
+            {% for livrable in livrables %}
+                <div class="challenge-card">
+                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 2rem;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+                                <h3 style="color: #2d3748; font-size: 1.3rem; margin: 0;">
+                                    {{ livrable.challenge.titre }}
+                                </h3>
+                                <span class="badge" style="background: linear-gradient(135deg, #f39c12 0%, #d68910 100%); color: white;">
+                                    ⏳ En attente
+                                </span>
+                            </div>
+                            
+                            <div style="background: #f7fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                    <div>
+                                        <strong style="color: #4a5568;">👥 Groupe:</strong>
+                                        <p style="margin: 0.25rem 0 0 0; color: #718096;">{{ livrable.groupe.nomGroupe }}</p>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #4a5568;">📅 Soumis le:</strong>
+                                        <p style="margin: 0.25rem 0 0 0; color: #718096;">
+                                            {{ livrable.dateSoumission|date('d/m/Y à H:i') }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #4a5568;">📄 Fichier:</strong>
+                                        <p style="margin: 0.25rem 0 0 0; color: #718096;">{{ livrable.fichier }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <a href="{{ asset('uploads/' ~ livrable.fichier) }}" 
+                                   download
+                                   class="btn" style="padding: 0.75rem 1.5rem;">
+                                    💾 Télécharger
+                                </a>
+                                
+                                {% if livrable.statut == 'en_attente' %}
+                                    <form method="post" action="{{ path('app_responsable_livrable_validate', {id: livrable.id}) }}" 
+                                          onsubmit="return confirm('Valider ce livrable ?');" 
+                                          style="display: inline;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('validate' ~ livrable.id) }}">
+                                        <button type="submit" class="btn btn-success" style="padding: 0.75rem 1.5rem;">
+                                            ✅ Valider
+                                        </button>
+                                    </form>
+
+                                
+                                    <form method="post" action="{{ path('app_responsable_livrable_reject', {id: livrable.id}) }}" 
+                                          onsubmit="return confirm('Refuser ce livrable ? Le groupe devra soumettre un nouveau fichier.');" 
+                                          style="display: inline;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ livrable.id) }}">
+                                        <button type="submit" class="btn btn-danger" style="padding: 0.75rem 1.5rem;">
+                                            ❌ Refuser
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span style="color: #718096; font-style: italic;">
+                                        {% if livrable.statut == 'valide' %}
+                                            ✅ Ce livrable a été validé
+                                        {% else %}
+                                            ❌ Ce livrable a été refusé
+                                        {% endif %}
+                                    </span>
+                                {% endif %}
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

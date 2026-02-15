@@ -18,6 +18,10 @@ class LivrableChallenge
 
     #[ORM\Column(length: 255)]
     private ?string $fichier = null;
+    
+    #[ORM\Column(length: 20)]
+    private ?string $statut = 'en_attente';
+
 
     #[ORM\Column]
     private ?\DateTimeImmutable $dateSoumission = null;
@@ -85,6 +89,17 @@ class LivrableChallenge
     public function setGroupe(?Groupe $groupe): static
     {
         $this->groupe = $groupe;
+        return $this;
+    }
+
+    public function getStatut(): ?string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(string $statut): static
+    {
+        $this->statut = $statut;
         return $this;
     }
 }

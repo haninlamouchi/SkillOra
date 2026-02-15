@@ -1,0 +1,80 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Soumettre un livrable{% endblock %}
+
+{% block body %}
+<div class="card">
+    <a href="{{ path('app_etudiant_participations') }}" 
+       style="color: #e53e3e; text-decoration: none; margin-bottom: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+        ← Retour aux participations
+    </a>
+
+    <h2>📤 Soumettre un livrable</h2>
+    <p style="color: #718096; margin: 0.5rem 0 2rem 0;">Challenge : <strong>{{ participation.challenge.titre }}</strong></p>
+
+    <div style="background: #f7fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+        <h3 style="color: #2d3748; font-size: 1.1rem; margin-bottom: 1rem;">📋 Informations</h3>
+        <div style="display: grid; gap: 0.75rem;">
+            <div><strong>👥 Groupe :</strong> {{ participation.groupe.nomGroupe }}</div>
+            <div><strong>📅 Date limite :</strong> {{ participation.challenge.dateFin|date('d/m/Y') }}</div>
+            <div><strong>📅 Participation le :</strong> {{ participation.dateParticipation|date('d/m/Y à H:i') }}</div>
+        </div>
+    </div>
+
+    <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid #ffc107;">
+        <strong>⚠️ Important :</strong>
+        <ul style="margin: 0.5rem 0 0 1.5rem; color: #856404;">
+            <li>Formats acceptés : ZIP, PDF, RAR</li>
+            <li>Taille maximale : 10 MB</li>
+            <li>Une seule soumission par groupe</li>
+            <li>Assurez-vous que tous les membres du groupe sont d'accord</li>
+        </ul>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="fichier">Sélectionner votre fichier livrable</label>
+            <div style="border: 2px dashed #e2e8f0; border-radius: 12px; padding: 2rem; text-align: center; background: #f7fafc; transition: all 0.3s;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📁</div>
+                <input type="file" 
+                       id="fichier" 
+                       name="fichier" 
+                       required
+                       accept=".zip,.pdf,.rar"
+                       style="margin-bottom: 1rem;">
+                <p style="color: #a0aec0; font-size: 0.9rem;">ZIP, PDF, RAR (max 10 MB)</p>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid #e2e8f0;">
+            <button type="submit" class="btn btn-success" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                ✅ Soumettre le livrable
+            </button>
+            <a href="{{ path('app_etudiant_participations') }}" class="btn btn-secondary" style="padding: 1rem 2rem;">
+                ❌ Annuler
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+input[type="file"] {
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+    background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-right: 1rem;
+}
+</style>
+{% endblock %}

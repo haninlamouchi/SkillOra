@@ -1,0 +1,65 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Participer - {{ challenge.titre }}{% endblock %}
+
+{% block body %}
+<div class="card">
+    <a href="{{ path('app_etudiant_challenge_detail', {id: challenge.id}) }}" 
+       style="color: #e53e3e; text-decoration: none; margin-bottom: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+        ← Retour au challenge
+    </a>
+
+    <h2>🏆 Participer au challenge</h2>
+    <p style="color: #718096; margin: 0.5rem 0 2rem 0;">Challenge : <strong>{{ challenge.titre }}</strong></p>
+
+    <div style="background: #f7fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+        <h3 style="color: #2d3748; font-size: 1.1rem; margin-bottom: 1rem;">📋 Informations du challenge</h3>
+        <div style="display: grid; gap: 0.75rem;">
+            <div>📅 <strong>Début :</strong> {{ challenge.dateDebut|date('d/m/Y') }}</div>
+            <div>📅 <strong>Fin :</strong> {{ challenge.dateFin|date('d/m/Y') }}</div>
+        </div>
+    </div>
+
+    {% if groupes is empty %}
+        <div class="empty-state">
+            <div class="icon">😔</div>
+            <p>Vous devez d'abord créer un groupe</p>
+            <a href="{{ path('app_etudiant_groupe_new') }}" class="btn btn-success" style="margin-top: 1rem;">
+                Créer mon premier groupe
+            </a>
+        </div>
+    {% else %}
+        <h3 style="color: #2d3748; margin-bottom: 1rem;">Choisissez votre groupe</h3>
+        
+        <form method="post">
+            <div class="form-group">
+                <label>Sélectionner un groupe</label>
+                <select name="groupe_id" class="form-control" required>
+                    <option value="">-- Choisir un groupe --</option>
+                    {% for groupe in groupes %}
+                        <option value="{{ groupe.id }}">
+                            {{ groupe.nomGroupe }} ({{ groupe.membres|length }} membre(s))
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin: 1.5rem 0; border-left: 4px solid #ffc107;">
+                <strong>⚠️ Important :</strong>
+                <p style="margin: 0.5rem 0 0 0; color: #856404;">
+                    Une fois la participation enregistrée, tous les membres de votre groupe pourront collaborer sur ce challenge.
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid #e2e8f0;">
+                <button type="submit" class="btn btn-success" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                    ✅ Confirmer la participation
+                </button>
+                <a href="{{ path('app_etudiant_challenge_detail', {id: challenge.id}) }}" class="btn btn-secondary" style="padding: 1rem 2rem;">
+                    ❌ Annuler
+                </a>
+            </div>
+        </form>
+    {% endif %}
+</div>
+{% endblock %}

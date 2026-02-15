@@ -30,10 +30,11 @@ class User
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $role = null;
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
 
-    #[ORM\Column]
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTime $datelnscription = null;
 
     #[ORM\Column(length: 20)]
@@ -109,14 +110,23 @@ class User
         return $this;
     }
 
-    public function getRole(): ?string
-    {
-        return $this->role;
+    public function getRoles(): array
+    { 
+        $roles = $this->roles;
+
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
     }
 
-    public function setRole(string $role): static
+    public function setRoles($roles): self
     {
-        $this->role = $role;
+        // si Symfony envoie une string
+        if (!is_array($roles)) {
+            $roles = [$roles];
+        }
+
+        $this->roles = $roles;
 
         return $this;
     }

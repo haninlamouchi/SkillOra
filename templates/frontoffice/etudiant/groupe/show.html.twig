@@ -1,0 +1,108 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}{{ groupe.nomGroupe }}{% endblock %}
+
+{% block body %}
+<div class="card">
+    <a href="{{ path('app_etudiant_groupe') }}" 
+       style="color: #e53e3e; text-decoration: none; margin-bottom: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+        ← Retour aux groupes
+    </a>
+
+    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
+        <div>
+            <h2>👥 {{ groupe.nomGroupe }}</h2>
+            <p style="color: #718096; margin-top: 0.5rem;">
+                {{ groupe.membres|length }} membre(s)
+            </p>
+        </div>
+        
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <a href="{{ path('app_etudiant_groupe_add_member', {id: groupe.id}) }}" class="btn btn-success">
+                ➕ Ajouter un membre
+            </a>
+            <a href="{{ path('app_etudiant_groupe_edit', {id: groupe.id}) }}" class="btn btn-warning">
+                ✏️ Modifier le nom
+            </a>
+            <form method="post" action="{{ path('app_etudiant_groupe_delete', {id: groupe.id}) }}" 
+                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce groupe ?');" 
+                  style="display: inline;">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ groupe.id) }}">
+                <button type="submit" class="btn btn-danger" style="padding: 0.875rem 1.75rem;">
+                    🗑️ Supprimer le groupe
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div style="background: #f7fafc; padding: 2rem; border-radius: 12px;">
+        <h3 style="color: #2d3748; margin-bottom: 1.5rem; font-size: 1.2rem;">Membres du groupe</h3>
+        
+        {% if groupe.membres is empty %}
+            <div class="empty-state" style="padding: 2rem;">
+                <div class="icon" style="font-size: 3rem;">👤</div>
+                <p>Aucun membre dans ce groupe</p>
+                <a href="{{ path('app_etudiant_groupe_add_member', {id: groupe.id}) }}" class="btn" style="margin-top: 1rem;">
+                    Ajouter le premier membre
+                </a>
+            </div>
+        {% else %}
+            <div style="display: grid; gap: 1rem;">
+                {% for membre in groupe.membres %}
+                    <div style="background: white; padding: 1.5rem; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: 700;">
+                                {{ membre.user.nom|first }}{{ membre.user.prenom|first }}
+                            </div>
+                            <div>
+                                <h4 style="color: #2d3748; margin: 0; font-size: 1.1rem;">
+                                    {{ membre.user.nom }} {{ membre.user.prenom }}
+                                </h4>
+                                <p style="color: #a0aec0; margin: 0.25rem 0 0 0; font-size: 0.9rem;">
+                                    {{ membre.user.email }}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            {% if membre.role == 'chef' %}
+                                <span class="badge" style="background: linear-gradient(135deg, #f39c12 0%, #d68910 100%); color: white;">
+                                    ⭐ Chef
+                                </span>
+                            {% else %}
+                                <span class="badge badge-primary">
+                                    👤 Membre
+                                </span>
+                            {% endif %}
+                            
+                            <form method="post" action="{{ path('app_etudiant_groupe_remove_member', {groupeId: groupe.id, membreId: membre.id}) }}" 
+                                  onsubmit="return confirm('Retirer {{ membre.user.nom }} du groupe ?');" 
+                                  style="display: inline;">
+                                <button type="submit" class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                                    ❌ Retirer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    {% if groupe.participations is not empty %}
+        <div style="margin-top: 2rem;">
+            <h3 style="color: #2d3748; margin-bottom: 1rem;">🏆 Participations</h3>
+            <div style="display: grid; gap: 1rem;">
+                {% for participation in groupe.participations %}
+                    <div style="background: #f7fafc; padding: 1.5rem; border-radius: 10px;">
+                        <strong>{{ participation.challenge.titre }}</strong>
+                        <p style="color: #718096; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                            Participé le {{ participation.dateParticipation|date('d/m/Y') }}
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

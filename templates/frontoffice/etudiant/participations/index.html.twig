@@ -1,0 +1,92 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Mes Participations{% endblock %}
+
+{% block body %}
+<div class="card">
+    <h2>📤 Mes Participations</h2>
+    <p style="color: #718096; margin: 0.5rem 0 2rem 0;">Suivez toutes vos participations aux challenges</p>
+
+    {% if participations is empty %}
+        <div class="empty-state">
+            <div class="icon">📭</div>
+            <p>Aucune participation pour le moment</p>
+            <p style="font-size: 0.95rem; margin-top: 0.5rem;">Participez à un challenge pour commencer !</p>
+            <a href="{{ path('app_etudiant_challenges') }}" class="btn" style="margin-top: 1rem;">
+                Voir les challenges disponibles
+            </a>
+        </div>
+    {% else %}
+        <div style="display: grid; gap: 1.5rem;">
+            {% for participation in participations %}
+                <div class="challenge-card">
+                    <div style="display: flex; gap: 2rem; align-items: start;">
+                        
+                        {% if participation.challenge.image %}
+                            <div style="flex-shrink: 0;">
+                                <img src="{{ asset('uploads/' ~ participation.challenge.image) }}" 
+                                     alt="{{ participation.challenge.titre }}" 
+                                     style="width: 150px; height: 150px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                            </div>
+                        {% endif %}
+
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+                                <h3 style="color: #2d3748; font-size: 1.4rem; margin: 0;">
+                                    {{ participation.challenge.titre }}
+                                </h3>
+                                <span class="badge badge-success">✅ Inscrit</span>
+                            </div>
+                            
+                            <p style="color: #718096; margin-bottom: 1rem;">
+                                {{ participation.challenge.description|length > 120 ? participation.challenge.description|slice(0, 120) ~ '...' : participation.challenge.description }}
+                            </p>
+                            
+                            <div style="background: #f7fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                    <div>
+                                        <strong style="color: #4a5568;">👥 Groupe:</strong>
+                                        <p style="margin: 0.25rem 0 0 0; color: #718096;">
+                                            {{ participation.groupe.nomGroupe }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #4a5568;">📅 Date de participation:</strong>
+                                        <p style="margin: 0.25rem 0 0 0; color: #718096;">
+                                            {{ participation.dateParticipation|date('d/m/Y à H:i') }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #4a5568;">📅 Date limite:</strong>
+                                        <p style="margin: 0.25rem 0 0 0; color: #718096;">
+                                            {{ participation.challenge.dateFin|date('d/m/Y') }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 1rem;">
+                                <a href="{{ path('app_etudiant_challenge_detail', {id: participation.challenge.id}) }}" 
+                                   class="btn" style="padding: 0.75rem 1.5rem;">
+                                    👁️ Voir le challenge
+                                </a>
+                                <a href="{{ path('app_etudiant_livrable_submit', {id: participation.id}) }}" class="btn btn-success" style="padding: 0.75rem 1.5rem;">
+                                    📤 Soumettre un livrable
+                                </a>
+                                <form method="post" action="{{ path('app_etudiant_participation_delete', {id: participation.id}) }}" 
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette participation ?');" 
+                                      style="display: inline;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ participation.id) }}">
+                                    <button type="submit" class="btn btn-danger" style="padding: 0.75rem 1.5rem;">
+                                        ❌ Annuler la participation
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

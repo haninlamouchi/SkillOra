@@ -1,0 +1,70 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Participations{% endblock %}
+
+{% block body %}
+<div class="card">
+    <h2>👥 Participations aux Challenges</h2>
+    <p style="color: #718096; margin: 0.5rem 0 2rem 0;">Toutes les participations des étudiants</p>
+
+    {% if participations is empty %}
+        <div class="empty-state">
+            <div class="icon">📭</div>
+            <p>Aucune participation pour le moment</p>
+        </div>
+    {% else %}
+        <div style="display: grid; gap: 1.5rem;">
+            {% for participation in participations %}
+                <div class="challenge-card">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+                                <h3 style="color: #2d3748; font-size: 1.3rem; margin: 0;">
+                                    {{ participation.challenge.titre }}
+                                </h3>
+                                <span class="badge badge-primary">Challenge</span>
+                            </div>
+                            
+                            <div style="background: #f7fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                    <div>
+                                        <strong style="color: #4a5568;">👥 Groupe:</strong>
+                                        <p style="margin: 0.25rem 0 0 0; color: #718096;">
+                                            {{ participation.groupe.nomGroupe }}
+                                            ({{ participation.groupe.membres|length }} membre(s))
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #4a5568;">📅 Date de participation:</strong>
+                                        <p style="margin: 0.25rem 0 0 0; color: #718096;">
+                                            {{ participation.dateParticipation|date('d/m/Y à H:i') }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #4a5568;">📅 Date limite:</strong>
+                                        <p style="margin: 0.25rem 0 0 0; color: #718096;">
+                                            {{ participation.challenge.dateFin|date('d/m/Y') }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 1rem;">
+                                <strong style="color: #4a5568;">Membres du groupe :</strong>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                                    {% for membre in participation.groupe.membres %}
+                                        <span class="badge" style="background: #e2e8f0; color: #2d3748; padding: 0.5rem 0.75rem;">
+                                            👤 {{ membre.user.nom }} {{ membre.user.prenom }}
+                                            {% if membre.role == 'chef' %}⭐{% endif %}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

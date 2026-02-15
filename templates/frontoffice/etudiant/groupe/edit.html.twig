@@ -1,0 +1,34 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Modifier le groupe{% endblock %}
+
+{% block body %}
+<div class="card">
+    <a href="{{ path('app_etudiant_groupe_show', {id: groupe.id}) }}" 
+       style="color: #e53e3e; text-decoration: none; margin-bottom: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+        ← Retour
+    </a>
+
+    <h2>✏️ Modifier le groupe</h2>
+    <p style="color: #718096; margin: 0.5rem 0 2rem 0;">Modifiez les informations du groupe</p>
+
+    {{ form_start(form) }}
+        <div class="form-group">
+            {{ form_label(form.nomGroupe, 'Nom du groupe') }}
+            {{ form_widget(form.nomGroupe, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.nomGroupe) }}
+        </div>
+
+        {{ form_rest(form) }}
+
+        <div style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid #e2e8f0;">
+            <button type="submit" class="btn btn-success" style="padding: 1rem 2rem;">
+                ✅ Enregistrer
+            </button>
+            <a href="{{ path('app_etudiant_groupe_show', {id: groupe.id}) }}" class="btn btn-secondary" style="padding: 1rem 2rem;">
+                ❌ Annuler
+            </a>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

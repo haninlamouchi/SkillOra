@@ -13,4 +13,16 @@ class FrontofficeController extends AbstractController
     {
         return $this->render('frontoffice/home.html.twig');
     }
+
+    #[Route('/responsable/dashboard', name: 'responsable_dashboard')]
+    public function responsableDashboard(): Response
+    {
+        return $this->render('frontoffice/responsable/dashboard.html.twig');
+    }
+
+    #[Route('/etudiant/dashboard', name: 'etudiant_dashboard')]
+    public function etudiantDashboard(): Response
+    {
+        return $this->render('frontoffice/etudiant/dashboard.html.twig');
+    }
 }

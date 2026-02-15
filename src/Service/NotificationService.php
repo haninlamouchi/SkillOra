@@ -16,9 +16,10 @@ class NotificationService
 
     public function envoyerEmail($to, $sujet, $message)
     {
-        dump("Email envoyé à $to | Sujet: $sujet | Message: $message");
+        dump("EMAIL ENVOYÉ À : ".$to);
+
         $email = (new Email())
-            ->from('noreply@challenge.com')
+            ->from('noreply@skillora.tn')
             ->to($to)
             ->subject($sujet)
             ->text($message);

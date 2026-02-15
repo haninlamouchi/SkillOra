@@ -1,0 +1,37 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Créer un Groupe{% endblock %}
+
+{% block body %}
+<div class="card">
+    <a href="{{ path('app_etudiant_groupe') }}" 
+       style="color: #e53e3e; text-decoration: none; margin-bottom: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+        ← Retour
+    </a>
+
+    <h2>➕ Créer un nouveau Groupe</h2>
+    <p style="color: #718096; margin: 0.5rem 0 2rem 0;">Créez votre groupe pour participer aux challenges</p>
+
+    {{ form_start(form) }}
+        <div style="display: grid; gap: 1.5rem;">
+            
+            <div class="form-group">
+                {{ form_label(form.nomGroupe, 'Nom du groupe') }}
+                {{ form_widget(form.nomGroupe, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Les Innovateurs'}}) }}
+                {{ form_errors(form.nomGroupe) }}
+            </div>
+
+            {{ form_rest(form) }}
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #e2e8f0;">
+                <button type="submit" class="btn btn-success" style="padding: 1rem 2rem;">
+                    ✅ Créer le Groupe
+                </button>
+                <a href="{{ path('app_etudiant_groupe') }}" class="btn btn-secondary" style="padding: 1rem 2rem;">
+                    ❌ Annuler
+                </a>
+            </div>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}
