@@ -112,25 +112,41 @@ public function editGroupe(Request $request, Groupe $groupe, EntityManagerInterf
 public function addMember(Request $request, Groupe $groupe, EntityManagerInterface $entityManager, UserRepository $userRepository): Response
 {
     if ($request->isMethod('POST')) {
-        $userId = $request->request->get('user_id');
-        $role = $request->request->get('role', 'membre');
-        
-        $user = $userRepository->find($userId);
-        
-        if ($user) {
-            $membre = new MembreGroupe();
-            $membre->setUser($user);
-            $membre->setGroupe($groupe);
-            $membre->setRole($role);
-            
-            $entityManager->persist($membre);
-            $entityManager->flush();
-            
-            $this->addFlash('success', 'Membre ajouté avec succès ! 👤');
-        }
-        
-        return $this->redirectToRoute('app_etudiant_groupe_show', ['id' => $groupe->getId()]);
+    $userId = $request->request->get('user_id');
+    $role = $request->request->get('role', 'membre');
+    
+    // Validation côté serveur
+    if (empty($userId)) {
+        $this->addFlash('error', 'Veuillez sélectionner un utilisateur. ❌');
+        return $this->redirectToRoute('app_etudiant_groupe_add_member', ['id' => $groupe->getId()]);
     }
+    
+    $user = $userRepository->find($userId);
+    
+    if (!$user) {
+        $this->addFlash('error', 'Utilisateur introuvable. ❌');
+        return $this->redirectToRoute('app_etudiant_groupe_add_member', ['id' => $groupe->getId()]);
+    }
+    
+    // Vérifier si l'utilisateur n'est pas déjà membre
+    $existingMemberIds = array_map(fn($m) => $m->getUser()->getId(), $groupe->getMembres()->toArray());
+    if (in_array($userId, $existingMemberIds)) {
+        $this->addFlash('error', 'Cet utilisateur est déjà membre du groupe ! ❌');
+        return $this->redirectToRoute('app_etudiant_groupe_add_member', ['id' => $groupe->getId()]);
+    }
+    
+    $membre = new MembreGroupe();
+    $membre->setUser($user);
+    $membre->setGroupe($groupe);
+    $membre->setRole($role);
+    
+    $entityManager->persist($membre);
+    $entityManager->flush();
+    
+    $this->addFlash('success', 'Membre ajouté avec succès ! 👤');
+    
+    return $this->redirectToRoute('app_etudiant_groupe_show', ['id' => $groupe->getId()]);
+}
     
     // Récupérer tous les utilisateurs qui ne sont pas déjà dans le groupe
     $allUsers = $userRepository->findAll();

@@ -19,10 +19,10 @@
             <p style="font-size: 0.9rem; margin-top: 0.5rem;">Tous les utilisateurs sont déjà dans le groupe</p>
         </div>
     {% else %}
-        <form method="post">
+        <form method="post" novalidate>
             <div class="form-group">
                 <label>Sélectionner un utilisateur</label>
-                <select name="user_id" class="form-control" required>
+                <select name="user_id" class="form-control">
                     <option value="">-- Choisir un étudiant --</option>
                     {% for user in availableUsers %}
                         <option value="{{ user.id }}">{{ user.nom }} {{ user.prenom }} ({{ user.email }})</option>

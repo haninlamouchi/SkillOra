@@ -48,10 +48,10 @@
                         </div>
 
                         <div style="display: flex; gap: 0.75rem; flex-shrink: 0;">
-                            <a href="#" class="btn" style="padding: 0.75rem 1.25rem; white-space: nowrap;">
+                            <a href="{{ path('app_responsable_challenge_show', {id: challenge.id}) }}" class="btn" style="padding: 0.75rem 1.25rem; white-space: nowrap;">
                                 👁️ Détails
                             </a>
-                            <a href="#" class="btn btn-warning" style="padding: 0.75rem 1.25rem; white-space: nowrap;">
+                            <a href="{{ path('app_responsable_challenge_edit', {id: challenge.id}) }}" class="btn btn-warning" style="padding: 0.75rem 1.25rem; white-space: nowrap;">
                                 ✏️ Modifier
                             </a>
                         </div>

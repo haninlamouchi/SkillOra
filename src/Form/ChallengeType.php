@@ -16,13 +16,19 @@ class ChallengeType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('titre')
-            ->add('description')
+            ->add('titre', null, [
+                'required' => false,
+            ])
+            ->add('description', null, [
+                'required' => false,
+            ])
             ->add('dateDebut', DateType::class, [
             'widget' => 'single_text',
+            'required' => true,
             ])
             ->add('dateFin', DateType::class, [
             'widget' => 'single_text',
+            'required' => true,
             ])
              ->add('image', FileType::class, [
             'mapped' => false,
@@ -54,6 +60,7 @@ class ChallengeType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Challenge::class,
+            'attr' => ['novalidate' => 'novalidate'],
         ]);
     }
 }

@@ -1,0 +1,73 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}{{ challenge.titre }}{% endblock %}
+
+{% block body %}
+<div class="card">
+    <a href="{{ path('app_responsable_challenges') }}" 
+       style="color: #e53e3e; text-decoration: none; margin-bottom: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+        ← Retour à la liste
+    </a>
+
+    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
+        <h2>{{ challenge.titre }}</h2>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{{ path('app_responsable_challenge_edit', {id: challenge.id}) }}" class="btn btn-warning">
+                ✏️ Modifier
+            </a>
+        </div>
+    </div>
+    
+    <div style="background: #ecf0f1; padding: 1rem; border-radius: 4px; margin: 1.5rem 0;">
+        <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+            <div>
+                <strong>📅 Date de début:</strong> {{ challenge.dateDebut|date('d/m/Y') }}
+            </div>
+            <div>
+                <strong>📅 Date de fin:</strong> {{ challenge.dateFin|date('d/m/Y') }}
+            </div>
+        </div>
+    </div>
+
+    {% if challenge.image %}
+        <div style="margin: 1.5rem 0;">
+            <img src="{{ asset('uploads/' ~ challenge.image) }}" alt="{{ challenge.titre }}" 
+                 style="max-width: 100%; border-radius: 8px;">
+        </div>
+    {% endif %}
+
+    <div style="margin: 1.5rem 0;">
+        <h3 style="color: #2c3e50; margin-bottom: 0.5rem;">📝 Description</h3>
+        <p style="line-height: 1.6; color: #34495e;">{{ challenge.description }}</p>
+    </div>
+
+    {% if challenge.fichierCahierCharges %}
+        <div style="background: #fff3cd; padding: 1rem; border-radius: 4px; margin: 1.5rem 0;">
+            <strong>📄 Cahier des charges:</strong>
+            <a href="{{ asset('uploads/' ~ challenge.fichierCahierCharges) }}" 
+               target="_blank" 
+               style="color: #856404; margin-left: 0.5rem;">
+                Télécharger le PDF
+            </a>
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid #ecf0f1;">
+        <h3 style="color: #2c3e50; margin-bottom: 1rem;">👥 Participations ({{ challenge.participations|length }})</h3>
+        {% if challenge.participations is empty %}
+            <p style="color: #718096;">Aucune participation pour ce challenge</p>
+        {% else %}
+            <div style="display: grid; gap: 1rem;">
+                {% for participation in challenge.participations %}
+                    <div style="background: #f7fafc; padding: 1rem; border-radius: 8px;">
+                        <strong>{{ participation.groupe.nomGroupe }}</strong>
+                        <span style="color: #718096; margin-left: 1rem;">
+                            Participé le {{ participation.dateParticipation|date('d/m/Y') }}
+                        </span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

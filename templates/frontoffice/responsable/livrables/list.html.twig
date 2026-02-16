@@ -22,9 +22,19 @@
                                 <h3 style="color: #2d3748; font-size: 1.3rem; margin: 0;">
                                     {{ livrable.challenge.titre }}
                                 </h3>
-                                <span class="badge" style="background: linear-gradient(135deg, #f39c12 0%, #d68910 100%); color: white;">
-                                    ⏳ En attente
-                                </span>
+                                {% if livrable.statut == 'valide' %}
+                                    <span class="badge badge-success" style="font-size: 1rem;">
+                                        ✅ Validé
+                                    </span>
+                                {% elseif livrable.statut == 'refuse' %}
+                                    <span class="badge badge-danger" style="font-size: 1rem;">
+                                        ❌ Refusé
+                                    </span>
+                                {% else %}
+                                    <span class="badge" style="background: linear-gradient(135deg, #f39c12 0%, #d68910 100%); color: white; font-size: 1rem;">
+                                        ⏳ En attente
+                                    </span>
+                                {% endif %}
                             </div>
                             
                             <div style="background: #f7fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">

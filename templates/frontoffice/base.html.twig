@@ -412,7 +412,10 @@
                        {% if app.request.get('_route') == 'app_etudiant_groupe' %}class="active"{% endif %}>
                         👥 Mon Groupe
                     </a>
-                    <a href="#">📤 Mes Livrables</a>
+                    <a href="{{ path('app_etudiant_livrables') }}"
+                        {% if app.request.get('_route') == 'app_etudiant_livrables' %}class="active"{% endif %}>
+                         📁 Mes Livrables
+                    </a>
                 {% endif %}
             </nav>
         </div>

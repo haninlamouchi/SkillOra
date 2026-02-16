@@ -120,9 +120,12 @@ public function validateLivrable(Request $request, LivrableChallenge $livrable, 
             $this->addFlash('error', 'Ce livrable est déjà validé ! ✅');
             return $this->redirectToRoute('app_responsable_livrables');
         }
+    
         
         $livrable->setStatut('valide');
-        $entityManager->flush();   
+        $entityManager->flush(); 
+        
+    
         
         $this->addFlash('success', 'Livrable validé avec succès ! ✅');
     }
@@ -146,5 +149,62 @@ public function rejectLivrable(Request $request, LivrableChallenge $livrable, En
     }
     
     return $this->redirectToRoute('app_responsable_livrables');
+}
+
+#[Route('/challenges/{id}', name: 'app_responsable_challenge_show', requirements: ['id' => '\d+'])]
+public function showChallenge(Challenge $challenge): Response
+{
+    return $this->render('frontoffice/responsable/challenges/show.html.twig', [
+        'challenge' => $challenge,
+    ]);
+}
+
+#[Route('/challenges/{id}/modifier', name: 'app_responsable_challenge_edit', methods: ['GET', 'POST'])]
+public function editChallenge(Request $request, Challenge $challenge, EntityManagerInterface $entityManager): Response
+{
+    $form = $this->createForm(ChallengeType::class, $challenge);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        // Gestion de l'image si changée
+        $imageFile = $form->get('image')->getData();
+        if ($imageFile) {
+            $newFilename = uniqid().'.'.$imageFile->guessExtension();
+            try {
+                $imageFile->move(
+                    $this->getParameter('uploads_directory'),
+                    $newFilename
+                );
+                $challenge->setImage($newFilename);
+            } catch (FileException $e) {
+                $this->addFlash('error', 'Erreur lors de l\'upload de l\'image.');
+            }
+        }
+
+        // Gestion du cahier des charges si changé
+        $cahierFile = $form->get('fichierCahierCharges')->getData();
+        if ($cahierFile) {
+            $newFilename = uniqid().'.'.$cahierFile->guessExtension();
+            try {
+                $cahierFile->move(
+                    $this->getParameter('uploads_directory'),
+                    $newFilename
+                );
+                $challenge->setFichierCahierCharges($newFilename);
+            } catch (FileException $e) {
+                $this->addFlash('error', 'Erreur lors de l\'upload du fichier PDF.');
+            }
+        }
+
+        $entityManager->flush();
+        
+        $this->addFlash('success', 'Challenge modifié avec succès ! ✅');
+        return $this->redirectToRoute('app_responsable_challenges');
+    }
+
+    return $this->render('frontoffice/responsable/challenges/edit.html.twig', [
+        'challenge' => $challenge,
+        'form' => $form,
+    ]);
 }
 }
