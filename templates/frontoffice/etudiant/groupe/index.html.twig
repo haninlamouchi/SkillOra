@@ -11,6 +11,47 @@
         </a>
     </div>
 
+    {# BARRE DE RECHERCHE ET TRI #}
+    <div style="background: #f7fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+        <form method="get" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: end;">
+            <div style="flex: 1; min-width: 250px;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2d3748;">
+                    🔍 Rechercher
+                </label>
+                <input type="text" 
+                       name="search" 
+                       value="{{ search }}" 
+                       placeholder="Nom du groupe..."
+                       style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px;">
+            </div>
+            
+            <div style="min-width: 120px;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2d3748;">
+                    ↕️ Ordre
+                </label>
+                <select name="order" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <option value="ASC" {% if order == 'ASC' %}selected{% endif %}>A → Z</option>
+                    <option value="DESC" {% if order == 'DESC' %}selected{% endif %}>Z → A</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
+                    Filtrer
+                </button>
+                <a href="{{ path('app_etudiant_groupe') }}" class="btn btn-secondary" style="padding: 0.75rem 1.5rem;">
+                    Réinitialiser
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    {% if search %}
+        <p style="color: #718096; margin-bottom: 1rem;">
+            📊 {{ groupes|length }} résultat(s) pour "{{ search }}"
+        </p>
+    {% endif %}
+
     {% if groupes is empty %}
         <div style="text-align: center; padding: 3rem; color: #7f8c8d;">
             <p style="font-size: 3rem;">👤</p>

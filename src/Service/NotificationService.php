@@ -5,6 +5,7 @@ namespace App\Service;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Mime\Address;
 
 class NotificationService
 {
@@ -21,7 +22,7 @@ class NotificationService
 {
     try {
         $email = (new Email())
-            ->from('kmaryem50@gmail.com')
+            ->from(new Address('kmaryem50@gmail.com', 'SkillOra Platform'))
             ->to($to)
             ->subject($sujet)
             ->text($message);
@@ -30,8 +31,8 @@ class NotificationService
         return true;
         
     } catch (\Exception $e) {
-        // Afficher l'erreur pour débugger
-        throw new \Exception("ERREUR EMAIL: " . $e->getMessage());
+        $this->logger->error('Erreur envoi email: ' . $e->getMessage());
+        return false;
     }
 }
 

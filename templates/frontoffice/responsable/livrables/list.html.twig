@@ -5,7 +5,50 @@
 {% block body %}
 <div class="card">
     <h2>📊 Livrables Soumis</h2>
-    <p style="color: #718096; margin: 0.5rem 0 2rem 0;">Tous les livrables en attente de validation</p>
+    <p style="color: #718096; margin: 0.5rem 0 1rem 0;">Tous les livrables en attente de validation</p>
+    
+    {# BARRE DE RECHERCHE ET FILTRE #}
+    <div style="background: #f7fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+        <form method="get" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: end;">
+            <div style="flex: 1; min-width: 250px;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2d3748;">
+                    🔍 Rechercher
+                </label>
+                <input type="text" 
+                       name="search" 
+                       value="{{ search }}" 
+                       placeholder="Challenge ou groupe..."
+                       style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px;">
+            </div>
+            
+            <div style="min-width: 150px;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2d3748;">
+                    📊 Statut
+                </label>
+                <select name="statut" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <option value="">Tous</option>
+                    <option value="en_attente" {% if filterStatut == 'en_attente' %}selected{% endif %}>En attente</option>
+                    <option value="valide" {% if filterStatut == 'valide' %}selected{% endif %}>Validé</option>
+                    <option value="refuse" {% if filterStatut == 'refuse' %}selected{% endif %}>Refusé</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
+                    Filtrer
+                </button>
+                <a href="{{ path('app_responsable_livrables') }}" class="btn btn-secondary" style="padding: 0.75rem 1.5rem;">
+                    Réinitialiser
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    {% if search or filterStatut %}
+        <p style="color: #718096; margin-bottom: 1rem;">
+            📊 {{ livrables|length }} résultat(s)
+        </p>
+    {% endif %}
 
     {% if livrables is empty %}
         <div class="empty-state">
@@ -72,8 +115,7 @@
                                             ✅ Valider
                                         </button>
                                     </form>
-
-                                
+                                    
                                     <form method="post" action="{{ path('app_responsable_livrable_reject', {id: livrable.id}) }}" 
                                           onsubmit="return confirm('Refuser ce livrable ? Le groupe devra soumettre un nouveau fichier.');" 
                                           style="display: inline;">
@@ -91,8 +133,6 @@
                                         {% endif %}
                                     </span>
                                 {% endif %}
-
-
                             </div>
                         </div>
                     </div>

@@ -8,7 +8,25 @@
         ← Retour aux challenges
     </a>
 
-    <h2>{{ challenge.titre }}</h2>
+    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+    <h2 style="margin: 0;">{{ challenge.titre }}</h2>
+    
+    {% if estFavori %}
+        <form method="post" action="{{ path('app_etudiant_favori_remove', {id: challenge.id}) }}" style="display: inline;">
+            <input type="hidden" name="_token" value="{{ csrf_token('favori' ~ challenge.id) }}">
+            <button type="submit" class="btn-favori" style="background: none; border: none; cursor: pointer; font-size: 2.5rem; padding: 0;" title="Retirer des favoris">
+                ⭐
+            </button>
+        </form>
+    {% else %}
+        <form method="post" action="{{ path('app_etudiant_favori_add', {id: challenge.id}) }}" style="display: inline;">
+            <input type="hidden" name="_token" value="{{ csrf_token('favori' ~ challenge.id) }}">
+            <button type="submit" class="btn-favori" style="background: none; border: none; cursor: pointer; font-size: 2.5rem; padding: 0;" title="Ajouter aux favoris">
+                ☆
+            </button>
+        </form>
+    {% endif %}
+</div>
     
     <div style="background: #ecf0f1; padding: 1rem; border-radius: 4px; margin: 1.5rem 0;">
         <div style="display: flex; gap: 2rem; flex-wrap: wrap;">

@@ -7,6 +7,58 @@
     <div style="margin-bottom: 2rem;">
         <h2>🏆 Challenges Disponibles</h2>
         <p style="color: #718096; margin-top: 0.5rem;">Choisissez un challenge et participez avec votre groupe</p>
+
+        {# BARRE DE RECHERCHE ET TRI #}
+    <div style="background: #f7fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+        <form method="get" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: end;">
+            <div style="flex: 1; min-width: 250px;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2d3748;">
+                    🔍 Rechercher
+                </label>
+                <input type="text" 
+                       name="search" 
+                       value="{{ search }}" 
+                       placeholder="Titre ou description..."
+                       style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px;">
+            </div>
+            
+            <div style="min-width: 150px;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2d3748;">
+                    📊 Trier par
+                </label>
+                <select name="sort" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <option value="dateDebut" {% if sortBy == 'dateDebut' %}selected{% endif %}>Date de début</option>
+                    <option value="dateFin" {% if sortBy == 'dateFin' %}selected{% endif %}>Date de fin</option>
+                    <option value="titre" {% if sortBy == 'titre' %}selected{% endif %}>Titre</option>
+                </select>
+            </div>
+            
+            <div style="min-width: 120px;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2d3748;">
+                    ↕️ Ordre
+                </label>
+                <select name="order" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <option value="ASC" {% if order == 'ASC' %}selected{% endif %}>Croissant</option>
+                    <option value="DESC" {% if order == 'DESC' %}selected{% endif %}>Décroissant</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
+                    Filtrer
+                </button>
+                <a href="{{ path('app_etudiant_challenges') }}" class="btn btn-secondary" style="padding: 0.75rem 1.5rem;">
+                    Réinitialiser
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    {% if search %}
+        <p style="color: #718096; margin-bottom: 1rem;">
+            📊 {{ challenges|length }} résultat(s) pour "{{ search }}"
+        </p>
+    {% endif %}
     </div>
 
     {% if challenges is empty %}
@@ -52,6 +104,36 @@
                                 <a href="{{ path('app_etudiant_challenge_participate', {id: challenge.id}) }}" class="btn btn-success" style="padding: 0.75rem 1.5rem;">
                                     ✅ Participer maintenant
                                 </a>
+
+                                {# Bouton Favori avec étoile vide/pleine #}
+    {% if challenge.id in favorisChallengeIds %}
+        <form method="post" action="{{ path('app_etudiant_favori_remove', {id: challenge.id}) }}" 
+              style="display: inline;">
+            <input type="hidden" name="_token" value="{{ csrf_token('favori' ~ challenge.id) }}">
+            <button type="submit" 
+                    class="btn-favori" 
+                    style="background: none; border: none; cursor: pointer; font-size: 2rem; padding: 0; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='scale(1.2)'"
+                    onmouseout="this.style.transform='scale(1)'"
+                    title="Retirer des favoris">
+                ⭐
+            </button>
+        </form>
+    {% else %}
+        <form method="post" action="{{ path('app_etudiant_favori_add', {id: challenge.id}) }}" 
+              style="display: inline;">
+            <input type="hidden" name="_token" value="{{ csrf_token('favori' ~ challenge.id) }}">
+            <button type="submit" 
+                    class="btn-favori" 
+                    style="background: none; border: none; cursor: pointer; font-size: 2rem; padding: 0; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='scale(1.2)'"
+                    onmouseout="this.style.transform='scale(1)'"
+                    title="Ajouter aux favoris">
+                ☆
+            </button>
+        </form>
+    {% endif %}
+</div>
                             </div>
                         </div>
                     </div>
@@ -60,4 +142,18 @@
         </div>
     {% endif %}
 </div>
+<style>
+.btn-favori {
+    position: relative;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.btn-favori:hover {
+    filter: drop-shadow(0 4px 8px rgba(255,215,0,0.4));
+}
+
+.btn-favori:active {
+    transform: scale(0.9) !important;
+}
+</style>
 {% endblock %}

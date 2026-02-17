@@ -1,0 +1,64 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Mes Favoris{% endblock %}
+
+{% block body %}
+<div class="card">
+    <h2>⭐ Mes Challenges Favoris</h2>
+    <p style="color: #718096; margin: 0.5rem 0 2rem 0;">Vos challenges préférés</p>
+
+    {% if favoris is empty %}
+        <div class="empty-state">
+            <div class="icon">⭐</div>
+            <p>Aucun favori pour le moment</p>
+            <a href="{{ path('app_etudiant_challenges') }}" class="btn" style="margin-top: 1rem;">
+                Voir les challenges
+            </a>
+        </div>
+    {% else %}
+        <div style="display: grid; gap: 1.5rem;">
+            {% for favori in favoris %}
+                {% set challenge = favori.challenge %}
+                <div class="challenge-card">
+                    {# Même structure que browse.html.twig #}
+                    <div style="display: flex; gap: 2rem; align-items: start;">
+                        {% if challenge.image %}
+                            <img src="{{ asset('uploads/' ~ challenge.image) }}" 
+                                 alt="{{ challenge.titre }}"
+                                 style="width: 200px; height: 200px; object-fit: cover; border-radius: 12px;">
+                        {% endif %}
+                        
+                        <div style="flex: 1;">
+                            <h3 style="color: #2d3748; font-size: 1.4rem; margin-bottom: 0.75rem;">
+                                {{ challenge.titre }}
+                            </h3>
+                            <p style="color: #718096; margin-bottom: 1rem;">
+                                {{ challenge.description|slice(0, 150) }}...
+                            </p>
+                            
+                            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                <span>📅 {{ challenge.dateDebut|date('d/m/Y') }} - {{ challenge.dateFin|date('d/m/Y') }}</span>
+                            </div>
+                            
+                            <div style="display: flex; gap: 1rem;">
+                                <a href="{{ path('app_etudiant_challenge_detail', {id: challenge.id}) }}" class="btn">
+                                    👁️ Voir détails
+                                </a>
+                                <a href="{{ path('app_etudiant_challenge_participate', {id: challenge.id}) }}" class="btn btn-success">
+                                    ✅ Participer
+                                </a>
+                                <form method="post" action="{{ path('app_etudiant_favori_remove', {id: challenge.id}) }}" style="display: inline;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('favori' ~ challenge.id) }}">
+                                    <button type="submit" class="btn btn-danger">
+                                        🗑️ Retirer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

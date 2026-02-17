@@ -20,6 +20,8 @@ use App\Form\ParticipationType;
 use App\Entity\LivrableChallenge;
 use App\Repository\LivrableChallengeRepository;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use App\Entity\Favori;
+use App\Entity\User;
 
 
 #[Route('/etudiant')]
@@ -32,35 +34,85 @@ final class EtudiantController extends AbstractController
     }
 
     #[Route('/challenges', name: 'app_etudiant_challenges')]
-    public function listChallenges(ChallengeRepository $challengeRepository): Response
+    public function listChallenges(Request $request, ChallengeRepository $challengeRepository, EntityManagerInterface $entityManager): Response
     {
-        // Récupérer uniquement les challenges actifs/à venir
-        $challenges = $challengeRepository->findAll();
+        $search = $request->query->get('search', '');
+        $sortBy = $request->query->get('sort', 'dateDebut');
+        $order = $request->query->get('order', 'DESC');
+
+        $queryBuilder = $challengeRepository->createQueryBuilder('c');
+
+        // Recherche
+        if ($search) {
+            $queryBuilder->where('c.titre LIKE :search OR c.description LIKE :search')
+                ->setParameter('search', '%' . $search . '%');
+        }
+    
+        // Tri
+        $validSorts = ['titre', 'dateDebut', 'dateFin'];
+        if (in_array($sortBy, $validSorts)) {
+            $queryBuilder->orderBy('c.' . $sortBy, $order);
+        }
         
+        $challenges = $queryBuilder->getQuery()->getResult();
+
+        // Récupérer les favoris de l'utilisateur
+        $user = $entityManager->getRepository(User::class)->find(1);
+        $favoris = $entityManager->getRepository(Favori::class)->findBy(['user' => $user]);
+        $favorisChallengeIds = array_map(fn($f) => $f->getChallenge()->getId(), $favoris);
+
         return $this->render('frontoffice/etudiant/challenges/browse.html.twig', [
             'challenges' => $challenges,
+            'search' => $search,
+            'sortBy' => $sortBy,
+            'order' => $order,
+            'favorisChallengeIds' => $favorisChallengeIds,
         ]);
     }
 
     #[Route('/challenges/{id}', name: 'app_etudiant_challenge_detail', requirements: ['id' => '\d+'])]
-    public function challengeDetail(Challenge $challenge): Response
+    public function challengeDetail(Challenge $challenge, EntityManagerInterface $entityManager): Response
     {
+        $user = $entityManager->getRepository(User::class)->find(1);
+        $estFavori = $entityManager->getRepository(Favori::class)->findOneBy([
+            'user' => $user,
+            'challenge' => $challenge,
+        ]) !== null;
         return $this->render('frontoffice/etudiant/challenges/detail.html.twig', [
             'challenge' => $challenge,
+            'estFavori' => $estFavori,
         ]);
     }
 
     #[Route('/mon-groupe', name: 'app_etudiant_groupe')]
-    public function monGroupe(GroupeRepository $groupeRepository): Response
-    {
-        // Pour l'instant, on affiche tous les groupes
-        // Plus tard, on filtrera par l'étudiant connecté
-        $groupes = $groupeRepository->findAll();
-        
-        return $this->render('frontoffice/etudiant/groupe/index.html.twig', [
-            'groupes' => $groupes,
-        ]);
+public function monGroupe(Request $request, GroupeRepository $groupeRepository): Response
+{
+    $search = $request->query->get('search', '');
+    $sortBy = $request->query->get('sort', 'nomGroupe');
+    $order = $request->query->get('order', 'ASC');
+    
+    $queryBuilder = $groupeRepository->createQueryBuilder('g');
+    
+    // Recherche
+    if ($search) {
+        $queryBuilder->where('g.nomGroupe LIKE :search')
+            ->setParameter('search', '%' . $search . '%');
     }
+    
+    // Tri
+    if ($sortBy === 'nomGroupe') {
+        $queryBuilder->orderBy('g.nomGroupe', $order);
+    }
+    
+    $groupes = $queryBuilder->getQuery()->getResult();
+    
+    return $this->render('frontoffice/etudiant/groupe/index.html.twig', [
+        'groupes' => $groupes,
+        'search' => $search,
+        'sortBy' => $sortBy,
+        'order' => $order,
+    ]);
+}
 
     #[Route('/groupe/nouveau', name: 'app_etudiant_groupe_new', methods: ['GET', 'POST'])]
     public function createGroupe(Request $request, EntityManagerInterface $entityManager): Response
@@ -255,14 +307,35 @@ public function participateChallenge(Request $request, Challenge $challenge, Gro
 }
 
 #[Route('/mes-participations', name: 'app_etudiant_participations')]
-public function mesParticipations(ParticipationRepository $participationRepository): Response
+public function mesParticipations(Request $request, ParticipationRepository $participationRepository): Response
 {
-    // Pour l'instant on affiche toutes les participations
-    // Plus tard on filtrera par l'étudiant connecté
-    $participations = $participationRepository->findAll();
+    $search = $request->query->get('search', '');
+    $sortBy = $request->query->get('sort', 'dateParticipation');
+    $order = $request->query->get('order', 'DESC');
+    
+    $queryBuilder = $participationRepository->createQueryBuilder('p')
+        ->leftJoin('p.challenge', 'c')
+        ->leftJoin('p.groupe', 'g');
+    
+    // Recherche
+    if ($search) {
+        $queryBuilder->where('c.titre LIKE :search OR g.nomGroupe LIKE :search')
+            ->setParameter('search', '%' . $search . '%');
+    }
+    
+    // Tri
+    $validSorts = ['dateParticipation'];
+    if (in_array($sortBy, $validSorts)) {
+        $queryBuilder->orderBy('p.' . $sortBy, $order);
+    }
+    
+    $participations = $queryBuilder->getQuery()->getResult();
     
     return $this->render('frontoffice/etudiant/participations/index.html.twig', [
         'participations' => $participations,
+        'search' => $search,
+        'sortBy' => $sortBy,
+        'order' => $order,
     ]);
 }
 #[Route('/participation/{id}/supprimer', name: 'app_etudiant_participation_delete', methods: ['POST'])]
@@ -334,14 +407,43 @@ public function submitLivrable(Request $request, Participation $participation, E
 }
 
 #[Route('/mes-livrables', name: 'app_etudiant_livrables')]
-public function mesLivrables(LivrableChallengeRepository $livrableRepository): Response
+public function mesLivrables(Request $request, LivrableChallengeRepository $livrableRepository): Response
 {
-    // Pour l'instant on affiche tous les livrables
-    // Plus tard on filtrera par l'étudiant connecté
-    $livrables = $livrableRepository->findAll();
+    $search = $request->query->get('search', '');
+    $sortBy = $request->query->get('sort', 'dateSoumission');
+    $order = $request->query->get('order', 'DESC');
+    $filterStatut = $request->query->get('statut', '');
+    
+    $queryBuilder = $livrableRepository->createQueryBuilder('l')
+        ->leftJoin('l.challenge', 'c')
+        ->leftJoin('l.groupe', 'g');
+    
+    // Recherche
+    if ($search) {
+        $queryBuilder->where('c.titre LIKE :search OR g.nomGroupe LIKE :search')
+            ->setParameter('search', '%' . $search . '%');
+    }
+    
+    // Filtre par statut
+    if ($filterStatut) {
+        $queryBuilder->andWhere('l.statut = :statut')
+            ->setParameter('statut', $filterStatut);
+    }
+    
+    // Tri
+    $validSorts = ['dateSoumission'];
+    if (in_array($sortBy, $validSorts)) {
+        $queryBuilder->orderBy('l.' . $sortBy, $order);
+    }
+    
+    $livrables = $queryBuilder->getQuery()->getResult();
     
     return $this->render('frontoffice/etudiant/livrables/index.html.twig', [
         'livrables' => $livrables,
+        'search' => $search,
+        'sortBy' => $sortBy,
+        'order' => $order,
+        'filterStatut' => $filterStatut,
     ]);
 }
 
@@ -367,4 +469,67 @@ public function deleteLivrable(Request $request, LivrableChallenge $livrable, En
     return $this->redirectToRoute('app_etudiant_livrables');
 }
 
+#[Route('/challenge/{id}/favori/ajouter', name: 'app_etudiant_favori_add', methods: ['POST'])]
+public function addFavori(Request $request, Challenge $challenge, EntityManagerInterface $entityManager): Response
+{
+    // Pour l'instant, on simule l'utilisateur connecté avec le premier user
+    // Plus tard, ce sera l'utilisateur réellement connecté
+    $user = $entityManager->getRepository(User::class)->find(1);
+    
+    // Vérifier si déjà en favori
+    $existingFavori = $entityManager->getRepository(Favori::class)->findOneBy([
+        'user' => $user,
+        'challenge' => $challenge,
+    ]);
+    
+    if (!$existingFavori) {
+        $favori = new Favori();
+        $favori->setUser($user);
+        $favori->setChallenge($challenge);
+        
+        $entityManager->persist($favori);
+        $entityManager->flush();
+        
+        $this->addFlash('success', 'Challenge ajouté aux favoris ! ⭐');
+    } else {
+        $this->addFlash('info', 'Ce challenge est déjà dans vos favoris.');
+    }
+    
+    return $this->redirectToRoute('app_etudiant_challenges');
+}
+
+#[Route('/challenge/{id}/favori/retirer', name: 'app_etudiant_favori_remove', methods: ['POST'])]
+public function removeFavori(Request $request, Challenge $challenge, EntityManagerInterface $entityManager): Response
+{
+    $user = $entityManager->getRepository(User::class)->find(1);
+    
+    $favori = $entityManager->getRepository(Favori::class)->findOneBy([
+        'user' => $user,
+        'challenge' => $challenge,
+    ]);
+    
+    if ($favori) {
+        $entityManager->remove($favori);
+        $entityManager->flush();
+        
+        $this->addFlash('success', 'Challenge retiré des favoris.');
+    }
+    
+    return $this->redirectToRoute('app_etudiant_challenges');
+}
+
+#[Route('/mes-favoris', name: 'app_etudiant_favoris')]
+public function mesFavoris(Request $request, EntityManagerInterface $entityManager): Response
+{
+    $user = $entityManager->getRepository(User::class)->find(1);
+    
+    $favoris = $entityManager->getRepository(Favori::class)->findBy(
+        ['user' => $user],
+        ['dateAjout' => 'DESC']
+    );
+    
+    return $this->render('frontoffice/etudiant/favoris/index.html.twig', [
+        'favoris' => $favoris,
+    ]);
+}
 }

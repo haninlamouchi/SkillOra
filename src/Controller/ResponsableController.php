@@ -17,7 +17,6 @@ use App\Entity\LivrableChallenge;
 use App\Entity\Groupe;
 use App\Service\NotificationService;
 
-
 #[Route('/responsable')]
 final class ResponsableController extends AbstractController
 {
@@ -28,12 +27,35 @@ final class ResponsableController extends AbstractController
     }
 
     #[Route('/challenges', name: 'app_responsable_challenges')]
-    public function listChallenges(ChallengeRepository $challengeRepository): Response
-    {
-        return $this->render('frontoffice/responsable/challenges/list.html.twig', [
-            'challenges' => $challengeRepository->findAll(),
-        ]);
+public function listChallenges(Request $request, ChallengeRepository $challengeRepository): Response
+{
+    $search = $request->query->get('search', '');
+    $sortBy = $request->query->get('sort', 'dateDebut');
+    $order = $request->query->get('order', 'DESC');
+    
+    $queryBuilder = $challengeRepository->createQueryBuilder('c');
+    
+    // Recherche
+    if ($search) {
+        $queryBuilder->where('c.titre LIKE :search OR c.description LIKE :search')
+            ->setParameter('search', '%' . $search . '%');
     }
+    
+    // Tri
+    $validSorts = ['titre', 'dateDebut', 'dateFin'];
+    if (in_array($sortBy, $validSorts)) {
+        $queryBuilder->orderBy('c.' . $sortBy, $order);
+    }
+    
+    $challenges = $queryBuilder->getQuery()->getResult();
+    
+    return $this->render('frontoffice/responsable/challenges/list.html.twig', [
+        'challenges' => $challenges,
+        'search' => $search,
+        'sortBy' => $sortBy,
+        'order' => $order,
+    ]);
+}
 
     #[Route('/challenges/nouveau', name: 'app_responsable_challenge_new', methods: ['GET', 'POST'])]
 public function newChallenge(Request $request, EntityManagerInterface $entityManager, NotificationService $notificationService): Response
@@ -75,14 +97,23 @@ public function newChallenge(Request $request, EntityManagerInterface $entityMan
         $entityManager->persist($challenge);
         $entityManager->flush();
 
-        // TEST FORCÉ
-$notificationService->envoyerEmailNouveauChallenge(
-    'kmaryem50@gmail.com',
-    'Test Etudiant',
-    $challenge->getTitre(),
-    $challenge->getDateDebut()->format('d/m/Y'),
-    $challenge->getDateFin()->format('d/m/Y')
-);
+        // Envoyer les emails aux étudiants
+$groupes = $entityManager->getRepository(Groupe::class)->findAll();
+
+foreach ($groupes as $groupe) {
+    foreach ($groupe->getMembres() as $membre) {
+        $user = $membre->getUser();
+        if ($user && $user->getEmail()) {
+            $notificationService->envoyerEmailNouveauChallenge(
+                $user->getEmail(),
+                $user->getNom() . ' ' . $user->getPrenom(),
+                $challenge->getTitre(),
+                $challenge->getDateDebut()->format('d/m/Y'),
+                $challenge->getDateFin()->format('d/m/Y')
+            );
+        }
+    }
+}
 
         $this->addFlash('success', 'Challenge créé avec succès ! 🎉 Les étudiants ont été notifiés par email.');
         return $this->redirectToRoute('app_responsable_challenges');
@@ -113,12 +144,33 @@ public function challengeParticipations(Challenge $challenge): Response
 }
 
 #[Route('/livrables', name: 'app_responsable_livrables')]
-public function listLivrables(LivrableChallengeRepository $livrableRepository): Response
+public function listLivrables(Request $request, LivrableChallengeRepository $livrableRepository): Response
 {
-    $livrables = $livrableRepository->findAll();
+    $search = $request->query->get('search', '');
+    $filterStatut = $request->query->get('statut', '');
+    
+    $queryBuilder = $livrableRepository->createQueryBuilder('l')
+        ->leftJoin('l.challenge', 'c')
+        ->leftJoin('l.groupe', 'g');
+    
+    if ($search) {
+        $queryBuilder->where('c.titre LIKE :search OR g.nomGroupe LIKE :search')
+            ->setParameter('search', '%' . $search . '%');
+    }
+    
+    if ($filterStatut) {
+        $queryBuilder->andWhere('l.statut = :statut')
+            ->setParameter('statut', $filterStatut);
+    }
+    
+    $queryBuilder->orderBy('l.dateSoumission', 'DESC');
+    
+    $livrables = $queryBuilder->getQuery()->getResult();
     
     return $this->render('frontoffice/responsable/livrables/list.html.twig', [
         'livrables' => $livrables,
+        'search' => $search,
+        'filterStatut' => $filterStatut,
     ]);
 }
 
@@ -217,5 +269,40 @@ public function editChallenge(Request $request, Challenge $challenge, EntityMana
         'challenge' => $challenge,
         'form' => $form,
     ]);
+}
+
+#[Route('/challenges/{id}/supprimer', name: 'app_responsable_challenge_delete', methods: ['POST'])]
+public function deleteChallenge(Request $request, Challenge $challenge, EntityManagerInterface $entityManager): Response
+{
+    if ($this->isCsrfTokenValid('delete'.$challenge->getId(), $request->request->get('_token'))) {
+        
+        // Vérifier si le challenge a des participations
+        if ($challenge->getParticipations()->count() > 0) {
+            $this->addFlash('error', 'Impossible de supprimer ce challenge : des groupes y participent. Supprimez d\'abord les participations.');
+            return $this->redirectToRoute('app_responsable_challenges');
+        }
+        
+        // Supprimer les fichiers uploadés
+        if ($challenge->getImage()) {
+            $imagePath = $this->getParameter('uploads_directory') . '/' . $challenge->getImage();
+            if (file_exists($imagePath)) {
+                unlink($imagePath);
+            }
+        }
+        
+        if ($challenge->getFichierCahierCharges()) {
+            $pdfPath = $this->getParameter('uploads_directory') . '/' . $challenge->getFichierCahierCharges();
+            if (file_exists($pdfPath)) {
+                unlink($pdfPath);
+            }
+        }
+        
+        $entityManager->remove($challenge);
+        $entityManager->flush();
+        
+        $this->addFlash('success', 'Challenge supprimé avec succès ! 🗑️');
+    }
+    
+    return $this->redirectToRoute('app_responsable_challenges');
 }
 }
