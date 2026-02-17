@@ -28,7 +28,7 @@ final class ChallengeController extends AbstractController
     }
 
     #[Route('/new', name: 'app_challenge_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, NotificationService $notification): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, NotificationService $notificationService): Response
     {
         $challenge = new Challenge();
         $form = $this->createForm(ChallengeType::class, $challenge);
@@ -68,19 +68,19 @@ final class ChallengeController extends AbstractController
             $entityManager->persist($challenge);
             $entityManager->flush();
 
-            //  NOTIFICATION EMAIL AUX MEMBRES
             $groupes = $entityManager->getRepository(Groupe::class)->findAll();
-
-            foreach ($groupes as $groupe) {
-                foreach ($groupe->getMembres() as $membre) {
-
-                    $user = $membre->getUser();
-
-                    if ($user && $user->getEmail()) {
-                        $notification->envoyerEmail(
+        
+        foreach ($groupes as $groupe) {
+            foreach ($groupe->getMembres() as $membre) {
+                $user = $membre->getUser();
+                
+                if ($user && $user->getEmail()) {
+                    $notificationService->envoyerEmailNouveauChallenge(
                         $user->getEmail(),
-                        'Nouveau Challenge disponible',
-                        'Un nouveau challenge a été créé : '.$challenge->getTitre()
+                        $user->getNom() . ' ' . $user->getPrenom(),
+                        $challenge->getTitre(),
+                        $challenge->getDateDebut()->format('d/m/Y'),
+                        $challenge->getDateFin()->format('d/m/Y')
                     );
                 }
             }
@@ -89,6 +89,7 @@ final class ChallengeController extends AbstractController
 
 
 
+            $this->addFlash('success', 'Challenge créé avec succès ! 🎉 Les étudiants ont été notifiés par email.');
             return $this->redirectToRoute('app_challenge_index', [], Response::HTTP_SEE_OTHER);
         }
 

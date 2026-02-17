@@ -14,6 +14,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Entity\LivrableChallenge;
+use App\Entity\Groupe;
+use App\Service\NotificationService;
 
 
 #[Route('/responsable')]
@@ -34,35 +36,35 @@ final class ResponsableController extends AbstractController
     }
 
     #[Route('/challenges/nouveau', name: 'app_responsable_challenge_new', methods: ['GET', 'POST'])]
-    public function newChallenge(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $challenge = new Challenge();
-        $form = $this->createForm(ChallengeType::class, $challenge);
-        $form->handleRequest($request);
+public function newChallenge(Request $request, EntityManagerInterface $entityManager, NotificationService $notificationService): Response
+{
+    $challenge = new Challenge();
+    $form = $this->createForm(ChallengeType::class, $challenge);
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            
-            $imageFile = $form->get('image')->getData();
-            if ($imageFile) {
-                $newFilename = uniqid().'.'.$imageFile->guessExtension();
-                try {
-                    $imageFile->move(
-                        $this->getParameter('uploads_directory'),
-                        $newFilename
-                    );
-                    $challenge->setImage($newFilename);
-                } catch (FileException $e) {
-                    $this->addFlash('error', 'Erreur lors de l\'upload de l\'image.');
-                }
-           }
+    if ($form->isSubmitted() && $form->isValid()) {
+        
+        $imageFile = $form->get('image')->getData();
+        if ($imageFile) {
+            $newFilename = uniqid().'.'.$imageFile->guessExtension();
+            try {
+                $imageFile->move(
+                    $this->getParameter('uploads_directory'),
+                    $newFilename
+                );
+                $challenge->setImage($newFilename);
+            } catch (FileException $e) {
+                $this->addFlash('error', 'Erreur lors de l\'upload de l\'image.');
+            }
+        }
 
-           $cahierFile = $form->get('fichierCahierCharges')->getData();
-           if ($cahierFile) {
-               $newFilename = uniqid().'.'.$cahierFile->guessExtension();
-               try {
-                   $cahierFile->move(
-                       $this->getParameter('uploads_directory'),
-                       $newFilename
+        $cahierFile = $form->get('fichierCahierCharges')->getData();
+        if ($cahierFile) {
+            $newFilename = uniqid().'.'.$cahierFile->guessExtension();
+            try {
+                $cahierFile->move(
+                    $this->getParameter('uploads_directory'),
+                    $newFilename
                 );
                 $challenge->setFichierCahierCharges($newFilename);
             } catch (FileException $e) {
@@ -70,17 +72,26 @@ final class ResponsableController extends AbstractController
             }
         }
 
-            $entityManager->persist($challenge);
-            $entityManager->flush();
+        $entityManager->persist($challenge);
+        $entityManager->flush();
 
-            $this->addFlash('success', 'Challenge créé avec succès !');
-            return $this->redirectToRoute('app_responsable_challenges');
-        }
+        // TEST FORCÉ
+$notificationService->envoyerEmailNouveauChallenge(
+    'kmaryem50@gmail.com',
+    'Test Etudiant',
+    $challenge->getTitre(),
+    $challenge->getDateDebut()->format('d/m/Y'),
+    $challenge->getDateFin()->format('d/m/Y')
+);
 
-        return $this->render('frontoffice/responsable/challenges/create.html.twig', [
-            'form' => $form,
-        ]);
+        $this->addFlash('success', 'Challenge créé avec succès ! 🎉 Les étudiants ont été notifiés par email.');
+        return $this->redirectToRoute('app_responsable_challenges');
     }
+
+    return $this->render('frontoffice/responsable/challenges/create.html.twig', [
+        'form' => $form,
+    ]);
+}
 
     #[Route('/participations', name: 'app_responsable_participations')]
 public function listParticipations(ParticipationRepository $participationRepository): Response
