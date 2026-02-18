@@ -8,13 +8,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class BackofficeController extends AbstractController
 {
-    #[Route('/admin', name: 'admin_dashboard')]
+    #[Route('/admin/old', name: 'admin_old_dashboard')]
     public function dashboard(): Response
     {
         return $this->render('backoffice/dashboard.html.twig');
     }
 
-    #[Route('/admin/index', name: 'admin_index')]
+    #[Route('/admin/index', name: 'admin_old_index')]
     public function index(): Response
     {
         return $this->render('backoffice/index.html.twig');
