@@ -50,7 +50,7 @@ class ResetPasswordController extends AbstractController
                 $email = (new Email())
                     ->from('malekfathidabbek@gmail.com')
                     ->to($user->getEmail())
-                    ->subject('Réinitialisation de votre mot de passe - Skillora')
+                    ->subject('Reset your password - Skillora')
                     ->html($this->renderView('security/reset_password_email.html.twig', [
                         'resetLink' => $resetLink,
                         'user' => $user,
@@ -86,7 +86,7 @@ class ResetPasswordController extends AbstractController
 
         // Vérifier que le token est valide et non expiré
         if (!$user || $user->getResetTokenExpiresAt() < new \DateTime()) {
-            $this->addFlash('danger', 'Ce lien est invalide ou a expiré.');
+            $this->addFlash('danger', 'This link is invalid or has expired.');
             return $this->redirectToRoute('app_forgot_password');
         }
 
@@ -97,9 +97,9 @@ class ResetPasswordController extends AbstractController
             $confirm  = $request->request->get('confirm_password');
 
             if (strlen($password) < 8) {
-                $error = 'Le mot de passe doit contenir au moins 8 caractères.';
+                $error =  'Password must be at least 8 characters long.';
             } elseif ($password !== $confirm) {
-                $error = 'Les mots de passe ne correspondent pas.';
+                $error = 'Passwords do not match.';
             } else {
                 // Hasher et sauvegarder le nouveau mot de passe
                 $hashed = $passwordHasher->hashPassword($user, $password);
@@ -110,7 +110,7 @@ class ResetPasswordController extends AbstractController
                 $user->setResetTokenExpiresAt(null);
                 $em->flush();
 
-                $this->addFlash('success', 'Mot de passe réinitialisé avec succès !');
+                $this->addFlash('success', 'Password successfully reset!');
                 return $this->redirectToRoute('app_login');
             }
         }
