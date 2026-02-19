@@ -11,6 +11,168 @@
     <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/owl.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/animate.css') }}">
 
+    <style>
+        /* ===== SUPPRIME LE FOND VIOLET DU BODY ===== */
+        body {
+            background-color: #ffffff !important;
+            background-image: none !important;
+        }
+
+        /* ===== HEADER FULL ROUGE - ECRASE LE CSS DU TEMPLATE ===== */
+        .header-area,
+        .header-area.header-sticky,
+        .background-header {
+            background: linear-gradient(135deg, #c10609 0%, #8b0507 100%) !important;
+            background-color: #c10609 !important;
+            background-image: none !important;
+            position: fixed !important;        /* ← fixe au lieu de absolute */
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            z-index: 9999 !important;
+            box-shadow: 0 2px 15px rgba(193, 6, 9, 0.4) !important;
+            border-radius: 0 !important;       /* ← supprime le border-radius du template */
+            height: auto !important;
+            padding: 10px 0 !important;
+        }
+
+        /* ===== DECALE LE CONTENU SOUS LE HEADER FIXE ===== */
+        body {
+            padding-top: 70px;
+        }
+
+        /* ===== LOGO ===== */
+        .main-nav .logo h1,
+        .header-area .main-nav .logo h1 {
+            color: white !important;
+            font-size: 26px !important;
+            font-weight: 800 !important;
+            letter-spacing: 1px;
+            border-right: 1px solid rgba(255,255,255,0.3) !important;
+        }
+
+        .main-nav .logo h1 span {
+            color: #ff6b6b;
+        }
+
+        /* ===== LIENS NAV ===== */
+        .header-area .main-nav ul.nav li a {
+            color: rgba(255,255,255,0.85) !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            padding: 8px 16px !important;
+            height: auto !important;
+            line-height: normal !important;
+            border-radius: 20px !important;
+            transition: all 0.3s;
+            text-transform: none !important;
+            letter-spacing: 0 !important;
+            background-image: none !important;
+            background-color: transparent !important;
+        }
+
+        .header-area .main-nav ul.nav li {
+            height: auto !important;
+            line-height: normal !important;
+        }
+
+        .header-area .main-nav ul.nav li a:hover {
+            background-color: rgba(255,255,255,0.15) !important;
+            color: white !important;
+        }
+
+        .header-area .main-nav ul.nav li a.active,
+        .header-area.header-sticky .nav li a.active {
+            background-color: rgba(255,255,255,0.2) !important;
+            border: 1px solid rgba(255,255,255,0.3) !important;
+            color: white !important;
+            opacity: 1 !important;
+        }
+
+        /* ===== PROFIL BADGE ===== */
+        .nav-profile-badge {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px;
+            background-color: rgba(255,255,255,0.15) !important;
+            border: 1px solid rgba(255,255,255,0.3) !important;
+            border-radius: 25px !important;
+            padding: 5px 14px 5px 6px !important;
+            color: white !important;
+            text-decoration: none !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s;
+            line-height: 1.3 !important;
+            height: auto !important;
+        }
+
+        .nav-profile-badge:hover {
+            background-color: rgba(255,255,255,0.25) !important;
+            color: white !important;
+        }
+
+        .nav-profile-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: white;
+            color: #c10609;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 12px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .nav-profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .nav-role-label {
+            color: rgba(255,255,255,0.7);
+            font-size: 11px;
+            font-weight: 400;
+        }
+
+        /* ===== LOGOUT ===== */
+        .nav-logout {
+            color: rgba(255,255,255,0.7) !important;
+            font-size: 13px !important;
+            padding: 6px 12px !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            border-radius: 20px !important;
+            background-color: transparent !important;
+            height: auto !important;
+            line-height: normal !important;
+        }
+
+        .nav-logout:hover {
+            background-color: rgba(255,255,255,0.1) !important;
+            color: white !important;
+        }
+
+        /* ===== SEPARATEUR ===== */
+        .nav-separator {
+            width: 1px;
+            height: 24px;
+            background-color: rgba(255,255,255,0.2);
+            margin: 0 4px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        /* ===== BANNER - supprime fond violet ===== */
+        .main-banner {
+            background-image: none !important;
+            background-color: #f8f8f8 !important;
+        }
+    </style>
+
     {% block stylesheets %}{% endblock %}
 </head>
 
@@ -22,24 +184,100 @@
         <div class="row">
             <div class="col-12">
                 <nav class="main-nav">
-                    <!-- Logo -->
-                    <a href="#" class="logo">
-                        <h1>Scholar</h1>
-                    </a>
+                    
 
-                    <!-- Menu -->
-                    <ul class="nav">
-                        <li><a href="#" class="active">Home</a></li>
-                        <li><a href="#services">Services</a></li>
-                        <li><a href="#courses">Courses</a></li>
-                        <li><a href="#team">Team</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                        <li><a href="{{ path('app_login') }}">🔐 Login</a></li>
+                     <a href="{{ path('front_home') }}" class="logo">
+        <h1>Skill<span>ora</span></h1>
+    </a>
+
+    <ul class="nav">
+                        {% if app.user %}
+
+                            {% if is_granted('ROLE_ETUDIANT') and not is_granted('ROLE_RESPONSABLE_CLUB') %}
+                                {# ===== NAVBAR ÉTUDIANT ===== #}
+                                <li><a href="{{ path('app_etudiant_dashboard') }}" class="active">Accueil</a></li>
+                                <li><a href="#">Challenges</a></li>
+                                <li><a href="#">Courses</a></li>
+                                <li><a href="#">Forums</a></li>
+                                <li><span class="nav-separator"></span></li>
+                                <li>
+                                    <a href="{{ path('app_user_show', {id: app.user.id}) }}" class="nav-profile-badge">
+                                        <div class="nav-profile-avatar">
+                                            {% if app.user.photo %}
+                                                <img src="{{ asset('uploads/photos/' ~ app.user.photo) }}" alt="">
+                                            {% else %}
+                                                {{ app.user.prenom|slice(0,1)|upper }}{{ app.user.nom|slice(0,1)|upper }}
+                                            {% endif %}
+                                        </div>
+                                        <span>
+                                            {{ app.user.prenom }} {{ app.user.nom }}<br>
+                                            <span class="nav-role-label">Étudiant</span>
+                                        </span>
+                                    </a>
+                                </li>
+
+                            {% elseif is_granted('ROLE_RESPONSABLE_CLUB') and not is_granted('ROLE_ADMIN') %}
+                                {# ===== NAVBAR RESPONSABLE ===== #}
+                                <li><a href="{{ path('app_responsable_dashboard') }}" class="active">Accueil</a></li>
+                                <li><a href="#">Formations</a></li>
+                                <li><a href="#">Projets</a></li>
+                                <li><a href="#">Forums</a></li>
+                                <li><span class="nav-separator"></span></li>
+                                <li>
+                                    <a href="{{ path('app_user_show', {id: app.user.id}) }}" class="nav-profile-badge">
+                                        <div class="nav-profile-avatar">
+                                            {% if app.user.photo %}
+                                                <img src="{{ asset('uploads/photos/' ~ app.user.photo) }}" alt="">
+                                            {% else %}
+                                                {{ app.user.prenom|slice(0,1)|upper }}{{ app.user.nom|slice(0,1)|upper }}
+                                            {% endif %}
+                                        </div>
+                                        <span>
+                                            {{ app.user.prenom }} {{ app.user.nom }}<br>
+                                            <span class="nav-role-label">Responsable Club</span>
+                                        </span>
+                                    </a>
+                                </li>
+
+                            {% elseif is_granted('ROLE_ADMIN') %}
+                                {# ===== NAVBAR ADMIN ===== #}
+                                <li><a href="{{ path('app_admin_dashboard') }}" class="active">Accueil</a></li>
+                                <li><a href="#">Administration</a></li>
+                                <li><span class="nav-separator"></span></li>
+                                <li>
+                                    <a href="{{ path('app_user_show', {id: app.user.id}) }}" class="nav-profile-badge">
+                                        <div class="nav-profile-avatar">
+                                            {% if app.user.photo %}
+                                                <img src="{{ asset('uploads/photos/' ~ app.user.photo) }}" alt="">
+                                            {% else %}
+                                                {{ app.user.prenom|slice(0,1)|upper }}{{ app.user.nom|slice(0,1)|upper }}
+                                            {% endif %}
+                                        </div>
+                                        <span>
+                                            {{ app.user.prenom }} {{ app.user.nom }}<br>
+                                            <span class="nav-role-label">Administrateur</span>
+                                        </span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {# Logout commun à tous les rôles #}
+                            <li>
+                                <a href="{{ path('app_logout') }}" class="nav-logout">
+                                    Déconnexion
+                                </a>
+                            </li>
+
+                        {% else %}
+                            {# ===== NAVBAR VISITEUR ===== #}
+                            {# ===== NAVBAR VISITEUR ===== #}
+<li><a href="{{ path('front_home') }}" class="{{ app.request.attributes.get('_route') == 'front_home' ? 'active' : '' }}">Home</a></li>
+<li><a href="{{ path('app_register') }}" class="{{ app.request.attributes.get('_route') == 'app_user_new' ? 'active' : '' }}">Sign up</a></li>
+<li><a href="{{ path('app_login') }}" class="{{ app.request.attributes.get('_route') == 'app_login' ? 'active' : '' }}">Login</a></li>
+                        {% endif %}
                     </ul>
 
-                    <a class="menu-trigger">
-                        <span>Menu</span>
-                    </a>
+                    <a class="menu-trigger"><span>Menu</span></a>
                 </nav>
             </div>
         </div>
@@ -55,9 +293,7 @@
 <footer>
     <div class="container">
         <div class="col-lg-12 text-center">
-            <p>
-                © {{ "now"|date("Y") }} Scholar. All rights reserved.
-            </p>
+            <p>© {{ "now"|date("Y") }} Skillora. All rights reserved.</p>
         </div>
     </div>
 </footer>

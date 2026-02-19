@@ -58,17 +58,13 @@ security:
             form_login:
                 login_path: app_login
                 check_path: app_login
-                default_target_path: app_home
-                always_use_default_target_path: true
                 enable_csrf: true
+                success_handler: App\Security\LoginSuccessHandler  # ← AJOUTÉ
             logout:
                 path: app_logout
                 target: front_home
 
     access_control:
-        - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/user/new, roles: PUBLIC_ACCESS }
-        - { path: ^/home, roles: ROLE_USER }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/user/new, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }

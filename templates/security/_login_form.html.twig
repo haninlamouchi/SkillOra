@@ -35,6 +35,12 @@
                autocomplete="current-password" 
                required
                placeholder="••••••••">
+               <div style="text-align:right; margin-top:6px;">
+                <a href="{{ path('app_forgot_password') }}" style="font-size:13px; color:#c62828; text-decoration:none;">
+                    🔑 Mot de passe oublié ?
+                </a>
+    </div>
+
     </div>
     <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
@@ -45,7 +51,7 @@
     </div>
 
     <div class="form-footer">
-        <p>Don't have an account yet? <a href="{{ path('app_user_new') }}" class="link-primary">Sign up here</a></p>
+        <p>Don't have an account yet? <a href="{{ path('app_register') }}" class="link-primary">Sign up here</a></p>
     </div>
 </form>
 

@@ -11,10 +11,13 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Symfony\Component\HttpFoundation\File\File;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'User')]
-#[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé')]
+#[UniqueEntity(fields: ['email'], message: 'This email is already used')]
+#[Vich\Uploadable]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -23,90 +26,90 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
-    #[Assert\NotBlank(message: 'Le nom est obligatoire')]
+    #[Assert\NotBlank(message: 'Last name is required')]
     #[Assert\Length(
         min: 2,
         max: 100,
-        minMessage: 'Le nom doit contenir au moins {{ limit }} caractères',
-        maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères'
+        minMessage: 'Last name must be at least {{ limit }} characters',
+        maxMessage: 'Last name cannot exceed {{ limit }} characters'
     )]
     #[Assert\Regex(
         pattern: '/^[a-zA-ZÀ-ÿ\s]+$/u',
-        message: 'Le nom ne peut contenir que des lettres et des espaces!'
+        message: 'Last name can only contain letters and spaces'
     )]
     private ?string $nom = null;
 
     #[ORM\Column(length: 100)]
-    #[Assert\NotBlank(message: 'Le prénom est obligatoire')]
+    #[Assert\NotBlank(message: 'First name is required')]
     #[Assert\Length(
         min: 2,
         max: 100,
-        minMessage: 'Le prénom doit contenir au moins {{ limit }} caractères',
-        maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères'
+        minMessage: 'First name must be at least {{ limit }} characters',
+        maxMessage: 'First name cannot exceed {{ limit }} characters'
     )]
     #[Assert\Regex(
         pattern: '/^[a-zA-ZÀ-ÿ\s]+$/u',
-        message: 'Le prénom ne peut contenir que des lettres et des espaces!'
+        message: 'First name can only contain letters and spaces'
     )]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 150, unique: true)]
-    #[Assert\NotBlank(message: 'L\'email est obligatoire')]
-    #[Assert\Email(message: 'L\'email {{ value }} n\'est pas un email valide!')]
+    #[Assert\NotBlank(message: 'Email is required')]
+    #[Assert\Email(message: 'Please enter a valid email address')]
     #[Assert\Length(max: 150)]
     private ?string $email = null;
 
-    #[ORM\Column(length: 255)]  // ← CETTE LIGNE EST IMPORTANTE
-    #[Assert\NotBlank(message: 'Le mot de passe est obligatoire')]
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Password is required')]
     #[Assert\Length(
-    min: 8,
-    minMessage:'Le mot de passe doit contenir au moins {{ limit }} caractères!'
+        min: 8,
+        minMessage: 'Password must be at least {{ limit }} characters'
     )]
     #[Assert\Regex(
-    pattern: '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/',
-    message: 'Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial!.'
+        pattern: '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/',
+        message: 'Password must contain uppercase, lowercase, number and special character'
     )]
-private ?string $password = null;
-    
+    private ?string $password = null;
 
-    #[ORM\Column(type: Types::STRING, columnDefinition: "ENUM('admin', 'responsable_club', 'etudiant')")]
-    #[Assert\NotBlank(message: 'Le rôle est obligatoire')]
-    #[Assert\Choice(
-        choices: ['admin', 'responsable_club', 'etudiant'],
-        message: 'Le rôle sélectionné n\'est pas valide'
-    )]
+    #[ORM\Column(type: Types::STRING, columnDefinition: "ENUM('admin', 'responsable_club', 'etudiant', 'membre')")]
     private ?string $role = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?\DateTimeInterface $dateInscription = null;
 
     #[ORM\Column(length: 20, nullable: true)]
-    #[Assert\NotBlank(message: 'Le téléphone est obligatoire')]
+    #[Assert\NotBlank(message: 'Phone number is required')]
     #[Assert\Regex(
         pattern: '/^[\d\s\+\-\(\)]+$/',
-        message: 'Le numéro de téléphone n\'est pas valide'
+        message: 'Please enter a valid phone number'
     )]
     #[Assert\Length(
         min: 8,
         max: 20,
-        minMessage: 'Le téléphone doit contenir au moins {{ limit }} chiffres',
-        maxMessage: 'Le téléphone ne peut pas dépasser {{ limit }} caractères'
+        minMessage: 'Phone number must be at least {{ limit }} digits',
+        maxMessage: 'Phone number cannot exceed {{ limit }} characters'
     )]
     private ?string $telephone = null;
 
-#[ORM\Column(length: 255, nullable: true)]
-private ?string $photo = null;
+    #[Vich\UploadableField(mapping: 'user_photo', fileNameProperty: 'photo')]
+    private ?File $photoFile = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $photo = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    #[Assert\NotBlank(message: 'La date de naissance est obligatoire')]
+    #[Assert\NotBlank(message: 'Date of birth is required')]
     #[Assert\LessThan(
         value: 'today',
-        message: 'La date de naissance doit être antérieure à aujourd\'hui'
+        message: 'Date of birth must be in the past'
     )]
     private ?\DateTimeInterface $dateNaissance = null;
 
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+private ?string $resetToken = null;
 
+#[ORM\Column(type: 'datetime', nullable: true)]
+private ?\DateTimeInterface $resetTokenExpiresAt = null;
     #[ORM\OneToMany(targetEntity: Club::class, mappedBy: 'responsable')]
     private Collection $clubs;
 
@@ -138,6 +141,7 @@ private ?string $photo = null;
         $this->participationsFormation = new ArrayCollection();
         $this->membresGroupe = new ArrayCollection();
         $this->dateInscription = new \DateTime();
+        $this->role = 'etudiant';
     }
 
     public function getId(): ?int
@@ -213,6 +217,9 @@ private ?string $photo = null;
         case 'etudiant':
             $roles[] = 'ROLE_ETUDIANT';
             break;
+        case 'membre':
+            $roles[] = 'ROLE_MEMBRE';
+            break;
     }
     
     $roles[] = 'ROLE_USER';
@@ -252,6 +259,17 @@ private ?string $photo = null;
         $this->photo = $photo;
         return $this;
     }
+    public function setPhotoFile(?File $photoFile = null): void
+{
+    $this->photoFile = $photoFile;
+}
+
+public function getPhotoFile(): ?File
+{
+    return $this->photoFile;
+}
+
+
 
     public function getDateNaissance(): ?\DateTimeInterface
     {
@@ -263,6 +281,28 @@ private ?string $photo = null;
         $this->dateNaissance = $dateNaissance;
         return $this;
     }
+
+    public function getResetToken(): ?string
+{
+    return $this->resetToken;
+}
+
+public function setResetToken(?string $resetToken): self
+{
+    $this->resetToken = $resetToken;
+    return $this;
+}
+
+public function getResetTokenExpiresAt(): ?\DateTimeInterface
+{
+    return $this->resetTokenExpiresAt;
+}
+
+public function setResetTokenExpiresAt(?\DateTimeInterface $date): self
+{
+    $this->resetTokenExpiresAt = $date;
+    return $this;
+}
 
     /**
      * @return Collection<int, Club>

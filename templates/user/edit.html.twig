@@ -13,7 +13,6 @@
         
         /* Cacher le header original */
         .header-area {
-            display: none !important;
         }
         
         /* Nouveau header rouge personnalisé */
@@ -69,7 +68,6 @@
         
         /* Cacher le footer original */
         footer {
-            display: none !important;
         }
         
         /* Nouveau footer noir personnalisé */
@@ -254,18 +252,6 @@
 {% endblock %}
 
 {% block body %}
-<!-- HEADER PERSONNALISÉ ROUGE -->
-<div class="custom-header">
-    <div class="container">
-        <div class="logo">
-            <div class="logo-circle">
-                <img src="{{ asset('images/logo-skillora.png') }}" alt="Skillora Logo">
-            </div>
-            <h1>Skillora</h1>
-        </div>
-    </div>
-</div>
-
 <!-- CONTENU DU FORMULAIRE -->
 <div class="user-form-section">
     <div class="container">
@@ -297,10 +283,4 @@
     </div>
 </div>
 
-<!-- FOOTER PERSONNALISÉ NOIR -->
-<div class="custom-footer">
-    <div class="container">
-        <p>© {{ "now"|date("Y") }} Skillora - Apprendre, grandir, réussir ✨</p>
-    </div>
-</div>
 {% endblock %}

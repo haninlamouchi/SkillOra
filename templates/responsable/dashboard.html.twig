@@ -11,7 +11,6 @@
         }
         
         .header-area {
-            display: none !important;
         }
         
         .custom-header {
@@ -222,7 +221,6 @@
         }
         
         footer {
-            display: none !important;
         }
         
         .custom-footer {
@@ -352,62 +350,6 @@
 {% endblock %}
 
 {% block body %}
-<div class="custom-header">
-    <div class="container">
-        <div class="logo">
-            <div class="logo-circle">
-                <img src="{{ asset('images/logo-skillora.png') }}" alt="Skillora Logo">
-            </div>
-            <h1>Skillora Club</h1>
-        </div>
-
-        <div class="user-info">
-            <div class="profile-trigger" onclick="toggleProfileDropdown()">
-                {% if user.photo %}
-                    <img src="{{ asset('uploads/photos/' ~ user.photo) }}" alt="{{ user.prenom }}" class="user-avatar">
-                {% else %}
-                    <div class="user-avatar-placeholder">
-                        {{ user.prenom|slice(0, 1)|upper }}{{ user.nom|slice(0, 1)|upper }}
-                    </div>
-                {% endif %}
-            </div>
-
-            <div class="profile-dropdown" id="profileDropdown">
-                <div class="profile-dropdown-header">
-                    {% if user.photo %}
-                        <img src="{{ asset('uploads/photos/' ~ user.photo) }}" alt="{{ user.prenom }}">
-                    {% else %}
-                        <div class="avatar-placeholder">
-                            {{ user.prenom|slice(0, 1)|upper }}{{ user.nom|slice(0, 1)|upper }}
-                        </div>
-                    {% endif %}
-                    <h3>{{ user.prenom }} {{ user.nom }}</h3>
-                    <p>{{ user.email }}</p>
-                </div>
-
-                <div class="profile-dropdown-menu">
-                    <a href="{{ path('app_user_show', {id: user.id}) }}" class="profile-dropdown-item">
-                        <i>👤</i>
-                        <span>My Profile</span>
-                    </a>
-
-                    <a href="{{ path('app_user_edit', {id: user.id}) }}" class="profile-dropdown-item">
-                        <i>✏️</i>
-                        <span>Edit Profile</span>
-                    </a>
-
-                    <a href="{{ path('app_logout') }}" class="profile-dropdown-item logout">
-                        <i>🚪</i>
-                        <span>Log Out</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="dropdown-overlay" id="dropdownOverlay" onclick="closeProfileDropdown()"></div>
-
 <div class="dashboard-section">
     <div class="container">
         <div class="dashboard-container">
@@ -417,29 +359,9 @@
                 <span class="role-badge">CLUB MANAGER</span>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>👥 Members</h3>
-                    <p>Manage club members</p>
-                </div>
-
-                <div class="stat-card">
-                    <h3>📚 Courses</h3>
-                    <p>Manage club courses</p>
-                </div>
-
-                <div class="stat-card">
-                    <h3>🏆 Challenges</h3>
-                    <p>Create and manage challenges</p>
-                </div>
+            
             </div>
         </div>
-    </div>
-</div>
-
-<div class="custom-footer">
-    <div class="container">
-        <p>© {{ "now"|date("Y") }} Skillora - Apprendre, grandir, réussir ✨</p>
     </div>
 </div>
 

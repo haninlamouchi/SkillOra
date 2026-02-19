@@ -138,7 +138,7 @@ if ($plainPassword) {
             $entityManager->flush();
 
             $this->addFlash('success', 'Utilisateur modifié avec succès !');
-            return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('front_home', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('user/edit.html.twig', [
@@ -157,6 +157,6 @@ if ($plainPassword) {
             $this->addFlash('success', 'Utilisateur supprimé avec succès !');
         }
 
-        return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('front_home', [], Response::HTTP_SEE_OTHER);
     }
 }

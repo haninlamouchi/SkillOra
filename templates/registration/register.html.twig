@@ -1,0 +1,240 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Sign Up - Skillora{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body { padding-top: 0 !important; margin: 0; }
+        .register-section {
+            padding: 110px 0 60px 0;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        .form-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 40px rgba(193, 6, 9, 0.15);
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+            border-top: 5px solid #c10609;
+        }
+        .form-label { font-weight: 600; color: #333; font-size: 14px; }
+        .form-control {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .form-control:focus {
+            border-color: #c62828;
+            box-shadow: 0 0 0 0.2rem rgba(198, 40, 40, 0.15);
+            outline: none;
+        }
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            background-image: none;
+        }
+        .btn-primary {
+            background-color: #c62828;
+            color: white;
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #b71c1c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(198, 40, 40, 0.3);
+        }
+        .form-group { margin-bottom: 1.5rem; }
+        .alert-danger {
+            background: #ffe6e6;
+            border: 2px solid #dc3545;
+            color: #dc3545;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+            margin-bottom: 1.5rem;
+        }
+        .alert-success {
+            background: #e6ffed;
+            border: 2px solid #28a745;
+            color: #28a745;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin-bottom: 1.5rem;
+        }
+        .form-error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+        }
+        .form-error::before {
+            content: "⚠️";
+            font-size: 12px;
+        }
+        .vich-image input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .vich-image input[type="file"]:focus {
+            border-color: #c62828;
+            box-shadow: 0 0 0 0.2rem rgba(198, 40, 40, 0.15);
+            outline: none;
+        }
+
+        .vich-image input[type="file"].is-invalid {
+            border-color: #dc3545;
+        }
+        .link-primary { color: #c62828; font-weight: 600; text-decoration: none; }
+        .link-primary:hover { color: #b71c1c; text-decoration: underline; }
+        .required { color: #dc3545; margin-left: 3px; font-weight: bold; }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="register-section">
+    <div class="container">
+        <div class="form-container">
+
+            <div class="page-header" style="text-align:center; margin-bottom:2rem;">
+                <h1>📚 Register on Skillora</h1>
+                <p style="color:#666; font-size:15px;">Join our learning and success platform</p>
+            </div>
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}}) }}
+
+                {# Last Name #}
+                <div class="form-group">
+                    <label class="form-label">Last Name <span class="required">*</span></label>
+                    {{ form_widget(form.nom, {
+                        'attr': {
+                            'class': 'form-control' ~ (form.nom.vars.errors|length > 0 ? ' is-invalid' : ''),
+                            'placeholder': 'Enter your last name'
+                        }
+                    }) }}
+                    {% for error in form.nom.vars.errors %}
+                        <span class="form-error">{{ error.message }}</span>
+                    {% endfor %}
+                </div>
+
+                {# First Name #}
+                <div class="form-group">
+                    <label class="form-label">First Name <span class="required">*</span></label>
+                    {{ form_widget(form.prenom, {
+                        'attr': {
+                            'class': 'form-control' ~ (form.prenom.vars.errors|length > 0 ? ' is-invalid' : ''),
+                            'placeholder': 'Enter your first name'
+                        }
+                    }) }}
+                    {% for error in form.prenom.vars.errors %}
+                        <span class="form-error">{{ error.message }}</span>
+                    {% endfor %}
+                </div>
+
+                {# Email #}
+                <div class="form-group">
+                    <label class="form-label">Email Address <span class="required">*</span></label>
+                    {{ form_widget(form.email, {
+                        'attr': {
+                            'class': 'form-control' ~ (form.email.vars.errors|length > 0 ? ' is-invalid' : ''),
+                            'placeholder': 'example@email.com'
+                        }
+                    }) }}
+                    {% for error in form.email.vars.errors %}
+                        <span class="form-error">{{ error.message }}</span>
+                    {% endfor %}
+                </div>
+
+                {# Password #}
+                <div class="form-group">
+                    <label class="form-label">Password <span class="required">*</span></label>
+                    {{ form_widget(form.password, {
+                        'attr': {
+                            'class': 'form-control' ~ (form.password.vars.errors|length > 0 ? ' is-invalid' : ''),
+                            'placeholder': '••••••••'
+                        }
+                    }) }}
+                    {% for error in form.password.vars.errors %}
+                        <span class="form-error">{{ error.message }}</span>
+                    {% endfor %}
+                    <small style="color:#999; font-size:12px;">
+                        Must contain at least 8 characters, one uppercase, one lowercase, one number and one special character.
+                    </small>
+                    
+                </div>
+
+                {# Phone #}
+                <div class="form-group">
+                    <label class="form-label">Phone Number <span class="required">*</span></label>
+                    {{ form_widget(form.telephone, {
+                        'attr': {
+                            'class': 'form-control' ~ (form.telephone.vars.errors|length > 0 ? ' is-invalid' : ''),
+                            'placeholder': '+216 XX XXX XXX'
+                        }
+                    }) }}
+                    {% for error in form.telephone.vars.errors %}
+                        <span class="form-error">{{ error.message }}</span>
+                    {% endfor %}
+                </div>
+
+                {# Profile Picture #}
+                <div class="form-group">
+                    <label class="form-label">Profile Picture <span class="required">*</span></label>
+                    <div class="vich-image">
+                        {{ form_widget(form.photoFile) }}
+                    </div>
+                    {% for error in form.photoFile.vars.errors %}
+                        <span class="form-error">{{ error.message }}</span>
+                    {% endfor %}
+                    <small style="color:#999; font-size:12px;">
+                        Accepted formats: JPEG, PNG, GIF — Max size: 2MB
+                    </small>
+                </div>
+                {# Date of Birth #}
+                <div class="form-group">
+                    <label class="form-label">Date of Birth <span class="required">*</span></label>
+                    {{ form_widget(form.dateNaissance, {
+                        'attr': {
+                            'class': 'form-control' ~ (form.dateNaissance.vars.errors|length > 0 ? ' is-invalid' : '')
+                        }
+                    }) }}
+                    {% for error in form.dateNaissance.vars.errors %}
+                        <span class="form-error">{{ error.message }}</span>
+                    {% endfor %}
+                </div>
+
+                <div style="border-top: 2px solid #eee; margin-top: 2rem; padding-top: 1.5rem;">
+                    <button type="submit" class="btn-primary">🚀 Create My Account</button>
+                </div>
+
+            {{ form_end(form) }}
+
+        </div>
+    </div>
+</div>
+{% endblock %}
