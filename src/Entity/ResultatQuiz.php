@@ -14,7 +14,7 @@ class ResultatQuiz
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'resultats')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Quiz $quiz = null;
 

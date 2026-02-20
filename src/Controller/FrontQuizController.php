@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Formation;
 use App\Entity\Quiz;
 use App\Entity\ResultatQuiz;
-use App\Entity\User;
 use App\Repository\ParticipationFormationRepository;
 use App\Repository\ResultatQuizRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,18 +22,6 @@ class FrontQuizController extends AbstractController
         private ResultatQuizRepository $resultatRepo,
     ) {}
 
-    private function getDefaultUser(): User
-    {
-        $user = $this->em->getRepository(User::class)->find(123);
-        if (!$user) {
-            $user = $this->em->getRepository(User::class)->findOneBy([]);
-        }
-        if (!$user) {
-            throw new \RuntimeException('Aucun utilisateur trouvé en base.');
-        }
-        return $user;
-    }
-
     // ──────────────────────────────────────────────
     //  GATEWAY: /formations/{formationId}/quiz
     //  Checks auth + participation, then redirects
@@ -43,6 +30,7 @@ class FrontQuizController extends AbstractController
     #[Route('', name: 'gateway', methods: ['GET'])]
     public function gateway(int $formationId): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
         $formation = $this->em->getRepository(Formation::class)->find($formationId);
         if (!$formation) {
             throw $this->createNotFoundException('Formation introuvable.');
@@ -70,6 +58,7 @@ class FrontQuizController extends AbstractController
     #[Route('/{id}', name: 'start', methods: ['GET'])]
     public function start(int $formationId, Quiz $quiz): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
         $formation = $this->em->getRepository(Formation::class)->find($formationId);
         if (!$formation || $quiz->getFormation() !== $formation) {
             throw $this->createNotFoundException('Quiz introuvable pour cette formation.');
@@ -77,7 +66,7 @@ class FrontQuizController extends AbstractController
 
         // Check if already passed this quiz
         $existingResult = $this->resultatRepo->findOneBy([
-            'user' => $this->getDefaultUser(),
+            'user' => $this->getUser(),
             'quiz' => $quiz,
         ]);
 
@@ -113,6 +102,7 @@ class FrontQuizController extends AbstractController
     #[Route('/{id}/submit', name: 'submit', methods: ['POST'])]
     public function submit(Request $request, int $formationId, Quiz $quiz): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
         $formation = $this->em->getRepository(Formation::class)->find($formationId);
         if (!$formation || $quiz->getFormation() !== $formation) {
             throw $this->createNotFoundException('Quiz introuvable pour cette formation.');
@@ -129,7 +119,7 @@ class FrontQuizController extends AbstractController
 
         // Prevent double submission
         $existingResult = $this->resultatRepo->findOneBy([
-            'user' => $this->getDefaultUser(),
+            'user' => $this->getUser(),
             'quiz' => $quiz,
         ]);
 
@@ -165,7 +155,7 @@ class FrontQuizController extends AbstractController
         // Save result
         $resultat = new ResultatQuiz();
         $resultat->setQuiz($quiz);
-        $resultat->setUser($this->getDefaultUser());
+        $resultat->setUser($this->getUser());
         $resultat->setScore($score);
         $resultat->setTotalPoints($totalPoints);
         $resultat->setReponses($answers); // store user answers for result review
@@ -186,13 +176,14 @@ class FrontQuizController extends AbstractController
     #[Route('/{id}/result', name: 'result', methods: ['GET'])]
     public function result(int $formationId, Quiz $quiz): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
         $formation = $this->em->getRepository(Formation::class)->find($formationId);
         if (!$formation || $quiz->getFormation() !== $formation) {
             throw $this->createNotFoundException('Quiz introuvable pour cette formation.');
         }
 
         $resultat = $this->resultatRepo->findOneBy([
-            'user' => $this->getDefaultUser(),
+            'user' => $this->getUser(),
             'quiz' => $quiz,
         ]);
 

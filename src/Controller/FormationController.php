@@ -10,6 +10,7 @@ use App\Form\ParticipationFormationType;
 use App\Form\VideoType;
 use App\Repository\FormationRepository;
 use App\Repository\ParticipationFormationRepository;
+use App\Repository\ResultatQuizRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -78,6 +79,7 @@ final class FormationController extends AbstractController
         Formation $formation,
         Request $request,
         ParticipationFormationRepository $participationRepo,
+        ResultatQuizRepository $resultatRepo,
     ): Response {
         // --- Video form (for Bootstrap modal) ---
         $video = new Video();
@@ -91,10 +93,20 @@ final class FormationController extends AbstractController
             'action' => $this->generateUrl('app_formation_add_participant', ['id' => $formation->getId()]),
         ]);
 
+        // --- Quiz results for this formation ---
+        $quizResults = [];
+        foreach ($formation->getQuizzes() as $quiz) {
+            $results = $resultatRepo->findBy(['quiz' => $quiz], ['datePassage' => 'DESC']);
+            foreach ($results as $result) {
+                $quizResults[] = $result;
+            }
+        }
+
         return $this->render('backoffice/formation/show.html.twig', [
             'formation' => $formation,
             'videoForm' => $videoForm,
             'participationForm' => $participationForm,
+            'quizResults' => $quizResults,
         ]);
     }
 

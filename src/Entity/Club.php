@@ -15,6 +15,25 @@ class Club
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column(length: 150)]
+    private ?string $nom = null;
+
+    /**
+     * The responsable_club user who manages this club.
+     */
+    #[ORM\OneToOne(targetEntity: User::class, inversedBy: 'clubResponsable')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?User $responsable = null;
+
+    /**
+     * Students who joined this club.
+     *
+     * @var Collection<int, User>
+     */
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'clubs')]
+    #[ORM\JoinTable(name: 'club_membre')]
+    private Collection $membres;
+
     /**
      * @var Collection<int, Formation>
      */
@@ -29,12 +48,69 @@ class Club
     public function __construct()
     {
         $this->formations = new ArrayCollection();
+        $this->membres = new ArrayCollection();
     }
 
     public function getId(): ?int
     {
         return $this->id;
     }
+
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+
+    public function setNom(string $nom): static
+    {
+        $this->nom = $nom;
+        return $this;
+    }
+
+    public function getResponsable(): ?User
+    {
+        return $this->responsable;
+    }
+
+    public function setResponsable(?User $responsable): static
+    {
+        $this->responsable = $responsable;
+        return $this;
+    }
+
+    // ── Membres ──────────────────────────────────
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getMembres(): Collection
+    {
+        return $this->membres;
+    }
+
+    public function addMembre(User $user): static
+    {
+        if (!$this->membres->contains($user)) {
+            $this->membres->add($user);
+            $user->addClub($this);
+        }
+        return $this;
+    }
+
+    public function removeMembre(User $user): static
+    {
+        if ($this->membres->removeElement($user)) {
+            $user->removeClub($this);
+        }
+        return $this;
+    }
+
+    public function hasMembre(User $user): bool
+    {
+        return $this->membres->contains($user);
+    }
+
+    // ── Formations ───────────────────────────────
 
     /**
      * @return Collection<int, Formation>
@@ -65,27 +141,8 @@ class Club
         return $this;
     }
 
-    // Backward-compatible aliases (consider removing once you refactor callers)
-    /** @deprecated Use getFormations() */
-    public function getYes(): Collection
-    {
-        return $this->getFormations();
-    }
-
-    /** @deprecated Use addFormation() */
-    public function addYe(Formation $ye): static
-    {
-        return $this->addFormation($ye);
-    }
-
-    /** @deprecated Use removeFormation() */
-    public function removeYe(Formation $ye): static
-    {
-        return $this->removeFormation($ye);
-    }
-
     public function __toString(): string
     {
-        return 'Club #' . $this->id;
+        return $this->nom ?? 'Club #' . $this->id;
     }
 }

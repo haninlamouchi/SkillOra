@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Club;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,27 @@ class ClubRepository extends ServiceEntityRepository
         parent::__construct($registry, Club::class);
     }
 
-//    /**
-//     * @return Club[] Returns an array of Club objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('c.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Find the club managed by a responsable_club user.
+     */
+    public function findByResponsable(User $responsable): ?Club
+    {
+        return $this->findOneBy(['responsable' => $responsable]);
+    }
 
-//    public function findOneBySomeField($value): ?Club
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * All clubs the student is a member of.
+     *
+     * @return Club[]
+     */
+    public function findByMembre(User $user): array
+    {
+        return $this->createQueryBuilder('c')
+            ->innerJoin('c.membres', 'm')
+            ->andWhere('m = :user')
+            ->setParameter('user', $user)
+            ->orderBy('c.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

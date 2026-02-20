@@ -296,15 +296,9 @@
                                                     <span><i class="fa fa-clock-o me-1"></i>{{ quiz.duree }} min</span>
                                                 {% endif %}
                                             </div>
-                                            {% if hasParticipated %}
-                                                <a href="{{ path('front_quiz_start', {formationId: formation.id, id: quiz.id}) }}" class="btn btn-sm px-4" style="background: linear-gradient(135deg, #5a0000, #8b1a1a); color: #fff; border-radius: 8px; font-weight: 600;">
-                                                    <i class="fa fa-bolt me-1"></i> Passer le quiz
-                                                </a>
-                                            {% else %}
-                                                <button class="btn btn-sm btn-secondary px-4" disabled title="Participez d'abord à la formation" style="border-radius: 8px;">
-                                                    <i class="fa fa-lock me-1"></i> Participez d'abord
-                                                </button>
-                                            {% endif %}
+                                            <a href="{{ path('front_quiz_start', {formationId: formation.id, id: quiz.id}) }}" class="btn btn-sm px-4" style="background: linear-gradient(135deg, #5a0000, #8b1a1a); color: #fff; border-radius: 8px; font-weight: 600;">
+                                                <i class="fa fa-bolt me-1"></i> Passer le quiz
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -362,7 +356,7 @@
                             {% endif %}
 
                             {# Quiz buttons #}
-                            {% if hasParticipated and formation.quizzes|length > 0 %}
+                            {% if formation.quizzes|length > 0 %}
                                 {% for quiz in formation.quizzes %}
                                     <a href="{{ path('front_quiz_start', {formationId: formation.id, id: quiz.id}) }}" class="btn btn-quiz mb-2">
                                         <i class="fa fa-bolt me-2"></i>{{ quiz.titre }}

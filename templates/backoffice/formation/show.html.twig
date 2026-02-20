@@ -290,6 +290,69 @@
             </div>
         </div>
 
+        {# ═══════════════════════════════════════════
+            QUIZ RESULTS / SCORES
+        ═══════════════════════════════════════════ #}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Résultats des Quiz ({{ quizResults|length }})</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if quizResults|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4 py-3 small text-muted fw-semibold">#</th>
+                                <th class="py-3 small text-muted fw-semibold">Participant</th>
+                                <th class="py-3 small text-muted fw-semibold">Quiz</th>
+                                <th class="py-3 small text-muted fw-semibold text-center">Score</th>
+                                <th class="py-3 small text-muted fw-semibold text-center">Résultat</th>
+                                <th class="pe-4 py-3 small text-muted fw-semibold text-end">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for res in quizResults %}
+                            <tr>
+                                <td class="ps-4 py-3">{{ loop.index }}</td>
+                                <td class="py-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width:34px;height:34px;background:linear-gradient(135deg,#5a0000,#8b1a1a);font-size:0.8rem">
+                                            {{ res.user.fullName|first|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold small">{{ res.user.fullName }}</div>
+                                            <small class="text-muted">{{ res.user.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 small">{{ res.quiz.titre }}</td>
+                                <td class="py-3 text-center fw-bold">{{ res.score }} / {{ res.totalPoints }}</td>
+                                <td class="py-3 text-center">
+                                    {% set pct = res.percentage %}
+                                    {% if pct >= 70 %}
+                                        <span class="badge rounded-pill bg-success px-3">{{ pct }}%</span>
+                                    {% elseif pct >= 50 %}
+                                        <span class="badge rounded-pill bg-warning text-dark px-3">{{ pct }}%</span>
+                                    {% else %}
+                                        <span class="badge rounded-pill bg-danger px-3">{{ pct }}%</span>
+                                    {% endif %}
+                                </td>
+                                <td class="pe-4 py-3 text-end text-muted small">{{ res.datePassage|date('d/m/Y H:i') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-trophy fs-1 d-block mb-2 opacity-25"></i>
+                    Aucun résultat de quiz pour cette formation.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
     </div>
 </main>
 

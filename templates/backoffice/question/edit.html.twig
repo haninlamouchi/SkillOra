@@ -105,3 +105,36 @@
     }
 </style>
 {% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelector('.question-form').addEventListener('submit', function(e) {
+        var contenu = document.getElementById('question_contenu');
+        if (!contenu || contenu.value.trim() === '') {
+            e.preventDefault();
+            alert('Le contenu de la question est obligatoire !');
+            if (contenu) contenu.focus();
+            return false;
+        }
+
+        var options = document.querySelectorAll('[id^="question_optionQuestions_"][id$="_contenu"]');
+        for (var i = 0; i < options.length; i++) {
+            if (options[i].value.trim() === '') {
+                e.preventDefault();
+                alert('Le contenu de l\'option ' + String.fromCharCode(65 + i) + ' est obligatoire !');
+                options[i].focus();
+                return false;
+            }
+        }
+
+        var checked = document.querySelectorAll('.correct-check:checked');
+        if (checked.length === 0) {
+            e.preventDefault();
+            alert('Veuillez cocher au moins une réponse correcte !');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

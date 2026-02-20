@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Formation;
 use App\Entity\Quiz;
 use App\Form\QuizType;
+use App\Repository\ResultatQuizRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,6 +17,7 @@ final class QuizController extends AbstractController
 {
     public function __construct(
         private EntityManagerInterface $em,
+        private ResultatQuizRepository $resultatRepo,
     ) {}
 
     // ──────────────────────────────────────────────
@@ -84,9 +86,12 @@ final class QuizController extends AbstractController
             throw $this->createNotFoundException('Quiz introuvable pour cette formation.');
         }
 
+        $quizResults = $this->resultatRepo->findBy(['quiz' => $quiz], ['datePassage' => 'DESC']);
+
         return $this->render('backoffice/quiz/show.html.twig', [
             'formation' => $formation,
             'quiz' => $quiz,
+            'quizResults' => $quizResults,
         ]);
     }
 

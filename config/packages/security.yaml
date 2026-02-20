@@ -1,6 +1,7 @@
 security:
     password_hashers:
-        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: "auto"
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+            algorithm: plaintext
 
     providers:
         app_user_provider:
@@ -25,7 +26,15 @@ security:
                 target: front_home
 
     access_control:
-        # No restrictions — auto-login handles authentication
+        # Responsable area — full scope requires ROLE_RESPONSABLE_CLUB
+        - { path: ^/responsable, roles: ROLE_RESPONSABLE_CLUB }
+
+        # Student-only routes (mes formations, en cours, participate, cancel)
+        - { path: ^/formations/mes-formations, roles: ROLE_ETUDIANT }
+        - { path: ^/formations/en-cours, roles: ROLE_ETUDIANT }
+
+        # Quiz area requires at least ROLE_USER
+        - { path: ^/formations/\d+/quiz, roles: ROLE_USER }
 
 when@test:
     security:

@@ -298,6 +298,173 @@
     </div>
   </section>
 
+  {# ═══════════════════════════════════════════════════════════
+     MES FORMATIONS — visible only for logged-in students
+     ═══════════════════════════════════════════════════════════ #}
+  {% if app.user and is_granted('ROLE_ETUDIANT') %}
+
+    {# ── En cours ─────────────────────────────────── #}
+    <section class="section" id="mes-formations">
+      <div class="container">
+        <div class="row mb-4">
+          <div class="col-lg-12 text-center">
+            <div class="section-heading">
+              <h6>Mon apprentissage</h6>
+              <h2>Mes Formations</h2>
+            </div>
+          </div>
+        </div>
+
+        {% if mesFormations is not empty %}
+          <div class="row">
+            {% for formation in mesFormations %}
+              <div class="col-lg-4 col-md-6 mb-4">
+                <div class="events_item h-100">
+                  <div class="thumb">
+                    {% if formation.image %}
+                      <img src="{{ asset('uploads/formations/' ~ formation.image) }}" alt="{{ formation.titre }}" class="img-fluid rounded-top">
+                    {% else %}
+                      <img src="{{ asset('assets/frontoffice/images/course-01.jpg') }}" alt="{{ formation.titre }}" class="img-fluid rounded-top">
+                    {% endif %}
+                    {# Active badge #}
+                    {% set today = "now"|date("Y-m-d") %}
+                    {% if formation.dateDebut and formation.dateFin
+                        and formation.dateDebut|date("Y-m-d") <= today
+                        and formation.dateFin|date("Y-m-d") >= today %}
+                      <span class="badge bg-success position-absolute top-0 end-0 m-2">En cours</span>
+                    {% endif %}
+                  </div>
+                  <div class="down-content p-3">
+                    <span class="author">{{ formation.club ? formation.club.nom : 'SkillOra' }}</span>
+                    <h4>{{ formation.titre }}</h4>
+                    {% if formation.dateDebut and formation.dateFin %}
+                      <small class="text-muted">
+                        {{ formation.dateDebut|date('d/m/Y') }} → {{ formation.dateFin|date('d/m/Y') }}
+                      </small>
+                    {% endif %}
+                    <div class="mt-2">
+                      <a href="{{ path('front_formation_show', {id: formation.id}) }}" class="btn btn-primary btn-sm">
+                        Voir la formation
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="text-center mt-2">
+            <a href="{{ path('front_formation_mes_formations') }}" class="btn btn-outline-primary">
+              Voir toutes mes formations
+            </a>
+            <a href="{{ path('front_formation_en_cours') }}" class="btn btn-outline-success ms-2">
+              Formations en cours
+            </a>
+          </div>
+        {% else %}
+          <div class="alert alert-info text-center">
+            Vous ne participez à aucune formation pour l'instant.
+            <a href="{{ path('front_formation_index') }}" class="alert-link">Parcourir les formations</a>
+          </div>
+        {% endif %}
+      </div>
+    </section>
+
+    {# ── Formations de mes clubs ──────────────────── #}
+    <section class="section bg-light" id="formations-clubs">
+      <div class="container">
+        <div class="row mb-4">
+          <div class="col-lg-12 text-center">
+            <div class="section-heading">
+              <h6>Mes clubs</h6>
+              <h2>Formations disponibles</h2>
+            </div>
+          </div>
+        </div>
+
+        {% if allFormations is not empty %}
+          <div class="row">
+            {% for formation in allFormations %}
+              <div class="col-lg-4 col-md-6 mb-4">
+                <div class="events_item h-100">
+                  <div class="thumb">
+                    {% if formation.image %}
+                      <img src="{{ asset('uploads/formations/' ~ formation.image) }}" alt="{{ formation.titre }}" class="img-fluid rounded-top">
+                    {% else %}
+                      <img src="{{ asset('assets/frontoffice/images/course-02.jpg') }}" alt="{{ formation.titre }}" class="img-fluid rounded-top">
+                    {% endif %}
+                    {% if formation.id in participatedIds %}
+                      <span class="badge bg-primary position-absolute top-0 end-0 m-2">Inscrit</span>
+                    {% endif %}
+                  </div>
+                  <div class="down-content p-3">
+                    <span class="author">{{ formation.club ? formation.club.nom : 'SkillOra' }}</span>
+                    <h4>{{ formation.titre }}</h4>
+                    <div class="mt-2">
+                      <a href="{{ path('front_formation_show', {id: formation.id}) }}" class="btn btn-outline-secondary btn-sm">
+                        Détails
+                      </a>
+                      {% if formation.id not in participatedIds %}
+                        <form method="post" action="{{ path('front_formation_participate', {id: formation.id}) }}" class="d-inline">
+                          <input type="hidden" name="_token" value="{{ csrf_token('participate' ~ formation.id) }}">
+                          <button type="submit" class="btn btn-success btn-sm">Participer</button>
+                        </form>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="alert alert-secondary text-center">
+            Aucune formation disponible dans vos clubs actuellement.
+          </div>
+        {% endif %}
+      </div>
+    </section>
+
+  {% else %}
+    {# ── Guest / Admin: show all formations ──────────────── #}
+    <section class="section" id="all-formations">
+      <div class="container">
+        <div class="row mb-4">
+          <div class="col-lg-12 text-center">
+            <div class="section-heading">
+              <h6>Nos formations</h6>
+              <h2>Toutes les formations</h2>
+            </div>
+          </div>
+        </div>
+        {% if allFormations is not empty %}
+          <div class="row">
+            {% for formation in allFormations %}
+              <div class="col-lg-4 col-md-6 mb-4">
+                <div class="events_item h-100">
+                  <div class="thumb">
+                    {% if formation.image %}
+                      <img src="{{ asset('uploads/formations/' ~ formation.image) }}" alt="{{ formation.titre }}" class="img-fluid rounded-top">
+                    {% else %}
+                      <img src="{{ asset('assets/frontoffice/images/course-01.jpg') }}" alt="{{ formation.titre }}" class="img-fluid rounded-top">
+                    {% endif %}
+                  </div>
+                  <div class="down-content p-3">
+                    <span class="author">{{ formation.club ? formation.club.nom : 'SkillOra' }}</span>
+                    <h4>{{ formation.titre }}</h4>
+                    <a href="{{ path('front_formation_show', {id: formation.id}) }}" class="btn btn-primary btn-sm mt-2">
+                      Voir
+                    </a>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-center text-muted">Aucune formation disponible.</p>
+        {% endif %}
+      </div>
+    </section>
+  {% endif %}
+
   <div class="section fun-facts">
     <div class="container">
       <div class="row">

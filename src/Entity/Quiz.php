@@ -43,9 +43,21 @@ class Quiz
     #[ORM\Column(nullable: true)]
     private ?int $nbQuestions = null;
 
+    /**
+     * @var Collection<int, ResultatQuiz>
+     */
+    #[ORM\OneToMany(
+        targetEntity: ResultatQuiz::class,
+        mappedBy: 'quiz',
+        cascade: ['remove'],
+        orphanRemoval: true
+    )]
+    private Collection $resultats;
+
     public function __construct()
     {
         $this->questions = new ArrayCollection();
+        $this->resultats = new ArrayCollection();
     }
 
     public function getId(): ?int

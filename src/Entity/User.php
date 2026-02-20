@@ -53,6 +53,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTime $dateNaissance = null;
 
     /**
+     * The club this user is responsible for (null if not responsable_club).
+     */
+    #[ORM\OneToOne(targetEntity: Club::class, mappedBy: 'responsable')]
+    private ?Club $clubResponsable = null;
+
+    /**
+     * Clubs the student has joined.
+     *
+     * @var Collection<int, Club>
+     */
+    #[ORM\ManyToMany(targetEntity: Club::class, mappedBy: 'membres')]
+    private Collection $clubs;
+
+    /**
      * @var Collection<int, ParticipationFormation>
      */
     #[ORM\OneToMany(
@@ -66,6 +80,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->participations = new ArrayCollection();
+        $this->clubs = new ArrayCollection();
         $this->dateInscription = new \DateTime();
     }
 
@@ -211,6 +226,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    // ── Club responsable ─────────────────────────
+
+    public function getClubResponsable(): ?Club
+    {
+        return $this->clubResponsable;
+    }
+
+    // ── Student clubs (memberships) ──────────────
+
+    /**
+     * @return Collection<int, Club>
+     */
+    public function getClubs(): Collection
+    {
+        return $this->clubs;
+    }
+
+    public function addClub(Club $club): static
+    {
+        if (!$this->clubs->contains($club)) {
+            $this->clubs->add($club);
+        }
+        return $this;
+    }
+
+    public function removeClub(Club $club): static
+    {
+        $this->clubs->removeElement($club);
+        return $this;
+    }
+
     public function getFullName(): string
     {
         return $this->prenom . ' ' . $this->nom;
@@ -231,9 +277,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $roles = ['ROLE_USER'];
 
         return match ($this->role) {
-            self::ROLE_ADMIN => array_merge($roles, ['ROLE_ADMIN']),
+            self::ROLE_ADMIN            => array_merge($roles, ['ROLE_ADMIN']),
             self::ROLE_RESPONSABLE_CLUB => array_merge($roles, ['ROLE_RESPONSABLE_CLUB']),
-            default => $roles,
+            self::ROLE_ETUDIANT         => array_merge($roles, ['ROLE_ETUDIANT']),
+            default                     => $roles,
         };
     }
 

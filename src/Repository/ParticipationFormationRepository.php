@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\Formation;
 use App\Entity\ParticipationFormation;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -17,7 +19,7 @@ class ParticipationFormationRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find all participants for a given formation.
+     * Find all participants for a given formation (with user data eagerly loaded).
      *
      * @return ParticipationFormation[]
      */
@@ -36,16 +38,28 @@ class ParticipationFormationRepository extends ServiceEntityRepository
     /**
      * Check if a user already participates in a formation.
      */
-    public function isAlreadyParticipating(int $userId, int $formationId): bool
+    public function isAlreadyParticipating(User $user, Formation $formation): bool
     {
-        $result = $this->createQueryBuilder('p')
-            ->andWhere('p.user = :userId')
-            ->andWhere('p.formation = :formationId')
-            ->setParameter('userId', $userId)
-            ->setParameter('formationId', $formationId)
-            ->getQuery()
-            ->getOneOrNullResult();
+        return null !== $this->findOneBy([
+            'user'      => $user,
+            'formation' => $formation,
+        ]);
+    }
 
-        return $result !== null;
+    /**
+     * Return all formation IDs the given user participates in (for quick lookup).
+     *
+     * @return int[]
+     */
+    public function findParticipatedFormationIds(User $user): array
+    {
+        $rows = $this->createQueryBuilder('p')
+            ->select('IDENTITY(p.formation) AS fid')
+            ->andWhere('p.user = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getScalarResult();
+
+        return array_column($rows, 'fid');
     }
 }
