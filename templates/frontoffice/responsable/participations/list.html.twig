@@ -65,6 +65,16 @@
                 </div>
             {% endfor %}
         </div>
+        
+        {# ✨ PAGINATION AJOUTÉE ICI ✨ #}
+        <div class="d-flex justify-content-center mt-4">
+            {{ knp_pagination_render(participations, 'pagination/custom_pagination.html.twig') }}
+        </div>
+        
+        <div style="margin-top: 2rem; text-align: center; color: #718096;">
+            Page {{ participations.getCurrentPageNumber }} sur {{ participations.getPageCount }}
+            ({{ participations.getTotalItemCount }} participation(s) au total)
+        </div>
     {% endif %}
 </div>
 {% endblock %}

@@ -63,7 +63,7 @@
     {# Afficher le nombre de résultats #}
     {% if search %}
         <p style="color: #718096; margin-bottom: 1rem;">
-            📊 {{ challenges|length }} résultat(s) pour "{{ search }}"
+            📊 {{ challenges.getTotalItemCount }} résultat(s) pour "{{ search }}"
         </p>
     {% endif %}
 
@@ -99,7 +99,7 @@
                                 </span>
                             </div>
                         </div>
-
+                        
                         <div style="display: flex; gap: 0.75rem; flex-shrink: 0;">
                             <a href="{{ path('app_responsable_challenge_show', {id: challenge.id}) }}" class="btn" style="padding: 0.75rem 1.25rem; white-space: nowrap;">
                                 👁️ Détails
@@ -120,6 +120,76 @@
                 </div>
             {% endfor %}
         </div>
+        
+        {# ✨ PAGINATION AJOUTÉE ICI ✨ #}
+        <div class="d-flex justify-content-center mt-4">
+            {{ knp_pagination_render(challenges, 'pagination/custom_pagination.html.twig') }}
+        </div>
+        
+        {# Statistiques #}
+        <div style="margin-top: 2rem; text-align: center; color: #718096;">
+            Page {{ challenges.getCurrentPageNumber }} sur {{ challenges.getPageCount }}
+            ({{ challenges.getTotalItemCount }} challenge(s) au total)
+        </div>
     {% endif %}
 </div>
+<style>
+/* Pagination Style */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0;
+}
+
+.pagination li {
+    display: inline-block;
+}
+
+.pagination li a,
+.pagination li span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0.5rem 1rem;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    color: #4a5568;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.pagination li a:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    border-color: #dc2626;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.pagination li.active span {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    border-color: #dc2626;
+    color: white;
+    font-weight: 600;
+}
+
+.pagination li.disabled span {
+    background: #f7fafc;
+    border-color: #e2e8f0;
+    color: #cbd5e0;
+    cursor: not-allowed;
+}
+
+.pagination li.previous a,
+.pagination li.next a {
+    font-weight: 600;
+}
+</style>
 {% endblock %}

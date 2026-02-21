@@ -126,6 +126,16 @@
             {% endfor %}
         </div>
     {% endif %}
+    {# PAGINATION #}
+<div class="d-flex justify-content-center mt-4">
+    {{ knp_pagination_render(challenges, 'pagination/custom_pagination.html.twig') }}
+</div>
+
+<div style="margin-top: 2rem; text-align: center; color: #718096;">
+    Page {{ challenges.getCurrentPageNumber }} sur {{ challenges.getPageCount }}
+    ({{ challenges.getTotalItemCount }} challenge(s) au total)
+</div>
+
 </div>
 
 <style>

@@ -22,6 +22,7 @@ use App\Repository\LivrableChallengeRepository;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use App\Entity\Favori;
 use App\Entity\User;
+use Knp\Component\Pager\PaginatorInterface;
 
 
 #[Route('/etudiant')]
@@ -34,7 +35,7 @@ final class EtudiantController extends AbstractController
     }
 
     #[Route('/challenges', name: 'app_etudiant_challenges')]
-    public function listChallenges(Request $request, ChallengeRepository $challengeRepository, EntityManagerInterface $entityManager): Response
+    public function listChallenges(Request $request, ChallengeRepository $challengeRepository, EntityManagerInterface $entityManager, PaginatorInterface $paginator): Response
     {
         $search = $request->query->get('search', '');
         $sortBy = $request->query->get('sort', 'dateDebut');
@@ -54,8 +55,12 @@ final class EtudiantController extends AbstractController
             $queryBuilder->orderBy('c.' . $sortBy, $order);
         }
         
-        $challenges = $queryBuilder->getQuery()->getResult();
-
+        // PAGINATION
+        $challenges = $paginator->paginate(
+        $queryBuilder,
+        $request->query->getInt('page', 1),
+        6    
+        );
         // Récupérer les favoris de l'utilisateur
         $user = $entityManager->getRepository(User::class)->find(1);
         $favoris = $entityManager->getRepository(Favori::class)->findBy(['user' => $user]);
@@ -307,7 +312,7 @@ public function participateChallenge(Request $request, Challenge $challenge, Gro
 }
 
 #[Route('/mes-participations', name: 'app_etudiant_participations')]
-public function mesParticipations(Request $request, ParticipationRepository $participationRepository): Response
+public function mesParticipations(Request $request, ParticipationRepository $participationRepository, PaginatorInterface $paginator): Response
 {
     $search = $request->query->get('search', '');
     $sortBy = $request->query->get('sort', 'dateParticipation');
@@ -329,7 +334,11 @@ public function mesParticipations(Request $request, ParticipationRepository $par
         $queryBuilder->orderBy('p.' . $sortBy, $order);
     }
     
-    $participations = $queryBuilder->getQuery()->getResult();
+    $participations = $paginator->paginate(
+        $queryBuilder,
+        $request->query->getInt('page', 1),
+        5
+    );
     
     return $this->render('frontoffice/etudiant/participations/index.html.twig', [
         'participations' => $participations,
@@ -407,7 +416,7 @@ public function submitLivrable(Request $request, Participation $participation, E
 }
 
 #[Route('/mes-livrables', name: 'app_etudiant_livrables')]
-public function mesLivrables(Request $request, LivrableChallengeRepository $livrableRepository): Response
+public function mesLivrables(Request $request, LivrableChallengeRepository $livrableRepository, PaginatorInterface $paginator): Response
 {
     $search = $request->query->get('search', '');
     $sortBy = $request->query->get('sort', 'dateSoumission');
@@ -436,7 +445,11 @@ public function mesLivrables(Request $request, LivrableChallengeRepository $livr
         $queryBuilder->orderBy('l.' . $sortBy, $order);
     }
     
-    $livrables = $queryBuilder->getQuery()->getResult();
+    $livrables = $paginator->paginate(
+        $queryBuilder,
+        $request->query->getInt('page', 1),
+        3
+    );
     
     return $this->render('frontoffice/etudiant/livrables/index.html.twig', [
         'livrables' => $livrables,

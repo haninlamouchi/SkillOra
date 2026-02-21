@@ -46,7 +46,7 @@
     
     {% if search or filterStatut %}
         <p style="color: #718096; margin-bottom: 1rem;">
-            📊 {{ livrables|length }} résultat(s)
+            📊 {{ livrables.getTotalItemCount }} résultat(s)
         </p>
     {% endif %}
 
@@ -138,6 +138,16 @@
                     </div>
                 </div>
             {% endfor %}
+        </div>
+        
+        {# ✨ PAGINATION AJOUTÉE ICI ✨ #}
+        <div class="d-flex justify-content-center mt-4">
+            {{ knp_pagination_render(livrables, 'pagination/custom_pagination.html.twig') }}
+        </div>
+        
+        <div style="margin-top: 2rem; text-align: center; color: #718096;">
+            Page {{ livrables.getCurrentPageNumber }} sur {{ livrables.getPageCount }}
+            ({{ livrables.getTotalItemCount }} livrable(s) au total)
         </div>
     {% endif %}
 </div>

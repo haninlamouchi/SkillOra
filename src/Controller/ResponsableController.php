@@ -16,6 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use App\Entity\LivrableChallenge;
 use App\Entity\Groupe;
 use App\Service\NotificationService;
+use Knp\Component\Pager\PaginatorInterface;
 
 #[Route('/responsable')]
 final class ResponsableController extends AbstractController
@@ -27,7 +28,7 @@ final class ResponsableController extends AbstractController
     }
 
     #[Route('/challenges', name: 'app_responsable_challenges')]
-public function listChallenges(Request $request, ChallengeRepository $challengeRepository): Response
+public function listChallenges(Request $request, ChallengeRepository $challengeRepository, PaginatorInterface $paginator): Response
 {
     $search = $request->query->get('search', '');
     $sortBy = $request->query->get('sort', 'dateDebut');
@@ -46,8 +47,13 @@ public function listChallenges(Request $request, ChallengeRepository $challengeR
     if (in_array($sortBy, $validSorts)) {
         $queryBuilder->orderBy('c.' . $sortBy, $order);
     }
-    
-    $challenges = $queryBuilder->getQuery()->getResult();
+
+    // PAGINATION - 10 challenges par page
+    $challenges = $paginator->paginate(
+        $queryBuilder,
+        $request->query->getInt('page', 1),
+        5
+    );
     
     return $this->render('frontoffice/responsable/challenges/list.html.twig', [
         'challenges' => $challenges,
@@ -125,9 +131,16 @@ foreach ($groupes as $groupe) {
 }
 
     #[Route('/participations', name: 'app_responsable_participations')]
-public function listParticipations(ParticipationRepository $participationRepository): Response
+public function listParticipations(Request $request, ParticipationRepository $participationRepository, PaginatorInterface $paginator): Response
 {
-    $participations = $participationRepository->findAll();
+    $queryBuilder = $participationRepository->createQueryBuilder('p')
+        ->orderBy('p.dateParticipation', 'DESC');
+    
+    $participations = $paginator->paginate(
+        $queryBuilder,
+        $request->query->getInt('page', 1),
+        5
+    );
     
     return $this->render('frontoffice/responsable/participations/list.html.twig', [
         'participations' => $participations,
@@ -144,7 +157,7 @@ public function challengeParticipations(Challenge $challenge): Response
 }
 
 #[Route('/livrables', name: 'app_responsable_livrables')]
-public function listLivrables(Request $request, LivrableChallengeRepository $livrableRepository): Response
+public function listLivrables(Request $request, LivrableChallengeRepository $livrableRepository, PaginatorInterface $paginator): Response
 {
     $search = $request->query->get('search', '');
     $filterStatut = $request->query->get('statut', '');
@@ -164,8 +177,12 @@ public function listLivrables(Request $request, LivrableChallengeRepository $liv
     }
     
     $queryBuilder->orderBy('l.dateSoumission', 'DESC');
-    
-    $livrables = $queryBuilder->getQuery()->getResult();
+
+    $livrables = $paginator->paginate(
+        $queryBuilder,
+        $request->query->getInt('page', 1),
+        3
+    );
     
     return $this->render('frontoffice/responsable/livrables/list.html.twig', [
         'livrables' => $livrables,
