@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: QuestionRepository::class)]
 class Question
@@ -33,9 +34,12 @@ class Question
     private Collection $optionQuestions;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: 'Le contenu de la question est obligatoire.')]
+    #[Assert\Length(min: 5, minMessage: 'Le contenu doit contenir au moins {{ limit }} caractères.')]
     private ?string $contenu = null;
 
     #[ORM\Column(nullable: true)]
+    #[Assert\Positive(message: 'Les points doivent être un nombre positif.')]
     private ?int $points = null;
 
     public function __construct()

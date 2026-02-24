@@ -76,7 +76,7 @@ final class QuestionController extends AbstractController
             ]);
         }
 
-        return $this->render('backoffice/question/new.html.twig', [
+        return $this->render('frontoffice/responsable/question/new.html.twig', [
             'formation' => $formation,
             'quiz' => $quiz,
             'form' => $form,
@@ -118,7 +118,7 @@ final class QuestionController extends AbstractController
             ]);
         }
 
-        return $this->render('backoffice/question/edit.html.twig', [
+        return $this->render('frontoffice/responsable/question/edit.html.twig', [
             'formation' => $formation,
             'quiz' => $quiz,
             'question' => $question,

@@ -32,7 +32,7 @@ final class QuizController extends AbstractController
             throw $this->createNotFoundException('Formation introuvable.');
         }
 
-        return $this->render('backoffice/quiz/index.html.twig', [
+        return $this->render('frontoffice/responsable/quiz/index.html.twig', [
             'formation' => $formation,
             'quizzes' => $formation->getQuizzes(),
         ]);
@@ -68,7 +68,7 @@ final class QuizController extends AbstractController
             ]);
         }
 
-        return $this->render('backoffice/quiz/new.html.twig', [
+        return $this->render('frontoffice/responsable/quiz/new.html.twig', [
             'formation' => $formation,
             'form' => $form,
         ]);
@@ -88,7 +88,7 @@ final class QuizController extends AbstractController
 
         $quizResults = $this->resultatRepo->findBy(['quiz' => $quiz], ['datePassage' => 'DESC']);
 
-        return $this->render('backoffice/quiz/show.html.twig', [
+        return $this->render('frontoffice/responsable/quiz/show.html.twig', [
             'formation' => $formation,
             'quiz' => $quiz,
             'quizResults' => $quizResults,
@@ -120,7 +120,7 @@ final class QuizController extends AbstractController
             ]);
         }
 
-        return $this->render('backoffice/quiz/edit.html.twig', [
+        return $this->render('frontoffice/responsable/quiz/edit.html.twig', [
             'formation' => $formation,
             'quiz' => $quiz,
             'form' => $form,

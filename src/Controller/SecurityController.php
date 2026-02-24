@@ -12,9 +12,9 @@ class SecurityController extends AbstractController
     #[Route('/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        // If already logged in, redirect to home
+        // If already logged in, redirect to formations
         if ($this->getUser()) {
-            return $this->redirectToRoute('front_home');
+            return $this->redirectToRoute('front_formation_index');
         }
 
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -24,6 +24,12 @@ class SecurityController extends AbstractController
             'last_username' => $lastUsername,
             'error' => $error,
         ]);
+    }
+
+    #[Route('/redirect-after-login', name: 'app_post_login')]
+    public function postLogin(): Response
+    {
+        return $this->redirectToRoute('front_formation_index');
     }
 
     #[Route('/logout', name: 'app_logout')]

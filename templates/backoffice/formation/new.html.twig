@@ -6,6 +6,16 @@
 <main class="admin-content">
     <div class="container-fluid px-4">
 
+        {# Flash messages #}
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }} alert-dismissible fade show mt-3" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
         {# -- Breadcrumb -- #}
         <div class="mb-4">
             <nav aria-label="breadcrumb">
@@ -53,10 +63,6 @@
                             <div class="col-md-6">
                                 {{ form_row(form.lienRessources) }}
                             </div>
-                        </div>
-
-                        <div class="mb-3">
-                            {{ form_row(form.club) }}
                         </div>
 
                         <hr>

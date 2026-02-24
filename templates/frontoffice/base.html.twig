@@ -22,27 +22,60 @@
         <div class="row">
             <div class="col-12">
                 <nav class="main-nav">
-                    <!-- Logo -->
-                    <a href="#" class="logo">
+                    <!-- Logo -->                    <a href="{{ path('front_home') }}" class="logo">
                         <h1>SkillOra</h1>
                     </a>
 
                     <!-- Menu -->
                     <ul class="nav">
-                        <li><a href="{{ path('front_home') }}" class="{{ app.request.attributes.get('_route') == 'front_home' ? 'active' : '' }}">Accueil</a></li>
-                        <li><a href="{{ path('front_formation_index') }}" class="{{ app.request.attributes.get('_route') starts with 'front_formation' ? 'active' : '' }}">Formations</a></li>
+                        <li>
+                            <a href="{{ path('front_home') }}"
+                               class="{{ app.request.attributes.get('_route') == 'front_home' ? 'active' : '' }}">
+                                Accueil
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ path('front_formation_index') }}"
+                               class="{{ app.request.attributes.get('_route') starts with 'front_formation' ? 'active' : '' }}">
+                                Formations
+                            </a>
+                        </li>
+
+                        {# ✅ Dashboard only for Responsable Club #}
+                        {% if app.user and app.user.role == constant('App\\Entity\\User::ROLE_RESPONSABLE_CLUB') %}
+                            <li>
+                                <a href="{{ path('app_formation_index') }}"
+                                   class="{{ app.request.attributes.get('_route') starts with 'responsable' ? 'active' : '' }}">
+                                    <i class="fa fa-dashboard"></i> Dashboard
+                                </a>
+                            </li>
+                        {% endif %}
                         <li><a href="#contact">Contact</a></li>
                         {% if app.user %}
-                            <li><a href="#" class="text-white-50"><i class="fa fa-user"></i> {{ app.user.fullName }}</a></li>
-                            <li><a href="{{ path('app_logout') }}" style="color:#f8d7da"><i class="fa fa-sign-out"></i> Déconnexion</a></li>
+                            <li>
+                                <a href="#" class="text-white-50">
+                                    <i class="fa fa-user"></i> {{ app.user.fullName }}
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ path('app_logout') }}" style="color:#f8d7da">
+                                    <i class="fa fa-sign-out"></i> Déconnexion
+                                </a>
+                            </li>
                         {% else %}
-                            <li><a href="{{ path('app_login') }}"><i class="fa fa-sign-in"></i> Connexion</a></li>
+                            <li>
+                                <a href="{{ path('app_login') }}">
+                                    <i class="fa fa-sign-in"></i> Connexion
+                                </a>                            </li>
                         {% endif %}
                     </ul>
 
                     <a class="menu-trigger">
                         <span>Menu</span>
                     </a>
+
                 </nav>
             </div>
         </div>
@@ -53,6 +86,7 @@
 <!-- ===== PAGE CONTENT ===== -->
 {% block body %}{% endblock %}
 <!-- ===== PAGE CONTENT END ===== -->
+
 
 <!-- ===== FOOTER ===== -->
 <footer>

@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-#[Route('/formation')]
+#[Route('/responsable/formation')]
 final class FormationController extends AbstractController
 {
     public function __construct(
@@ -35,9 +35,19 @@ final class FormationController extends AbstractController
     #[Route('', name: 'app_formation_index', methods: ['GET'])]
     public function index(): Response
     {
-        $formations = $this->formationRepository->findAll();
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
 
-        return $this->render('backoffice/formation/index.html.twig', [
+        if (in_array('ROLE_RESPONSABLE_CLUB', $user->getRoles())) {
+            $club = $user->getClubResponsable();
+            $formations = $club
+                ? $this->formationRepository->findBy(['club' => $club], ['dateDebut' => 'DESC'])
+                : [];
+        } else {
+            $formations = $this->formationRepository->findAll();
+        }
+
+        return $this->render('frontoffice/responsable/formation/index.html.twig', [
             'formations' => $formations,
         ]);
     }
@@ -56,6 +66,10 @@ final class FormationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->handleImageUpload($form, $formation);
 
+            /** @var \App\Entity\User $user */
+            $user = $this->getUser();
+            $formation->setClub($user->getClubResponsable());
+
             $this->em->persist($formation);
             $this->em->flush();
 
@@ -64,7 +78,7 @@ final class FormationController extends AbstractController
             return $this->redirectToRoute('app_formation_index');
         }
 
-        return $this->render('backoffice/formation/new.html.twig', [
+        return $this->render('frontoffice/responsable/formation/new.html.twig', [
             'formation' => $formation,
             'form' => $form,
         ]);
@@ -95,18 +109,36 @@ final class FormationController extends AbstractController
 
         // --- Quiz results for this formation ---
         $quizResults = [];
+        // Map userId → best ResultatQuiz (highest percentage) for the participants table
+        $participantScores = [];
+
         foreach ($formation->getQuizzes() as $quiz) {
             $results = $resultatRepo->findBy(['quiz' => $quiz], ['datePassage' => 'DESC']);
             foreach ($results as $result) {
                 $quizResults[] = $result;
+
+                $uid = $result->getUser()->getId();
+                $pct = $result->getTotalPoints() > 0
+                    ? round(($result->getScore() / $result->getTotalPoints()) * 100)
+                    : 0;
+
+                if (!isset($participantScores[$uid]) || $pct > $participantScores[$uid]['pct']) {
+                    $participantScores[$uid] = [
+                        'score'       => $result->getScore(),
+                        'totalPoints' => $result->getTotalPoints(),
+                        'pct'         => $pct,
+                        'quizTitre'   => $result->getQuiz()->getTitre(),
+                    ];
+                }
             }
         }
 
-        return $this->render('backoffice/formation/show.html.twig', [
-            'formation' => $formation,
-            'videoForm' => $videoForm,
+        return $this->render('frontoffice/responsable/formation/show.html.twig', [
+            'formation'        => $formation,
+            'videoForm'        => $videoForm,
             'participationForm' => $participationForm,
-            'quizResults' => $quizResults,
+            'quizResults'      => $quizResults,
+            'participantScores' => $participantScores,
         ]);
     }
 
@@ -123,6 +155,10 @@ final class FormationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->handleImageUpload($form, $formation);
 
+            /** @var \App\Entity\User $user */
+            $user = $this->getUser();
+            $formation->setClub($user->getClubResponsable());
+
             $this->em->flush();
 
             $this->addFlash('success', 'Formation modifiée avec succès.');
@@ -130,7 +166,7 @@ final class FormationController extends AbstractController
             return $this->redirectToRoute('app_formation_show', ['id' => $formation->getId()]);
         }
 
-        return $this->render('backoffice/formation/edit.html.twig', [
+        return $this->render('frontoffice/responsable/formation/edit.html.twig', [
             'formation' => $formation,
             'form' => $form,
         ]);
@@ -236,7 +272,7 @@ final class FormationController extends AbstractController
             $user = $participation->getUser();
 
             // Check duplicate participation
-            if ($participationRepo->isAlreadyParticipating($user->getId(), $formation->getId())) {
+            if ($participationRepo->isAlreadyParticipating($user, $formation)) {
                 $this->addFlash('warning', 'Cet utilisateur participe déjà à cette formation.');
             } else {
                 $participation->setFormation($formation);

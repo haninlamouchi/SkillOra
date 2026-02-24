@@ -19,7 +19,8 @@ security:
             form_login:
                 login_path: app_login
                 check_path: app_login
-                default_target_path: front_home
+                default_target_path: /formations
+                always_use_default_target_path: true
                 enable_csrf: true
             logout:
                 path: app_logout

@@ -2,9 +2,7 @@
 
 namespace App\Form;
 
-use App\Entity\Club;
 use App\Entity\Formation;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -59,14 +57,6 @@ class FormationType extends AbstractType
                 'label' => 'Lien Ressources',
                 'required' => false,
                 'attr' => ['class' => 'form-control', 'placeholder' => 'https://...'],
-            ])
-            ->add('club', EntityType::class, [
-                'class' => Club::class,
-                'choice_label' => 'id',
-                'label' => 'Club',
-                'required' => false,
-                'placeholder' => '-- Sélectionner un club (optionnel) --',
-                'attr' => ['class' => 'form-select'],
             ])
         ;
     }
