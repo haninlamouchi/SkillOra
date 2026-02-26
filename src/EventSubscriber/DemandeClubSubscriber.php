@@ -33,7 +33,7 @@ class DemandeClubSubscriber implements EventSubscriberInterface
 
         // 1️⃣ Email à l'admin
         $email = (new Email())
-            ->from('noreply@clubs.com')
+            ->from('malekfathidabbek@gmail.com')
             ->to($admin->getEmail())
             ->subject('🏫 Nouvelle demande de création de club')
             ->html('
@@ -47,14 +47,7 @@ class DemandeClubSubscriber implements EventSubscriberInterface
             ');
         $this->mailer->send($email);
 
-        // 2️⃣ SMS à l'admin
-        if ($admin->getTelephone()) {
-            $this->smsService->send(
-                $admin->getTelephone(),
-                '🏫 ' . $user->getNom() . ' souhaite créer le club ' .
-                $demande->getNom() . '. Connectez-vous pour traiter.'
-            );
-        }
+        
 
         // 3️⃣ Notification en BDD
         $notification = new NotificationClub();

@@ -37,39 +37,42 @@ class ResponsableClubController extends AbstractController
         ]);
     }
 
-#[Route('/edit/{id}', name: 'club_edit', methods: ['GET', 'POST'])]
-public function edit(
-    Club $club,
-    Request $request,
-    EntityManagerInterface $entityManager
-): Response {
+    // Modifier un club
+    #[Route('/edit', name: 'club_edit', methods: ['GET', 'POST'])]
+    public function edit(
+        Request $request,
+        ClubRepository $clubRepository,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $user = $this->getUser();
+        $club = $clubRepository->findOneBy(['responsable' => $user]);
 
-    // ✅ sécurité : le responsable modifie seulement SON club
-    if ($club->getResponsable() !== $this->getUser()) {
-        throw $this->createAccessDeniedException('Accès refusé.');
+        // ✅ Vérifier que le club existe
+        if (!$club) {
+            $this->addFlash('danger', 'Vous n\'êtes pas responsable d\'aucun club.');
+            return $this->redirectToRoute('responsable_adhesion_index');
+        }
+
+        $form = $this->createForm(ClubType::class, $club, [
+            'disable_responsable' => true,
+        ]);
+
+        $form->handleRequest($request);
+        
+
+        if ($form->isSubmitted() && $form->isValid()) {
+           
+            $club->setUpdatedAt(new \DateTimeImmutable());
+            $entityManager->flush();
+            $this->addFlash('success', 'Club mis à jour avec succès.');
+            return $this->redirectToRoute('club_show');  // plus besoin de ['id'] puisque show récupère par user
+        }
+
+        return $this->render('frontoffice/responsable/editResp.html.twig', [
+            'club' => $club,
+            'form' => $form,
+        ]);
     }
-
-    $form = $this->createForm(ClubType::class, $club, [
-        'disable_responsable' => true,
-    ]);
-
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-
-        // Doctrine détecte automatiquement les changements
-        $entityManager->flush();
-
-        $this->addFlash('success', 'Club mis à jour avec succès.');
-
-        return $this->redirectToRoute('club_show');
-    }
-
-    return $this->render('frontoffice/responsable/editResp.html.twig', [
-        'club' => $club,
-        'form' => $form,
-    ]);
-}
     // Liste des demandes d'adhésion de son club uniquement
     #[Route('/adhesions', name: 'responsable_adhesion_index', methods: ['GET'])]
     public function adhesions(

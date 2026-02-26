@@ -34,7 +34,7 @@ class DemandeResponsableSubscriber implements EventSubscriberInterface
 
         // 1️⃣ Email à l'admin
         $email = (new Email())
-            ->from('noreply@clubs.com')
+            ->from('malekfathidabbek@gmail.com')
             ->to($admin->getEmail())
             ->subject('🔄 Demande de changement de responsable')
             ->html('
@@ -47,15 +47,6 @@ class DemandeResponsableSubscriber implements EventSubscriberInterface
                 <p>Connectez-vous pour accepter ou refuser cette demande.</p>
             ');
         $this->mailer->send($email);
-
-        // 2️⃣ SMS à l'admin
-        if ($admin->getTelephone()) {
-            $this->smsService->send(
-                $admin->getTelephone(),
-                '🔄 ' . $membre->getNom() . ' souhaite devenir responsable du club ' .
-                $club->getNom() . '. Connectez-vous pour traiter.'
-            );
-        }
 
         // 3️⃣ Notification en BDD
         $notification = new NotificationClub();

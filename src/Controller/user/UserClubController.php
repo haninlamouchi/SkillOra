@@ -21,6 +21,8 @@ use App\Event\DemandeClubEvent;
 use App\Event\DemandeResponsableEvent;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Knp\Component\Pager\PaginatorInterface;
+use App\Service\GeminiService;
+
 #[Route('/user/club')]
 class UserClubController extends AbstractController
 {
@@ -65,6 +67,30 @@ public function index(ClubRepository $clubRepository,PaginatorInterface $paginat
 
         return $this->render('frontoffice/user/mesClubs.html.twig', [
             'clubs' => $clubs,
+        ]);
+    }
+    #[Route('/recommandations', name: 'user_club_recommandations', methods: ['GET', 'POST'])]
+    public function recommandations(
+        Request $request,
+        ClubRepository $clubRepository,
+        GeminiService $geminiService
+    ): Response {
+        $recommandations = [];
+        $interets = '';
+
+        if ($request->isMethod('POST')) {
+            $interets = $request->request->get('interets', '');
+
+            // Récupérer tous les clubs
+            $clubs = $clubRepository->findAll();
+
+            // Demander à Gemini de recommander
+            $recommandations = $geminiService->recommanderClubs($interets, $clubs);
+        }
+
+        return $this->render('frontoffice/user/recommandations.html.twig', [
+            'recommandations' => $recommandations,
+            'interets'        => $interets,
         ]);
     }
 
@@ -186,4 +212,5 @@ public function index(ClubRepository $clubRepository,PaginatorInterface $paginat
         $this->addFlash('success', 'Votre demande pour devenir responsable a été envoyée à l\'admin.');
         return $this->redirectToRoute('user_mes_clubs');
     }
+    
 }

@@ -42,3 +42,7 @@ services:
             $twilioSid:   '%env(TWILIO_SID)%'
             $twilioToken: '%env(TWILIO_TOKEN)%'
             $twilioFrom:  '%env(TWILIO_FROM)%'
+    # ✅ Gemini AI Service
+    App\Service\GeminiService:
+        arguments:
+            $geminiApiKey: '%env(GEMINI_API_KEY)%'

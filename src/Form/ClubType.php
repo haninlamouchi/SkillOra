@@ -41,6 +41,9 @@ class ClubType extends AbstractType
             'data_class'          => Club::class,
             'disable_responsable' => false,
             'attr'                => ['novalidate' => 'novalidate'],
+            'csrf_protection'     => true,
+            'csrf_field_name'     => '_token',
+            'csrf_token_id'       => 'club',
         ]);
     }
 }
