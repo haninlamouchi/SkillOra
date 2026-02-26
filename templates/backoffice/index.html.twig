@@ -1,0 +1,17 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Index - Backoffice{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Bienvenue sur SkillOra</h2>
+                <p class="card-text">Ceci est la page d'index du backoffice.</p>
+                <a href="{{ path('admin_dashboard') }}" class="btn btn-primary">Aller au Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

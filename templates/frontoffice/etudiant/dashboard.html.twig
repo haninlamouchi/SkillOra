@@ -1,0 +1,303 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Dashboard Étudiant — SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --sk-red:       #8b0000;
+  --sk-red-dark:  #4a0000;
+  --sk-red-light: #c0392b;
+  --sk-accent:    #e84040;
+  --sk-white:     #ffffff;
+  --sk-ink:       #180808;
+  --sk-muted:     #8a7070;
+  --sk-border:    rgba(139,0,0,0.09);
+}
+
+/* ── offset for fixed 70px navbar ── */
+.sk-page {
+  padding-top: 70px;
+}
+
+/* ══════════════════════════════
+   HERO — full viewport width
+   bleeds out of Bootstrap container
+══════════════════════════════ */
+.sk-hero {
+  position: relative;
+  background: linear-gradient(135deg, #3d0000 0%, #8b0000 48%, #c23030 100%);
+  /* cancel the container's padding to go full-width */
+  margin-left:  calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  padding: 72px 20px 64px;
+  text-align: center;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* grain */
+.sk-hero::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+  background-size: 180px; opacity: 0.5;
+}
+
+.sk-hero-ring-l, .sk-hero-ring-r {
+  position: absolute; z-index: 0; border-radius: 50%;
+  border: 72px solid rgba(255,255,255,0.035);
+}
+.sk-hero-ring-l { width: 520px; height: 520px; top: -210px; left: -160px; }
+.sk-hero-ring-r { width: 380px; height: 380px; bottom: -160px; right: -100px; border-width: 50px; }
+
+.sk-hero-inner {
+  position: relative; z-index: 1;
+  max-width: 580px; margin: 0 auto;
+}
+
+.sk-hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  font-weight: 800; letter-spacing: -0.03em;
+  color: #fff; margin: 0 0 14px; line-height: 1.1;
+}
+.sk-hero p {
+  font-family: 'DM Sans', sans-serif;
+  color: rgba(255,255,255,0.60);
+  font-size: 1rem; line-height: 1.7;
+  margin: 0 auto 32px; max-width: 440px;
+}
+
+/* search */
+.sk-search {
+  display: flex; align-items: center;
+  background: rgba(255,255,255,0.97);
+  border-radius: 100px;
+  padding: 5px 5px 5px 22px;
+  max-width: 500px; margin: 0 auto;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+  gap: 8px;
+}
+.sk-search input {
+  flex: 1; border: none; outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.92rem; color: var(--sk-ink);
+  background: transparent; min-width: 0;
+}
+.sk-search input::placeholder { color: #bbb; }
+.sk-search button {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--sk-red-dark), var(--sk-red-light));
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px rgba(139,0,0,0.28);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.sk-search button:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(139,0,0,0.40); }
+.sk-search button svg {
+  width: 17px; height: 17px; stroke: #fff; fill: none;
+  stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* ══════════════════════════════
+   CONTENT inside container
+══════════════════════════════ */
+.sk-content {
+  padding: 36px 0 56px;
+}
+
+.sk-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--sk-muted);
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 18px;
+}
+.sk-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--sk-border), transparent);
+}
+
+/* ══════════════════════════════
+   GRID
+══════════════════════════════ */
+.sk-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+/* ══════════════════════════════
+   CARD
+══════════════════════════════ */
+.sk-card {
+  position: relative;
+  background: var(--sk-white);
+  border-radius: 16px;
+  padding: 22px 18px 18px;
+  border: 1.5px solid var(--sk-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  display: flex; flex-direction: column; gap: 10px;
+  text-decoration: none; overflow: hidden;
+  transition: transform 0.28s cubic-bezier(.22,.68,0,1.25), box-shadow 0.28s, border-color 0.22s;
+}
+.sk-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--sk-red-dark), var(--sk-accent));
+  border-radius: 16px 16px 0 0;
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.28s ease;
+}
+.sk-card::after {
+  content: attr(data-icon);
+  position: absolute; bottom: -10px; right: 0;
+  font-size: 3.8rem; line-height: 1;
+  opacity: 0.035; pointer-events: none;
+  transition: opacity 0.28s, transform 0.28s;
+}
+.sk-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 44px rgba(139,0,0,0.12), 0 4px 12px rgba(0,0,0,0.05);
+  border-color: rgba(139,0,0,0.22);
+  text-decoration: none;
+}
+.sk-card:hover::before { transform: scaleX(1); }
+.sk-card:hover::after  { opacity: 0.065; transform: scale(1.1) rotate(-6deg); }
+
+.sk-card-icon {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--sk-red-dark), var(--sk-red-light));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: 0 5px 16px rgba(139,0,0,0.22);
+  transition: transform 0.28s cubic-bezier(.22,.68,0,1.5), box-shadow 0.25s;
+}
+.sk-card:hover .sk-card-icon { transform: rotate(-8deg) scale(1.12); box-shadow: 0 8px 24px rgba(139,0,0,0.32); }
+
+.sk-card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.93rem; font-weight: 700;
+  color: var(--sk-ink); margin: 0; letter-spacing: -0.01em;
+}
+.sk-card-desc {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.77rem; color: var(--sk-muted);
+  margin: 0; line-height: 1.5;
+}
+.sk-card-arrow {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.76rem; font-weight: 600; color: var(--sk-red-light);
+  display: inline-flex; align-items: center; gap: 5px; margin-top: auto;
+  transition: gap 0.2s, color 0.2s;
+}
+.sk-card:hover .sk-card-arrow { gap: 9px; color: var(--sk-red); }
+
+/* ══════════════════════════════
+   ANIMATIONS
+══════════════════════════════ */
+@keyframes sk-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.sk-hero    { animation: sk-up 0.5s cubic-bezier(.22,.68,0,1) both; }
+.sk-label   { animation: sk-up 0.4s 0.18s ease both; }
+.sk-card    { animation: sk-up 0.38s ease both; }
+.sk-card:nth-child(1) { animation-delay:.22s }
+.sk-card:nth-child(2) { animation-delay:.30s }
+.sk-card:nth-child(3) { animation-delay:.38s }
+.sk-card:nth-child(4) { animation-delay:.46s }
+.sk-card:nth-child(5) { animation-delay:.54s }
+
+/* ══════════════════════════════
+   RESPONSIVE
+══════════════════════════════ */
+@media (max-width: 1024px) { .sk-grid { grid-template-columns: repeat(3,1fr); } }
+@media (max-width: 680px) {
+  .sk-hero { padding: 56px 20px 48px; }
+  .sk-grid { grid-template-columns: repeat(2,1fr); gap: 12px; }
+}
+@media (max-width: 400px) { .sk-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+
+  <!-- HERO : full bleed -->
+  <div class="sk-hero">
+    <div class="sk-hero-ring-l"></div>
+    <div class="sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <h1>Bonjour 👋</h1>
+      <p>Participez aux challenges, gérez vos groupes et soumettez vos livrables.</p>
+      <div class="sk-search">
+        <input type="text" placeholder="Rechercher un challenge, un groupe...">
+        <button type="button" aria-label="Rechercher">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARDS : inside Bootstrap container -->
+  <div class="container">
+    <div class="sk-content">
+      <div class="sk-label">Accès rapide</div>
+      <div class="sk-grid">
+
+        <a href="{{ path('app_etudiant_challenges') }}" class="sk-card" data-icon="🏆">
+          <div class="sk-card-icon">🏆</div>
+          <div>
+            <p class="sk-card-title">Challenges</p>
+            <p class="sk-card-desc">Découvrir et rejoindre les challenges disponibles</p>
+          </div>
+          <span class="sk-card-arrow">Voir tous →</span>
+        </a>
+
+        <a href="{{ path('app_etudiant_groupe') }}" class="sk-card" data-icon="👥">
+          <div class="sk-card-icon">👥</div>
+          <div>
+            <p class="sk-card-title">Mes Groupes</p>
+            <p class="sk-card-desc">Créer et gérer vos groupes de travail</p>
+          </div>
+          <span class="sk-card-arrow">Gérer →</span>
+        </a>
+
+        <a href="{{ path('app_etudiant_participations') }}" class="sk-card" data-icon="📋">
+          <div class="sk-card-icon">📋</div>
+          <div>
+            <p class="sk-card-title">Mes Participations</p>
+            <p class="sk-card-desc">Suivre l'avancement de vos participations</p>
+          </div>
+          <span class="sk-card-arrow">Consulter →</span>
+        </a>
+
+        <a href="{{ path('app_etudiant_livrables') }}" class="sk-card" data-icon="📤">
+          <div class="sk-card-icon">📤</div>
+          <div>
+            <p class="sk-card-title">Mes Livrables</p>
+            <p class="sk-card-desc">Soumettre et suivre l'état de vos livrables</p>
+          </div>
+          <span class="sk-card-arrow">Voir tout →</span>
+        </a>
+
+        <a href="{{ path('app_etudiant_favoris') }}" class="sk-card" data-icon="⭐">
+          <div class="sk-card-icon">⭐</div>
+          <div>
+            <p class="sk-card-title">Mes Favoris</p>
+            <p class="sk-card-desc">Retrouver vos challenges sauvegardés</p>
+          </div>
+          <span class="sk-card-arrow">Voir →</span>
+        </a>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

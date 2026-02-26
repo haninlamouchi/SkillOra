@@ -1,0 +1,248 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Dashboard Responsable — SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --sk-red:       #8b0000;
+  --sk-red-dark:  #4a0000;
+  --sk-red-light: #c0392b;
+  --sk-accent:    #e84040;
+  --sk-white:     #ffffff;
+  --sk-ink:       #180808;
+  --sk-muted:     #8a7070;
+  --sk-border:    rgba(139,0,0,0.09);
+}
+
+.sk-page { padding-top: 70px; }
+
+/* ══════════════════════════════
+   HERO
+══════════════════════════════ */
+.sk-hero {
+  position: relative;
+  background: linear-gradient(135deg, #3d0000 0%, #8b0000 48%, #c23030 100%);
+  margin-left:  calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  padding: 72px 20px 64px;
+  text-align: center;
+  overflow: hidden;
+  isolation: isolate;
+}
+.sk-hero::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+  background-size: 180px; opacity: 0.5;
+}
+.sk-hero-ring-l, .sk-hero-ring-r {
+  position: absolute; z-index: 0; border-radius: 50%;
+  border: 72px solid rgba(255,255,255,0.035);
+}
+.sk-hero-ring-l { width: 520px; height: 520px; top: -210px; left: -160px; }
+.sk-hero-ring-r { width: 380px; height: 380px; bottom: -160px; right: -100px; border-width: 50px; }
+
+.sk-hero-inner { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
+
+.sk-hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  font-weight: 800; letter-spacing: -0.03em;
+  color: #fff; margin: 0 0 14px; line-height: 1.1;
+}
+.sk-hero p {
+  font-family: 'DM Sans', sans-serif;
+  color: rgba(255,255,255,0.60);
+  font-size: 1rem; line-height: 1.7;
+  margin: 0 auto; max-width: 460px;
+}
+
+/* ══════════════════════════════
+   CONTENT
+══════════════════════════════ */
+.sk-content { padding: 36px 0 56px; }
+
+.sk-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--sk-muted);
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 18px;
+}
+.sk-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--sk-border), transparent);
+}
+
+/* ══════════════════════════════
+   GRID — 4 cards
+══════════════════════════════ */
+.sk-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* ══════════════════════════════
+   CARD
+══════════════════════════════ */
+.sk-card {
+  position: relative;
+  background: var(--sk-white);
+  border-radius: 16px;
+  padding: 26px 22px 22px;
+  border: 1.5px solid var(--sk-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  display: flex; flex-direction: column; gap: 10px;
+  text-decoration: none; overflow: hidden;
+  transition: transform 0.28s cubic-bezier(.22,.68,0,1.25), box-shadow 0.28s, border-color 0.22s;
+  animation: sk-up 0.4s ease both;
+}
+.sk-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  border-radius: 16px 16px 0 0;
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.28s ease;
+}
+.sk-card::after {
+  content: attr(data-icon);
+  position: absolute; bottom: -10px; right: 0;
+  font-size: 4rem; line-height: 1;
+  opacity: 0.035; pointer-events: none;
+  transition: opacity 0.28s, transform 0.28s;
+}
+.sk-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 44px rgba(139,0,0,0.11), 0 4px 12px rgba(0,0,0,0.05);
+  border-color: rgba(139,0,0,0.22);
+  text-decoration: none;
+}
+.sk-card:hover::before { transform: scaleX(1); }
+.sk-card:hover::after  { opacity: 0.07; transform: scale(1.1) rotate(-6deg); }
+
+/* each card gets its own accent color */
+.sk-card-challenges::before  { background: linear-gradient(90deg, #1a4fa8, #3b82f6); }
+.sk-card-new::before          { background: linear-gradient(90deg, #166534, #22c55e); }
+.sk-card-participations::before { background: linear-gradient(90deg, #92400e, #f59e0b); }
+.sk-card-livrables::before    { background: linear-gradient(90deg, #5b21b6, #a855f7); }
+
+.sk-card-icon {
+  width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.35rem;
+  transition: transform 0.28s cubic-bezier(.22,.68,0,1.5), box-shadow 0.25s;
+}
+.sk-card:hover .sk-card-icon { transform: rotate(-8deg) scale(1.12); }
+
+.sk-card-challenges  .sk-card-icon { background: linear-gradient(135deg, #1e3a8a, #3b82f6); box-shadow: 0 5px 16px rgba(59,130,246,0.28); }
+.sk-card-new         .sk-card-icon { background: linear-gradient(135deg, #14532d, #22c55e); box-shadow: 0 5px 16px rgba(34,197,94,0.28); }
+.sk-card-participations .sk-card-icon { background: linear-gradient(135deg, #78350f, #f59e0b); box-shadow: 0 5px 16px rgba(245,158,11,0.28); }
+.sk-card-livrables   .sk-card-icon { background: linear-gradient(135deg, #4c1d95, #a855f7); box-shadow: 0 5px 16px rgba(168,85,247,0.28); }
+
+.sk-card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.97rem; font-weight: 700;
+  color: var(--sk-ink); margin: 0; letter-spacing: -0.01em;
+}
+.sk-card-desc {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.79rem; color: var(--sk-muted);
+  margin: 0; line-height: 1.5;
+}
+
+.sk-card-arrow {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.76rem; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 5px; margin-top: auto;
+  transition: gap 0.2s;
+}
+.sk-card-challenges  .sk-card-arrow { color: #3b82f6; }
+.sk-card-new         .sk-card-arrow { color: #22c55e; }
+.sk-card-participations .sk-card-arrow { color: #f59e0b; }
+.sk-card-livrables   .sk-card-arrow { color: #a855f7; }
+.sk-card:hover .sk-card-arrow { gap: 9px; }
+
+/* ── Animations ── */
+@keyframes sk-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.sk-hero { animation: sk-up 0.5s cubic-bezier(.22,.68,0,1) both; }
+.sk-label { animation: sk-up 0.4s 0.15s ease both; }
+.sk-card:nth-child(1) { animation-delay:.20s }
+.sk-card:nth-child(2) { animation-delay:.28s }
+.sk-card:nth-child(3) { animation-delay:.36s }
+.sk-card:nth-child(4) { animation-delay:.44s }
+
+/* ── Responsive ── */
+@media (max-width: 1024px) { .sk-grid { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 560px)  { .sk-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+
+  <!-- HERO -->
+  <div class="sk-hero">
+    <div class="sk-hero-ring-l"></div>
+    <div class="sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <h1>👩‍💼 Bienvenue Responsable</h1>
+      <p>Gérez vos challenges et suivez les participations des étudiants</p>
+    </div>
+  </div>
+
+  <!-- CARDS -->
+  <div class="container">
+    <div class="sk-content">
+      <div class="sk-label">Accès rapide</div>
+      <div class="sk-grid">
+
+        <a href="{{ path('app_responsable_challenges') }}" class="sk-card sk-card-challenges" data-icon="📋">
+          <div class="sk-card-icon">📋</div>
+          <div>
+            <p class="sk-card-title">Mes Challenges</p>
+            <p class="sk-card-desc">Créer et gérer vos challenges</p>
+          </div>
+          <span class="sk-card-arrow">Voir tous →</span>
+        </a>
+
+        <a href="{{ path('app_responsable_challenge_new') }}" class="sk-card sk-card-new" data-icon="➕">
+          <div class="sk-card-icon">➕</div>
+          <div>
+            <p class="sk-card-title">Nouveau Challenge</p>
+            <p class="sk-card-desc">Créer un challenge rapidement</p>
+          </div>
+          <span class="sk-card-arrow">Créer maintenant →</span>
+        </a>
+
+        <a href="{{ path('app_responsable_participations') }}" class="sk-card sk-card-participations" data-icon="👥">
+          <div class="sk-card-icon">👥</div>
+          <div>
+            <p class="sk-card-title">Participations</p>
+            <p class="sk-card-desc">Suivre les participations des étudiants</p>
+          </div>
+          <span class="sk-card-arrow">Consulter →</span>
+        </a>
+
+        <a href="{{ path('app_responsable_livrables') }}" class="sk-card sk-card-livrables" data-icon="📊">
+          <div class="sk-card-icon">📊</div>
+          <div>
+            <p class="sk-card-title">Livrables</p>
+            <p class="sk-card-desc">Valider ou refuser les livrables soumis</p>
+          </div>
+          <span class="sk-card-arrow">Voir tout →</span>
+        </a>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

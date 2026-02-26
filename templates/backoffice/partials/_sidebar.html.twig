@@ -1,0 +1,82 @@
+<nav class="sidebar sidebar-offcanvas" id="sidebar">
+  <ul class="nav">
+    <li class="nav-item">
+      <a class="nav-link" href="{{ path('admin_dashboard') }}">
+        <i class="mdi mdi-grid-large menu-icon"></i>
+        <span class="menu-title" style="color: black; font-weight: bold; font-size: 1.2rem;">Dashboard</span>
+      </a>
+    </li>
+    
+
+    <li class="nav-item nav-category">Management</li>
+            {# -------- Users -------- #}
+    <li class="nav-item">
+      <a class="nav-link {{ app.request.attributes.get('_route') == 'app_user_index' ? 'active' : '' }}"
+         href="{{ path('app_user_index') }}">
+        <i class="menu-icon mdi mdi-account-multiple" style="color: black; font-size: 1.2rem;"></i>
+        <span class="menu-title" style="color: black;">User Management</span>
+      </a>
+    </li>
+
+    {# -------- Forum -------- #}
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#forum-menu" aria-expanded="false" aria-controls="forum-menu">
+        <i class="menu-icon mdi mdi-forum-outline" style="color: black; font-size: 1.2rem;"></i>
+        <span class="menu-title" style="color: black;">Forum Management</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="forum-menu">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ path('admin_forum_publications') }}" style="color: darkred; font-size: 1rem;">Publications</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ path('admin_forum_commentaires') }}" style="color: darkred; font-size: 1rem;">Comments</a>
+          </li>
+        </ul>
+      </div>
+    </li>
+
+    {# -------- Clubs -------- #}
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#club-menu"
+         aria-expanded="{{ app.request.attributes.get('_route') starts with 'admin_club' or app.request.attributes.get('_route') starts with 'admin_adhesion' ? 'true' : 'false' }}"
+         aria-controls="club-menu">
+        <i class="menu-icon mdi mdi-account-group" style="color: black; font-size: 1.2rem;"></i>
+        <span class="menu-title" style="color: black;">Club Management</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse {{ app.request.attributes.get('_route') starts with 'admin_club' or app.request.attributes.get('_route') starts with 'admin_adhesion' ? 'show' : '' }}"
+           id="club-menu">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link {{ app.request.attributes.get('_route') == 'admin_club_index' ? 'active' : '' }}"
+               href="{{ path('admin_club_index') }}" style="color: darkblue; font-size: 1rem;">
+              <i class="mdi mdi-view-list me-1"></i> Liste des clubs
+            </a>
+          </li>
+          <li class="nav-item">
+
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {{ app.request.attributes.get('_route') == 'admin_club_demandes' ? 'active' : '' }}"
+               href="{{ path('admin_club_demandes') }}" style="color: darkblue; font-size: 1rem;">
+              <i class="mdi mdi-clipboard-list me-1"></i> Demandes de création
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {{ app.request.attributes.get('_route') == 'admin_adhesion_index' ? 'active' : '' }}"
+               href="{{ path('admin_adhesion_index') }}" style="color: darkblue; font-size: 1rem;">
+              <i class="mdi mdi-account-plus me-1"></i> Demandes d'adhésion
+            </a>
+          </li>
+        </ul>
+      </div>
+    </li>
+
+
+
+
+
+  </ul>
+</nav>

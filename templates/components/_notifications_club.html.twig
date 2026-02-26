@@ -1,0 +1,84 @@
+{# templates/components/_notifications_club.html.twig #}
+
+<li class="nav-item dropdown">
+    <a class="nav-link count-indicator" id="notificationClubDropdown" href="#" data-bs-toggle="dropdown">
+        <i class="icon-bell"></i>
+        <span class="count" id="notif-club-count" style="display:none;">0</span>
+    </a>
+    <div class="dropdown-menu dropdown-menu-end navbar-dropdown preview-list pb-0" aria-labelledby="notificationClubDropdown">
+        <a class="dropdown-item py-3 border-bottom" href="#">
+            <p class="mb-0 fw-medium float-start">Notifications Clubs</p>
+            <span class="badge badge-pill badge-primary float-end" id="notif-club-count-text">0 nouvelle(s)</span>
+        </a>
+        <div id="notif-club-list">
+            <a class="dropdown-item preview-item py-3" href="#">
+                <div class="preview-item-content">
+                    <h6 class="preview-subject fw-normal text-dark mb-1">Aucune notification</h6>
+                </div>
+            </a>
+        </div>
+    </div>
+</li>
+
+<script>
+function loadNotificationsClub() {
+    fetch('/notifications/club/')
+        .then(res => res.json())
+        .then(data => {
+            const count     = data.count;
+            const notifs    = data.notifications;
+            const badge     = document.getElementById('notif-club-count');
+            const badgeText = document.getElementById('notif-club-count-text');
+            const list      = document.getElementById('notif-club-list');
+
+            // Badge
+            if (count > 0) {
+                badge.style.display = 'inline-block';
+                badge.textContent   = count;
+                badgeText.textContent = count + ' nouvelle(s)';
+            } else {
+                badge.style.display = 'none';
+                badgeText.textContent = '0 nouvelle(s)';
+            }
+
+            // Liste
+            if (notifs.length === 0) {
+                list.innerHTML = `
+                    <a class="dropdown-item preview-item py-3" href="#">
+                        <div class="preview-item-content">
+                            <h6 class="preview-subject fw-normal text-dark mb-1">
+                                Aucune notification
+                            </h6>
+                        </div>
+                    </a>`;
+            } else {
+                list.innerHTML = notifs.map(n => `
+                    <a class="dropdown-item preview-item py-3"
+                       href="${n.lienRedirection}"
+                       onclick="markReadClub(${n.id})">
+                        <div class="preview-thumbnail">
+                            <i class="mdi mdi-bell m-auto text-primary"></i>
+                        </div>
+                        <div class="preview-item-content">
+                            <h6 class="preview-subject fw-normal text-dark mb-1">
+                                ${n.message}
+                            </h6>
+                            <p class="fw-light small-text mb-0">${n.createdAt}</p>
+                        </div>
+                    </a>
+                `).join('');
+            }
+        })
+        .catch(err => console.error('Erreur notifications club:', err));
+}
+
+function markReadClub(id) {
+    fetch('/notifications/club/' + id + '/read', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    }).then(() => loadNotificationsClub());
+}
+
+loadNotificationsClub();
+setInterval(loadNotificationsClub, 30000);
+</script>

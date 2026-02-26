@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Nouveau Commentaire — SkillOra Admin</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#f1f1f1;font-family:'Segoe UI',Arial,sans-serif}
+  .wrap{max-width:620px;margin:30px auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 6px 30px rgba(0,0,0,.12)}
+  .hdr{background:linear-gradient(135deg,#5a0000 0%,#8b1a1a 60%,#a52a2a 100%);padding:28px 36px}
+  .hdr-logo{font-size:1.9rem;font-weight:800;color:#fff;letter-spacing:2px}
+  .hdr-logo span{color:#ff8080}
+  .hdr-sub{color:rgba(255,255,255,.7);font-size:.82rem;margin-top:4px}
+  .strip{padding:12px 20px;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:10px;background:#e8f4fd;color:#0c5460;border-left:5px solid #17a2b8}
+  .body{padding:28px 36px}
+  .intro{font-size:.93rem;color:#555;line-height:1.7;margin-bottom:20px}
+  .intro strong{color:#8b0000}
+
+  /* Bloc publication liée */
+  .pub-ref{background:#f8f8f8;border:1px solid #e5e7eb;border-radius:10px;padding:14px 18px;margin-bottom:18px}
+  .pub-ref-lbl{font-size:.72rem;font-weight:700;text-transform:uppercase;color:#aaa;letter-spacing:.5px;margin-bottom:6px}
+  .pub-ref-title{font-size:.95rem;font-weight:700;color:#1a1a1a}
+  .pub-ref-meta{font-size:.78rem;color:#888;margin-top:4px}
+
+  /* Bloc commentaire */
+  .com-card{border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px}
+  .com-card-head{background:linear-gradient(135deg,#17a2b8,#138496);padding:14px 22px}
+  .com-card-head h2{color:#fff;font-size:.95rem;font-weight:700;margin:0}
+  .com-card-body{padding:18px 22px;background:#fafafa}
+  table.info{width:100%;border-collapse:collapse}
+  table.info td{padding:8px 6px;font-size:.84rem;border-bottom:1px solid #f0f0f0;vertical-align:top}
+  table.info tr:last-child td{border-bottom:none}
+  table.info .lbl{color:#999;font-weight:700;text-transform:uppercase;font-size:.72rem;letter-spacing:.5px;width:120px}
+  table.info .val{color:#333}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.73rem;font-weight:700}
+  .b-etudiant{background:#dbeafe;color:#1d4ed8}
+  .b-responsable{background:#fef2f2;color:#8b0000}
+
+  /* Contenu du commentaire */
+  .contenu-box{background:#fff;border-left:4px solid #17a2b8;border-radius:0 8px 8px 0;padding:14px 18px;margin-top:14px;font-size:.88rem;color:#444;line-height:1.7;font-style:italic}
+
+  .cta{text-align:center;margin:22px 0 6px}
+  .cta a{display:inline-block;background:linear-gradient(135deg,#17a2b8,#138496);color:#fff;text-decoration:none;padding:13px 32px;border-radius:8px;font-weight:700;font-size:.9rem}
+  .note{font-size:.75rem;color:#bbb;text-align:center;margin-top:16px}
+  .ftr{background:#111;padding:16px 36px;text-align:center}
+  .ftr p{color:rgba(255,255,255,.4);font-size:.72rem;margin:3px 0}
+  .ftr strong{color:rgba(255,255,255,.7)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <div class="hdr-logo">Skill<span>Ora</span></div>
+    <div class="hdr-sub">Notification Admin — Forum</div>
+  </div>
+
+  <div class="strip">
+    💬 Nouveau commentaire posté sur le forum
+  </div>
+
+  <div class="body">
+    <p class="intro">
+      Bonjour <strong>Administrateur</strong>,<br>
+      Un nouveau commentaire a été posté sur SkillOra le <strong>{{ dateFormatee }}</strong>.
+    </p>
+
+    <!-- Publication liée -->
+    <div class="pub-ref">
+      <div class="pub-ref-lbl">📄 Publication concernée</div>
+      <div class="pub-ref-title">{{ publication.titre }}</div>
+      <div class="pub-ref-meta">
+        Par {{ publication.user.prenom }} {{ publication.user.nom }}
+        — {{ publication.typecontenu.value|capitalize }}
+      </div>
+    </div>
+
+    <!-- Commentaire -->
+    <div class="com-card">
+      <div class="com-card-head"><h2>💬 Détails du commentaire</h2></div>
+      <div class="com-card-body">
+        <table class="info">
+          <tr>
+            <td class="lbl">Auteur</td>
+            <td class="val"><strong>{{ auteur.prenom }} {{ auteur.nom }}</strong></td>
+          </tr>
+          <tr>
+            <td class="lbl">Email</td>
+            <td class="val">{{ auteur.email }}</td>
+          </tr>
+          <tr>
+            <td class="lbl">Rôle</td>
+            <td class="val">
+              <span class="badge {{ auteur.role == 'responsable_club' ? 'b-responsable' : 'b-etudiant' }}">
+                {{ roleLabel }}
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td class="lbl">Date</td>
+            <td class="val">{{ dateFormatee }}</td>
+          </tr>
+        </table>
+
+        <div class="contenu-box">{{ apercu }}</div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <a href="http://localhost:8000/admin/forum/commentaires">🔍 Voir dans le Backoffice</a>
+    </div>
+    <p class="note">Email automatique — Ne pas répondre directement.</p>
+  </div>
+
+  <div class="ftr">
+    <p><strong>SkillOra Admin Notifications</strong></p>
+    <p>© {{ "now"|date("Y") }} SkillOra — Esprit, Tunis</p>
+  </div>
+</div>
+</body>
+</html>

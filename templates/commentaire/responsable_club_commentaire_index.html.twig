@@ -1,0 +1,97 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Comment Supervision{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .supervision-page { padding: 0 0 80px; background: #f0f2f5; min-height: 100vh; }
+    .supervision-page .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    .sup-hero { background: linear-gradient(135deg, #5a0000 0%, #8b1a1a 50%, #a52a2a 100%); color: white; padding: 100px 0 70px; position: relative; overflow: hidden; }
+    .sup-hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%); border-radius: 50%; }
+    .sup-hero .container { display: flex; align-items: center; justify-content: space-between; gap: 24px; position: relative; z-index: 1; }
+    .sup-hero h1 { margin: 0; font-size: 2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+    .sup-hero p { margin: 6px 0 0; font-size: 0.95rem; opacity: 0.95; }
+
+    .stats-pill { background: white; border-radius: 8px; padding: 20px 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08); margin-bottom: 28px; display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .stats-pill span { color: #666; font-size: 0.95rem; font-weight: 600; }
+    .stats-pill strong { color: #e74c3c; font-size: 1.8rem; font-weight: 800; }
+
+    .comments-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 20px; }
+    .sup-card { background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08); border-left: 4px solid #8b1a1a; transition: all 0.3s ease; }
+    .sup-card:hover { border-left-color: #e74c3c; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .sup-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb; }
+    .sup-card-pub { font-weight: 700; color: #000; font-size: 0.95rem; margin-bottom: 4px; }
+    .sup-card-author { color: #666; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
+    .sup-card-role { background: #fef2f2; color: #dc2626; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; }
+    .sup-card-date { color: #666; font-size: 0.78rem; }
+    .sup-card-content { color: #555; font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px; background: #f9fafb; padding: 14px; border-radius: 8px; }
+    .sup-card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-action { flex: 1; min-width: 100px; padding: 9px 14px; border-radius: 8px; font-weight: 600; font-size: 0.82rem; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s ease; }
+    .btn-act-view { background: #2c3e50; color: white; }
+    .btn-act-view:hover { background: #34495e; color: white; text-decoration: none; }
+    .btn-act-reply { background: #f0f2f5; color: #333; border: 1px solid #e5e7eb; }
+    .btn-act-reply:hover { border-color: #8b1a1a; color: #8b1a1a; text-decoration: none; }
+    .btn-act-delete { background: #fef2f2; color: #dc2626; }
+    .btn-act-delete:hover { background: #dc2626; color: white; text-decoration: none; }
+
+    .empty-state { text-align: center; padding: 60px 20px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08); }
+    .empty-state i { font-size: 2.5rem; color: #e5e7eb; margin-bottom: 16px; display: block; }
+    .empty-state h3 { color: #666; font-size: 1.1rem; margin-bottom: 6px; }
+
+    @media (max-width: 768px) { 
+        .comments-grid { grid-template-columns: 1fr; } 
+        .supervision-page { padding: 0 0 40px; } 
+        .sup-hero { padding: 80px 0 50px; }
+        .sup-hero .container { flex-direction: column; align-items: flex-start; }
+        .sup-hero h1 { font-size: 1.4rem; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="supervision-page">
+    <div class="sup-hero">
+        <div class="container">
+            <div>
+                <h1>Supervision des Commentaires</h1>
+                <p>Espace Responsable Club</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats-pill">
+            <span>Total :</span>
+            <strong>{{ commentaires|length }}</strong>
+            <span>commentaire(s)</span>
+        </div>
+        {% if commentaires is not empty %}
+            <div class="comments-grid">
+                {% for commentaire in commentaires %}
+                    <div class="sup-card">
+                        <div class="sup-card-head">
+                            <div>
+                                <div class="sup-card-pub">{{ commentaire.publication.titre }}</div>
+                                <div class="sup-card-author">{{ commentaire.user.prenom }} {{ commentaire.user.nom }} <span class="sup-card-role">{{ commentaire.user.role|replace({'_': ' '})|upper }}</span></div>
+                            </div>
+                            <div class="sup-card-date"><i class="far fa-clock"></i> {{ commentaire.dateCommentaire|date('d/m/Y H:i') }}</div>
+                        </div>
+                        <div class="sup-card-content">{{ commentaire.contenu }}</div>
+                        <div class="sup-card-actions">
+                            <a href="{{ path('app_forum_show', {'id': commentaire.publication.id, 'userId': userId}) }}" class="btn-action btn-act-view"><i class="fas fa-eye"></i> Voir</a>
+                            <a href="{{ path('app_responsable_club_commentaire_reply', {'userId': userId, 'commentaireId': commentaire.id}) }}" class="btn-action btn-act-reply"><i class="fas fa-reply"></i> Répondre</a>
+                            <a href="{{ path('app_responsable_club_commentaire_delete', {'userId': userId, 'commentaireId': commentaire.id}) }}" class="btn-action btn-act-delete" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')"><i class="far fa-trash-alt"></i> Supprimer</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="far fa-comment"></i>
+                <h3>Aucun commentaire pour le moment</h3>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}{{ challenge.titre }} — SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --sk-red:#8b0000; --sk-red-dark:#4a0000; --sk-red-light:#c0392b; --sk-white:#fff; --sk-ink:#180808; --sk-muted:#8a7070; --sk-border:rgba(139,0,0,0.09); }
+.sk-page { padding-top:70px; }
+.sk-hero { position:relative; background:linear-gradient(135deg,#3d0000 0%,#8b0000 48%,#c23030 100%); margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%); padding:60px 20px 52px; text-align:center; overflow:hidden; isolation:isolate; }
+.sk-hero::before { content:''; position:absolute; inset:0; z-index:0; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E"); background-size:180px; opacity:0.5; }
+.sk-hero-ring-l,.sk-hero-ring-r { position:absolute; z-index:0; border-radius:50%; border:72px solid rgba(255,255,255,0.035); }
+.sk-hero-ring-l { width:520px; height:520px; top:-210px; left:-160px; }
+.sk-hero-ring-r { width:380px; height:380px; bottom:-160px; right:-100px; border-width:50px; }
+.sk-hero-inner { position:relative; z-index:1; }
+.sk-hero h1 { font-family:'Syne',sans-serif; font-size:clamp(1.8rem,4vw,2.6rem); font-weight:800; letter-spacing:-0.03em; color:#fff; margin:0 0 10px; line-height:1.1; }
+.sk-hero p { font-family:'DM Sans',sans-serif; color:rgba(255,255,255,0.60); font-size:0.97rem; margin:0; }
+.sk-content { padding:36px 0 56px; }
+.sk-back { display:inline-flex; align-items:center; gap:6px; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:600; color:var(--sk-muted); text-decoration:none; margin-bottom:24px; transition:color 0.2s; }
+.sk-back:hover { color:var(--sk-red); text-decoration:none; }
+
+.sk-show-card { background:#fff; border-radius:20px; border:1.5px solid var(--sk-border); box-shadow:0 4px 20px rgba(0,0,0,0.06); overflow:hidden; animation:sk-up 0.45s 0.1s ease both; }
+.sk-show-head { padding:28px 32px; border-bottom:1.5px solid var(--sk-border); display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
+.sk-show-title { font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:800; color:var(--sk-ink); margin:0 0 6px; }
+.sk-badge-active { display:inline-flex; align-items:center; padding:3px 12px; border-radius:50px; font-size:0.70rem; font-weight:700; background:#dcfce7; color:#15803d; font-family:'DM Sans',sans-serif; }
+.sk-show-actions { display:flex; gap:8px; flex-shrink:0; }
+
+.sk-show-body { padding:28px 32px; display:grid; gap:24px; }
+.sk-show-dates { display:flex; gap:20px; padding:14px 18px; background:#f9f9f9; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:0.85rem; color:var(--sk-muted); flex-wrap:wrap; }
+.sk-show-dates span { display:flex; align-items:center; gap:6px; }
+
+.sk-show-img { width:100%; max-height:300px; object-fit:cover; border-radius:14px; }
+
+.sk-show-section-title { font-family:'Syne',sans-serif; font-size:0.95rem; font-weight:800; color:var(--sk-ink); margin:0 0 12px; display:flex; align-items:center; gap:8px; }
+.sk-show-desc { font-family:'DM Sans',sans-serif; font-size:0.9rem; color:#374151; line-height:1.7; margin:0; }
+
+.sk-pdf-box { display:inline-flex; align-items:center; gap:10px; padding:12px 18px; background:#fef9c3; border:1.5px solid #fde047; border-radius:12px; text-decoration:none; font-family:'DM Sans',sans-serif; font-size:0.87rem; font-weight:600; color:#854d0e; transition:background 0.2s; }
+.sk-pdf-box:hover { background:#fef08a; text-decoration:none; color:#713f12; }
+
+.sk-participations { display:grid; gap:10px; }
+.sk-participation-row { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:#f9f9f9; border-radius:12px; border:1.5px solid var(--sk-border); }
+.sk-participation-name { font-family:'Syne',sans-serif; font-size:0.92rem; font-weight:700; color:var(--sk-ink); }
+.sk-participation-date { font-family:'DM Sans',sans-serif; font-size:0.80rem; color:var(--sk-muted); }
+
+.sk-btn { display:inline-flex; align-items:center; gap:7px; padding:9px 18px; border-radius:10px; font-weight:700; font-family:'DM Sans',sans-serif; font-size:0.85rem; border:none; cursor:pointer; transition:all 0.25s; text-decoration:none; }
+.sk-btn-warn { background:linear-gradient(135deg,#92400e,#d97706); color:#fff; }
+.sk-btn-warn:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(217,119,6,0.3); color:#fff; text-decoration:none; }
+.sk-btn-danger { background:transparent; color:#dc2626; border:1.5px solid #fca5a5; }
+.sk-btn-danger:hover { background:#dc2626; color:#fff; border-color:#dc2626; text-decoration:none; }
+
+@keyframes sk-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.sk-hero { animation:sk-up 0.5s cubic-bezier(.22,.68,0,1) both; }
+@media(max-width:680px){ .sk-show-head{flex-direction:column;} .sk-show-actions{width:100%;} }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+  <div class="sk-hero">
+    <div class="sk-hero-ring-l"></div>
+    <div class="sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <h1>🏆 Détails du Challenge</h1>
+      <p>{{ challenge.dateDebut|date('d/m/Y') }} → {{ challenge.dateFin|date('d/m/Y') }}</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sk-content">
+      <a href="{{ path('app_responsable_challenges') }}" class="sk-back">← Retour à la liste</a>
+
+      <div class="sk-show-card">
+        <div class="sk-show-head">
+          <div>
+            <h2 class="sk-show-title">{{ challenge.titre }}</h2>
+            <span class="sk-badge-active">● Actif</span>
+          </div>
+          <div class="sk-show-actions">
+            <a href="{{ path('app_responsable_challenge_edit', {id: challenge.id}) }}" class="sk-btn sk-btn-warn">✏️ Modifier</a>
+            <form method="post" action="{{ path('app_responsable_challenge_delete', {id: challenge.id}) }}" style="margin:0" onsubmit="return confirm('Supprimer ce challenge ? Action irréversible.')">
+              <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ challenge.id) }}">
+              <button type="submit" class="sk-btn sk-btn-danger">🗑️ Supprimer</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="sk-show-body">
+          <div class="sk-show-dates">
+            <span>📅 Début : {{ challenge.dateDebut|date('d/m/Y') }}</span>
+            <span>⏳ Fin : {{ challenge.dateFin|date('d/m/Y') }}</span>
+          </div>
+
+          {% if challenge.image %}
+            <img class="sk-show-img" src="{{ asset('uploads/' ~ challenge.image) }}" alt="{{ challenge.titre }}">
+          {% endif %}
+
+          <div>
+            <div class="sk-show-section-title">📝 Description</div>
+            <p class="sk-show-desc">{{ challenge.description }}</p>
+          </div>
+
+          {% if challenge.fichierCahierCharges %}
+            <div>
+              <div class="sk-show-section-title">📄 Cahier des charges</div>
+              <a href="{{ asset('uploads/' ~ challenge.fichierCahierCharges) }}" target="_blank" class="sk-pdf-box">
+                📄 Télécharger le PDF
+              </a>
+            </div>
+          {% endif %}
+
+          <div>
+            <div class="sk-show-section-title">👥 Participations ({{ challenge.participations|length }})</div>
+            {% if challenge.participations is empty %}
+              <p style="font-family:'DM Sans',sans-serif;color:var(--sk-muted);font-size:0.88rem;">Aucune participation pour ce challenge.</p>
+            {% else %}
+              <div class="sk-participations">
+                {% for participation in challenge.participations %}
+                  <div class="sk-participation-row">
+                    <span class="sk-participation-name">{{ participation.groupe.nomGroupe }}</span>
+                    <span class="sk-participation-date">{{ participation.dateParticipation|date('d/m/Y') }}</span>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

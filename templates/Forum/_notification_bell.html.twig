@@ -1,0 +1,344 @@
+{# templates/components/_notification_bell.html.twig #}
+
+{% if _user is defined and _user %}
+<div class="notif-wrapper" id="notifWrapper">
+
+    {# ── Bouton cloche ── #}
+    <button class="notif-bell-btn" id="notifBell" onclick="toggleNotifPanel()" type="button">
+        <i class="fas fa-bell"></i>
+        {% if notificationsNonLues is defined and notificationsNonLues|length > 0 %}
+            <span class="notif-badge" id="notifBadge">
+                {{ notificationsNonLues|length > 9 ? '9+' : notificationsNonLues|length }}
+            </span>
+        {% endif %}
+    </button>
+
+    {# ── Panel dropdown ── #}
+    <div class="notif-panel" id="notifPanel">
+
+        <div class="notif-panel-header">
+            <span class="notif-panel-title">
+                <i class="fas fa-bell"></i> Notifications
+            </span>
+            {% if notificationsNonLues is defined and notificationsNonLues|length > 0 %}
+                <button class="notif-mark-all" onclick="marquerToutLu()" type="button">
+                    <i class="fas fa-check-double"></i> Tout lire
+                </button>
+            {% endif %}
+        </div>
+
+        <div class="notif-list" id="notifList">
+            {% if notificationsNonLues is defined and notificationsNonLues|length > 0 %}
+                {% for notif in notificationsNonLues %}
+                    {# Chaque notif est cliquable et redirige #}
+                    <a href="{{ notif.lienRedirection ?? '#' }}"
+                       class="notif-item"
+                       onclick="marquerUnLu({{ notif.id }})">
+                        <div class="notif-icon notif-icon--{{ notif.type }}">
+                            <i class="fas fa-{{ notif.type == 'commentaire' ? 'comment' : 'reply' }}"></i>
+                        </div>
+                        <div class="notif-content">
+                            <p class="notif-msg">{{ notif.message }}</p>
+                            {# Badge rôle expéditeur #}
+                            {% if notif.roleExpediteur %}
+                                <span class="notif-role-badge notif-role--{{ notif.roleExpediteur }}">
+                                    {% if notif.roleExpediteur == 'responsable_club' %}
+                                        <i class="fas fa-shield-alt"></i> Responsable Club
+                                    {% else %}
+                                        <i class="fas fa-user-graduate"></i> Étudiant
+                                    {% endif %}
+                                </span>
+                            {% endif %}
+                            <span class="notif-time">
+                                <i class="far fa-clock"></i>
+                                {{ notif.createdAt|date('d/m/Y H:i') }}
+                            </span>
+                        </div>
+                        <i class="fas fa-chevron-right notif-arrow"></i>
+                    </a>
+                {% endfor %}
+            {% else %}
+                <div class="notif-empty">
+                    <i class="far fa-bell-slash"></i>
+                    <p>Aucune notification</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="notif-panel-footer">
+            <span id="notifCount">{{ notificationsNonLues is defined ? notificationsNonLues|length : 0 }} non lue(s)</span>
+        </div>
+    </div>
+</div>
+
+<style>
+.notif-icon--validation {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+.notif-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-left: 6px;
+}
+
+.notif-bell-btn {
+    position: relative;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    color: #fff;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.25s ease;
+    outline: none; flex-shrink: 0;
+}
+.notif-bell-btn:hover {
+    background: rgba(255,255,255,0.28);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.notif-badge {
+    position: absolute; top: -5px; right: -5px;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    background: #e74c3c; color: #fff;
+    border-radius: 50px; font-size: 0.58rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #8b0000;
+    animation: badgePop 0.3s cubic-bezier(0.68,-0.55,0.265,1.55);
+}
+@keyframes badgePop { from { transform: scale(0); } to { transform: scale(1); } }
+
+.notif-panel {
+    position: absolute;
+    top: calc(100% + 16px); right: -8px;
+    width: 310px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 16px 50px rgba(90,0,0,0.18), 0 2px 10px rgba(0,0,0,0.06);
+    border: 1px solid rgba(139,0,0,0.08);
+    z-index: 9999; overflow: hidden;
+    display: none;
+    animation: panelIn 0.2s ease;
+}
+@keyframes panelIn {
+    from { opacity: 0; transform: translateY(6px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.notif-panel::before {
+    content: ''; position: absolute; top: -6px; right: 16px;
+    width: 12px; height: 12px; background: #5a0000;
+    transform: rotate(45deg); border-radius: 2px; z-index: 1;
+}
+
+.notif-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 15px 11px;
+    background: linear-gradient(135deg, #5a0000 0%, #8b1a1a 100%);
+    position: relative; z-index: 2;
+}
+.notif-panel-title {
+    color: #fff; font-size: 0.82rem; font-weight: 700;
+    display: flex; align-items: center; gap: 7px;
+}
+.notif-mark-all {
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.28);
+    color: rgba(255,255,255,0.9);
+    font-size: 0.68rem; font-weight: 600;
+    padding: 4px 9px; border-radius: 20px; cursor: pointer;
+    display: flex; align-items: center; gap: 4px; transition: all 0.2s;
+}
+.notif-mark-all:hover { background: rgba(255,255,255,0.25); }
+
+.notif-list { max-height: 300px; overflow-y: auto; }
+.notif-list::-webkit-scrollbar { width: 3px; }
+.notif-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+/* ── Item cliquable ── */
+.notif-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 12px 14px;
+    border-bottom: 1px solid #f8f8f8;
+    background: #fff9f9;
+    border-left: 3px solid #e74c3c;
+    transition: background 0.15s, border-left-color 0.15s;
+    text-decoration: none !important;
+    cursor: pointer;
+}
+.notif-item:hover {
+    background: #fff0f0;
+    border-left-color: #8b0000;
+    text-decoration: none !important;
+}
+.notif-item:last-child { border-bottom: none; }
+
+.notif-icon {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 0.7rem; margin-top: 2px;
+}
+.notif-icon--commentaire { background: #fef2f2; color: #e74c3c; border: 1px solid #fecaca; }
+.notif-icon--reponse     { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+
+.notif-content { flex: 1; min-width: 0; }
+.notif-msg {
+    margin: 0 0 5px;
+    font-size: 0.78rem; color: #2c2c2c; line-height: 1.45;
+    word-break: break-word;
+}
+
+/* Badge rôle expéditeur */
+.notif-role-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 0.62rem; font-weight: 700;
+    padding: 2px 7px; border-radius: 10px;
+    margin-bottom: 4px;
+}
+.notif-role--responsable_club {
+    background: #fef2f2; color: #8b0000;
+    border: 1px solid #fecaca;
+}
+.notif-role--etudiant {
+    background: #eff6ff; color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.notif-time {
+    font-size: 0.68rem; color: #bbb;
+    display: flex; align-items: center; gap: 4px;
+}
+
+.notif-arrow {
+    color: #ddd; font-size: 0.65rem; margin-top: 6px; flex-shrink: 0;
+    transition: color 0.2s;
+}
+.notif-item:hover .notif-arrow { color: #8b0000; }
+
+.notif-empty {
+    text-align: center; padding: 34px 20px; color: #ccc;
+}
+.notif-empty i { font-size: 1.6rem; margin-bottom: 8px; display: block; color: #e5e7eb; }
+.notif-empty p { margin: 0; font-size: 0.82rem; color: #bbb; }
+
+.notif-panel-footer {
+    padding: 7px 14px; background: #fafafa;
+    border-top: 1px solid #f0f0f0;
+    font-size: 0.7rem; color: #bbb; text-align: center;
+}
+</style>
+
+<script>
+function toggleNotifPanel() {
+    const panel = document.getElementById('notifPanel');
+    const isOpen = panel.style.display === 'block';
+    panel.style.display = isOpen ? 'none' : 'block';
+}
+
+document.addEventListener('click', function(e) {
+    const wrapper = document.getElementById('notifWrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+        document.getElementById('notifPanel').style.display = 'none';
+    }
+});
+
+// Marquer tout comme lu
+function marquerToutLu() {
+    fetch('/notifications/lire?u={{ _user.id }}', { method: 'POST' })
+        .then(r => r.json())
+        .then(() => {
+            document.querySelectorAll('.notif-item').forEach(el => {
+                el.style.background = '#fff';
+                el.style.borderLeftColor = '#e5e7eb';
+            });
+            document.getElementById('notifBadge')?.remove();
+            const fc = document.getElementById('notifCount');
+            if (fc) fc.textContent = '0 non lue(s)';
+            document.querySelector('.notif-mark-all')?.remove();
+        });
+}
+
+// Marquer une seule comme lue (au clic)
+function marquerUnLu(notifId) {
+    fetch('/notifications/lire?u={{ _user.id }}', { method: 'POST' });
+    // Le badge sera mis à jour au rechargement de la page
+}
+
+// ── Mercure temps réel ──
+(function() {
+    try {
+        const mercureUrl = new URL('http://localhost:3000/.well-known/mercure');
+        mercureUrl.searchParams.append('topic', '/notifications/user/{{ _user.id }}');
+
+        const es = new EventSource(mercureUrl);
+
+        es.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const list = document.getElementById('notifList');
+
+            // Enlever l'état vide
+            const empty = list.querySelector('.notif-empty');
+            if (empty) empty.remove();
+
+            // Badge rôle
+            let roleBadgeHtml = '';
+            if (data.roleExpediteur) {
+                const isResp = data.roleExpediteur === 'responsable_club';
+                roleBadgeHtml =
+                    '<span class="notif-role-badge notif-role--' + data.roleExpediteur + '">' +
+                    (isResp
+                        ? '<i class="fas fa-shield-alt"></i> Responsable Club'
+                        : '<i class="fas fa-user-graduate"></i> Étudiant') +
+                    '</span>';
+            }
+
+            // Créer item cliquable
+            const item = document.createElement('a');
+            item.href = data.lien || '#';
+            item.className = 'notif-item';
+            item.setAttribute('onclick', 'marquerUnLu(' + data.id + ')');
+            const isReponse = data.type === 'reponse';
+            item.innerHTML =
+                '<div class="notif-icon notif-icon--' + data.type + '">' +
+                    '<i class="fas fa-' + (isReponse ? 'reply' : 'comment') + '"></i>' +
+                '</div>' +
+                '<div class="notif-content">' +
+                    '<p class="notif-msg">' + data.message + '</p>' +
+                    roleBadgeHtml +
+                    '<span class="notif-time"><i class="far fa-clock"></i> ' + data.createdAt + '</span>' +
+                '</div>' +
+                '<i class="fas fa-chevron-right notif-arrow"></i>';
+            list.prepend(item);
+
+            // Badge compteur
+            let badge = document.getElementById('notifBadge');
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.id = 'notifBadge';
+                badge.className = 'notif-badge';
+                badge.textContent = '1';
+                document.getElementById('notifBell').appendChild(badge);
+            } else {
+                const c = parseInt(badge.textContent) + 1;
+                badge.textContent = c > 9 ? '9+' : c;
+            }
+
+            // Footer
+            const fc = document.getElementById('notifCount');
+            if (fc) {
+                const curr = parseInt(fc.textContent) || 0;
+                fc.textContent = (curr + 1) + ' non lue(s)';
+            }
+        };
+
+        es.onerror = function() { /* silencieux si Mercure est off */ };
+    } catch(e) {}
+})();
+</script>
+{% endif %}

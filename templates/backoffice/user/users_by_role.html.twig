@@ -1,0 +1,335 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}Users — {{ role|replace({'_': ' '})|title }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+.user-panel-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 1040;
+    backdrop-filter: blur(3px);
+}
+.user-panel-overlay.open { display: block; }
+.user-panel {
+    position: fixed; top: 0; right: -520px; height: 100vh;
+    width: 480px; max-width: 96vw; background: #fff; z-index: 1050;
+    box-shadow: -8px 0 40px rgba(0,0,0,0.18);
+    transition: right 0.3s cubic-bezier(0.4,0,0.2,1);
+    display: flex; flex-direction: column; overflow: hidden;
+    border-radius: 16px 0 0 16px;
+}
+.user-panel.open { right: 0; }
+.panel-header {
+    background: linear-gradient(135deg, #c10609 0%, #8b0507 100%);
+    color: #fff; padding: 22px 24px 18px;
+    display: flex; align-items: center; gap: 16px; flex-shrink: 0;
+}
+.panel-avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: rgba(255,255,255,0.25); border: 3px solid rgba(255,255,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; font-weight: 800; color: #fff;
+    overflow: hidden; flex-shrink: 0;
+}
+.panel-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.panel-name { font-size: 1.1rem; font-weight: 800; margin-bottom: 2px; }
+.panel-email { font-size: 0.78rem; opacity: 0.8; margin-bottom: 4px; }
+.panel-close {
+    margin-left: auto; background: rgba(255,255,255,0.15); border: none;
+    color: #fff; width: 32px; height: 32px; border-radius: 50%;
+    font-size: 1.1rem; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+}
+.panel-close:hover { background: rgba(255,255,255,0.3); }
+.panel-body { flex: 1; overflow-y: auto; padding: 24px; }
+.panel-section { margin-bottom: 22px; }
+.panel-section-title {
+    font-size: 0.6rem; font-weight: 800; letter-spacing: 2px;
+    text-transform: uppercase; color: #999;
+    border-bottom: 1px solid #eee; padding-bottom: 6px; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+}
+.panel-field { margin-bottom: 14px; }
+.panel-field label {
+    display: block; font-size: 0.68rem; font-weight: 700; color: #aaa;
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;
+}
+.panel-field p { font-size: 0.9rem; font-weight: 600; color: #111; margin: 0; }
+.panel-footer {
+    padding: 16px 24px; border-top: 1px solid #eee;
+    display: flex; gap: 10px; flex-shrink: 0; background: #fafafa;
+}
+.btn-panel-edit {
+    flex: 1; background: #c10609; color: #fff; border: none;
+    padding: 10px; border-radius: 8px; font-size: 0.82rem; font-weight: 700;
+    cursor: pointer; text-decoration: none; text-align: center;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-panel-edit:hover { background: #8b0507; color: #fff; text-decoration: none; }
+.btn-panel-delete {
+    background: #fff; color: #c10609; border: 1.5px solid #fecaca;
+    padding: 10px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; gap: 6px;
+}
+.btn-panel-delete:hover { background: #c10609; color: #fff; border-color: #c10609; }
+.role-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px; font-size: 0.65rem;
+    font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.role-admin       { background: #c10609; color: #fff; }
+.role-responsable { background: #1d4ed8; color: #fff; }
+.role-membre      { background: #0891b2; color: #fff; }
+.role-etudiant    { background: #059669; color: #fff; }
+.table tbody tr { cursor: pointer; transition: background 0.15s; }
+.table tbody tr:hover { background: rgba(193,6,9,0.04) !important; }
+.table tbody tr.selected { background: rgba(193,6,9,0.08) !important; border-left: 3px solid #c10609; }
+.filter-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+#search-input {
+    flex: 1; min-width: 200px; padding: 9px 14px;
+    border: 1.5px solid #e4e4e4; border-radius: 8px;
+    font-size: 0.85rem; background: #fafafa; transition: border-color 0.2s;
+}
+#search-input:focus { outline: none; border-color: #c10609; background: #fff; }
+.count-badge { background: #c10609; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 800; }
+</style>
+{% endblock %}
+
+{% block body %}
+
+{# ── Overlay + Panel ── #}
+<div class="user-panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+<div class="user-panel" id="userPanel">
+    <div class="panel-header">
+        <div class="panel-avatar" id="panelAvatar"></div>
+        <div>
+            <div class="panel-name" id="panelName"></div>
+            <div class="panel-email" id="panelEmail"></div>
+            <span id="panelRole"></span>
+        </div>
+        <button class="panel-close" onclick="closePanel()">✕</button>
+    </div>
+    <div class="panel-body">
+        <div class="panel-section">
+            <div class="panel-section-title"><i class="mdi mdi-information-outline"></i> Account Information</div>
+            <div class="row">
+                <div class="col-6 panel-field"><label>First Name</label><p id="pPrenom">—</p></div>
+                <div class="col-6 panel-field"><label>Last Name</label><p id="pNom">—</p></div>
+                <div class="col-12 panel-field"><label>Email</label><p id="pEmail">—</p></div>
+                <div class="col-6 panel-field"><label>Phone</label><p id="pTel">—</p></div>
+                <div class="col-6 panel-field"><label>Date of Birth</label><p id="pDob">—</p></div>
+                <div class="col-6 panel-field"><label>Registered</label><p id="pDate">—</p></div>
+                <div class="col-6 panel-field"><label>Role</label><p id="pRoleText">—</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer">
+        <a href="#" id="panelEditBtn" class="btn-panel-edit">
+            <i class="mdi mdi-pencil"></i> Edit Profile
+        </a>
+        <form id="panelDeleteForm" method="post" action="#" onsubmit="return confirm('Delete this user?')">
+            <input type="hidden" name="_token" id="panelDeleteToken">
+            <button type="submit" class="btn-panel-delete">
+                <i class="mdi mdi-trash-can-outline"></i> Delete
+            </button>
+        </form>
+    </div>
+</div>
+
+{# ── Page content ── #}
+<div class="row">
+    <div class="col-12 grid-margin">
+        <div class="card" style="border-radius:12px; border-top:3px solid #c10609;">
+            <div class="card-body">
+
+                <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                    <h4 class="card-title mb-0">
+                        {% if role == 'responsable_club' %}
+                            <i class="mdi mdi-account-tie me-2" style="color:#c10609;"></i>Club Managers
+                        {% elseif role == 'etudiant' %}
+                            <i class="mdi mdi-school me-2" style="color:#c10609;"></i>Students
+                        {% elseif role == 'membre' %}
+                            <i class="mdi mdi-account me-2" style="color:#c10609;"></i>Members
+                        {% else %}
+                            <i class="mdi mdi-account-multiple me-2" style="color:#c10609;"></i>Users
+                        {% endif %}
+                        <span class="count-badge ms-2">{{ users|length }}</span>
+                    </h4>
+                    <div class="d-flex gap-2 flex-wrap align-items-center">
+                        <a href="{{ path('app_admin_users_by_role', {role: 'membre'}) }}"
+                           class="btn btn-sm {{ role == 'membre' ? 'btn-danger' : 'btn-outline-danger' }}">
+                            👤 Members
+                        </a>
+                        <a href="{{ path('app_admin_users_by_role', {role: 'responsable_club'}) }}"
+                           class="btn btn-sm {{ role == 'responsable_club' ? 'btn-primary' : 'btn-outline-primary' }}">
+                            👥 Club Managers
+                        </a>
+                        <a href="{{ path('app_admin_users_by_role', {role: 'etudiant'}) }}"
+                           class="btn btn-sm {{ role == 'etudiant' ? 'btn-success' : 'btn-outline-success' }}">
+                            🎓 Students
+                        </a>
+                        <a href="{{ path('app_user_index') }}"
+                           class="btn btn-sm btn-outline-secondary" title="Show all users">
+                            <i class="mdi mdi-refresh"></i> Reset
+                        </a>
+                    </div>
+                </div>
+
+                <div class="filter-bar">
+                    <input type="text" id="search-input" placeholder="🔍  Search by name or email…">
+                    <span class="text-muted small" id="count-display">{{ users|length }} user{{ users|length != 1 ? 's' : '' }}</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover" id="usersTable">
+                        <thead style="background:#fafafa;">
+                            <tr>
+                                <th style="width:48px;">Photo</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Registered</th>
+                                <th style="width:90px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for user in users %}
+                            <tr class="user-row"
+                                onclick="openPanel(this)"
+                                data-id="{{ user.id }}"
+                                data-prenom="{{ user.prenom }}"
+                                data-nom="{{ user.nom }}"
+                                data-email="{{ user.email }}"
+                                data-tel="{{ user.telephone ?? '-' }}"
+                                data-dob="{{ user.dateNaissance ? user.dateNaissance|date('d/m/Y') : '-' }}"
+                                data-date="{{ user.dateInscription|date('d/m/Y') }}"
+                                data-role="{{ user.role }}"
+                                data-photo="{{ user.photo ? asset('uploads/photos/' ~ user.photo) : '' }}"
+                                data-edit-url="{{ path('app_user_edit_backoffice', {id: user.id}) }}"
+                                data-delete-url="{{ path('app_user_delete', {id: user.id}) }}"
+                                data-token="{{ csrf_token('delete' ~ user.id) }}">
+
+                                <td onclick="event.stopPropagation()">
+                                    {% if user.photo %}
+                                        <img src="{{ asset('uploads/photos/' ~ user.photo) }}"
+                                             class="rounded-circle"
+                                             style="width:38px;height:38px;object-fit:cover;border:2px solid #eee;">
+                                    {% else %}
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                             style="width:38px;height:38px;background:linear-gradient(135deg,#c10609,#8b0507);color:#fff;font-weight:800;font-size:0.85rem;">
+                                            {{ user.prenom|slice(0,1)|upper }}{{ user.nom|slice(0,1)|upper }}
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td><span class="fw-semibold">{{ user.prenom }} {{ user.nom }}</span></td>
+                                <td class="text-muted small">{{ user.email }}</td>
+                                <td class="text-muted small">{{ user.telephone ?? '-' }}</td>
+                                <td class="text-muted small">{{ user.dateInscription|date('d/m/Y') }}</td>
+                                <td onclick="event.stopPropagation()">
+                                    <a href="{{ path('app_user_edit_backoffice', {id: user.id}) }}"
+                                       class="btn btn-sm btn-outline-warning me-1" title="Edit">
+                                        <i class="mdi mdi-pencil"></i>
+                                    </a>
+                                    <form method="post" action="{{ path('app_user_delete', {id: user.id}) }}"
+                                          style="display:inline"
+                                          onsubmit="return confirm('Delete this user?')">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                            <i class="mdi mdi-trash-can-outline"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-5">
+                                    <i class="mdi mdi-account-off" style="font-size:2rem;opacity:0.3;"></i>
+                                    <p class="mt-2 mb-0">No users found</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>{# ← ferme card-body #}
+        </div>{# ← ferme card #}
+    </div>{# ← ferme col-12 #}
+</div>{# ← ferme row #}
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function() {
+    var ROLE_LABELS = {
+        'admin':            '🛡️ Administrator',
+        'responsable_club': '👥 Club Manager',
+        'membre':           '👤 Member',
+        'etudiant':         '🎓 Student'
+    };
+    var ROLE_CLASSES = {
+        'admin':            'role-badge role-admin',
+        'responsable_club': 'role-badge role-responsable',
+        'membre':           'role-badge role-membre',
+        'etudiant':         'role-badge role-etudiant'
+    };
+
+    window.openPanel = function(row) {
+        var d = row.dataset;
+        var av = document.getElementById('panelAvatar');
+        if (d.photo) {
+            av.innerHTML = '<img src="' + d.photo + '" alt="">';
+        } else {
+            av.textContent = d.prenom.charAt(0).toUpperCase() + d.nom.charAt(0).toUpperCase();
+        }
+        document.getElementById('panelName').textContent   = d.prenom + ' ' + d.nom;
+        document.getElementById('panelEmail').textContent  = d.email;
+        document.getElementById('panelRole').className     = ROLE_CLASSES[d.role] || 'role-badge';
+        document.getElementById('panelRole').textContent   = ROLE_LABELS[d.role] || d.role;
+        document.getElementById('pPrenom').textContent     = d.prenom;
+        document.getElementById('pNom').textContent        = d.nom;
+        document.getElementById('pEmail').textContent      = d.email;
+        document.getElementById('pTel').textContent        = d.tel;
+        document.getElementById('pDob').textContent        = d.dob;
+        document.getElementById('pDate').textContent       = d.date;
+        document.getElementById('pRoleText').textContent   = (ROLE_LABELS[d.role] || d.role).replace(/^[^\s]+\s/, '');
+        document.getElementById('panelEditBtn').href       = d.editUrl;
+        document.getElementById('panelDeleteForm').action  = d.deleteUrl;
+        document.getElementById('panelDeleteToken').value  = d.token;
+        document.querySelectorAll('.user-row').forEach(function(r) { r.classList.remove('selected'); });
+        row.classList.add('selected');
+        document.getElementById('userPanel').classList.add('open');
+        document.getElementById('panelOverlay').classList.add('open');
+    };
+
+    window.closePanel = function() {
+        document.getElementById('userPanel').classList.remove('open');
+        document.getElementById('panelOverlay').classList.remove('open');
+        document.querySelectorAll('.user-row').forEach(function(r) { r.classList.remove('selected'); });
+    };
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closePanel();
+    });
+
+    var searchInput  = document.getElementById('search-input');
+    var countDisplay = document.getElementById('count-display');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            var q = this.value.toLowerCase().trim();
+            var rows = document.querySelectorAll('#usersTable tbody .user-row');
+            var visible = 0;
+            rows.forEach(function(row) {
+                var name  = (row.dataset.prenom + ' ' + row.dataset.nom).toLowerCase();
+                var email = row.dataset.email.toLowerCase();
+                var show  = !q || name.includes(q) || email.includes(q);
+                row.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            countDisplay.textContent = visible + ' user' + (visible !== 1 ? 's' : '');
+        });
+    }
+})();
+</script>
+{% endblock %}

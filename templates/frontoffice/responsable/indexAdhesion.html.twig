@@ -1,0 +1,164 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Adhésions — {{ club.nom }} · SkillOra{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap');
+:root{--red:#c10609;--red-soft:rgba(193,6,9,0.07);--ink:#0d0d0d;--muted:#6b6b6b;--border:#e4e4e4;--bg:#f2f2f2;--white:#fff;--green:#059669;--amber:#d97706;--radius:16px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--ink);}
+.shell{min-height:100vh;padding:100px 0 80px;}
+.wrap{max-width:900px;margin:0 auto;padding:0 28px;}
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:28px;flex-wrap:wrap;animation:fadeUp 0.4s ease both;}
+.page-eyebrow{font-size:0.65rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.page-eyebrow::before{content:'';width:20px;height:2px;background:var(--red);}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:var(--ink);margin-bottom:4px;}
+.page-title em{font-style:normal;color:var(--red);}
+.page-sub{font-size:0.82rem;color:var(--muted);}
+.btn-back{display:inline-flex;align-items:center;gap:8px;background:var(--white);color:var(--ink);padding:10px 20px;border-radius:10px;border:1.5px solid var(--border);font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;}
+.btn-back:hover{border-color:var(--ink);text-decoration:none;color:var(--ink);}
+.flash{padding:12px 16px;border-radius:10px;margin-bottom:14px;font-size:0.875rem;font-weight:600;display:flex;align-items:center;gap:10px;}
+.flash-success{background:#ecfdf5;border-left:4px solid #10b981;color:#065f46;}
+.flash-warning{background:#fffbeb;border-left:4px solid #f59e0b;color:#92400e;}
+.flash-danger{background:#fef2f2;border-left:4px solid var(--red);color:#7f1d1d;}
+.club-strip{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);border-left:4px solid var(--red);padding:18px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 10px rgba(0,0,0,0.04);animation:fadeUp 0.4s 0.05s ease both;}
+.club-strip-logo{width:48px;height:48px;border-radius:10px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.4rem;overflow:hidden;flex-shrink:0;}
+.club-strip-logo img{width:100%;height:100%;object-fit:cover;}
+.club-strip-name{font-weight:700;font-size:1rem;color:var(--ink);}
+.club-strip-sub{font-size:0.72rem;color:var(--muted);}
+.club-strip-stats{margin-left:auto;display:flex;gap:20px;}
+.strip-stat{text-align:center;}
+.strip-stat-val{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--ink);display:block;}
+.strip-stat-lbl{font-size:0.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.section-mb{margin-bottom:28px;}
+.section-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.section-lbl{font-size:0.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.section-line{flex:1;height:1px;background:var(--border);}
+.section-count{font-size:0.68rem;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+.sc-attente{background:#fffbeb;color:var(--amber);border:1px solid #fde68a;}
+.sc-membre{background:#ecfdf5;color:var(--green);border:1px solid #a7f3d0;}
+.demande-card{background:var(--white);border-radius:12px;border:1px solid var(--border);box-shadow:0 1px 6px rgba(0,0,0,0.04);display:flex;align-items:center;gap:14px;padding:14px 18px;margin-bottom:8px;transition:box-shadow 0.2s;animation:fadeUp 0.35s ease both;}
+.demande-card:hover{box-shadow:0 6px 20px rgba(0,0,0,0.08);}
+.demande-card.pending{border-left:3px solid var(--amber);}
+.demande-card.accepted{border-left:3px solid var(--green);}
+.av{width:42px;height:42px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:0.95rem;font-weight:700;flex-shrink:0;overflow:hidden;}
+.av img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.card-info{flex:1;}
+.card-name{font-size:0.9rem;font-weight:700;color:var(--ink);margin-bottom:2px;}
+.card-email{font-size:0.72rem;color:var(--muted);}
+.card-date{font-size:0.68rem;color:var(--muted);margin-top:2px;}
+.card-actions{display:flex;gap:8px;flex-shrink:0;}
+.btn-accept{display:inline-flex;align-items:center;gap:6px;background:#ecfdf5;color:var(--green);border:1.5px solid #a7f3d0;border-radius:8px;padding:8px 14px;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.btn-accept:hover{background:var(--green);color:#fff;border-color:var(--green);}
+.btn-refuse{display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--red);border:1.5px solid rgba(193,6,9,0.25);border-radius:8px;padding:8px 14px;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.btn-refuse:hover{background:var(--red);color:#fff;border-color:var(--red);}
+.empty{text-align:center;padding:36px 20px;background:var(--white);border-radius:12px;border:1px solid var(--border);color:var(--muted);font-size:0.82rem;}
+.empty-ico{font-size:1.8rem;margin-bottom:8px;opacity:0.4;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:640px){.club-strip-stats{display:none;}.card-actions{flex-direction:column;}.wrap{padding:0 16px;}.page-header{flex-direction:column;align-items:flex-start;}}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="shell"><div class="wrap">
+
+    {% for type, messages in app.flashes %}{% for msg in messages %}
+        <div class="flash flash-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }}">
+            {{ type == 'success' ? '✅' : (type == 'warning' ? '⚠️' : '❌') }} {{ msg }}
+        </div>
+    {% endfor %}{% endfor %}
+
+    <div class="page-header">
+        <div>
+            <div class="page-eyebrow">Gestion du club</div>
+            <h1 class="page-title">Demandes d'<em>adhésion</em></h1>
+            <p class="page-sub">Acceptez ou refusez les membres qui souhaitent rejoindre votre club.</p>
+        </div>
+        <a href="{{ path('club_show', {'id': club.id}) }}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Mon club
+        </a>
+    </div>
+
+    <div class="club-strip">
+        <div class="club-strip-logo">
+            {% if club.logo %}<img src="{{ vich_uploader_asset(club, 'logoFile') }}" alt="">{% else %}🏛️{% endif %}
+        </div>
+        <div>
+            <div class="club-strip-name">{{ club.nom }}</div>
+            <div class="club-strip-sub">{{ club.siteWeb ?? 'Pas de site web' }}</div>
+        </div>
+        <div class="club-strip-stats">
+            <div class="strip-stat">
+                <span class="strip-stat-val">{{ demandes|length }}</span>
+                <span class="strip-stat-lbl">En attente</span>
+            </div>
+            <div class="strip-stat">
+                <span class="strip-stat-val">{{ demandesAcceptees is defined ? demandesAcceptees|length : 0 }}</span>
+                <span class="strip-stat-lbl">Membres</span>
+            </div>
+        </div>
+    </div>
+
+    {# ── EN ATTENTE ── #}
+    <div class="section-mb">
+        <div class="section-head">
+            <span class="section-lbl">En attente</span>
+            <div class="section-line"></div>
+            <span class="section-count sc-attente">{{ demandes|length }}</span>
+        </div>
+        {% if demandes is empty %}
+            <div class="empty"><div class="empty-ico">📭</div><p>Aucune demande en attente.</p></div>
+        {% else %}
+            {% for d in demandes %}
+            <div class="demande-card pending" style="animation-delay:{{ loop.index * 0.05 }}s">
+                <div class="av">
+                    {% if d.user.photo %}<img src="{{ asset('uploads/photos/' ~ d.user.photo) }}" alt="">
+                    {% else %}{{ d.user.prenom|slice(0,1)|upper }}{{ d.user.nom|slice(0,1)|upper }}{% endif %}
+                </div>
+                <div class="card-info">
+                    <div class="card-name">{{ d.user.prenom }} {{ d.user.nom }}</div>
+                    <div class="card-email">{{ d.user.email }}</div>
+                    <div class="card-date">📅 {{ d.dateInscription|date('d/m/Y') }}</div>
+                </div>
+                <div class="card-actions">
+                    <form method="post" action="{{ path('responsable_adhesion_accepter', {'id': d.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('accept' ~ d.id) }}">
+                        <button class="btn-accept"><i class="fas fa-check"></i> Accepter</button>
+                    </form>
+                    <form method="post" action="{{ path('responsable_adhesion_refuser', {'id': d.id}) }}" onsubmit="return confirm('Refuser cette demande ?')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('refuse' ~ d.id) }}">
+                        <button class="btn-refuse"><i class="fas fa-times"></i> Refuser</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    {# ── MEMBRES ── #}
+    {% if demandesAcceptees is defined and demandesAcceptees|length > 0 %}
+    <div class="section-mb">
+        <div class="section-head">
+            <span class="section-lbl">Membres actuels</span>
+            <div class="section-line"></div>
+            <span class="section-count sc-membre">{{ demandesAcceptees|length }}</span>
+        </div>
+        {% for d in demandesAcceptees %}
+        <div class="demande-card accepted" style="animation-delay:{{ loop.index * 0.04 }}s">
+            <div class="av">
+                {% if d.user.photo %}<img src="{{ asset('uploads/photos/' ~ d.user.photo) }}" alt="">
+                {% else %}{{ d.user.prenom|slice(0,1)|upper }}{{ d.user.nom|slice(0,1)|upper }}{% endif %}
+            </div>
+            <div class="card-info">
+                <div class="card-name">{{ d.user.prenom }} {{ d.user.nom }}</div>
+                <div class="card-email">{{ d.user.email }}</div>
+                <div class="card-date">✅ Membre depuis {{ d.dateInscription|date('d/m/Y') }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</div></div>
+{% endblock %}

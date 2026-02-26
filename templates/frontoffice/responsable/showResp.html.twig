@@ -1,0 +1,178 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}{{ club.nom }} — SkillOra{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap');
+:root {
+    --red:#c10609; --red-soft:rgba(193,6,9,0.07); --ink:#0d0d0d;
+    --muted:#6b6b6b; --border:#e4e4e4; --bg:#f2f2f2; --white:#fff; --radius:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--ink);}
+.shell{min-height:100vh;padding:100px 0 80px;}
+.wrap{max-width:860px;margin:0 auto;padding:0 28px;}
+
+/* Hero card */
+.club-hero {
+    background:var(--ink); border-radius:var(--radius);
+    border-top:4px solid var(--red);
+    overflow:hidden; margin-bottom:24px;
+    animation:fadeUp 0.4s ease both;
+}
+.club-hero-body {
+    display:grid; grid-template-columns:auto 1fr; gap:28px;
+    align-items:center; padding:36px 40px;
+}
+.club-logo-wrap {
+    width:100px; height:100px; border-radius:16px;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    display:flex; align-items:center; justify-content:center;
+    font-size:2.8rem; overflow:hidden; flex-shrink:0;
+}
+.club-logo-wrap img{width:100%;height:100%;object-fit:cover;}
+.club-hero-info {}
+.club-eyebrow {
+    font-size:0.65rem; font-weight:700; letter-spacing:3px;
+    text-transform:uppercase; color:rgba(255,255,255,0.4);
+    margin-bottom:8px; display:flex; align-items:center; gap:8px;
+}
+.club-eyebrow::before{content:'';width:20px;height:1px;background:var(--red);}
+.club-name {
+    font-family:'Playfair Display',serif;
+    font-size:clamp(1.6rem,3vw,2.2rem); font-weight:700;
+    color:#fff; margin-bottom:10px; line-height:1.1;
+}
+.club-desc{font-size:0.875rem;color:rgba(255,255,255,0.55);line-height:1.6;max-width:520px;}
+
+/* Meta row */
+.club-meta-bar {
+    display:flex; gap:0; border-top:1px solid rgba(255,255,255,0.06);
+}
+.meta-item {
+    flex:1; padding:16px 24px;
+    border-right:1px solid rgba(255,255,255,0.06);
+    display:flex; align-items:center; gap:10px;
+}
+.meta-item:last-child{border-right:none;}
+.meta-ico {
+    width:32px;height:32px;border-radius:8px;
+    background:rgba(255,255,255,0.06);
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.8rem;color:var(--red);flex-shrink:0;
+}
+.meta-lbl{font-size:0.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);display:block;margin-bottom:2px;}
+.meta-val{font-size:0.82rem;font-weight:600;color:#fff;}
+.meta-val a{color:#fff;text-decoration:underline;text-underline-offset:3px;}
+
+/* Actions panel */
+.actions-card {
+    background:var(--white); border-radius:var(--radius);
+    border:1px solid var(--border);
+    box-shadow:0 2px 12px rgba(0,0,0,0.04);
+    padding:28px 32px;
+    animation:fadeUp 0.4s 0.1s ease both;
+}
+.actions-title {
+    font-size:0.65rem;font-weight:700;letter-spacing:2px;
+    text-transform:uppercase;color:var(--muted);
+    margin-bottom:16px;display:flex;align-items:center;gap:10px;
+}
+.actions-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.actions-row{display:flex;gap:12px;flex-wrap:wrap;}
+
+.btn-primary-action {
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--red);color:#fff;
+    padding:12px 24px;border-radius:10px;
+    font-size:0.875rem;font-weight:700;
+    text-decoration:none;transition:all 0.2s;border:none;cursor:pointer;
+}
+.btn-primary-action:hover{background:#8b0507;color:#fff;text-decoration:none;transform:translateY(-2px);box-shadow:0 6px 20px rgba(193,6,9,0.3);}
+
+.btn-outline-action {
+    display:inline-flex;align-items:center;gap:8px;
+    background:transparent;color:var(--ink);
+    padding:12px 24px;border-radius:10px;
+    font-size:0.875rem;font-weight:600;
+    text-decoration:none;transition:all 0.2s;
+    border:1.5px solid var(--border);
+}
+.btn-outline-action:hover{border-color:var(--ink);color:var(--ink);text-decoration:none;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:640px){
+    .club-hero-body{grid-template-columns:1fr;padding:24px 20px;}
+    .club-meta-bar{flex-direction:column;}
+    .meta-item{border-right:none;border-bottom:1px solid rgba(255,255,255,0.06);}
+    .actions-card{padding:20px;}
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="shell"><div class="wrap">
+
+    <div class="club-hero">
+        <div class="club-hero-body">
+            <div class="club-logo-wrap">
+                {% if club.logo %}
+                    <img src="{{ vich_uploader_asset(club, 'logoFile') }}" alt="{{ club.nom }}">
+                {% else %}🏛️{% endif %}
+            </div>
+            <div class="club-hero-info">
+                <div class="club-eyebrow">Mon club · SkillOra</div>
+                <h1 class="club-name">{{ club.nom }}</h1>
+                {% if club.description %}
+                    <p class="club-desc">{{ club.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="club-meta-bar">
+            {% if club.dateCreation %}
+            <div class="meta-item">
+                <div class="meta-ico"><i class="fas fa-calendar"></i></div>
+                <div>
+                    <span class="meta-lbl">Création</span>
+                    <span class="meta-val">{{ club.dateCreation|date('d/m/Y') }}</span>
+                </div>
+            </div>
+            {% endif %}
+            {% if club.siteWeb %}
+            <div class="meta-item">
+                <div class="meta-ico"><i class="fas fa-globe"></i></div>
+                <div>
+                    <span class="meta-lbl">Site web</span>
+                    <span class="meta-val"><a href="{{ club.siteWeb }}" target="_blank">{{ club.siteWeb }}</a></span>
+                </div>
+            </div>
+            {% endif %}
+            <div class="meta-item">
+                <div class="meta-ico"><i class="fas fa-user-tie"></i></div>
+                <div>
+                    <span class="meta-lbl">Responsable</span>
+                    <span class="meta-val">{{ club.responsable ? club.responsable.prenom ~ ' ' ~ club.responsable.nom : '—' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="actions-card">
+        <div class="actions-title">Actions</div>
+        <div class="actions-row">
+            <a href="{{ path('club_edit',{'id': club.id}) }}" class="btn-primary-action">
+                <i class="fas fa-pen"></i> Modifier le club
+            </a>
+            <a href="{{ path('responsable_adhesion_index') }}" class="btn-outline-action">
+                <i class="fas fa-users"></i> Gérer les adhésions
+            </a>
+            <a href="{{ path('app_responsable_dashboard') }}" class="btn-outline-action">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+</div></div>
+{% endblock %}

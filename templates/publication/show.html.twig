@@ -1,0 +1,151 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}{{ publication.titre }}{% endblock %}
+
+
+
+{% block stylesheets %}
+<style>
+    .show-page { padding: 0 0 80px; background: var(--grey-light); min-height: 100vh; }
+    .show-page .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+    .show-hero {
+        background: linear-gradient(135deg, #5a0000 0%, #8b1a1a 50%, #a52a2a 100%);
+        color: #fff;
+        padding: 100px 0 40px;
+        position: relative;
+        overflow: hidden;
+    }
+    .show-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .show-hero .container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .show-hero-text h1 { font-size: 1.8rem; font-weight: 800; margin: 0; }
+    .show-hero-text p { margin: 4px 0 0 0; color: rgba(255,255,255,0.9); font-size: 0.95rem; }
+    .show-hero-btn { flex-shrink: 0; }
+    .show-hero .btn-back {
+        background: var(--white);
+        color: var(--darkred);
+        padding: 10px 22px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+    }
+    .show-hero .btn-back:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(90,0,0,0.3); color: var(--darkred); text-decoration: none; }
+
+    .show-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-md); overflow: hidden; margin-top: 30px; }
+    .show-media { width: 100%; max-height: 280px; overflow: hidden; background: var(--grey-light); }
+    .show-media img { width: 100%; height: 280px; object-fit: cover; display: block; }
+    .show-media video { width: 100%; max-height: 280px; display: block; }
+
+    .show-body { padding: 32px 36px; }
+    .show-badges { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+    .badge { padding: 5px 14px; border-radius: var(--radius-pill); font-size: 0.75rem; font-weight: 700; }
+    .badge-type { background: var(--red); color: var(--white); }
+    .badge-published { background: #ecfdf5; color: #059669; }
+    .badge-pending { background: #fef3c7; color: #d97706; }
+
+    .show-title { font-size: 1.7rem; font-weight: 800; color: var(--black); margin: 0 0 12px; line-height: 1.35; }
+    .show-meta { display: flex; align-items: center; gap: 20px; color: #999; font-size: 0.85rem; margin-bottom: 24px; flex-wrap: wrap; }
+    .show-meta span { display: inline-flex; align-items: center; gap: 6px; }
+    .show-content { font-size: 0.95rem; line-height: 1.75; color: #444; margin-bottom: 32px; }
+
+    .show-actions { display: flex; gap: 12px; padding-top: 24px; border-top: 1px solid #e5e7eb; flex-wrap: wrap; }
+    .show-actions a { padding: 11px 24px; border-radius: 8px; font-weight: 600; font-size: 0.88rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: var(--transition); border: none; cursor: pointer; }
+    .btn-back { background: #f0f2f5; color: #555; }
+    .btn-back:hover { background: #e4e6eb; text-decoration: none; }
+    .btn-edit { background: linear-gradient(135deg, var(--darkred), var(--red)); color: var(--white); }
+    .btn-edit:hover { box-shadow: 0 4px 12px rgba(229, 76, 60, 0.3); text-decoration: none; }
+    .btn-delete { background: #fef2f2; color: #dc2626; }
+    .btn-delete:hover { background: #dc2626; color: var(--white); text-decoration: none; }
+
+    .comments-section { margin-top: 40px; padding-top: 40px; border-top: 2px solid #e5e7eb; }
+    .comments-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 20px; color: var(--black); }
+
+    @media (max-width: 768px) {
+        .show-hero { padding: 80px 0 30px; }
+        .show-hero .container { flex-direction: column; align-items: flex-start; }
+        .show-hero h1 { font-size: 1.4rem; }
+        .show-hero-btn { width: 100%; }
+        .show-hero .btn-back { width: 100%; justify-content: center; }
+        .show-body { padding: 24px 18px; }
+        .show-title { font-size: 1.3rem; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="show-page">
+    <div class="show-hero">
+        <div class="container">
+            <div class="show-hero-text">
+                <h1>{{ publication.titre }}</h1>
+                <p>Publication de {{ publication.user.prenom }} {{ publication.user.nom }}</p>
+            </div>
+            <div class="show-hero-btn">
+                <a href="{{ path('app_publication_index', {u: currentUser.id}) }}" class="btn-back"><i class="fas fa-arrow-left"></i> Retour</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="show-card">
+            {% if publication.fichier %}
+    {% set ext = publication.fichier|split('.')|last|lower %}
+    {% if ext in ['jpg','jpeg','png','gif','webp'] %}
+        <img src="{{ asset('uploads/publications/' ~ publication.fichier) }}" alt="{{ publication.titre }}">
+    {% elseif ext in ['mp4','webm','ogg'] %}
+        <video controls><source src="{{ asset('uploads/publications/' ~ publication.fichier) }}" type="video/{{ ext }}"></video>
+    {% endif %}
+{% endif %}
+            <div class="show-body">
+                <div class="show-badges">
+                    <span class="badge badge-type">{{ publication.typecontenu.label }}</span>
+                    <span class="badge {{ publication.status.value == 'publié' ? 'badge-published' : 'badge-pending' }}">
+                        {{ publication.status.label }}
+                    </span>
+                </div>
+                <div class="show-meta">
+                    <span><i class="far fa-calendar"></i> {{ publication.datePublication|date('d/m/Y H:i') }}</span>
+                    <span><i class="far fa-comment"></i> {{ publication.commentaires|length }} commentaire(s)</span>
+                </div>
+                <div class="show-content">{{ publication.contenu|nl2br }}</div>
+                <div class="show-actions">
+                    <a href="{{ path('app_publication_index', {u: currentUser.id}) }}" class="btn-back"><i class="fas fa-arrow-left"></i> Retour</a>
+                    <a href="{{ path('app_publication_edit', {id: publication.id, u: currentUser.id}) }}" class="btn-edit"><i class="fas fa-pen"></i> Modifier</a>
+                    <a href="{{ path('app_publication_delete', {id: publication.id, u: currentUser.id}) }}" class="btn-delete" onclick="return confirm('Supprimer cette publication ?')"><i class="fas fa-trash"></i> Supprimer</a>
+                </div>
+            </div>
+        </div>
+
+        {% if publication.commentaires is not empty %}
+            <div class="comments-section">
+                <h2 class="comments-title"><i class="fas fa-comments"></i> Commentaires ({{ publication.commentaires|length }})</h2>
+                {# Comments will be displayed here #}
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

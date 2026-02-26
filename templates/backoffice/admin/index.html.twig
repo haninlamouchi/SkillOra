@@ -1,0 +1,122 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}Clubs | Admin{% endblock %}
+
+{% block stylesheets %}
+<style>
+.club-logo { width:80px; height:40px; object-fit:contain; border-radius:6px; border:1px solid #eee; background:#fafafa; }
+.no-logo {
+    width:40px; height:40px; border-radius:50%;
+    background:linear-gradient(135deg,#c10609,#8b0507);
+    color:#fff; font-weight:800; font-size:0.82rem;
+    display:flex; align-items:center; justify-content:center;
+}
+.table tbody tr { cursor:default; transition:background 0.15s; }
+.table tbody tr:hover { background:rgba(193,6,9,0.04) !important; }
+.count-badge { background:#c10609; color:#fff; padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:800; }
+
+/* Pagination */
+.pagination { justify-content:center; gap:4px; }
+.pagination .page-link {
+    border-radius:8px !important;
+    border:1.5px solid #e4e4e4;
+    color:#c10609;
+    font-size:0.82rem;
+    font-weight:600;
+    padding:6px 12px;
+    transition:all 0.2s;
+}
+.pagination .page-link:hover { background:#c10609; color:#fff; border-color:#c10609; }
+.pagination .page-item.active .page-link { background:#c10609; border-color:#c10609; color:#fff; }
+.pagination .page-item.disabled .page-link { color:#bbb; pointer-events:none; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12 grid-margin">
+        <div class="card" style="border-radius:12px; border-top:3px solid #c10609;">
+            <div class="card-body">
+
+                {# Flash messages #}
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                    <h4 class="card-title mb-0">
+                        <i class="mdi mdi-shield-star me-2" style="color:#c10609;"></i>
+                        Clubs
+                        <span class="count-badge ms-2">{{ clubs.getTotalItemCount }}</span>
+                    </h4>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover" id="clubsTable">
+                        <thead style="background:#fafafa;">
+                            <tr>
+                                <th>Logo</th>
+                                <th>Nom</th>
+                                <th>Description</th>
+                                <th>Date Création</th>
+                                <th style="width:120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for club in clubs %}
+                        <tr>
+                            <td>
+                                {% if club.logo %}
+                                    <img src="{{ vich_uploader_asset(club, 'logoFile') }}"
+                                         alt="{{ club.nom }}"
+                                         class="club-logo">
+                                {% else %}
+                                    <div class="no-logo">
+                                        {{ club.nom|slice(0,2)|upper }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td><span class="fw-semibold">{{ club.nom }}</span></td>
+                            <td class="text-muted small">{{ club.description|u.truncate(80, '…') }}</td>
+                            <td class="text-muted small">{{ club.dateCreation ? club.dateCreation|date('d/m/Y') : '—' }}</td>
+                            <td>
+                                <a href="{{ path('admin_club_show', {'id': club.id}) }}"
+                                   class="btn btn-sm btn-outline-primary me-1" title="Détails">
+                                    <i class="mdi mdi-eye"></i>
+                                </a>
+
+                                <form method="post" action="{{ path('admin_club_delete', {'id': club.id}) }}"
+                                      style="display:inline"
+                                      onsubmit="return confirm('Supprimer ce club ?')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ club.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                        <i class="mdi mdi-trash-can-outline"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-5">
+                                <i class="mdi mdi-shield-off" style="font-size:2rem;opacity:0.3;"></i>
+                                <p class="mt-2 mb-0">Aucun club trouvé.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-center mt-3">
+                    {{ knp_pagination_render(clubs) }}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

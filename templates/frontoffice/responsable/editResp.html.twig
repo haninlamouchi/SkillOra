@@ -1,0 +1,115 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Modifier {{ club.nom }} — SkillOra{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap');
+:root{--red:#c10609;--red-mid:#8b0507;--red-soft:rgba(193,6,9,0.07);--ink:#0d0d0d;--muted:#6b6b6b;--border:#e4e4e4;--bg:#f2f2f2;--white:#fff;--radius:16px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--ink);}
+.shell{min-height:100vh;padding:100px 0 80px;}
+.wrap{max-width:760px;margin:0 auto;padding:0 24px;}
+
+/* Header */
+.form-header{margin-bottom:28px;animation:fadeUp 0.4s ease both;}
+.form-eyebrow{font-size:0.65rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.form-eyebrow::before{content:'';width:20px;height:2px;background:var(--red);}
+.form-title{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,3vw,2rem);font-weight:700;color:var(--ink);margin-bottom:6px;}
+.form-title em{font-style:normal;color:var(--red);}
+.form-sub{font-size:0.82rem;color:var(--muted);line-height:1.5;}
+
+/* Card */
+.form-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);border-top:4px solid var(--red);box-shadow:0 4px 24px rgba(0,0,0,0.06);overflow:hidden;animation:fadeUp 0.4s 0.08s ease both;}
+.form-section{padding:26px 32px;border-bottom:1px solid var(--border);}
+.form-section:last-of-type{border-bottom:none;}
+.section-label{font-size:0.6rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Fields */
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.field-row.full{grid-template-columns:1fr;}
+.field-group{display:flex;flex-direction:column;}
+.field-label{font-size:0.72rem;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink);margin-bottom:6px;}
+.field-group input[type="text"],.field-group input[type="url"],.field-group input[type="date"],.field-group textarea,.field-group select{padding:11px 14px;border:1.5px solid var(--border);border-radius:9px;background:var(--bg);font-family:'DM Sans',sans-serif;font-size:0.875rem;color:var(--ink);transition:border-color 0.2s,background 0.2s,box-shadow 0.2s;width:100%;appearance:none;}
+.field-group input:focus,.field-group textarea:focus,.field-group select:focus{outline:none;border-color:var(--red);background:var(--white);box-shadow:0 0 0 3px rgba(193,6,9,0.07);}
+.field-group textarea{resize:vertical;min-height:90px;}
+.field-group input[type="file"]{padding:9px 12px;border:1.5px dashed var(--border);border-radius:9px;background:var(--bg);font-size:0.8rem;color:var(--muted);cursor:pointer;transition:border-color 0.2s,background 0.2s;width:100%;}
+.field-group input[type="file"]:hover{border-color:var(--red);background:var(--red-soft);}
+.field-hint{font-size:0.68rem;color:var(--muted);margin-top:4px;}
+
+/* Actions */
+.form-actions{padding:22px 32px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--border);background:var(--bg);flex-wrap:wrap;}
+.btn-save{display:inline-flex;align-items:center;gap:8px;background:var(--red);color:#fff;padding:12px 28px;border-radius:10px;border:none;font-family:'DM Sans',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.btn-save:hover{background:var(--red-mid);transform:translateY(-2px);box-shadow:0 6px 20px rgba(193,6,9,0.3);}
+.btn-cancel{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--muted);padding:12px 20px;border-radius:10px;border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;font-size:0.875rem;font-weight:600;text-decoration:none;transition:all 0.2s;}
+.btn-cancel:hover{border-color:var(--ink);color:var(--ink);text-decoration:none;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:640px){.field-row{grid-template-columns:1fr;}.form-section{padding:20px 18px;}.form-actions{flex-direction:column;align-items:stretch;}.btn-save,.btn-cancel{justify-content:center;}.wrap{padding:0 16px;}}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="shell"><div class="wrap">
+
+    <div class="form-header">
+        <div class="form-eyebrow">Mon club</div>
+        <h1 class="form-title">Modifier <em>{{ club.nom }}</em></h1>
+        <p class="form-sub">Mettez à jour les informations de votre club. Le logo et le nom seront visibles par tous les membres.</p>
+    </div>
+
+    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
+    <div class="form-card">
+
+        <div class="form-section">
+            <div class="section-label">Informations générales</div>
+            <div class="field-row">
+                <div class="field-group">
+                    <label class="field-label">Nom du club *</label>
+                    {{ form_widget(form.nom, {'attr': {'placeholder': 'Nom du club'}}) }}
+                    {{ form_errors(form.nom) }}
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Date de création</label>
+                    {{ form_widget(form.dateCreation) }}
+                    {{ form_errors(form.dateCreation) }}
+                </div>
+            </div>
+            <div class="field-row full">
+                <div class="field-group">
+                    <label class="field-label">Description</label>
+                    {{ form_widget(form.description, {'attr': {'placeholder': 'Décrivez votre club...', 'rows': 3}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+            </div>
+            <div class="field-row">
+                <div class="field-group">
+                    <label class="field-label">Site web</label>
+                    {{ form_widget(form.siteWeb, {'attr': {'placeholder': 'https://...'}}) }}
+                    {{ form_errors(form.siteWeb) }}
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Logo</label>
+                    {{ form_widget(form.logoFile) }}
+                    {% if club.logo %}
+                        <span class="field-hint">Logo actuel : {{ club.logo }}</span>
+                    {% endif %}
+                    {{ form_errors(form.logoFile) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ path('club_show', {'id': club.id}) }}" class="btn-cancel">
+                <i class="fas fa-times"></i> Annuler
+            </a>
+            <button type="submit" class="btn-save">
+                <i class="fas fa-save"></i> Enregistrer les modifications
+            </button>
+        </div>
+    </div>
+    {{ form_end(form, {'render_rest': false}) }}
+
+</div></div>
+{% endblock %}

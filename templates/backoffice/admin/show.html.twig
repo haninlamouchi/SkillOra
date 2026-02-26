@@ -1,0 +1,49 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Club{% endblock %}
+
+{% block body %}
+    <h1>Club</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ club.id }}</td>
+            </tr>
+            <tr>
+                <th>Nom</th>
+                <td>{{ club.nom }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ club.description }}</td>
+            </tr>
+            <tr>
+                <th>Logo</th>
+                <td>
+                    {% if club.logo %}
+                        <img src="{{ vich_uploader_asset(club, 'logoFile') }}" alt="Logo {{ club.nom }}" width="100">
+                    {% else %}
+                        Aucun logo
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>DateCreation</th>
+                <td>{{ club.dateCreation ? club.dateCreation|date('Y-m-d') : '' }}</td>
+            </tr>
+            <tr>
+                <th>SiteWeb</th>
+                <td>{{ club.siteWeb }}</td>
+            </tr>
+            <tr>
+                <th>Responsable</th>
+                <td>{{ club.responsable ? club.responsable.id : 'Aucun' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('admin_club_index') }}">back to list</a>
+
+{% endblock %}

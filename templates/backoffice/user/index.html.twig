@@ -1,0 +1,158 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}All Users{% endblock %}
+
+{% block stylesheets %}
+<style>
+.profile-photo { width:40px; height:40px; object-fit:cover; border-radius:50%; border:2px solid #eee; }
+.no-photo {
+    width:40px; height:40px; border-radius:50%;
+    background:linear-gradient(135deg,#c10609,#8b0507);
+    color:#fff; font-weight:800; font-size:0.82rem;
+    display:flex; align-items:center; justify-content:center;
+}
+.role-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:0.65rem; font-weight:800; text-transform:uppercase; }
+.role-admin       { background:#c10609; color:#fff; }
+.role-responsable { background:#1d4ed8; color:#fff; }
+.role-membre      { background:#0891b2; color:#fff; }
+.role-etudiant    { background:#059669; color:#fff; }
+.table tbody tr { cursor:default; transition:background 0.15s; }
+.table tbody tr:hover { background:rgba(193,6,9,0.04) !important; }
+.filter-bar { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
+#search-input {
+    flex:1; min-width:200px; padding:9px 14px;
+    border:1.5px solid #e4e4e4; border-radius:8px;
+    font-size:0.85rem; background:#fafafa; transition:border-color 0.2s;
+}
+#search-input:focus { outline:none; border-color:#c10609; background:#fff; }
+.count-badge { background:#c10609; color:#fff; padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:800; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12 grid-margin">
+        <div class="card" style="border-radius:12px; border-top:3px solid #c10609;">
+            <div class="card-body">
+
+                <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                    <h4 class="card-title mb-0">
+                        <i class="mdi mdi-account-multiple me-2" style="color:#c10609;"></i>
+                        All Users
+                        <span class="count-badge ms-2">{{ users|length }}</span>
+                    </h4>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{{ path('app_admin_users_by_role', {role: 'membre'}) }}" class="btn btn-sm btn-outline-info">👤 Members</a>
+                        <a href="{{ path('app_admin_users_by_role', {role: 'responsable_club'}) }}" class="btn btn-sm btn-outline-primary">👥 Club Managers</a>
+                        <a href="{{ path('app_admin_users_by_role', {role: 'etudiant'}) }}" class="btn btn-sm btn-outline-success">🎓 Students</a>
+
+                    </div>
+                </div>
+
+
+                <div class="table-responsive">
+                    <table class="table table-hover" id="usersTable">
+                        <thead style="background:#fafafa;">
+                            <tr>
+                                <th>Photo</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Phone</th>
+                                <th>Birth Date</th>
+                                <th>Registered</th>
+                                <th style="width:120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for user in users %}
+                        <tr class="user-row"
+                            data-name="{{ user.prenom|lower }} {{ user.nom|lower }}"
+                            data-email="{{ user.email|lower }}"
+                            data-role="{{ user.role|lower }}">
+                            <td>
+                                {% if user.photo %}
+                                    <img src="{{ asset('uploads/photos/' ~ user.photo) }}"
+                                         alt="{{ user.prenom }} {{ user.nom }}"
+                                         class="profile-photo">
+                                {% else %}
+                                    <div class="no-photo">
+                                        {{ user.prenom|slice(0,1)|upper }}{{ user.nom|slice(0,1)|upper }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td><span class="fw-semibold">{{ user.prenom }} {{ user.nom }}</span></td>
+                            <td class="text-muted small">{{ user.email }}</td>
+                            <td>
+                                {% if user.role == 'admin' %}
+                                    <span class="role-badge role-admin">🛡️ Admin</span>
+                                {% elseif user.role == 'responsable_club' %}
+                                    <span class="role-badge role-responsable">👥 Club Manager</span>
+                                {% elseif user.role == 'membre' %}
+                                    <span class="role-badge role-membre">👤 Member</span>
+                                {% elseif user.role == 'etudiant' %}
+                                    <span class="role-badge role-etudiant">🎓 Student</span>
+                                {% else %}
+                                    <span class="role-badge" style="background:#666;color:#fff;">{{ user.role }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-muted small">{{ user.telephone ?? '-' }}</td>
+                            <td class="text-muted small">{{ user.dateNaissance ? user.dateNaissance|date('d/m/Y') : '-' }}</td>
+                            <td class="text-muted small">{{ user.dateInscription ? user.dateInscription|date('d/m/Y') : '-' }}</td>
+                            <td>
+                                <a href="{{ path('app_user_show_backoffice', {id: user.id}) }}"
+                                   class="btn btn-sm btn-outline-primary me-1" title="View">
+                                    <i class="mdi mdi-eye"></i>
+                                </a>
+
+                                <form method="post" action="{{ path('app_user_delete', {id: user.id}) }}"
+                                      style="display:inline"
+                                      onsubmit="return confirm('Delete {{ user.prenom }} {{ user.nom }}?')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                        <i class="mdi mdi-trash-can-outline"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-5">
+                                <i class="mdi mdi-account-off" style="font-size:2rem;opacity:0.3;"></i>
+                                <p class="mt-2 mb-0">No users found</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function() {
+    var input = document.getElementById('search-input');
+    var counter = document.getElementById('count-display');
+    if (!input) return;
+    input.addEventListener('input', function() {
+        var q = this.value.toLowerCase().trim();
+        var rows = document.querySelectorAll('#usersTable tbody .user-row');
+        var visible = 0;
+        rows.forEach(function(row) {
+            var match = !q
+                || row.dataset.name.includes(q)
+                || row.dataset.email.includes(q)
+                || row.dataset.role.includes(q);
+            row.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+        counter.textContent = visible + ' user' + (visible !== 1 ? 's' : '');
+    });
+})();
+</script>
+{% endblock %}

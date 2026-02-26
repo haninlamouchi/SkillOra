@@ -1,0 +1,388 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Challenges Disponibles — SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --sk-red:       #8b0000;
+  --sk-red-dark:  #4a0000;
+  --sk-red-light: #c0392b;
+  --sk-accent:    #e84040;
+  --sk-white:     #ffffff;
+  --sk-ink:       #180808;
+  --sk-muted:     #8a7070;
+  --sk-border:    rgba(139,0,0,0.09);
+}
+
+/* ── fixed navbar offset ── */
+.sk-page { padding-top: 70px; }
+
+/* ══════════════════════════════
+   HERO — full viewport width
+══════════════════════════════ */
+.sk-hero {
+  position: relative;
+  background: linear-gradient(135deg, #3d0000 0%, #8b0000 48%, #c23030 100%);
+  margin-left:  calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  padding: 72px 20px 64px;
+  text-align: center;
+  overflow: hidden;
+  isolation: isolate;
+}
+.sk-hero::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+  background-size: 180px; opacity: 0.5;
+}
+.sk-hero-ring-l, .sk-hero-ring-r {
+  position: absolute; z-index: 0; border-radius: 50%;
+  border: 72px solid rgba(255,255,255,0.035);
+}
+.sk-hero-ring-l { width: 520px; height: 520px; top: -210px; left: -160px; }
+.sk-hero-ring-r { width: 380px; height: 380px; bottom: -160px; right: -100px; border-width: 50px; }
+
+.sk-hero-inner {
+  position: relative; z-index: 1;
+  max-width: 600px; margin: 0 auto;
+}
+.sk-hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  font-weight: 800; letter-spacing: -0.03em;
+  color: #fff; margin: 0 0 14px; line-height: 1.1;
+}
+.sk-hero p {
+  font-family: 'DM Sans', sans-serif;
+  color: rgba(255,255,255,0.60);
+  font-size: 1rem; line-height: 1.7;
+  margin: 0 auto 32px; max-width: 460px;
+}
+
+/* search */
+.sk-search {
+  display: flex; align-items: center;
+  background: rgba(255,255,255,0.97);
+  border-radius: 100px;
+  padding: 5px 5px 5px 22px;
+  max-width: 520px; margin: 0 auto;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+  gap: 8px;
+}
+.sk-search input {
+  flex: 1; border: none; outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.92rem; color: var(--sk-ink);
+  background: transparent; min-width: 0;
+}
+.sk-search input::placeholder { color: #bbb; }
+.sk-search button {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--sk-red-dark), var(--sk-red-light));
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px rgba(139,0,0,0.28);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.sk-search button:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(139,0,0,0.40); }
+.sk-search button svg {
+  width: 17px; height: 17px; stroke: #fff; fill: none;
+  stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* ══════════════════════════════
+   CONTENT
+══════════════════════════════ */
+.sk-content { padding: 36px 0 56px; }
+
+/* ── Filter bar ── */
+.sk-filters {
+  background: #fff; border-radius: 16px; padding: 20px 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 28px;
+  border: 1px solid #f0f0f0;
+}
+.sk-filters form { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+.sk-field { display: flex; flex-direction: column; gap: 5px; }
+.sk-field label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.69rem; font-weight: 700; color: var(--sk-muted);
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.sk-field input, .sk-field select {
+  padding: 9px 14px; border: 1.5px solid #e5e7eb; border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem; color: var(--sk-ink); background: #f9f9f9;
+  transition: border-color 0.2s; outline: none;
+}
+.sk-field input:focus, .sk-field select:focus { border-color: var(--sk-red); background: #fff; }
+.sk-field.grow { flex: 1; min-width: 220px; }
+.sk-field input { width: 100%; }
+
+.sk-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 20px; border-radius: 10px; font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.87rem; border: none; cursor: pointer; transition: all 0.25s;
+  text-decoration: none;
+}
+.sk-btn-primary { background: linear-gradient(135deg, var(--sk-red-dark), var(--sk-red-light)); color: #fff; }
+.sk-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(139,0,0,0.3); color: #fff; text-decoration: none; }
+.sk-btn-outline { background: transparent; color: var(--sk-red); border: 1.5px solid var(--sk-red); }
+.sk-btn-outline:hover { background: var(--sk-red); color: #fff; text-decoration: none; }
+.sk-btn-sm { padding: 8px 16px; font-size: 0.82rem; }
+.sk-btn-success { background: linear-gradient(135deg, #15803d, #16a34a); color: #fff; }
+.sk-btn-success:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(21,128,61,0.3); color: #fff; text-decoration: none; }
+
+/* ── Section label ── */
+.sk-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--sk-muted);
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+}
+.sk-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--sk-border), transparent);
+}
+
+/* ── Cards grid ── */
+.sk-challenges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.sk-challenge-card {
+  background: #fff; border-radius: 18px; overflow: hidden;
+  border: 1.5px solid #f0f0f0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  transition: transform 0.28s cubic-bezier(.22,.68,0,1.25), box-shadow 0.28s, border-color 0.22s;
+  display: flex; flex-direction: column;
+  animation: sk-up 0.4s ease both;
+}
+.sk-challenge-card:hover {
+  border-color: rgba(139,0,0,0.25);
+  transform: translateY(-6px);
+  box-shadow: 0 18px 44px rgba(139,0,0,0.11);
+}
+
+.sk-challenge-img { width: 100%; height: 170px; object-fit: cover; display: block; }
+.sk-challenge-img-placeholder {
+  width: 100%; height: 170px;
+  background: linear-gradient(135deg, var(--sk-red-dark), var(--sk-red-light));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3.2rem;
+}
+
+.sk-challenge-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+
+.sk-challenge-top { display: flex; align-items: flex-start; gap: 8px; }
+.sk-challenge-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.02rem; font-weight: 800; color: var(--sk-ink);
+  margin: 0; flex: 1; line-height: 1.35;
+}
+
+.sk-badge {
+  display: inline-flex; align-items: center; padding: 3px 10px;
+  border-radius: 50px; font-size: 0.70rem; font-weight: 700; flex-shrink: 0;
+  font-family: 'DM Sans', sans-serif;
+}
+.sk-badge-green { background: #dcfce7; color: #15803d; }
+.sk-badge-red   { background: #fee2e2; color: var(--sk-red); }
+
+.sk-challenge-desc {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.83rem; color: #6b6b6b; line-height: 1.6; flex: 1;
+}
+
+.sk-challenge-dates {
+  display: flex; gap: 14px; font-size: 0.78rem; color: #9ca3af;
+  padding: 9px 12px; background: #f9f9f9; border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+}
+.sk-challenge-dates span { display: flex; align-items: center; gap: 5px; }
+
+.sk-challenge-actions { display: flex; gap: 8px; margin-top: auto; }
+.sk-challenge-actions .sk-btn { flex: 1; justify-content: center; }
+
+.sk-favori-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 1.3rem; padding: 4px; transition: transform 0.2s;
+  flex-shrink: 0; line-height: 1;
+}
+.sk-favori-btn:hover { transform: scale(1.25); }
+
+/* ── Empty state ── */
+.sk-empty {
+  text-align: center; padding: 60px 20px;
+  background: #fff; border-radius: 16px; border: 1.5px dashed #e5e7eb;
+}
+.sk-empty-icon { font-size: 3.5rem; margin-bottom: 16px; }
+.sk-empty h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--sk-ink); margin-bottom: 8px; }
+.sk-empty p { font-family: 'DM Sans', sans-serif; color: #6b6b6b; font-size: 0.88rem; margin-bottom: 20px; }
+
+.sk-pagination-info {
+  text-align: center; color: #9ca3af;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem; margin-top: 12px;
+}
+
+/* ── Animations ── */
+@keyframes sk-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.sk-hero    { animation: sk-up 0.5s cubic-bezier(.22,.68,0,1) both; }
+.sk-filters { animation: sk-up 0.4s 0.15s ease both; }
+.sk-challenge-card:nth-child(1) { animation-delay:.10s }
+.sk-challenge-card:nth-child(2) { animation-delay:.17s }
+.sk-challenge-card:nth-child(3) { animation-delay:.24s }
+.sk-challenge-card:nth-child(4) { animation-delay:.31s }
+.sk-challenge-card:nth-child(5) { animation-delay:.38s }
+.sk-challenge-card:nth-child(6) { animation-delay:.45s }
+
+/* ── Responsive ── */
+@media (max-width: 680px) {
+  .sk-hero { padding: 56px 20px 48px; }
+  .sk-challenges-grid { grid-template-columns: 1fr; }
+  .sk-filters form { flex-direction: column; }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+
+  <!-- HERO full-width -->
+  <div class="sk-hero">
+    <div class="sk-hero-ring-l"></div>
+    <div class="sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <h1>🏆 Challenges Disponibles</h1>
+      <p>Rejoignez un challenge avec votre groupe et soumettez votre meilleur travail</p>
+
+      <!-- search bar -->
+      <form method="get" action="{{ path('app_etudiant_challenges') }}">
+        <div class="sk-search">
+          <input type="text" name="search" value="{{ search }}" placeholder="Rechercher par titre ou description…">
+          <button type="submit" aria-label="Rechercher">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="container">
+    <div class="sk-content">
+
+      <!-- Filtres avancés -->
+      <div class="sk-filters">
+        <form method="get">
+          {% if search %}<input type="hidden" name="search" value="{{ search }}">{% endif %}
+          <div class="sk-field">
+            <label>Trier par</label>
+            <select name="sort">
+              <option value="dateDebut" {% if sortBy == 'dateDebut' %}selected{% endif %}>Date début</option>
+              <option value="dateFin"   {% if sortBy == 'dateFin'   %}selected{% endif %}>Date fin</option>
+              <option value="titre"     {% if sortBy == 'titre'     %}selected{% endif %}>Titre</option>
+            </select>
+          </div>
+          <div class="sk-field">
+            <label>Ordre</label>
+            <select name="order">
+              <option value="ASC"  {% if order == 'ASC'  %}selected{% endif %}>Croissant</option>
+              <option value="DESC" {% if order == 'DESC' %}selected{% endif %}>Décroissant</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end">
+            <button type="submit" class="sk-btn sk-btn-primary">Filtrer</button>
+            <a href="{{ path('app_etudiant_challenges') }}" class="sk-btn sk-btn-outline">Réinit.</a>
+          </div>
+        </form>
+      </div>
+
+      {% if challenges is empty %}
+        <div class="sk-empty">
+          <div class="sk-empty-icon">🏅</div>
+          <h3>Aucun challenge disponible</h3>
+          <p>Revenez bientôt, de nouveaux challenges arrivent régulièrement !</p>
+        </div>
+
+      {% else %}
+        <div class="sk-label">{{ challenges.getTotalItemCount }} challenge(s) disponible(s)</div>
+
+        <div class="sk-challenges-grid">
+          {% for challenge in challenges %}
+            <div class="sk-challenge-card">
+
+              {% if challenge.image %}
+                <img class="sk-challenge-img"
+                     src="{{ asset('uploads/' ~ challenge.image) }}"
+                     alt="{{ challenge.titre }}">
+              {% else %}
+                <div class="sk-challenge-img-placeholder">🏆</div>
+              {% endif %}
+
+              <div class="sk-challenge-body">
+                <div class="sk-challenge-top">
+                  <h3 class="sk-challenge-title">{{ challenge.titre }}</h3>
+                  <span class="sk-badge sk-badge-green">Disponible</span>
+
+                  {% if challenge.id in favorisChallengeIds %}
+                    <form method="post" action="{{ path('app_etudiant_favori_remove', {id: challenge.id}) }}" style="margin:0">
+                      <input type="hidden" name="_token" value="{{ csrf_token('favori' ~ challenge.id) }}">
+                      <button type="submit" class="sk-favori-btn" title="Retirer des favoris">⭐</button>
+                    </form>
+                  {% else %}
+                    <form method="post" action="{{ path('app_etudiant_favori_add', {id: challenge.id}) }}" style="margin:0">
+                      <input type="hidden" name="_token" value="{{ csrf_token('favori' ~ challenge.id) }}">
+                      <button type="submit" class="sk-favori-btn" title="Ajouter aux favoris">☆</button>
+                    </form>
+                  {% endif %}
+                </div>
+
+                <p class="sk-challenge-desc">
+                  {{ challenge.description|length > 110 ? challenge.description|slice(0,110) ~ '…' : challenge.description }}
+                </p>
+
+                <div class="sk-challenge-dates">
+                  <span>📅 {{ challenge.dateDebut|date('d/m/Y') }}</span>
+                  <span>⏳ {{ challenge.dateFin|date('d/m/Y') }}</span>
+                </div>
+
+                <div class="sk-challenge-actions">
+                  <a href="{{ path('app_etudiant_challenge_detail', {id: challenge.id}) }}" class="sk-btn sk-btn-outline sk-btn-sm">
+                    Détails
+                  </a>
+                  <a href="{{ path('app_etudiant_challenge_participate', {id: challenge.id}) }}" class="sk-btn sk-btn-success sk-btn-sm">
+                    Participer
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-center mt-4">
+          {{ knp_pagination_render(challenges, 'pagination/custom_pagination.html.twig') }}
+        </div>
+        <p class="sk-pagination-info">
+          Page {{ challenges.getCurrentPageNumber }} / {{ challenges.getPageCount }}
+          · {{ challenges.getTotalItemCount }} challenge(s)
+        </p>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

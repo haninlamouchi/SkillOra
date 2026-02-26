@@ -1,0 +1,288 @@
+
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}SkillOra — collaborative platform{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+/* ── HERO ── */
+.home-hero {
+    background: linear-gradient(135deg, #5a0000 0%, #8b0000 50%, #a52a2a 100%);
+    min-height: 100vh; display: flex; align-items: center;
+    position: relative; overflow: hidden; padding-top: 70px;
+}
+.home-hero::before {
+    content: ''; position: absolute; top: -30%; right: -15%; width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%); border-radius: 50%;
+}
+.home-hero::after {
+    content: ''; position: absolute; bottom: -20%; left: -10%; width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(255,100,100,0.08) 0%, transparent 70%); border-radius: 50%;
+}
+.hero-content { position: relative; z-index: 2; }
+.hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+    padding: 6px 18px; border-radius: 50px; font-size: 0.8rem; font-weight: 600;
+    color: rgba(255,255,255,0.9); margin-bottom: 24px;
+}
+.hero-badge span { width: 7px; height: 7px; background: #4ade80; border-radius: 50%; display: inline-block; }
+.hero-title { font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 20px; }
+.hero-title span { color: #ff8080; }
+.hero-subtitle { font-size: 1.05rem; color: rgba(255,255,255,0.75); line-height: 1.7; margin-bottom: 36px; max-width: 520px; }
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 48px; }
+.hero-btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #fff; color: #8b0000; padding: 15px 32px;
+    border-radius: 12px; font-weight: 800; font-size: 1rem;
+    text-decoration: none; transition: all 0.3s; border: 2px solid #fff;
+}
+.hero-btn-primary:hover { background: #f1eaea; color: #5a0000; text-decoration: none; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+.hero-btn-secondary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: transparent; color: #fff; padding: 15px 32px;
+    border-radius: 12px; font-weight: 700; font-size: 1rem;
+    text-decoration: none; transition: all 0.3s; border: 2px solid rgba(255,255,255,0.5);
+}
+.hero-btn-secondary:hover { background: rgba(255,255,255,0.12); border-color: #fff; color: #fff; text-decoration: none; transform: translateY(-2px); }
+
+.quick-access { padding: 90px 0 60px; background: #f7f8fa; }
+.quick-access-title { font-size: 1.8rem; font-weight: 800; color: #111; margin-bottom: 6px; }
+.quick-access-sub { color: #6b6b6b; font-size: 0.95rem; margin-bottom: 40px; }
+.qa-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+.qa-card {
+    background: #fff; border-radius: 14px; padding: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06); text-decoration: none;
+    border: 2px solid transparent; transition: all 0.3s; display: flex; flex-direction: column; gap: 14px;
+}
+.qa-card:hover { border-color: #8b0000; transform: translateY(-4px); box-shadow: 0 8px 30px rgba(139,0,0,0.12); text-decoration: none; }
+.qa-card-icon { width: 52px; height: 52px; border-radius: 12px; background: linear-gradient(135deg, #8b0000, #c0392b); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #fff; }
+.qa-card-title { font-size: 1rem; font-weight: 700; color: #111; margin: 0; }
+.qa-card-desc { font-size: 0.82rem; color: #6b6b6b; margin: 0; line-height: 1.5; }
+.qa-card-arrow { color: #8b0000; font-size: 0.85rem; font-weight: 700; margin-top: auto; }
+
+.features-section { padding: 90px 0 60px; background: #fff; }
+.section-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #8b0000; margin-bottom: 10px; }
+.section-title { font-size: 2.2rem; font-weight: 800; color: #111; margin-bottom: 12px; }
+.section-sub { color: #6b6b6b; font-size: 0.95rem; max-width: 540px; margin: 0 auto 50px; line-height: 1.7; }
+.feature-card {
+    background: #f7f8fa; border-radius: 16px; padding: 28px 24px;
+    border: 1px solid #e5e7eb; transition: all 0.3s; height: 100%;
+}
+.feature-card:hover { border-color: #8b0000; background: #fff; box-shadow: 0 6px 24px rgba(139,0,0,0.08); transform: translateY(-3px); }
+.feature-icon { width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, #5a0000, #a52a2a); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 18px; }
+.feature-title { font-size: 1.05rem; font-weight: 700; color: #111; margin-bottom: 10px; }
+.feature-desc { font-size: 0.875rem; color: #6b6b6b; line-height: 1.65; margin: 0; }
+
+/* ── Clubs ── */
+.clubs-section { padding: 80px 0 60px; background: #fff; }
+.clubs-section.alt-bg { background: #f7f8fa; }
+.club-card {
+    background: #fff; border-radius: 16px; overflow: hidden;
+    border: 1px solid #e5e7eb; box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    transition: all 0.3s; height: 100%; display: flex; flex-direction: column;
+}
+.club-card:hover { border-color: #8b0000; transform: translateY(-4px); box-shadow: 0 10px 32px rgba(139,0,0,0.1); }
+.club-card-img-wrap {
+    width: 100%; height: 160px; overflow: hidden;
+    background: linear-gradient(135deg, #5a0000, #a52a2a);
+    display: flex; align-items: center; justify-content: center; font-size: 3rem;
+}
+.club-card-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.club-card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.club-card-name { font-size: 1rem; font-weight: 800; color: #111; margin: 0; }
+.club-card-desc { font-size: 0.83rem; color: #6b6b6b; line-height: 1.55; flex: 1; margin: 0; }
+.club-card-meta { font-size: 0.76rem; color: #bbb; margin-top: 4px; }
+.club-card-footer { padding: 0 20px 20px; }
+.btn-rejoindre {
+    display: block; width: 100%; text-align: center;
+    background: linear-gradient(135deg, #8b0000, #c0392b);
+    color: #fff; font-weight: 700; font-size: 0.9rem;
+    padding: 11px; border-radius: 10px; border: none;
+    text-decoration: none; transition: all 0.25s; cursor: pointer;
+}
+.btn-rejoindre:hover { background: linear-gradient(135deg, #5a0000, #8b0000); color: #fff; text-decoration: none; transform: translateY(-1px); }
+.btn-rejoindre-outline {
+    display: block; width: 100%; text-align: center;
+    background: transparent; color: #8b0000;
+    border: 2px solid #8b0000; font-weight: 700; font-size: 0.9rem;
+    padding: 10px; border-radius: 10px;
+    text-decoration: none; transition: all 0.25s;
+}
+.btn-rejoindre-outline:hover { background: #8b0000; color: #fff; text-decoration: none; }
+
+/* ── Toast suppression ── */
+.toast-delete {
+    position: fixed; bottom: 30px; right: 30px;
+    background: #1a1a1a; color: #fff;
+    padding: 14px 20px; border-radius: 12px;
+    font-size: 14px; font-weight: 500;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    display: flex; align-items: center; gap: 12px;
+    z-index: 99999; opacity: 0; transform: translateY(16px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    pointer-events: none;
+}
+.toast-delete.show { opacity: 1; transform: translateY(0); }
+.toast-delete-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: #dc3545; display: flex; align-items: center;
+    justify-content: center; font-size: 15px; flex-shrink: 0;
+}
+.toast-progress {
+    position: absolute; bottom: 0; left: 0; height: 3px;
+    background: rgba(255,255,255,0.3); border-radius: 0 0 12px 12px;
+    animation: shrink 3s linear forwards;
+}
+@keyframes shrink { from { width: 100%; } to { width: 0%; } }
+</style>
+{% endblock %}
+
+{% block body %}
+
+{# ── Toast suppression (flash delete_success) ── #}
+{% if app.flashes('delete_success')|length > 0 %}
+<div class="toast-delete" id="toastDelete">
+    <div class="toast-delete-icon">🗑️</div>
+    <span>Account deleted successfully</span>
+    <div class="toast-progress"></div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var t = document.getElementById('toastDelete');
+        setTimeout(function () { t.classList.add('show'); }, 100);
+        setTimeout(function () { t.classList.remove('show'); }, 3200);
+    });
+</script>
+{% endif %}
+
+{# ── HERO ── #}
+<section class="home-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span></span> University club  platform SkillOra
+                    </div>
+
+                    {% if _user %}
+                        <h1 class="hero-title">Bonjour, <span>{{ _user.prenom }}</span> 👋</h1>
+                        <p class="hero-subtitle">
+                            Bienvenue sur votre espace SkillOra.
+                            {% if _user.role == 'responsable_club' %}
+                                En tant que Responsable Club, gérez vos publications, validez les contenus et supervisez les commentaires.
+                            {% elseif _user.role == 'admin' %}
+                                Accédez au tableau de bord administrateur et gérez la plateforme.
+                            {% else %}
+                                Explorez le forum, publiez vos idées et échangez avec la communauté.
+                            {% endif %}
+                        </p>
+                        <div class="hero-actions">
+                            <a href="{{ path('app_forum_index') }}{{ _uq }}" class="hero-btn-primary">
+                                <i class="fas fa-comments"></i> Accéder au Forum
+                            </a>
+                            {% if _user.role == 'responsable_club' %}
+                                <a href="{{ path('app_responsable_dashboard') }}" class="hero-btn-secondary">
+                                    <i class="fas fa-tachometer-alt"></i> Mon Dashboard
+                                </a>
+                            {% elseif _user.role == 'admin' %}
+                                <a href="{{ path('app_admin_dashboard') }}" class="hero-btn-secondary">
+                                    <i class="fas fa-cog"></i> Administration
+                                </a>
+                            {% else %}
+                                <a href="{{ path('app_membre_dashboard') }}" class="hero-btn-secondary">
+                                    <i class="fas fa-tachometer-alt"></i> Mon Dashboard
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <h1 class="hero-title">La plateforme qui <span>connecte</span> les talents</h1>
+                        <p class="hero-subtitle">
+                            SkillOra réunit étudiants, clubs et formateurs d'Esprit autour d'un forum collaboratif, de formations et de projets ambitieux.
+                        </p>
+                        <div class="hero-actions">
+                            <a href="{{ path('app_register') }}" class="hero-btn-primary">
+                                <i class="fas fa-rocket"></i> Créer mon compte
+                            </a>
+                            <a href="{{ path('app_login') }}" class="hero-btn-secondary">
+                                <i class="fas fa-sign-in-alt"></i> Se connecter
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+{# ══════════════════════════════════════════════
+   SECTION CLUBS — visible pour tout le monde
+   ══════════════════════════════════════════════ #}
+{% if clubs is defined and clubs|length > 0 %}
+<section class="clubs-section {{ _user ? 'alt-bg' : '' }}">
+    <div class="container">
+        <div class="text-center mb-5">
+            <p class="section-label">Communauté</p>
+            <h2 class="section-title">Nos Clubs</h2>
+            <p class="section-sub">Rejoignez un club et participez à la vie associative de SkillOra.</p>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for club in clubs %}
+            <div class="col">
+                <div class="club-card">
+
+                    <div class="club-card-img-wrap">
+                        {% if club.logo %}
+                            <img src="{{ vich_uploader_asset(club, 'logoFile') }}" alt="{{ club.nom }}">
+                        {% else %}
+                            🏛️
+                        {% endif %}
+                    </div>
+
+                    <div class="club-card-body">
+                        <p class="club-card-name">{{ club.nom }}</p>
+                        {% if club.description %}
+                            <p class="club-card-desc">
+                                {{ club.description|length > 110 ? club.description|slice(0, 110) ~ '…' : club.description }}
+                            </p>
+                        {% endif %}
+                        {% if club.dateCreation %}
+                            <p class="club-card-meta">📅 Créé le {{ club.dateCreation|date('d/m/Y') }}</p>
+                        {% endif %}
+                        {% if club.siteWeb %}
+                            <p class="club-card-meta">
+                                🌐 <a href="{{ club.siteWeb }}" target="_blank" rel="noopener" style="color:#8b0000;">{{ club.siteWeb }}</a>
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="club-card-footer">
+                        {% if _user is defined and _user %}
+                            <form method="post" action="{{ path('front_club_rejoindre', {id: club.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('rejoindre' ~ club.id) }}">
+                                <button type="submit" class="btn-rejoindre">🤝 Rejoindre ce club</button>
+                            </form>
+                        {% else %}
+                            <a href="{{ path('app_login') }}" class="btn-rejoindre-outline">
+                                🔒 Connectez-vous pour rejoindre
+                            </a>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ── Features (visiteurs non connectés uniquement) ── #}
+
+
+{% endblock %}

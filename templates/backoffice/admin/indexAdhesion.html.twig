@@ -1,0 +1,59 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Demandes d'adhésion | Admin{% endblock %}
+
+
+
+{% block body %}
+
+
+    {# Flash messages #}
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <h1>Demandes d'adhésion</h1>
+    <p>En attente : {{ dem|length }} demande{{ dem|length != 1 ? 's' : '' }}</p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Utilisateur</th>
+                <th>Club</th>
+                <th>Date d'inscription</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for demande in dem %}
+            <tr>
+                <td>{{ demande.id }}</td>
+                <td>{{ demande.user ? demande.user.id : 'Aucun' }}</td>
+                <td>{{ demande.club ? demande.club.nom : 'Aucun' }}</td>
+                <td>{{ demande.dateInscription ? demande.dateInscription|date('d/m/Y') : '—' }}</td>
+                <td>{{ demande.statut.value }}</td>
+                <td>
+                    <form method="post" action="{{ path('admin_adhesion_accepter', {'id': demande.id}) }}" style="display:inline" onsubmit="return confirm('Accepter cette demande ?')">
+                        <button type="submit">Accepter</button>
+                    </form>
+                    <form method="post" action="{{ path('admin_adhesion_refuser', {'id': demande.id}) }}" style="display:inline" onsubmit="return confirm('Refuser cette demande ?')">
+                        <button type="submit">Refuser</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">Aucune demande d'adhésion en attente.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

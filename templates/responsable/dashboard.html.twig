@@ -1,0 +1,630 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Dashboard — SkillOra{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+    :root {
+        --ink:     #0d0d0d;
+        --cream:   #f2f2f2;
+        --red:     #c10609;
+        --red-mid: #8b0507;
+        --red-dim: rgba(193,6,9,0.07);
+        --gold:    #ffffff;
+        --muted:   #6b6b6b;
+        --card-bg: #ffffff;
+        --radius:  18px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { background: var(--cream); font-family: 'DM Sans', sans-serif; color: var(--ink); }
+
+    /* ─── PAGE SHELL ─── */
+    .db-shell {
+        min-height: 100vh;
+        padding: 100px 0 80px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Subtle grain overlay */
+    .db-shell::before {
+        content: '';
+        position: fixed; inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+        pointer-events: none; z-index: 0; opacity: 0.4;
+    }
+
+    .db-wrap {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 0 32px;
+        position: relative; z-index: 1;
+    }
+
+    /* ─── HERO BANNER ─── */
+    .hero-banner {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 32px;
+        background: var(--ink);
+        border-radius: 28px;
+        padding: 44px 52px;
+        margin-bottom: 32px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Decorative red stripe */
+    .hero-banner::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+        background: var(--red);
+    }
+
+    /* Big ghosted letter */
+    .hero-banner::after {
+        content: 'R';
+        position: absolute;
+        right: -20px; bottom: -40px;
+        font-family: 'Playfair Display', serif;
+        font-size: 260px;
+        font-weight: 900;
+        color: rgba(255,255,255,0.03);
+        line-height: 1;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    .hero-left { position: relative; z-index: 1; }
+
+    .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.6);
+        margin-bottom: 16px;
+    }
+    .hero-eyebrow span {
+        display: inline-block;
+        width: 28px; height: 1px;
+        background: var(--red);
+    }
+
+    .hero-name {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(2rem, 4vw, 3.2rem);
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.1;
+        margin-bottom: 10px;
+    }
+    .hero-name em {
+        font-style: normal;
+        color: var(--red);
+    }
+
+    .hero-sub {
+        color: rgba(255,255,255,0.45);
+        font-size: 0.9rem;
+        font-weight: 400;
+        letter-spacing: 0.3px;
+    }
+
+    .hero-avatar {
+        width: 100px; height: 100px;
+        border-radius: 50%;
+        border: 3px solid rgba(255,255,255,0.2);
+        overflow: hidden;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(255,255,255,0.08);
+        font-family: 'Playfair Display', serif;
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+        position: relative; z-index: 1;
+    }
+    .hero-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ─── STATS ROW ─── */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    .stat-tile {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 26px 24px;
+        border: 1px solid rgba(0,0,0,0.07);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: default;
+    }
+    .stat-tile:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.09);
+    }
+
+    /* Accent line top */
+    .stat-tile::before {
+        content: '';
+        position: absolute; top: 0; left: 0; right: 0;
+        height: 3px;
+    }
+    .stat-tile.t-red::before    { background: var(--red); }
+    .stat-tile.t-amber::before  { background: #e6a817; }
+    .stat-tile.t-green::before  { background: #16a34a; }
+    .stat-tile.t-blue::before   { background: #2563eb; }
+
+    .stat-emoji {
+        font-size: 1.6rem;
+        margin-bottom: 14px;
+        display: block;
+    }
+    .stat-val {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.6rem;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--ink);
+        margin-bottom: 4px;
+    }
+    .stat-tile.t-red   .stat-val { color: var(--red); }
+    .stat-tile.t-amber .stat-val { color: #c97d0a; }
+    .stat-tile.t-green .stat-val { color: #15803d; }
+    .stat-tile.t-blue  .stat-val { color: #1d4ed8; }
+
+    .stat-lbl {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
+
+    /* ─── BOTTOM GRID ─── */
+    .bottom-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+    }
+
+    /* ─── ACTIONS PANEL ─── */
+    .panel {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        border: 1px solid rgba(0,0,0,0.07);
+        overflow: hidden;
+    }
+
+    .panel-head {
+        padding: 22px 28px;
+        border-bottom: 1px solid rgba(0,0,0,0.06);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .panel-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--ink);
+    }
+    .panel-badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--red);
+        background: var(--red-dim);
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+
+    .action-list { padding: 12px; }
+
+    .action-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: background 0.2s, transform 0.2s;
+        position: relative;
+        overflow: hidden;
+    }
+    .action-item::before {
+        content: '';
+        position: absolute; inset: 0;
+        background: linear-gradient(90deg, var(--red-dim), transparent);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .action-item:hover {
+        background: var(--cream);
+        transform: translateX(4px);
+        text-decoration: none;
+    }
+    .action-item:hover::before { opacity: 1; }
+
+    .action-ico {
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        background: var(--cream);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        border: 1px solid rgba(0,0,0,0.06);
+        transition: background 0.2s;
+    }
+    .action-item:hover .action-ico {
+        background: var(--red-dim);
+    }
+
+    .action-text { flex: 1; }
+    .action-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--ink);
+        display: block;
+        margin-bottom: 2px;
+    }
+    .action-desc {
+        font-size: 0.75rem;
+        color: var(--muted);
+        font-weight: 400;
+    }
+
+    .action-arrow {
+        font-size: 0.75rem;
+        color: var(--red);
+        opacity: 0;
+        transform: translateX(-6px);
+        transition: all 0.25s;
+    }
+    .action-item:hover .action-arrow {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .action-divider {
+        height: 1px;
+        background: rgba(0,0,0,0.05);
+        margin: 4px 16px;
+    }
+
+    /* ─── PROFILE PANEL ─── */
+    .profile-body { padding: 24px 28px; }
+
+    .profile-avatar-lg {
+        width: 72px; height: 72px;
+        border-radius: 50%;
+        background: var(--ink);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0 auto 16px;
+        overflow: hidden;
+        border: 3px solid var(--red);
+    }
+    .profile-avatar-lg img { width: 100%; height: 100%; object-fit: cover; }
+
+    .profile-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        text-align: center;
+        color: var(--ink);
+        margin-bottom: 4px;
+    }
+    .profile-role {
+        text-align: center;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--red);
+        margin-bottom: 24px;
+    }
+
+    .profile-sep { height: 1px; background: rgba(0,0,0,0.07); margin-bottom: 20px; }
+
+    .info-row {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 9px 0;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-ico {
+        width: 28px; height: 28px;
+        border-radius: 8px;
+        background: var(--red-dim);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.75rem;
+        color: var(--red);
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+    .info-lbl {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 1px;
+    }
+    .info-val {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--ink);
+    }
+
+    /* Logout btn */
+    .logout-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        margin-top: 20px;
+        padding: 11px;
+        border-radius: 10px;
+        border: 1px solid rgba(193,6,9,0.2);
+        background: transparent;
+        color: var(--red);
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .logout-btn:hover {
+        background: var(--red);
+        color: #fff;
+        text-decoration: none;
+        border-color: var(--red);
+    }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-banner  { animation: fadeUp 0.5s ease both; }
+    .stats-row    { animation: fadeUp 0.5s 0.1s ease both; }
+    .bottom-grid  { animation: fadeUp 0.5s 0.2s ease both; }
+
+    .stat-tile { animation: fadeUp 0.4s ease both; }
+    .stat-tile:nth-child(1) { animation-delay: 0.12s; }
+    .stat-tile:nth-child(2) { animation-delay: 0.18s; }
+    .stat-tile:nth-child(3) { animation-delay: 0.24s; }
+    .stat-tile:nth-child(4) { animation-delay: 0.30s; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1024px) {
+        .stats-row { grid-template-columns: repeat(2, 1fr); }
+        .bottom-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+        .db-wrap { padding: 0 16px; }
+        .hero-banner { grid-template-columns: 1fr; padding: 32px 28px; }
+        .hero-avatar { display: none; }
+        .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="db-shell">
+<div class="db-wrap">
+
+    {# ── HERO ── #}
+    <div class="hero-banner">
+        <div class="hero-left">
+            <div class="hero-eyebrow">
+                <span></span> Espace Responsable · SkillOra
+            </div>
+            <h1 class="hero-name">
+                Bonjour,<br><em>{{ user.prenom }} {{ user.nom }}</em>
+            </h1>
+            <p class="hero-sub">
+                Tableau de bord · {{ "now"|date("d/m/Y") }} —
+                Bienvenue dans votre espace de gestion du forum.
+            </p>
+        </div>
+        <div class="hero-avatar">
+            {% if user.photo %}
+                <img src="{{ asset('uploads/photos/' ~ user.photo) }}" alt="">
+            {% else %}
+                {{ user.prenom|slice(0,1)|upper }}{{ user.nom|slice(0,1)|upper }}
+            {% endif %}
+        </div>
+    </div>
+
+    {# ── STATS ── #}
+    <div class="stats-row">
+        <div class="stat-tile t-red">
+            <span class="stat-emoji">📄</span>
+            <div class="stat-val">{{ totalPublications ?? '—' }}</div>
+            <div class="stat-lbl">Publications</div>
+        </div>
+        <div class="stat-tile t-amber">
+            <span class="stat-emoji">⏳</span>
+            <div class="stat-val">{{ enAttente ?? '—' }}</div>
+            <div class="stat-lbl">En attente</div>
+        </div>
+        <div class="stat-tile t-green">
+            <span class="stat-emoji">✅</span>
+            <div class="stat-val">{{ publiees ?? '—' }}</div>
+            <div class="stat-lbl">Publiées</div>
+        </div>
+        <div class="stat-tile t-blue">
+            <span class="stat-emoji">💬</span>
+            <div class="stat-val">{{ totalCommentaires ?? '—' }}</div>
+            <div class="stat-lbl">Commentaires</div>
+        </div>
+    </div>
+
+    {# ── BOTTOM GRID ── #}
+    <div class="bottom-grid">
+
+        {# Actions #}
+        <div class="panel">
+            <div class="panel-head">
+                <span class="panel-title">Actions rapides</span>
+                <span class="panel-badge">Responsable</span>
+            </div>
+            <div class="action-list">
+
+                <a href="{{ path('app_responsable_club_publication_index') }}?u={{ user.id }}"
+                   class="action-item">
+                    <div class="action-ico">📋</div>
+                    <div class="action-text">
+                        <span class="action-label">Gérer les publications</span>
+                        <span class="action-desc">Valider, modifier, dépublier les soumissions membres</span>
+                    </div>
+                    <i class="fas fa-arrow-right action-arrow"></i>
+                </a>
+
+                <div class="action-divider"></div>
+
+                <a href="{{ path('app_responsable_club_commentaire_index', {'userId': user.id}) }}"
+                   class="action-item">
+                    <div class="action-ico">💬</div>
+                    <div class="action-text">
+                        <span class="action-label">Modérer les commentaires</span>
+                        <span class="action-desc">Superviser, répondre et supprimer les échanges</span>
+                    </div>
+                    <i class="fas fa-arrow-right action-arrow"></i>
+                </a>
+
+                <div class="action-divider"></div>
+
+                <a href="{{ path('app_responsable_club_publication_new', {'id': user.id}) }}"
+                   class="action-item">
+                    <div class="action-ico">✍️</div>
+                    <div class="action-text">
+                        <span class="action-label">Nouvelle publication</span>
+                        <span class="action-desc">Publiée directement sur le forum</span>
+                    </div>
+                    <i class="fas fa-arrow-right action-arrow"></i>
+                </a>
+
+                <div class="action-divider"></div>
+
+                <a href="{{ path('app_forum_index') }}?u={{ user.id }}"
+                   class="action-item">
+                    <div class="action-ico">🌐</div>
+                    <div class="action-text">
+                        <span class="action-label">Voir le forum public</span>
+                        <span class="action-desc">Vue telle qu'elle apparaît aux membres</span>
+                    </div>
+                    <i class="fas fa-arrow-right action-arrow"></i>
+                </a>
+
+                <div class="action-divider"></div>
+
+                <a href="{{ path('app_user_show', {'id': user.id}) }}"
+                   class="action-item">
+                    <div class="action-ico">👤</div>
+                    <div class="action-text">
+                        <span class="action-label">Mon profil</span>
+                        <span class="action-desc">Consulter et modifier mes informations</span>
+                    </div>
+                    <i class="fas fa-arrow-right action-arrow"></i>
+                </a>
+
+            </div>
+        </div>
+
+        {# Profile card #}
+        <div class="panel">
+            <div class="panel-head">
+                <span class="panel-title">Mon profil</span>
+            </div>
+            <div class="profile-body">
+
+                <div class="profile-avatar-lg">
+                    {% if user.photo %}
+                        <img src="{{ asset('uploads/photos/' ~ user.photo) }}" alt="">
+                    {% else %}
+                        {{ user.prenom|slice(0,1)|upper }}{{ user.nom|slice(0,1)|upper }}
+                    {% endif %}
+                </div>
+
+                <div class="profile-name">{{ user.prenom }} {{ user.nom }}</div>
+                <div class="profile-role">Responsable de Club</div>
+
+                <div class="profile-sep"></div>
+
+                <div class="info-row">
+                    <div class="info-ico"><i class="fas fa-envelope"></i></div>
+                    <div>
+                        <span class="info-lbl">Email</span>
+                        <span class="info-val">{{ user.email }}</span>
+                    </div>
+                </div>
+
+                {% if user.telephone %}
+                <div class="info-row">
+                    <div class="info-ico"><i class="fas fa-phone"></i></div>
+                    <div>
+                        <span class="info-lbl">Téléphone</span>
+                        <span class="info-val">{{ user.telephone }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if user.dateNaissance %}
+                <div class="info-row">
+                    <div class="info-ico"><i class="fas fa-birthday-cake"></i></div>
+                    <div>
+                        <span class="info-lbl">Naissance</span>
+                        <span class="info-val">{{ user.dateNaissance|date('d/m/Y') }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="info-row">
+                    <div class="info-ico"><i class="fas fa-calendar-check"></i></div>
+                    <div>
+                        <span class="info-lbl">Membre depuis</span>
+                        <span class="info-val">{{ user.dateInscription|date('d/m/Y') }}</span>
+                    </div>
+                </div>
+
+                <a href="{{ path('app_logout') }}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Se déconnecter
+                </a>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+</div>
+{% endblock %}

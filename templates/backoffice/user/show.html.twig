@@ -1,0 +1,130 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Profile - {{ user.prenom }} {{ user.nom }}{% endblock %}
+
+{% block body %}
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 grid-margin">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="card-title mb-0">👤 User Profile</h4>
+                <div>
+                    {% if user.role == 'admin' %}
+                    <a href="{{ path('app_user_edit_backoffice', {id: user.id}) }}" class="btn btn-sm btn-warning me-2">
+                        <i class="mdi mdi-account-edit-outline me-1"></i> Edit
+                    </a>
+                    {% endif %}
+                    <a href="{{ path('app_admin_dashboard') }}" class="btn btn-sm btn-secondary">
+                        <i class="mdi mdi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                {# Carte gauche #}
+                <div class="col-lg-4 mb-4">
+                    <div class="card" style="border-radius:15px; overflow:hidden;">
+                        <div style="background:linear-gradient(135deg,#c10609,#8b0507); height:110px;"></div>
+                        <div class="text-center" style="margin-top:-50px;">
+                            {% if user.photo %}
+                                <img src="{{ asset('uploads/photos/' ~ user.photo) }}"
+                                     class="rounded-circle border border-4 border-white"
+                                     style="width:100px; height:100px; object-fit:cover;">
+                            {% else %}
+                                <div class="rounded-circle border border-4 border-white mx-auto d-flex align-items-center justify-content-center"
+                                     style="width:100px; height:100px; background:linear-gradient(135deg,#c10609,#8b0507); color:white; font-size:36px; font-weight:800;">
+                                    {{ user.prenom|slice(0,1)|upper }}{{ user.nom|slice(0,1)|upper }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-body text-center">
+                            <h5 class="fw-bold mt-2">{{ user.prenom }} {{ user.nom }}</h5>
+                            <p class="text-muted mb-2">{{ user.email }}</p>
+                            {% if user.role == 'admin' %}
+                                <span class="badge" style="background:#c10609;">🛡️ Administrator</span>
+                            {% elseif user.role == 'responsable_club' %}
+                                <span class="badge bg-primary">👥 Club Manager</span>
+                            {% elseif user.role == 'etudiant' %}
+                                <span class="badge bg-success">🎓 Student</span>
+                            {% elseif user.role == 'membre' %}
+                                <span class="badge bg-info">👤 Member</span>
+                            {% endif %}
+                            <hr>
+                            <div class="text-start">
+                                <p class="mb-2">
+                                    <i class="mdi mdi-phone me-2" style="color:#c10609;"></i>
+                                    {{ user.telephone ?? 'Not provided' }}
+                                </p>
+                                <p class="mb-2">
+                                    <i class="mdi mdi-calendar me-2" style="color:#c10609;"></i>
+                                    {{ user.dateNaissance ? user.dateNaissance|date('d/m/Y') : 'Not provided' }}
+                                </p>
+                                <p class="mb-2">
+                                    <i class="mdi mdi-account-plus me-2" style="color:#c10609;"></i>
+                                    Joined: {{ user.dateInscription|date('d/m/Y') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Détails droite #}
+                <div class="col-lg-8 mb-4">
+                    <div class="card" style="border-radius:15px;">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold mb-4">
+                                <i class="mdi mdi-information-outline me-2" style="color:#c10609;"></i>
+                                Account Information
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="text-muted small fw-semibold">FIRST NAME</label>
+                                    <p class="fw-semibold">{{ user.prenom }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="text-muted small fw-semibold">LAST NAME</label>
+                                    <p class="fw-semibold">{{ user.nom }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="text-muted small fw-semibold">EMAIL</label>
+                                    <p class="fw-semibold">{{ user.email }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="text-muted small fw-semibold">PHONE</label>
+                                    <p class="fw-semibold">{{ user.telephone ?? '-' }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="text-muted small fw-semibold">DATE OF BIRTH</label>
+                                    <p class="fw-semibold">
+                                        {{ user.dateNaissance ? user.dateNaissance|date('d/m/Y') : '-' }}
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="text-muted small fw-semibold">ROLE</label>
+                                    <p class="fw-semibold">{{ user.role|replace({'_': ' '})|title }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="text-muted small fw-semibold">REGISTERED ON</label>
+                                    <p class="fw-semibold">{{ user.dateInscription|date('d/m/Y H:i') }}</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="d-flex gap-2 mt-3">
+                            {% if user.role == 'admin' %}
+                                <a href="{{ path('app_user_edit_backoffice', {id: user.id}) }}" class="btn btn-warning">
+                                    <i class="mdi mdi-account-edit-outline me-1"></i> Edit Profile
+                                </a>
+                                {% endif %}
+                                <a href="{{ path('app_admin_dashboard') }}" class="btn btn-outline-secondary">
+                                    <i class="mdi mdi-arrow-left me-1"></i> Back
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

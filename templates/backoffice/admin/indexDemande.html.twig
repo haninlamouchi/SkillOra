@@ -1,0 +1,72 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Demandes de création | Admin{% endblock %}
+
+{% block body %}
+
+    {# Flash messages #}
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <h1>Demandes de création de clubs</h1>
+    <p>Total : {{ demandes|length }} demande{{ demandes|length != 1 ? 's' : '' }} en attente</p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nom</th>
+                <th>Description</th>
+                <th>Logo</th>
+                <th>Date Création</th>
+                <th>Site Web</th>
+                <th>Responsable</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for demande in demandes %}
+            <tr>
+                <td>{{ demande.id }}</td>
+                <td>{{ demande.nom }}</td>
+                <td>{{ demande.description }}</td>
+                <td>
+                    {% if demande.logo %}
+                        <img src="{{ vich_uploader_asset(demande, 'logoFile') }}" alt="{{ demande.nom }}" width="50"> {# ← modifié #}
+                    {% else %}
+                        Aucun logo
+                    {% endif %}
+                </td>
+                <td>{{ demande.dateCreation ? demande.dateCreation|date('d/m/Y') : '—' }}</td>
+                <td>
+                    {% if demande.siteWeb %}
+                        <a href="{{ demande.siteWeb }}" target="_blank">{{ demande.siteWeb }}</a>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>{{ demande.responsable ? demande.responsable.id : 'Aucun' }}</td>
+                <td>
+                    <form method="post" action="{{ path('admin_club_accepter', {'id': demande.id}) }}" style="display:inline" onsubmit="return confirm('Accepter cette demande ?')">
+                        <button type="submit">Accepter</button>
+                    </form>
+                    <form method="post" action="{{ path('admin_club_refuser', {'id': demande.id}) }}" style="display:inline" onsubmit="return confirm('Refuser cette demande ?')">
+                        <button type="submit">Refuser</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="8">Aucune demande de création en attente.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
