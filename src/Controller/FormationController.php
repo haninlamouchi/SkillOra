@@ -18,6 +18,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use App\Service\CloudinaryService;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+
+
+
 
 #[Route('/responsable/formation')]
 final class FormationController extends AbstractController
@@ -26,7 +32,21 @@ final class FormationController extends AbstractController
         private EntityManagerInterface $em,
         private FormationRepository $formationRepository,
         private SluggerInterface $slugger,
+        private MailerInterface $mailer,
     ) {}
+
+    // ──────────────────────────────────────────────
+    //  HELPER : club du responsable connecté
+    //  ✅ FIX: getClubResponsable() n'existe pas → on utilise getClubs()->first()
+    // ──────────────────────────────────────────────
+
+    private function getMyClub(): ?\App\Entity\Club
+    {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        $club = $user->getClubs()->first();
+        return $club ?: null;
+    }
 
     // ──────────────────────────────────────────────
     //  LIST
@@ -39,7 +59,8 @@ final class FormationController extends AbstractController
         $user = $this->getUser();
 
         if (in_array('ROLE_RESPONSABLE_CLUB', $user->getRoles())) {
-            $club = $user->getClubResponsable();
+            // ✅ FIX: remplace getClubResponsable() par getClubs()->first()
+            $club = $this->getMyClub();
             $formations = $club
                 ? $this->formationRepository->findBy(['club' => $club], ['dateDebut' => 'DESC'])
                 : [];
@@ -57,21 +78,77 @@ final class FormationController extends AbstractController
     // ──────────────────────────────────────────────
 
     #[Route('/new', name: 'app_formation_new', methods: ['GET', 'POST'])]
-    public function new(Request $request): Response
+    public function new(Request $request, CloudinaryService $cloudinary): Response
     {
         $formation = new Formation();
         $form = $this->createForm(FormationType::class, $formation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->handleImageUpload($form, $formation);
+            $imageFile = $form->get('imageFile')->getData();
 
-            /** @var \App\Entity\User $user */
-            $user = $this->getUser();
-            $formation->setClub($user->getClubResponsable());
+            if ($imageFile) {
+                $url = $cloudinary->uploadImage($imageFile);
+                $formation->setImage($url);
+            }
+
+            $formation->setClub($this->getMyClub());
 
             $this->em->persist($formation);
             $this->em->flush();
+
+            // Get club members
+            $club = $formation->getClub();
+            $members = $club->getMembres();
+
+            foreach ($members as $member) {
+
+                if ($member->getEmail()) {
+
+                    $email = (new Email())
+                        ->from('koukieya43@gmail.com')
+                        ->to($member->getEmail())
+                        ->subject('Nouvelle formation ajoutée')
+                        ->html('
+                            <div style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 40px 0;">
+                                <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+
+                                    <!-- Header -->
+                                    <div style="background: linear-gradient(90deg, #4e73df, #1cc88a); padding: 20px; text-align: center;">
+                                        <h1 style="color: #ffffff; margin: 0;">📚 Nouvelle Formation</h1>
+                                    </div>
+
+                                    <!-- Body -->
+                                    <div style="padding: 30px; color: #333333;">
+                                        <p style="font-size: 16px;">Bonjour 👋,</p>
+
+                                        <p style="font-size: 15px; line-height: 1.6;">
+                                            Nous avons le plaisir de vous informer qu’une nouvelle formation a été ajoutée à votre club.
+                                        </p>
+
+                                        <div style="background-color: #f8f9fc; padding: 15px; border-left: 5px solid #4e73df; margin: 20px 0;">
+                                            <p style="margin: 5px 0;"><strong>Titre :</strong> '.$formation->getTitre().'</p>
+                                            <p style="margin: 5px 0;"><strong>Description :</strong> '.$formation->getDescription().'</p>
+                                        </div>
+
+                                        <p style="font-size: 14px; color: #6c757d;">
+                                            Nous vous encourageons à consulter les détails et à vous inscrire si cela vous intéresse.
+                                        </p>
+                                    </div>
+
+                                    <!-- Footer -->
+                                    <div style="background-color: #f1f1f1; text-align: center; padding: 15px; font-size: 12px; color: #888;">
+                                        © '.date("Y").' SkillOra | Tous droits réservés<br>
+                                        Cet email a été envoyé automatiquement, merci de ne pas y répondre.
+                                    </div>
+
+                                </div>
+                            </div>
+                            ');
+
+                    $this->mailer->send($email);
+                }
+            }
 
             $this->addFlash('success', 'Formation créée avec succès.');
 
@@ -109,7 +186,6 @@ final class FormationController extends AbstractController
 
         // --- Quiz results for this formation ---
         $quizResults = [];
-        // Map userId → best ResultatQuiz (highest percentage) for the participants table
         $participantScores = [];
 
         foreach ($formation->getQuizzes() as $quiz) {
@@ -134,10 +210,10 @@ final class FormationController extends AbstractController
         }
 
         return $this->render('frontoffice/responsable/formation/show.html.twig', [
-            'formation'        => $formation,
-            'videoForm'        => $videoForm,
+            'formation'         => $formation,
+            'videoForm'         => $videoForm,
             'participationForm' => $participationForm,
-            'quizResults'      => $quizResults,
+            'quizResults'       => $quizResults,
             'participantScores' => $participantScores,
         ]);
     }
@@ -147,17 +223,19 @@ final class FormationController extends AbstractController
     // ──────────────────────────────────────────────
 
     #[Route('/{id}/edit', name: 'app_formation_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Formation $formation): Response
+    public function edit(Request $request, Formation $formation, CloudinaryService $cloudinary): Response
     {
         $form = $this->createForm(FormationType::class, $formation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->handleImageUpload($form, $formation);
+            $imageFile = $form->get('imageFile')->getData();
+            if ($imageFile) {
+                $url = $cloudinary->uploadImage($imageFile);
+                $formation->setImage($url);
+            }
 
-            /** @var \App\Entity\User $user */
-            $user = $this->getUser();
-            $formation->setClub($user->getClubResponsable());
+            
 
             $this->em->flush();
 
@@ -176,7 +254,7 @@ final class FormationController extends AbstractController
     //  DELETE
     // ──────────────────────────────────────────────
 
-    #[Route('/{id}/delete', name: 'app_formation_delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'app_formation_delete',methods: ['GET', 'POST'])]
     public function delete(Request $request, Formation $formation): Response
     {
         if ($this->isCsrfTokenValid('delete' . $formation->getId(), $request->request->get('_token'))) {
@@ -194,31 +272,91 @@ final class FormationController extends AbstractController
     // ──────────────────────────────────────────────
 
     #[Route('/{id}/video/add', name: 'app_formation_add_video', methods: ['POST'])]
-    public function addVideo(Request $request, Formation $formation): Response
+    public function addVideo(Request $request, Formation $formation,CloudinaryService $cloudinary): Response
     {
         $video = new Video();
         $form = $this->createForm(VideoType::class, $video);
         $form->handleRequest($request);
-
+        
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->handleVideoUpload($form, $video);
+            //$this->handleVideoUpload($form, $video);
+            $videoFile = $form->get('videoFile')->getData();
 
-            if (!$video->getVideoPath()) {
+            if (!$videoFile) {
                 $this->addFlash('danger', 'Erreur lors de l\'upload du fichier vidéo.');
                 return $this->redirectToRoute('app_formation_show', ['id' => $formation->getId()]);
             }
-
+            if($videoFile){
+                $url = $cloudinary->uploadVideo($videoFile);
+                $video->setVideoPath($url);
+            }
+ 
             $video->setFormation($formation);
             $this->em->persist($video);
             $this->em->flush();
 
+
+            $participants = $formation->getParticipations();
+
+            foreach ($participants as $participation) {
+
+                $member = $participation->getUser();
+
+                if ($member && $member->getEmail()) {
+
+                    $email = (new Email())
+                        ->from('koukieya43@gmail.com')
+                        ->to($member->getEmail())
+                        ->subject('Nouvelle vidéo ajoutée')
+                        ->html('
+                            <div style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 40px 0;">
+                                <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+
+                                    <div style="background: linear-gradient(90deg, #4e73df, #1cc88a); padding: 20px; text-align: center;">
+                                        <h1 style="color: #ffffff; margin: 0;">🎥 Nouvelle Vidéo</h1>
+                                    </div>
+
+                                    <div style="padding: 30px; color: #333333;">
+
+                                        <p style="font-size: 16px;">Bonjour 👋,</p>
+
+                                        <p style="font-size: 15px;">
+                                            Une nouvelle vidéo a été ajoutée dans votre formation.
+                                        </p>
+
+                                        <div style="background-color: #f8f9fc; padding: 15px; border-left: 5px solid #4e73df; margin: 20px 0;">
+                                            <p><strong>Formation :</strong> '.$formation->getTitre().'</p>
+                                            <p><strong>Vidéo :</strong> '.$video->getTitre().'</p>
+                                        </div>
+
+                                        <p style="font-size: 14px; color: #6c757d;">
+                                            Connectez-vous pour voir la vidéo.
+                                        </p>
+
+                                    </div>
+
+                                    <div style="background-color: #f1f1f1; text-align: center; padding: 15px; font-size: 12px; color: #888;">
+                                        © '.date("Y").' SkillOra
+                                    </div>
+
+                                </div>
+                            </div>
+                        ');
+
+                    $this->mailer->send($email);
+                }
+            }
+
+
+
+
             $this->addFlash('success', 'Vidéo ajoutée avec succès.');
-        } else if ($form->isSubmitted()) {
+        } elseif ($form->isSubmitted()) {
             $errors = [];
             foreach ($form->getErrors(true) as $error) {
                 $errors[] = $error->getMessage();
             }
-            $this->addFlash('danger', 'Erreur : ' . (implode(', ', $errors) ?: 'Fichier vidéo invalide ou trop volumineux. Vérifiez la taille du fichier.'));
+            $this->addFlash('danger', 'Erreur : ' . (implode(', ', $errors) ?: 'Fichier vidéo invalide ou trop volumineux.'));
         }
 
         return $this->redirectToRoute('app_formation_show', ['id' => $formation->getId()]);
@@ -235,7 +373,6 @@ final class FormationController extends AbstractController
 
         if ($video && $video->getFormation() === $formation) {
             if ($this->isCsrfTokenValid('delete_video' . $videoId, $request->request->get('_token'))) {
-                // Delete physical video file
                 $videoPath = $video->getVideoPath();
                 if ($videoPath) {
                     $fullPath = $this->getParameter('kernel.project_dir') . '/public' . $videoPath;
@@ -271,7 +408,6 @@ final class FormationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $participation->getUser();
 
-            // Check duplicate participation
             if ($participationRepo->isAlreadyParticipating($user, $formation)) {
                 $this->addFlash('warning', 'Cet utilisateur participe déjà à cette formation.');
             } else {
@@ -328,7 +464,6 @@ final class FormationController extends AbstractController
             try {
                 $imageFile->move($uploadDir, $newFilename);
 
-                // Delete old image if exists
                 $oldImage = $formation->getImage();
                 if ($oldImage) {
                     $oldPath = $this->getParameter('kernel.project_dir') . '/public' . $oldImage;
@@ -339,7 +474,7 @@ final class FormationController extends AbstractController
 
                 $formation->setImage('/uploads/formations/' . $newFilename);
             } catch (FileException $e) {
-                // Handle exception silently - image won't be updated
+                // Handle exception silently
             }
         }
     }
@@ -348,7 +483,7 @@ final class FormationController extends AbstractController
     //  PRIVATE: Handle video upload
     // ──────────────────────────────────────────────
 
-    private function handleVideoUpload($form, Video $video): void
+    /*private function handleVideoUpload($form, Video $video): void
     {
         $videoFile = $form->get('videoFile')->getData();
 
@@ -363,8 +498,8 @@ final class FormationController extends AbstractController
                 $videoFile->move($uploadDir, $newFilename);
                 $video->setVideoPath('/uploads/videos/' . $newFilename);
             } catch (FileException $e) {
-                // Handle exception silently - video won't be saved
+                // Handle exception silently
             }
         }
-    }
+    }*/
 }

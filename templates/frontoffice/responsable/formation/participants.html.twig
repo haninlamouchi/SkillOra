@@ -1,0 +1,81 @@
+{% extends 'frontoffice/responsable/base.html.twig' %}
+
+{% block title %}Participants — {{ formation.titre }} | SkillOra{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Participants</h2>
+            <p class="text-muted mb-0">Formation : <strong>{{ formation.titre }}</strong></p>
+        </div>
+        <a href="{{ path('responsable_formation_show', {id: formation.id}) }}" class="btn btn-outline-secondary">
+            <i class="fa fa-arrow-left me-1"></i> Retour
+        </a>
+    </div>
+
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {% if participants is empty %}
+        <div class="alert alert-info">Aucun participant inscrit à cette formation.</div>
+    {% else %}
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Participant</th>
+                            <th>Email</th>
+                            <th>Date d'inscription</th>
+                            <th>Score quiz</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in participants %}
+                            {% set uid = p.user.id %}
+                            <tr>
+                                <td>
+                                    <i class="fa fa-user-circle me-2 text-secondary"></i>
+                                    {{ p.user.fullName }}
+                                </td>
+                                <td>{{ p.user.email }}</td>
+                                <td>{{ p.dateParticipation|date('d/m/Y H:i') }}</td>
+                                <td>
+                                    {% if quizResultsByUser[uid] is defined %}
+                                        {% for result in quizResultsByUser[uid] %}
+                                            <span class="badge bg-primary me-1">
+                                                {{ result.quiz.titre }}: {{ result.score }}/{{ result.totalPoints }}
+                                            </span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <form method="post" action="{{ path('responsable_formation_participant_remove', {id: formation.id, userId: uid}) }}"
+                                          onsubmit="return confirm('Retirer ce participant ?')">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('remove_participant' ~ uid) }}">
+                                        <button class="btn btn-sm btn-outline-danger">
+                                            <i class="fa fa-times me-1"></i>Retirer
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

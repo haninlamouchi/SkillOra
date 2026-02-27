@@ -1,0 +1,19 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Aucun club assigné | SkillOra{% endblock %}
+
+{% block body %}
+<div class="container py-5 text-center" style="min-height: 60vh; display:flex; align-items:center; justify-content:center;">
+    <div>
+        <div style="font-size:5rem; color:#ccc;"><i class="fa fa-building-o"></i></div>
+        <h2 class="fw-bold mt-3 mb-2">Aucun club ne vous est assigné</h2>
+        <p class="text-muted mb-4" style="max-width:480px; margin:0 auto;">
+            Votre compte est bien configuré en tant que responsable, mais aucun club n'a encore été associé à votre profil.
+            Veuillez contacter l'administrateur pour qu'il vous assigne un club.
+        </p>
+        <a href="{{ path('front_home') }}" class="btn btn-outline-secondary">
+            <i class="fa fa-home me-1"></i> Retour à l'accueil
+        </a>
+    </div>
+</div>
+{% endblock %}

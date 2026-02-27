@@ -11,7 +11,222 @@
     <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/owl.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/animate.css') }}">
 
-    {% block stylesheets %}{% endblock %}
+    {% block stylesheets %}
+        <style>
+
+            /* =====================================================
+            GLOBAL FRONT STYLE – SKILLORA DESIGN SYSTEM
+            ===================================================== */
+
+            /* Body */
+            body {
+                background: #f8f8f8;
+                font-family: "Poppins", sans-serif;
+            }
+
+            /* ================= HEADER ENHANCEMENT ================= */
+
+            .header-area {
+                background: linear-gradient(135deg, #5a0000 0%, #8b1a1a 50%, #a52a2a 100%) !important;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            }
+
+            .header-area .main-nav .logo h1 {
+                color: #fff !important;
+                font-weight: 800;
+                letter-spacing: -0.5px;
+            }
+
+            .header-area .main-nav .nav li a {
+                color: rgba(255,255,255,0.85) !important;
+                font-weight: 500;
+                transition: all 0.3s ease;
+            }
+
+            .header-area .main-nav .nav li a:hover,
+            .header-area .main-nav .nav li a.active {
+                color: #fff !important;
+                position: relative;
+            }
+
+            .header-area .main-nav .nav li a.active::after {
+                content: '';
+                position: absolute;
+                bottom: -6px;
+                left: 0;
+                width: 100%;
+                height: 3px;
+                background: #fff;
+                border-radius: 3px;
+            }
+
+            /* ================= SECTION SPACING ================= */
+
+            section {
+                padding: 80px 0;
+            }
+
+            /* ================= CARDS GLOBAL STYLE ================= */
+
+            .card {
+                border: none;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+                transition: all 0.3s ease;
+            }
+
+            .card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 15px 40px rgba(90,0,0,0.12);
+            }
+
+            .card-title {
+                font-weight: 700;
+                color: #333;
+            }
+
+            .card-text {
+                color: #666;
+                font-size: 0.9rem;
+                line-height: 1.6;
+            }
+
+            /* ================= BUTTON SYSTEM ================= */
+
+            .btn-primary,
+            .btn-skillora {
+                background: #5a0000 !important;
+                border: none !important;
+                border-radius: 10px !important;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+
+            .btn-primary:hover,
+            .btn-skillora:hover {
+                background: #7a1a1a !important;
+                transform: translateY(-2px);
+            }
+
+            .btn-outline-primary {
+                border: 2px solid #5a0000 !important;
+                color: #5a0000 !important;
+                border-radius: 8px !important;
+                font-weight: 600;
+            }
+
+            .btn-outline-primary:hover {
+                background: #5a0000 !important;
+                color: #fff !important;
+            }
+
+            /* ================= BADGES ================= */
+
+            .badge {
+                border-radius: 20px;
+                padding: 6px 12px;
+                font-size: 0.75rem;
+                font-weight: 600;
+            }
+
+            .badge-skillora {
+                background: #5a0000;
+                color: #fff;
+            }
+
+            .badge-soft {
+                background: #f0e6e6;
+                color: #5a0000;
+            }
+
+            /* ================= HERO GENERIC ================= */
+
+            .skillora-hero {
+                background: linear-gradient(135deg, #5a0000 0%, #8b1a1a 50%, #a52a2a 100%);
+                padding: 120px 0 80px;
+                color: #fff;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .skillora-hero h1 {
+                font-size: 2.8rem;
+                font-weight: 800;
+                letter-spacing: -0.5px;
+            }
+
+            .skillora-hero p {
+                opacity: 0.85;
+                max-width: 650px;
+                margin: 0 auto;
+            }
+
+            /* ================= FILTER BAR ================= */
+
+            .filter-bar {
+                background: #fff;
+                border-radius: 16px;
+                padding: 20px 28px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            }
+
+            .filter-pill {
+                display: inline-block;
+                padding: 7px 18px;
+                border-radius: 50px;
+                border: 2px solid #e0e0e0;
+                background: #fff;
+                color: #555;
+                font-size: 0.85rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.25s;
+            }
+
+            .filter-pill:hover {
+                border-color: #5a0000;
+                color: #5a0000;
+            }
+
+            .filter-pill.active {
+                background: #5a0000;
+                border-color: #5a0000;
+                color: #fff;
+            }
+
+            /* ================= FOOTER ================= */
+
+            footer {
+                background: #5a0000;
+                color: #fff;
+                padding: 30px 0;
+                margin-top: 60px;
+            }
+
+            footer p {
+                margin: 0;
+                font-size: 0.9rem;
+                opacity: 0.85;
+            }
+
+            /* ================= ANIMATIONS ================= */
+
+            .fade-in {
+                opacity: 0;
+                transform: translateY(20px);
+                animation: fadeInUp 0.6s ease forwards;
+            }
+
+            @keyframes fadeInUp {
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        </style>
+    {% endblock %}
 </head>
 
 <body>
@@ -43,7 +258,7 @@
                         </li>
 
                         {# ✅ Dashboard only for Responsable Club #}
-                        {% if app.user and app.user.role == constant('App\\Entity\\User::ROLE_RESPONSABLE_CLUB') %}
+                        {% if is_granted('ROLE_RESPONSABLE_CLUB') %}
                             <li>
                                 <a href="{{ path('app_formation_index') }}"
                                    class="{{ app.request.attributes.get('_route') starts with 'responsable' ? 'active' : '' }}">
@@ -58,7 +273,6 @@
                                     <i class="fa fa-user"></i> {{ app.user.fullName }}
                                 </a>
                             </li>
-
                             <li>
                                 <a href="{{ path('app_logout') }}" style="color:#f8d7da">
                                     <i class="fa fa-sign-out"></i> Déconnexion

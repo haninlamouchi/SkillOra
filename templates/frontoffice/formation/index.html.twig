@@ -241,6 +241,7 @@
                 <span class="filter-pill" data-filter="completed"><i class="fa fa-circle text-secondary me-1" style="font-size:0.5rem"></i> Terminées</span>
                 {% if app.user %}
                     <span class="filter-pill" data-filter="participated"><i class="fa fa-check-circle text-primary me-1" style="font-size:0.7rem"></i> Mes inscriptions</span>
+                    <span class="filter-pill" data-filter="favorite"><i class="fa fa-heart text-danger me-1" style="font-size:0.7rem"></i> Favoris</span>
                 {% endif %}
 
                 {# Club filters (dynamic) #}
@@ -299,6 +300,7 @@
                      data-club="{{ formation.club ? (formation.club ~ '')|lower : '' }}"
                      data-status="{{ isActive ? 'active' : 'completed' }}"
                      data-participated="{{ formation.id in participatedIds ? '1' : '0' }}"
+                     data-favorite="{{ formation.id in favoritesIds ? '1' : '0' }}"
                      data-date="{{ formation.dateDebut ? formation.dateDebut|date('Y-m-d') : '0000-00-00' }}"
                      data-participants="{{ formation.participations|length }}"
                      style="animation-delay: {{ loop.index0 * 0.06 }}s">
@@ -313,6 +315,21 @@
                         {% endif %}
 
                         <div class="card-body d-flex flex-column">
+                            {# ❤️ Favorite button #}
+                            {% if app.user %}
+                                <div class="text-end mb-2">
+                                    <a href="{{ path('front_formation_toggle_favorite', {id: formation.id}) }}"
+                                    style="text-decoration:none; font-size:22px;">
+                                    
+                                        {% if formation.id in favoritesIds %}
+                                            ❤️
+                                        {% else %}
+                                            🤍
+                                        {% endif %}
+
+                                    </a>
+                                </div>
+                            {% endif %}
                             {# Badges #}
                             <div class="d-flex flex-wrap gap-1 mb-2">
                                 {% if isActive %}
@@ -453,9 +470,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Status filter
             let matchStatus = true;
-            if (currentFilter === 'active')       matchStatus = (status === 'active');
-            else if (currentFilter === 'completed') matchStatus = (status === 'completed');
+            if (currentFilter === 'active')         matchStatus = (status === 'active');
+            else if (currentFilter === 'completed')  matchStatus = (status === 'completed');
             else if (currentFilter === 'participated') matchStatus = participated;
+            else if (currentFilter === 'favorite')   matchStatus = (item.dataset.favorite === '1');
 
             // Club filter
             const matchClub = !currentClub || club === currentClub.toLowerCase();

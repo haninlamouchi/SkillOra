@@ -253,7 +253,7 @@
                             <div class="col-md-6">
                                 <div class="video-card">
                                     <video controls preload="metadata" poster="">
-                                        <source src="{{ asset(video.videoPath) }}" type="video/mp4">
+                                        <source src="{{ video.videoPath }}" type="video/mp4">
                                         Votre navigateur ne supporte pas la lecture vidéo.
                                     </video>
                                     <div class="video-info">
@@ -316,7 +316,7 @@
                 {# Image + Stats #}
                 <div class="card sidebar-card mb-4">
                     {% if formation.image %}
-                        <img src="{{ asset(formation.image) }}" alt="{{ formation.titre }}">
+                        <img src="{{ formation.image }}" alt="{{ formation.titre }}">
                     {% else %}
                         <div class="img-placeholder">
                             <i class="fa fa-graduation-cap" style="font-size: 3rem; color: #ccc"></i>

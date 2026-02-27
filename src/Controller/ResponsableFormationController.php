@@ -3,9 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Formation;
+use App\Entity\ParticipationFormation;
 use App\Entity\Quiz;
 use App\Entity\ResultatQuiz;
+use App\Entity\Video;
 use App\Form\FormationType;
+use App\Form\ParticipationFormationType;
+use App\Form\VideoType;
 use App\Repository\ClubRepository;
 use App\Repository\FormationRepository;
 use App\Repository\ParticipationFormationRepository;
@@ -40,16 +44,19 @@ class ResponsableFormationController extends AbstractController
     //  Throws 403 if user has no club assigned.
     // ──────────────────────────────────────────────
 
-    private function getMyClub(): \App\Entity\Club
+    private function getMyClub(): ?\App\Entity\Club
     {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
-        $club = $user->getClubResponsable();
+        return $user->getClubs()->first() ?: null;
+    }
 
+    private function requireMyClub(): \App\Entity\Club
+    {
+        $club = $this->getMyClub();
         if (!$club) {
-            throw $this->createAccessDeniedException('Vous n\'êtes responsable d\'aucun club.');
+            throw $this->createNotFoundException('Aucun club ne vous est assigné.');
         }
-
         return $club;
     }
 
@@ -59,7 +66,7 @@ class ResponsableFormationController extends AbstractController
      */
     private function assertOwnClub(Formation $formation): void
     {
-        $myClub = $this->getMyClub();
+        $myClub = $this->requireMyClub();
 
         if ($formation->getClub()?->getId() !== $myClub->getId()) {
             throw $this->createAccessDeniedException('Cette formation n\'appartient pas à votre club.');
@@ -74,9 +81,14 @@ class ResponsableFormationController extends AbstractController
     public function dashboard(): Response
     {
         $club = $this->getMyClub();
+
+        if (!$club) {
+            return $this->render('frontoffice/responsable/no_club.html.twig');
+        }
+
         $formations = $this->formationRepo->findByClub($club->getId());
 
-        return $this->render('responsable/dashboard.html.twig', [
+        return $this->render('frontoffice/responsable/dashboard.html.twig', [
             'club'       => $club,
             'formations' => $formations,
         ]);
@@ -89,10 +101,10 @@ class ResponsableFormationController extends AbstractController
     #[Route('/formations', name: 'formation_index', methods: ['GET'])]
     public function formationIndex(): Response
     {
-        $club = $this->getMyClub();
+        $club = $this->requireMyClub();
         $formations = $this->formationRepo->findByClub($club->getId());
 
-        return $this->render('responsable/formation/index.html.twig', [
+        return $this->render('frontoffice/responsable/formation/index.html.twig', [
             'club'       => $club,
             'formations' => $formations,
         ]);
@@ -101,7 +113,7 @@ class ResponsableFormationController extends AbstractController
     #[Route('/formations/new', name: 'formation_new', methods: ['GET', 'POST'])]
     public function formationNew(Request $request, SluggerInterface $slugger): Response
     {
-        $club = $this->getMyClub();
+        $club = $this->requireMyClub();
 
         $formation = new Formation();
         $formation->setClub($club);
@@ -119,7 +131,7 @@ class ResponsableFormationController extends AbstractController
             return $this->redirectToRoute('responsable_formation_index');
         }
 
-        return $this->render('responsable/formation/new.html.twig', [
+        return $this->render('frontoffice/responsable/formation/new.html.twig', [
             'club' => $club,
             'form' => $form,
         ]);
@@ -130,22 +142,58 @@ class ResponsableFormationController extends AbstractController
     {
         $this->assertOwnClub($formation);
 
+        // Fetch participants via repository (avoids Doctrine lazy-load hydration bug)
         $participants = $this->participationRepo->findByFormation($formation->getId());
 
-        // Gather quiz results per participant
-        $quizResultsByUser = [];
+        // Build participantScores: [userId => ['score', 'totalPoints', 'pct', 'quizTitre']]
+        // Keeps only the first (most recent) result per user across all quizzes.
+        $participantScores = [];
+
+        // Build quizResults: flat ordered list of ALL ResultatQuiz for this formation
+        $quizResults = [];
+
         foreach ($formation->getQuizzes() as $quiz) {
             $results = $this->resultatRepo->findBy(['quiz' => $quiz], ['datePassage' => 'DESC']);
             foreach ($results as $result) {
+                $quizResults[] = $result;
+
                 $uid = $result->getUser()->getId();
-                $quizResultsByUser[$uid][] = $result;
+                if (!isset($participantScores[$uid])) {
+                    $total = $result->getTotalPoints();
+                    $pct   = $total > 0
+                        ? round(($result->getScore() / $total) * 100, 1)
+                        : 0;
+
+                    $participantScores[$uid] = [
+                        'score'      => $result->getScore(),
+                        'totalPoints'=> $total,
+                        'pct'        => $pct,
+                        'quizTitre'  => $quiz->getTitre(),
+                    ];
+                }
             }
         }
 
-        return $this->render('responsable/formation/show.html.twig', [
-            'formation'          => $formation,
-            'participants'       => $participants,
-            'quizResultsByUser'  => $quizResultsByUser,
+        // ── Forms for modals (video + participant) ─────────────────
+        $video = new Video();
+        $videoForm = $this->createForm(VideoType::class, $video, [
+            'action' => $this->generateUrl('app_formation_add_video', ['id' => $formation->getId()]),
+        ]);
+
+        $participation = new ParticipationFormation();
+        $participationForm = $this->createForm(ParticipationFormationType::class, $participation, [
+            'action' => $this->generateUrl('app_formation_add_participant', ['id' => $formation->getId()]),
+        ]);
+
+        return $this->render('frontoffice/responsable/formation/show.html.twig', [
+            'formation'         => $formation,
+            'participants'      => $participants,
+            'participantScores' => $participantScores,
+            'quizResults'       => $quizResults,
+            // ✅ FIX: le template utilise 'videoType' — on expose les deux noms pour compatibilité
+            'videoType'         => $videoForm,
+            'videoForm'         => $videoForm,
+            'participationForm' => $participationForm,
         ]);
     }
 
@@ -165,7 +213,7 @@ class ResponsableFormationController extends AbstractController
             return $this->redirectToRoute('responsable_formation_show', ['id' => $formation->getId()]);
         }
 
-        return $this->render('responsable/formation/edit.html.twig', [
+        return $this->render('frontoffice/responsable/formation/edit.html.twig', [
             'formation' => $formation,
             'form'      => $form,
         ]);
@@ -207,7 +255,7 @@ class ResponsableFormationController extends AbstractController
             }
         }
 
-        return $this->render('responsable/formation/participants.html.twig', [
+        return $this->render('frontoffice/responsable/formation/participants.html.twig', [
             'formation'         => $formation,
             'participants'      => $participants,
             'quizResultsByUser' => $quizResultsByUser,
@@ -254,9 +302,9 @@ class ResponsableFormationController extends AbstractController
     #[Route('/club/membres', name: 'club_membres', methods: ['GET'])]
     public function clubMembres(): Response
     {
-        $club = $this->getMyClub();
+        $club = $this->requireMyClub();
 
-        return $this->render('responsable/club/membres.html.twig', [
+        return $this->render('frontoffice/responsable/club/membres.html.twig', [
             'club'    => $club,
             'membres' => $club->getMembres(),
         ]);
@@ -268,7 +316,7 @@ class ResponsableFormationController extends AbstractController
     #[Route('/club/membres/{userId}/remove', name: 'club_membre_remove', methods: ['POST'])]
     public function removeClubMembre(Request $request, int $userId): Response
     {
-        $club = $this->getMyClub();
+        $club = $this->requireMyClub();
 
         if (!$this->isCsrfTokenValid('remove_membre' . $userId, $request->request->get('_token'))) {
             $this->addFlash('danger', 'Token de sécurité invalide.');
@@ -295,7 +343,7 @@ class ResponsableFormationController extends AbstractController
     #[Route('/resultats', name: 'resultats', methods: ['GET'])]
     public function resultats(): Response
     {
-        $club = $this->getMyClub();
+        $club = $this->requireMyClub();
 
         $resultsByFormation = [];
         foreach ($club->getFormations() as $formation) {
@@ -317,14 +365,14 @@ class ResponsableFormationController extends AbstractController
             }
         }
 
-        return $this->render('responsable/resultats.html.twig', [
-            'club'                 => $club,
-            'resultsByFormation'   => $resultsByFormation,
+        return $this->render('frontoffice/responsable/resultats.html.twig', [
+            'club'               => $club,
+            'resultsByFormation' => $resultsByFormation,
         ]);
     }
 
     // ──────────────────────────────────────────────
-    //  HELPER: image upload (shared with FormationController)
+    //  HELPER: image upload
     // ──────────────────────────────────────────────
 
     private function handleImageUpload(
@@ -333,7 +381,7 @@ class ResponsableFormationController extends AbstractController
         SluggerInterface $slugger,
     ): void {
         /** @var \Symfony\Component\HttpFoundation\File\UploadedFile|null $imageFile */
-        $imageFile = $form->get('image')->getData();
+        $imageFile = $form->get('imageFile')->getData();
         if (!$imageFile) {
             return;
         }

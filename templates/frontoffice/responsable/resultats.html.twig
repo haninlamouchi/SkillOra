@@ -1,0 +1,67 @@
+{% extends 'frontoffice/responsable/base.html.twig' %}
+
+{% block title %}Résultats Quiz | SkillOra{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Résultats des Quiz</h2>
+            <p class="text-muted mb-0">Club : <strong>{{ club.nom }}</strong></p>
+        </div>
+        <a href="{{ path('responsable_dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fa fa-arrow-left me-1"></i> Dashboard
+        </a>
+    </div>
+
+    {% if resultsByFormation is empty %}
+        <div class="alert alert-info">Aucun résultat de quiz disponible pour votre club.</div>
+    {% else %}
+        {% for formationId, data in resultsByFormation %}
+            <div class="card shadow-sm border-0 rounded-3 mb-4">
+                <div class="card-header bg-dark text-white fw-bold">
+                    <i class="fa fa-graduation-cap me-2"></i>{{ data.formation.titre }}
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Étudiant</th>
+                                <th>Quiz</th>
+                                <th>Score</th>
+                                <th>Pourcentage</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in data.results %}
+                                {% set pct = result.totalPoints > 0 ? ((result.score / result.totalPoints) * 100)|round(1) : 0 %}
+                                <tr>
+                                    <td>
+                                        <i class="fa fa-user me-1 text-secondary"></i>
+                                        {{ result.user.fullName }}
+                                    </td>
+                                    <td>{{ result.quiz.titre }}</td>
+                                    <td>{{ result.score }} / {{ result.totalPoints }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height:8px">
+                                                <div class="progress-bar {{ pct >= 70 ? 'bg-success' : (pct >= 40 ? 'bg-warning' : 'bg-danger') }}"
+                                                     style="width: {{ pct }}%"></div>
+                                            </div>
+                                            <small>{{ pct }}%</small>
+                                        </div>
+                                    </td>
+                                    <td>{{ result.datePassage|date('d/m/Y H:i') }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+</div>
+{% endblock %}

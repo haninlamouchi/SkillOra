@@ -18,8 +18,9 @@ class ResultatQuiz
     #[ORM\JoinColumn(nullable: false)]
     private ?Quiz $quiz = null;
 
+    // ✅ DÉJÀ OK : referencedColumnName: 'id_User' présent
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: 'user_id', nullable: false, referencedColumnName: 'id_User')]
     private ?User $user = null;
 
     #[ORM\Column]

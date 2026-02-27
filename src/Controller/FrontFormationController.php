@@ -14,6 +14,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Entity\Favorite;
+use App\Repository\FavoriteRepository;
+
 
 #[Route('/formations', name: 'front_formation_')]
 class FrontFormationController extends AbstractController
@@ -23,6 +26,7 @@ class FrontFormationController extends AbstractController
         private FormationRepository $formationRepo,
         private ParticipationFormationRepository $participationRepo,
         private ResultatQuizRepository $resultatRepo,
+        private FavoriteRepository $favoriteRepo,
     ) {}
 
     // ──────────────────────────────────────────────
@@ -35,7 +39,7 @@ class FrontFormationController extends AbstractController
         /** @var User|null $user */
         $user = $this->getUser();
 
-        if ($user && $this->isGranted('ROLE_ETUDIANT')) {
+        if ($user && $this->isGranted('ROLE_MEMBRE')) {
             // Students only see formations from clubs they joined
             $formations = $this->formationRepo->findByStudentClubs($user);
         } else {
@@ -46,10 +50,16 @@ class FrontFormationController extends AbstractController
         if ($user) {
             $participatedIds = $this->participationRepo->findParticipatedFormationIds($user);
         }
+        $favoritesIds = [];
+
+        if ($user) {
+            $favoritesIds = $this->favoriteRepo->findUserFavoritesIds($user);
+        }
 
         return $this->render('frontoffice/formation/index.html.twig', [
             'formations'      => $formations,
             'participatedIds' => $participatedIds,
+            'favoritesIds'    => $favoritesIds,
         ]);
     }
 
@@ -58,7 +68,7 @@ class FrontFormationController extends AbstractController
     // ──────────────────────────────────────────────
 
     #[Route('/mes-formations', name: 'mes_formations', methods: ['GET'])]
-    #[IsGranted('ROLE_ETUDIANT')]
+    #[IsGranted('ROLE_MEMBRE')]
     public function mesFormations(): Response
     {
         /** @var User $user */
@@ -78,7 +88,7 @@ class FrontFormationController extends AbstractController
     // ──────────────────────────────────────────────
 
     #[Route('/en-cours', name: 'en_cours', methods: ['GET'])]
-    #[IsGranted('ROLE_ETUDIANT')]
+    #[IsGranted('ROLE_MEMBRE')]
     public function enCours(): Response
     {
         /** @var User $user */
@@ -104,7 +114,7 @@ class FrontFormationController extends AbstractController
         $user = $this->getUser();
 
         // Students can only view formations from their clubs
-        if ($user && $this->isGranted('ROLE_ETUDIANT')) {
+        if ($user && $this->isGranted('ROLE_MEMBRE')) {
             $studentClubIds = array_map(
                 fn($c) => $c->getId(),
                 $user->getClubs()->toArray()
@@ -143,7 +153,7 @@ class FrontFormationController extends AbstractController
     // ──────────────────────────────────────────────
 
     #[Route('/{id}/participer', name: 'participate', methods: ['POST'])]
-    #[IsGranted('ROLE_ETUDIANT')]
+    #[IsGranted('ROLE_MEMBRE')]
     public function participate(Request $request, Formation $formation): Response
     {
         /** @var User $user */
@@ -185,7 +195,7 @@ class FrontFormationController extends AbstractController
     // ──────────────────────────────────────────────
 
     #[Route('/{id}/annuler', name: 'cancel', methods: ['POST'])]
-    #[IsGranted('ROLE_ETUDIANT')]
+    #[IsGranted('ROLE_MEMBRE')]
     public function cancel(Request $request, Formation $formation): Response
     {
         /** @var User $user */
@@ -208,5 +218,39 @@ class FrontFormationController extends AbstractController
         }
 
         return $this->redirectToRoute('front_formation_show', ['id' => $formation->getId()]);
+    }
+
+    // ──────────────────────────────────────────────
+    //  TOGGLE FAVORITE 
+    // ──────────────────────────────────────────────
+
+    #[Route('/{id}/favorite', name: 'toggle_favorite', methods: ['GET'])]
+    public function toggleFavorite(Formation $formation): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $favorite = $this->favoriteRepo->findOneBy([
+            'user' => $user,
+            'formation' => $formation,
+        ]);
+
+        if ($favorite) {
+            // remove favorite
+            $this->em->remove($favorite);
+            $this->addFlash('success', 'Retiré des favoris ❤️');
+        } else {
+            // add favorite
+            $favorite = new Favorite();
+            $favorite->setUser($user);
+            $favorite->setFormation($formation);
+
+            $this->em->persist($favorite);
+            $this->addFlash('success', 'Ajouté aux favoris ❤️');
+        }
+
+        $this->em->flush();
+
+        return $this->redirectToRoute('front_formation_index');
     }
 }

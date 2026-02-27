@@ -1,0 +1,583 @@
+﻿{% extends 'backoffice/base.html.twig' %}
+{% block title %}{{ formation.titre }} | Admin SkillOra{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* ── Base ── */
+.fo-page { font-family: "Inter", sans-serif; color: #1e2130; }
+
+/* ── Hero ── */
+.fo-hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e2f5c 55%, #0f3460 100%);
+  border-radius: 18px;
+  position: relative;
+  overflow: hidden;
+  padding: 32px 36px;
+}
+.fo-hero::before {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(99,102,241,.12) 0%, transparent 65%);
+  pointer-events: none;
+}
+.fo-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -50px; left: 30%;
+  width: 250px; height: 250px;
+  background: radial-gradient(circle, rgba(59,130,246,.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+.fo-hero-title { font-size: 1.55rem; font-weight: 700; line-height: 1.3; color: #fff; letter-spacing: -.02em; }
+.fo-breadcrumb a { color: rgba(255,255,255,.45); font-size: .76rem; text-decoration: none; transition: color .15s; }
+.fo-breadcrumb a:hover { color: rgba(255,255,255,.7); }
+.fo-breadcrumb-sep { color: rgba(255,255,255,.25); margin: 0 6px; font-size: .7rem; }
+
+/* ── Stat chips ── */
+.stat-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 100px;
+  padding: 4px 12px;
+  font-size: .75rem; color: rgba(255,255,255,.82);
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+  font-weight: 500;
+}
+.stat-chip i { font-size: .85rem; opacity: .7; }
+
+/* ── Pill nav ── */
+.pill-nav {
+  background: #fff;
+  border-radius: 100px;
+  padding: 5px 6px;
+  display: inline-flex; gap: 2px; flex-wrap: nowrap;
+  overflow-x: auto; max-width: 100%;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+  position: sticky; top: 60px; z-index: 100;
+  scrollbar-width: none;
+}
+.pill-nav::-webkit-scrollbar { display: none; }
+.pill-nav a {
+  display: inline-flex; align-items: center; gap: 5px;
+  color: #6b7280; font-size: .775rem; font-weight: 600;
+  text-decoration: none; padding: 6px 14px; border-radius: 100px;
+  transition: all .2s; white-space: nowrap;
+}
+.pill-nav a:hover { background: #f3f4f6; color: #374151; }
+.pill-nav a.active { background: #3949ab; color: #fff; box-shadow: 0 2px 10px rgba(57,73,171,.35); }
+.pill-nav .cnt {
+  background: currentColor; color: #fff; min-width: 18px; height: 18px;
+  border-radius: 100px; font-size: .65rem; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 5px; opacity: .22;
+}
+.pill-nav a.active .cnt { opacity: .35; }
+
+/* ── Sections ── */
+.sec-anchor { scroll-margin-top: 90px; }
+
+/* ── Section card ── */
+.s-card { border: none !important; border-radius: 16px !important; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 20px rgba(0,0,0,.05) !important; overflow: hidden; }
+.s-card-header {
+  background: #fff; padding: 16px 22px;
+  border-bottom: 1px solid #f1f2f6 !important;
+  display: flex; align-items: center; gap: 12px;
+}
+.s-card-header .s-icon {
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.s-card-header .s-title { font-size: .925rem; font-weight: 700; color: #1e2130; }
+.s-card-header .s-cnt { font-size: .72rem; font-weight: 600; padding: 3px 9px; border-radius: 100px; margin-left: 6px; }
+
+/* ── Info blocks ── */
+.ib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; padding: 20px; }
+.ib { background: #f8f9fe; border-radius: 12px; padding: 14px 16px; border: 1px solid #eef0f8; }
+.ib-full { grid-column: 1 / -1; }
+.ib .ib-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: #9298a8; font-weight: 700; margin-bottom: 5px; }
+.ib .ib-val { font-size: .9rem; font-weight: 500; color: #2d3142; }
+
+/* ── Video tiles ── */
+.vid-tile { border-radius: 14px; border: 1px solid #eef0f8 !important; transition: box-shadow .2s, transform .2s; background: #fff; overflow: hidden; }
+.vid-tile:hover { box-shadow: 0 8px 32px rgba(0,0,0,.1) !important; transform: translateY(-4px); }
+.vid-tile .v-info { padding: 10px 14px 4px; }
+.vid-tile .v-info h6 { font-size: .82rem; font-weight: 700; color: #1e2130; margin-bottom: 3px; }
+.vid-tile .v-info p { font-size: .74rem; color: #9298a8; }
+.vid-tile .v-foot { padding: 8px 14px; border-top: 1px solid #f1f2f6; display: flex; justify-content: flex-end; }
+
+/* ── Avatar ── */
+.av { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #3949ab, #1e88e5); color: #fff; font-weight: 700; font-size: .78rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.av-sm { width: 28px; height: 28px; font-size: .68rem; }
+
+/* ── Micro progress ── */
+.micro-bar { height: 5px; border-radius: 3px; background: #eef0f8; overflow: hidden; margin-top: 3px; }
+.micro-fill { height: 100%; border-radius: 3px; transition: width .4s; }
+
+/* ── Quiz tiles ── */
+.quiz-tile { border-radius: 14px; border: 1px solid #eef0f8 !important; transition: box-shadow .2s, transform .2s; background: #fff; overflow: hidden; }
+.quiz-tile:hover { box-shadow: 0 8px 32px rgba(0,0,0,.1) !important; transform: translateY(-4px); }
+
+/* ── Rank dots ── */
+.rank-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 700; flex-shrink: 0; margin: 0 auto; }
+.rank-1 { background: linear-gradient(135deg, #ffd700, #f59e0b); color: #7c4c00; box-shadow: 0 2px 8px rgba(245,158,11,.3); }
+.rank-2 { background: linear-gradient(135deg, #e2e8f0, #cbd5e1); color: #475569; }
+.rank-3 { background: linear-gradient(135deg, #fecaca, #fca5a5); color: #991b1b; }
+.rank-n { background: #f3f4f6; color: #9ca3af; }
+
+/* ── Tables ── */
+.fo-table thead th { font-size: .71rem; text-transform: uppercase; letter-spacing: .06em; color: #9298a8; font-weight: 700; padding-top: 14px; padding-bottom: 14px; border-bottom: none; }
+.fo-table tbody tr { transition: background .15s; }
+.fo-table tbody tr:hover { background: #f8f9fe; }
+.fo-table td { padding-top: 13px; padding-bottom: 13px; border-color: #f1f2f6; vertical-align: middle; }
+
+/* ── Delete modal ── */
+.del-modal .modal-content { border-radius: 20px; border: none; overflow: hidden; }
+.del-modal .modal-body { padding: 36px 32px; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="fo-page">
+
+{% for type, messages in app.flashes %}
+  {% for message in messages %}
+  <div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }} alert-dismissible fade show d-flex align-items-center gap-2 mb-3 rounded-3" role="alert">
+    <i class="mdi mdi-{{ type == 'success' ? 'check-circle-outline' : 'alert-circle-outline' }} fs-6"></i>
+    <span>{{ message }}</span>
+    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+{% endfor %}
+
+{# ═══ HERO ═══ #}
+<div class="fo-hero mb-4">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-8">
+      <nav class="fo-breadcrumb mb-2">
+        <a href="{{ path('admin_dashboard') }}"><i class="mdi mdi-view-dashboard-outline" style="font-size:.8rem;margin-right:3px"></i>Dashboard</a>
+        <span class="fo-breadcrumb-sep">›</span>
+        <span style="color:rgba(255,255,255,.5);font-size:.76rem">{{ formation.titre|slice(0,50) }}{{ formation.titre|length > 50 ? '…' }}</span>
+      </nav>
+
+      <h1 class="fo-hero-title mb-3">{{ formation.titre }}</h1>
+
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        {% if formation.club %}
+          <span class="stat-chip"><i class="mdi mdi-domain"></i>{{ formation.club.nom }}{% if formation.club.responsable %}<span style="opacity:.5;margin:0 2px">·</span><span style="opacity:.65">{{ formation.club.responsable.fullName }}</span>{% endif %}</span>
+        {% endif %}
+        {% set today = "now"|date("Y-m-d") %}
+        {% if formation.dateFin and formation.dateFin|date('Y-m-d') < today %}
+          <span class="stat-chip" style="background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.25);color:#fca5a5"><i class="mdi mdi-check-circle" style="opacity:1"></i>Terminée</span>
+        {% elseif formation.dateDebut and formation.dateDebut|date('Y-m-d') <= today %}
+          <span class="stat-chip" style="background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.25);color:#86efac"><i class="mdi mdi-play-circle" style="opacity:1"></i>En cours</span>
+        {% else %}
+          <span class="stat-chip" style="background:rgba(251,191,36,.15);border-color:rgba(251,191,36,.25);color:#fde68a"><i class="mdi mdi-clock-outline" style="opacity:1"></i>À venir</span>
+        {% endif %}
+      </div>
+
+      <div class="d-flex flex-wrap gap-2">
+        {% if formation.dateDebut %}<span class="stat-chip"><i class="mdi mdi-calendar-arrow-right"></i>Début {{ formation.dateDebut|date('d/m/Y') }}</span>{% endif %}
+        {% if formation.dateFin %}<span class="stat-chip"><i class="mdi mdi-calendar-arrow-left"></i>Fin {{ formation.dateFin|date('d/m/Y') }}</span>{% endif %}
+        <span class="stat-chip"><i class="mdi mdi-video-outline"></i>{{ formation.videos|length }} vidéo{{ formation.videos|length != 1 ? 's' : '' }}</span>
+        <span class="stat-chip"><i class="mdi mdi-account-group-outline"></i>{{ formation.participations|length }} participant{{ formation.participations|length != 1 ? 's' : '' }}</span>
+        <span class="stat-chip"><i class="mdi mdi-help-circle-outline"></i>{{ formation.quizzes|length }} quiz</span>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="d-flex flex-column align-items-lg-end gap-3">
+        {% if formation.image %}
+          <img src="{{ formation.image }}" alt="{{ formation.titre }}"
+               class="rounded-3 d-none d-lg-block"
+               style="max-height:100px;max-width:170px;object-fit:cover;border:2px solid rgba(255,255,255,.12);box-shadow:0 8px 24px rgba(0,0,0,.3)">
+        {% endif %}
+        <div class="d-flex gap-2 flex-wrap justify-content-lg-end">
+          <a href="{{ path('admin_dashboard') }}" class="btn btn-sm px-3"
+             style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:10px;font-size:.8rem;font-weight:600;backdrop-filter:blur(6px)">
+            <i class="mdi mdi-arrow-left me-1"></i>Retour
+          </a>
+          <button type="button" class="btn btn-sm btn-danger px-3"
+                  style="border-radius:10px;font-size:.8rem;font-weight:600"
+                  data-bs-toggle="modal" data-bs-target="#deleteModal">
+            <i class="mdi mdi-trash-can-outline me-1"></i>Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ═══ PILL NAV ═══ #}
+<div class="mb-4">
+  <div class="pill-nav">
+    <a href="#sec-details" class="active"><i class="mdi mdi-information-outline"></i>Détails</a>
+    <a href="#sec-videos"><i class="mdi mdi-video-outline"></i>Vidéos<span class="cnt">{{ formation.videos|length }}</span></a>
+    <a href="#sec-participants"><i class="mdi mdi-account-group-outline"></i>Participants<span class="cnt">{{ formation.participations|length }}</span></a>
+    <a href="#sec-quiz"><i class="mdi mdi-help-circle-outline"></i>Quiz<span class="cnt">{{ formation.quizzes|length }}</span></a>
+    <a href="#sec-resultats"><i class="mdi mdi-trophy-outline"></i>Résultats<span class="cnt">{{ quizResults|length }}</span></a>
+  </div>
+</div>
+
+{# ═══ DETAILS ═══ #}
+<div id="sec-details" class="sec-anchor">
+<div class="s-card mb-4">
+  <div class="s-card-header">
+    <div class="s-icon bg-primary bg-opacity-10"><i class="mdi mdi-information-outline text-primary" style="font-size:1.1rem"></i></div>
+    <span class="s-title">Détails de la formation</span>
+  </div>
+  <div class="ib-grid">
+    <div class="ib ib-full">
+      <div class="ib-label"><i class="mdi mdi-text-box-outline me-1"></i>Description</div>
+      <div class="ib-val">{{ formation.description ?? '—' }}</div>
+    </div>
+    <div class="ib">
+      <div class="ib-label"><i class="mdi mdi-domain me-1"></i>Club</div>
+      <div class="ib-val">
+        {% if formation.club %}{{ formation.club.nom }}
+          {% if formation.club.responsable %}<div class="text-muted" style="font-size:.78rem;margin-top:2px">{{ formation.club.responsable.fullName }}</div>{% endif %}
+        {% else %}—{% endif %}
+      </div>
+    </div>
+    <div class="ib">
+      <div class="ib-label"><i class="mdi mdi-calendar-arrow-right me-1"></i>Date de début</div>
+      <div class="ib-val">{{ formation.dateDebut ? formation.dateDebut|date('d/m/Y') : '—' }}</div>
+    </div>
+    <div class="ib">
+      <div class="ib-label"><i class="mdi mdi-calendar-arrow-left me-1"></i>Date de fin</div>
+      <div class="ib-val">{{ formation.dateFin ? formation.dateFin|date('d/m/Y') : '—' }}</div>
+    </div>
+    <div class="ib">
+      <div class="ib-label"><i class="mdi mdi-link-variant me-1"></i>Lien ressources</div>
+      <div class="ib-val">
+        {% if formation.lienRessources %}
+          <a href="{{ formation.lienRessources }}" target="_blank" class="text-primary" style="font-size:.85rem">
+            <i class="mdi mdi-open-in-new me-1"></i>{{ formation.lienRessources|slice(0,45) }}{{ formation.lienRessources|length > 45 ? '…' }}
+          </a>
+        {% else %}—{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+{# ═══ VIDEOS ═══ #}
+<div id="sec-videos" class="sec-anchor">
+<div class="s-card mb-4">
+  <div class="s-card-header">
+    <div class="s-icon" style="background:rgba(6,182,212,.1)"><i class="mdi mdi-video-outline" style="color:#06b6d4;font-size:1.1rem"></i></div>
+    <span class="s-title">Vidéos</span>
+    <span class="s-cnt" style="background:rgba(6,182,212,.1);color:#0891b2">{{ formation.videos|length }}</span>
+  </div>
+  <div class="p-3 p-md-4">
+    {% if formation.videos|length > 0 %}
+    <div class="row g-3">
+      {% for video in formation.videos %}
+      <div class="col-md-6 col-xl-4">
+        <div class="vid-tile">
+          <div class="ratio ratio-16x9" style="overflow:hidden">
+            <video controls style="background:#0f172a;width:100%;height:100%;object-fit:contain">
+              <source src="{{ video.videoPath }}" type="video/mp4">
+            </video>
+          </div>
+          <div class="v-info">
+            <h6>{{ video.titre }}</h6>
+            {% if video.description %}<p class="mb-0">{{ video.description }}</p>{% endif %}
+          </div>
+          <div class="v-foot">
+            <form action="{{ path('app_formation_delete_video', {id: formation.id, videoId: video.id}) }}" method="post" onsubmit="return confirm('Supprimer cette vidéo ?')">
+              <input type="hidden" name="_token" value="{{ csrf_token('delete_video' ~ video.id) }}">
+              <button type="submit" class="btn btn-sm px-3" style="background:#fff5f5;border:1px solid #fecaca;color:#dc2626;border-radius:8px;font-size:.78rem;font-weight:600">
+                <i class="mdi mdi-trash-can-outline me-1"></i>Supprimer
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+      <div style="width:64px;height:64px;border-radius:50%;background:#f1f5f9;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px">
+        <i class="mdi mdi-video-off-outline text-muted" style="font-size:1.7rem"></i>
+      </div>
+      <p class="text-muted small mb-0">Aucune vidéo pour cette formation.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+</div>
+
+{# ═══ PARTICIPANTS ═══ #}
+<div id="sec-participants" class="sec-anchor">
+<div class="s-card mb-4">
+  <div class="s-card-header">
+    <div class="s-icon" style="background:rgba(34,197,94,.1)"><i class="mdi mdi-account-group-outline" style="color:#16a34a;font-size:1.1rem"></i></div>
+    <span class="s-title">Participants</span>
+    <span class="s-cnt" style="background:rgba(34,197,94,.1);color:#16a34a">{{ formation.participations|length }}</span>
+  </div>
+  {% if formation.participations|length > 0 %}
+  <div class="table-responsive">
+    <table class="table fo-table mb-0">
+      <thead><tr>
+        <th class="ps-4" style="width:48px">#</th>
+        <th>Participant</th>
+        <th>Email</th>
+        <th>Rôle</th>
+        <th class="text-center" style="min-width:150px">Score Quiz</th>
+        <th class="pe-4">Inscrit le</th>
+      </tr></thead>
+      <tbody>
+        {% for participation in formation.participations %}
+        {% set uid = participation.user.id %}
+        <tr>
+          <td class="ps-4 text-muted small">{{ loop.index }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="av">{{ participation.user.fullName|first|upper }}</div>
+              <span class="fw-semibold" style="font-size:.875rem">{{ participation.user.fullName }}</span>
+            </div>
+          </td>
+          <td class="text-muted small">{{ participation.user.email }}</td>
+          <td>
+            {% set r = participation.user.role %}
+            <span class="badge px-2 py-1 rounded-pill fw-semibold"
+              style="font-size:.7rem;
+              {% if r == 'admin' %}background:rgba(239,68,68,.1);color:#dc2626
+              {% elseif r == 'responsable_club' %}background:rgba(245,158,11,.1);color:#d97706
+              {% elseif r == 'etudiant' %}background:rgba(57,73,171,.1);color:#3949ab
+              {% else %}background:rgba(6,182,212,.1);color:#0891b2{% endif %}">
+              {{ r }}
+            </span>
+          </td>
+          <td class="text-center">
+            {% if participantScores[uid] is defined %}
+              {% set s = participantScores[uid] %}
+              <div style="min-width:110px;margin:0 auto">
+                <div class="d-flex justify-content-between" style="font-size:.75rem;margin-bottom:4px">
+                  <span class="fw-semibold">{{ s.score }}/{{ s.totalPoints }}</span>
+                  <span class="fw-bold {% if s.pct >= 70 %}text-success{% elseif s.pct >= 50 %}text-warning{% else %}text-danger{% endif %}">{{ s.pct }}%</span>
+                </div>
+                <div class="micro-bar">
+                  <div class="micro-fill {% if s.pct >= 70 %}bg-success{% elseif s.pct >= 50 %}bg-warning{% else %}bg-danger{% endif %}" style="width:{{ s.pct }}%"></div>
+                </div>
+              </div>
+            {% else %}<span class="text-muted small">—</span>{% endif %}
+          </td>
+          <td class="pe-4 text-muted small">{{ participation.dateParticipation|date('d/m/Y') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="p-5 text-center">
+    <div style="width:64px;height:64px;border-radius:50%;background:#f1f5f9;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px">
+      <i class="mdi mdi-account-multiple-remove-outline text-muted" style="font-size:1.7rem"></i>
+    </div>
+    <p class="text-muted small mb-0">Aucun participant inscrit.</p>
+  </div>
+  {% endif %}
+</div>
+</div>
+
+{# ═══ QUIZ ═══ #}
+<div id="sec-quiz" class="sec-anchor">
+<div class="s-card mb-4">
+  <div class="s-card-header">
+    <div class="s-icon" style="background:rgba(245,158,11,.1)"><i class="mdi mdi-help-circle-outline" style="color:#d97706;font-size:1.1rem"></i></div>
+    <span class="s-title">Quiz</span>
+    <span class="s-cnt" style="background:rgba(245,158,11,.1);color:#d97706">{{ formation.quizzes|length }}</span>
+  </div>
+  <div class="p-3 p-md-4">
+    {% if formation.quizzes|length > 0 %}
+    <div class="row g-3">
+      {% for quiz in formation.quizzes %}
+      <div class="col-md-6 col-xl-4">
+        <div class="quiz-tile">
+          <div class="p-3">
+            <div class="d-flex align-items-start gap-3 mb-3">
+              <div class="s-icon mt-1" style="background:rgba(245,158,11,.1);flex-shrink:0">
+                <i class="mdi mdi-help-circle-outline" style="color:#d97706"></i>
+              </div>
+              <div>
+                <div class="fw-bold" style="font-size:.875rem;color:#1e2130">{{ quiz.titre }}</div>
+                <small class="text-muted">{{ quiz.questions|length }} question{{ quiz.questions|length != 1 ? 's' : '' }}</small>
+              </div>
+            </div>
+            {% if quiz.description %}
+              <p class="small text-muted mb-3 ps-2" style="border-left:3px solid #fde68a;font-size:.76rem;line-height:1.5">
+                {{ quiz.description|slice(0,115) }}{{ quiz.description|length > 115 ? '…' }}
+              </p>
+            {% endif %}
+            <div class="d-flex flex-wrap gap-1">
+              {% if quiz.duree %}
+              <span style="background:#f8f9fe;border:1px solid #eef0f8;border-radius:20px;padding:2px 10px;font-size:.72rem;color:#6b7280;font-weight:600">
+                <i class="mdi mdi-clock-outline me-1"></i>{{ quiz.duree }} min
+              </span>
+              {% endif %}
+              <span style="background:#f8f9fe;border:1px solid #eef0f8;border-radius:20px;padding:2px 10px;font-size:.72rem;color:#6b7280;font-weight:600">
+                <i class="mdi mdi-format-list-checks me-1"></i>{{ quiz.questions|length }} Q
+              </span>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center px-3 py-2" style="border-top:1px solid #f1f2f6">
+            <a href="{{ path('app_quiz_show', {formationId: formation.id, id: quiz.id}) }}"
+               class="btn btn-sm px-3"
+               style="background:#eff1fe;border:none;color:#3949ab;border-radius:8px;font-size:.78rem;font-weight:600">
+              <i class="mdi mdi-eye-outline me-1"></i>Voir
+            </a>
+            <form action="{{ path('app_quiz_delete', {formationId: formation.id, id: quiz.id}) }}" method="post" onsubmit="return confirm('Supprimer ce quiz et toutes ses questions ?')">
+              <input type="hidden" name="_token" value="{{ csrf_token('delete_quiz' ~ quiz.id) }}">
+              <button type="submit" class="btn btn-sm px-2"
+                      style="background:#fff5f5;border:1px solid #fecaca;color:#dc2626;border-radius:8px;font-size:.78rem">
+                <i class="mdi mdi-trash-can-outline"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+      <div style="width:64px;height:64px;border-radius:50%;background:#f1f5f9;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px">
+        <i class="mdi mdi-help-circle-outline text-muted" style="font-size:1.7rem"></i>
+      </div>
+      <p class="text-muted small mb-0">Aucun quiz pour cette formation.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+</div>
+
+{# ═══ RÉSULTATS ═══ #}
+<div id="sec-resultats" class="sec-anchor">
+<div class="s-card mb-5">
+  <div class="s-card-header">
+    <div class="s-icon bg-primary bg-opacity-10"><i class="mdi mdi-trophy-outline text-primary" style="font-size:1.1rem"></i></div>
+    <span class="s-title">Résultats des Quiz</span>
+    <span class="s-cnt bg-primary bg-opacity-10 text-primary">{{ quizResults|length }}</span>
+  </div>
+  {% if quizResults|length > 0 %}
+  <div class="table-responsive">
+    <table class="table fo-table mb-0">
+      <thead><tr>
+        <th class="ps-4 text-center" style="width:60px">Rang</th>
+        <th>Participant</th>
+        <th>Quiz</th>
+        <th class="text-center">Score</th>
+        <th class="text-center" style="min-width:160px">Résultat</th>
+        <th class="pe-4 text-end">Date</th>
+      </tr></thead>
+      <tbody>
+        {% for res in quizResults %}
+        {% set pct = res.percentage %}
+        <tr>
+          <td class="ps-4 text-center">
+            {% if loop.index == 1 %}<div class="rank-dot rank-1"><i class="mdi mdi-trophy" style="font-size:.8rem"></i></div>
+            {% elseif loop.index == 2 %}<div class="rank-dot rank-2">2</div>
+            {% elseif loop.index == 3 %}<div class="rank-dot rank-3">3</div>
+            {% else %}<div class="rank-dot rank-n">{{ loop.index }}</div>{% endif %}
+          </td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="av av-sm">{{ res.user.fullName|first|upper }}</div>
+              <div>
+                <div class="fw-semibold" style="font-size:.85rem">{{ res.user.fullName }}</div>
+                <small class="text-muted" style="font-size:.73rem">{{ res.user.email }}</small>
+              </div>
+            </div>
+          </td>
+          <td class="text-muted small">{{ res.quiz.titre }}</td>
+          <td class="text-center">
+            <span class="fw-bold">{{ res.score }}</span>
+            <span class="text-muted small"> / {{ res.totalPoints }}</span>
+          </td>
+          <td class="text-center">
+            <div style="min-width:130px;margin:0 auto">
+              <div class="d-flex justify-content-between mb-1" style="font-size:.75rem">
+                <span class="fw-bold {% if pct >= 70 %}text-success{% elseif pct >= 50 %}text-warning{% else %}text-danger{% endif %}">{{ pct }}%</span>
+                <span class="text-muted">{{ pct >= 70 ? 'Réussi' : (pct >= 50 ? 'Passable' : 'Échoué') }}</span>
+              </div>
+              <div class="micro-bar">
+                <div class="micro-fill {% if pct >= 70 %}bg-success{% elseif pct >= 50 %}bg-warning{% else %}bg-danger{% endif %}" style="width:{{ pct }}%"></div>
+              </div>
+            </div>
+          </td>
+          <td class="pe-4 text-end text-muted" style="font-size:.8rem">
+            {{ res.datePassage|date('d/m/Y') }}<br>
+            <span style="font-size:.7rem;opacity:.6">{{ res.datePassage|date('H:i') }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="p-5 text-center">
+    <div style="width:64px;height:64px;border-radius:50%;background:#f1f5f9;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px">
+      <i class="mdi mdi-trophy-outline text-muted" style="font-size:1.7rem"></i>
+    </div>
+    <p class="text-muted small mb-0">Aucun résultat de quiz enregistré.</p>
+  </div>
+  {% endif %}
+</div>
+</div>
+
+{# ═══ DELETE MODAL ═══ #}
+<div class="modal fade del-modal" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:420px">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#fee2e2,#fecaca);display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 4px 16px rgba(239,68,68,.2)">
+          <i class="mdi mdi-trash-can-outline" style="font-size:2rem;color:#dc2626"></i>
+        </div>
+        <h5 class="fw-bold mb-1" style="color:#1e2130">Supprimer cette formation ?</h5>
+        <p class="text-muted mb-4" style="font-size:.875rem;line-height:1.6">
+          Cette action est <strong>irréversible</strong>.<br>
+          Toutes les vidéos, quiz et participations associés seront supprimés.
+        </p>
+        <div class="d-flex gap-2 justify-content-center">
+          <button type="button" class="btn px-4 fw-semibold"
+                  style="background:#f3f4f6;border:none;color:#374151;border-radius:10px"
+                  data-bs-dismiss="modal">
+            <i class="mdi mdi-close me-1"></i>Annuler
+          </button>
+          <form method="POST" action="{{ path('admin_formation_delete', {id: formation.id}) }}" class="d-inline">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ formation.id) }}">
+            <button type="submit" class="btn btn-danger px-4 fw-semibold" style="border-radius:10px">
+              <i class="mdi mdi-trash-can me-1"></i>Confirmer la suppression
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>{# /.fo-page #}
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+  const links = document.querySelectorAll('.pill-nav a');
+  const sections = document.querySelectorAll('.sec-anchor');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector('.pill-nav a[href="#' + e.target.id + '"]');
+      if (a) a.classList.add('active');
+    });
+  }, { rootMargin: '-10% 0px -78% 0px' });
+  sections.forEach(s => io.observe(s));
+})();
+</script>
+{% endblock %}

@@ -1,4 +1,4 @@
-{% extends 'backoffice/base.html.twig' %}
+{% extends 'frontoffice/responsable/base.html.twig' %}
 
 {% block title %}{{ formation.titre }} | Skillora Admin{% endblock %}
 
@@ -31,9 +31,23 @@
                     <a href="{{ path('app_formation_edit', {id: formation.id}) }}" class="btn btn-outline-primary btn-sm">
                         <i class="bi bi-pencil-square me-1"></i> Modifier
                     </a>
+                    {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('admin_dashboard') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i> Retour au Dashboard Admin
+                    </a>
+                    {% else %}
                     <a href="{{ path('app_formation_index') }}" class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-arrow-left me-1"></i> Retour
                     </a>
+                    {% endif %}
+                    {% if is_granted('ROLE_ADMIN') %}
+                    <form method="POST" action="{{ path('app_formation_delete', {id: formation.id}) }}" class="d-inline" onsubmit="return confirm('Supprimer cette formation ?')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ formation.id) }}">
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash3 me-1"></i> Supprimer
+                        </button>
+                    </form>
+                    {% endif %}
                 </div>
             </div>
         </div>

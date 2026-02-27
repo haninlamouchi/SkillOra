@@ -1,4 +1,4 @@
-{% extends 'backoffice/base.html.twig' %}
+{% extends 'frontoffice/responsable/base.html.twig' %}
 
 {% block title %}{{ quiz.titre }} | Skillora Admin{% endblock %}
 
@@ -110,7 +110,7 @@
                                 <a href="{{ path('app_question_edit', {formationId: formation.id, quizId: quiz.id, id: question.id}) }}" class="btn btn-outline-secondary btn-sm" title="Modifier">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <form action="{{ path('app_question_delete', {formationId: formation.id, quizId: quiz.id, id: question.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Supprimer cette question ?')">
+                                <form action="{{ path('app_question_delete', {formationId: formation.id, quizId: quiz.id, id: question.id}) }}" method="post" class="d-inline" data-confirm="Supprimer cette question ?">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete_question' ~ question.id) }}">
                                     <button type="submit" class="btn btn-outline-danger btn-sm" title="Supprimer">
                                         <i class="bi bi-trash3"></i>

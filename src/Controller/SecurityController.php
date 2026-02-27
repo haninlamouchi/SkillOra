@@ -12,8 +12,11 @@ class SecurityController extends AbstractController
     #[Route('/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        // If already logged in, redirect to formations
+        // If already logged in, redirect based on role
         if ($this->getUser()) {
+            if ($this->isGranted('ROLE_ADMIN')) {
+                return $this->redirectToRoute('admin_dashboard');
+            }
             return $this->redirectToRoute('front_formation_index');
         }
 
@@ -29,6 +32,10 @@ class SecurityController extends AbstractController
     #[Route('/redirect-after-login', name: 'app_post_login')]
     public function postLogin(): Response
     {
+        if ($this->isGranted('ROLE_ADMIN')) {
+            return $this->redirectToRoute('admin_dashboard');
+        }
+
         return $this->redirectToRoute('front_formation_index');
     }
 

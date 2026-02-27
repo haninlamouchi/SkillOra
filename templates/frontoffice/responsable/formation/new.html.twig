@@ -1,4 +1,4 @@
-{% extends 'backoffice/base.html.twig' %}
+{% extends 'frontoffice/responsable/base.html.twig' %}
 
 {% block title %}Nouvelle Formation | Skillora Admin{% endblock %}
 
@@ -22,7 +22,11 @@
             <div class="col-lg-8">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4">
-                        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                        {{ form_start(form, {
+                            'action': path('app_formation_new'),
+                            'method': 'POST',
+                            'attr': {'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}
+                        }) }}
 
                         <div class="row mb-3">
                             <div class="col-12">

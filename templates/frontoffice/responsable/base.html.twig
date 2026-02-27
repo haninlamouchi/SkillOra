@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Skillora Admin{% endblock %}</title>
+
+    <!-- Google Fonts (Poppins – same as frontoffice) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Frontoffice vendor CSS (powers the header / nav) -->
+    <link rel="stylesheet" href="{{ asset('assets/frontoffice/vendor/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/fontawesome.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/templatemo-scholar.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/animate.css') }}">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Skillora Admin CSS (page-title, btn-skillora, breadcrumbs…) -->
+    <link rel="stylesheet" href="{{ asset('assets/backoffice/css/skillora-admin.css') }}">
+
+    <style>
+        /* ── Base ── */
+        body {
+            background: #f8f8f8;
+            font-family: "Poppins", sans-serif;
+        }
+
+        /* ── Sticky header offset for content ── */
+        .responsable-content {
+            padding-top: 150px;
+            padding-bottom: 60px;
+            min-height: calc(100vh - 180px);
+        }
+
+        .header-area.header-sticky {
+            height: 100px;          /* change this value if you want taller */
+            display: flex;
+            align-items: center;
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        /* Make navbar content centered vertically */
+        .header-area .main-nav {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Adjust menu links vertical alignment */
+        .header-area .main-nav .nav {
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        /* ── Header gradient (same as formation/quiz pages) ── */
+        .header-area {
+            background: linear-gradient(135deg, #5a0000 0%, #8b1a1a 50%, #a52a2a 100%) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+        .header-area .main-nav .logo h1 {
+            color: #fff !important;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .header-area .main-nav .nav li a {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            transition: color 0.25s ease;
+        }
+        .header-area .main-nav .nav li a:hover,
+        .header-area .main-nav .nav li a.active {
+            color: #fff !important;
+            position: relative;
+        }
+        .header-area .main-nav .nav li a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #fff;
+            border-radius: 3px;
+        }
+
+        /* ── Page hero banner (used by responsable sub-pages) ── */
+        .skillora-hero {
+            background: linear-gradient(135deg, #5a0000 0%, #8b1a1a 50%, #a52a2a 100%);
+            padding: 100px 0 60px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        .skillora-hero::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -80px;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .skillora-hero h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .skillora-hero .breadcrumb a { color: rgba(255,255,255,0.7); text-decoration: none; }
+        .skillora-hero .breadcrumb-item.active { color: rgba(255,255,255,0.9); }
+        .skillora-hero .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.45); }
+
+
+
+        /* ── Cards ── */
+        /* ── Formation Cards (Improved UI – same size, cleaner look) ── */
+
+        .formation-card {
+            border: none;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #ffffff;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.28s cubic-bezier(.4,0,.2,1);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+            position: relative;
+        }
+
+        /* Hover effect */
+        .formation-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 18px 40px rgba(90,0,0,0.15);
+        }
+
+        /* Image */
+        .formation-card .card-img-top {
+            height: 170px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        /* Virtual placeholder (when no image) */
+        .formation-card .card-img-placeholder {
+            height: 170px;
+            width: 100%;
+            background: linear-gradient(135deg, #5a0000 0%, #8b1a1a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative light circle */
+        .formation-card .card-img-placeholder::after {
+            content: "";
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+            top: -60px;
+            right: -60px;
+        }
+
+        .formation-card .card-img-placeholder i {
+            font-size: 3rem;
+            color: rgba(255,255,255,0.9);
+        }
+
+        /* Card body */
+        .formation-card .card-body {
+            padding: 1.3rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        /* Title */
+        .formation-card .card-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 0.4rem;
+            color: #1a1a1a;
+            min-height: 42px; /* keeps cards equal */
+        }
+
+        /* Description */
+        .formation-card .card-desc {
+            font-size: 0.85rem;
+            color: #777;
+            line-height: 1.6;
+            margin-bottom: 0.8rem;
+            min-height: 52px; /* equal height */
+            overflow: hidden;
+        }
+
+        /* Meta section */
+        .formation-card .card-footer-meta {
+            border-top: 1px solid #f1f1f1;
+            padding-top: 0.9rem;
+            margin-top: auto;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* Status badges slightly modern */
+        .formation-card .badge {
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.72rem;
+            padding: 6px 12px;
+        }
+
+        /* Action buttons */
+        .formation-card .btn-action {
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .formation-card .btn-action:hover {
+            transform: translateY(-2px);
+        }
+
+        
+         
+
+
+
+        /* ── Buttons ── */
+        .btn-skillora,
+        .btn-primary {
+            background: #5a0000 !important;
+            border: none !important;
+            border-radius: 10px !important;
+            font-weight: 600;
+            transition: background 0.25s ease, transform 0.2s ease;
+        }
+        .btn-skillora:hover,
+        .btn-primary:hover {
+            background: #7a1a1a !important;
+            transform: translateY(-2px);
+            color: #fff !important;
+        }
+        .btn-outline-primary {
+            border: 2px solid #5a0000 !important;
+            color: #5a0000 !important;
+            border-radius: 8px !important;
+            font-weight: 600;
+            transition: all 0.25s;
+        }
+        .btn-outline-primary:hover {
+            background: #5a0000 !important;
+            color: #fff !important;
+        }
+
+        /* ── Badges ── */
+        .badge { border-radius: 20px; padding: 5px 12px; font-size: 0.75rem; font-weight: 600; }
+        .badge-skillora { background: #5a0000; color: #fff; }
+        .badge-soft     { background: #f0e6e6; color: #5a0000; }
+
+        /* ── Breadcrumb ── */
+        .breadcrumb-sm { font-size: 0.82rem; }
+        .breadcrumb-sm a { color: #5a0000; text-decoration: none; }
+        .breadcrumb-sm a:hover { text-decoration: underline; }
+
+        /* ── Page title ── */
+        .page-title    { font-size: 1.6rem; font-weight: 700; color: #1a1a1a; margin: 0; }
+        .page-subtitle { color: #888; font-size: 0.9rem; margin-top: 4px; }
+
+        /* ── Flash messages auto-dismiss ── */
+        .alert { border-radius: 12px; }
+
+        /* ── Fade-in animation ── */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(18px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Footer ── */
+        footer {
+            background: #5a0000;
+            color: #fff;
+            padding: 28px 0;
+            margin-top: 0;
+        }
+        .bg-skillora-soft {
+            background-color: #f3e6e6 !important;
+        }
+
+        .text-skillora {
+            color: #5a0000 !important;
+        }
+
+        .btn-outline-warning {
+            color: #f59e0b !important;
+            border: 2px solid #f59e0b !important;
+        }
+
+        .btn-outline-warning:hover {
+            background: #f59e0b !important;
+            color: #fff !important;
+        }
+
+        .btn-outline-danger {
+            color: #dc3545 !important;
+            border: 2px solid #dc3545 !important;
+        }
+
+        .btn-outline-danger:hover {
+            background: #dc3545 !important;
+            color: #fff !important;
+        }
+        footer p { margin: 0; font-size: 0.88rem; opacity: 0.85; }
+    </style>
+
+    {% block stylesheets %}{% endblock %}
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+<!-- ===== HEADER ===== -->
+<header class="header-area header-sticky">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <nav class="main-nav">
+                    <!-- Logo -->                    <a href="{{ path('front_home') }}" class="logo">
+                        <h1>SkillOra</h1>
+                    </a>
+
+                    <!-- Menu -->
+                    <ul class="nav">
+                        <li>
+                            <a href="{{ path('front_home') }}"
+                               class="{{ app.request.attributes.get('_route') == 'front_home' ? 'active' : '' }}">
+                                Accueil
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ path('front_formation_index') }}"
+                               class="{{ app.request.attributes.get('_route') starts with 'front_formation' ? 'active' : '' }}">
+                                Formations
+                            </a>
+                        </li>
+
+                        {# ✅ Dashboard only for Responsable Club #}
+                        {% if is_granted('ROLE_RESPONSABLE_CLUB') %}
+                            <li>
+                                <a href="{{ path('app_formation_index') }}"
+                                   class="{{ app.request.attributes.get('_route') starts with 'responsable' ? 'active' : '' }}">
+                                    <i class="fa fa-dashboard"></i> Dashboard
+                                </a>
+                            </li>
+                        {% endif %}
+                        <li><a href="#contact">Contact</a></li>
+                        {% if app.user %}
+                            <li>
+                                <a href="#" class="text-white-50">
+                                    <i class="fa fa-user"></i> {{ app.user.fullName }}
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ path('app_logout') }}" style="color:#f8d7da">
+                                    <i class="fa fa-sign-out"></i> Déconnexion
+                                </a>
+                            </li>
+                        {% else %}
+                            <li>
+                                <a href="{{ path('app_login') }}">
+                                    <i class="fa fa-sign-in"></i> Connexion
+                                </a>                            </li>
+                        {% endif %}
+                    </ul>
+
+                    <a class="menu-trigger">
+                        <span>Menu</span>
+                    </a>
+
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- ===== HEADER END ===== -->
+
+<!-- ===== PAGE CONTENT ===== -->
+<div class="flex-grow-1 responsable-content">
+    {% block body %}{% endblock %}
+</div>
+<!-- ===== PAGE CONTENT END ===== -->
+
+<!-- ===== FOOTER ===== -->
+<footer>
+    <div class="container">
+        <div class="col-lg-12 text-center">
+            <p>© {{ "now"|date("Y") }} SkillOra. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+<!-- ===== FOOTER END ===== -->
+
+<!-- JS -->
+<script src="{{ asset('assets/frontoffice/vendor/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset('assets/frontoffice/vendor/bootstrap/js/bootstrap.min.js') }}"></script>
+<script src="{{ asset('assets/frontoffice/js/isotope.min.js') }}"></script>
+<script src="{{ asset('assets/frontoffice/js/owl-carousel.js') }}"></script>
+<script src="{{ asset('assets/frontoffice/js/counter.js') }}"></script>
+<script src="{{ asset('assets/frontoffice/js/custom.js') }}"></script>
+
+{% block javascripts %}{% endblock %}
+
+</body>
+</html>

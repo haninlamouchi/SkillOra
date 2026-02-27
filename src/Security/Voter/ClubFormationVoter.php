@@ -75,7 +75,7 @@ class ClubFormationVoter extends Voter
             return $this->canManage($user, $formation);
         }
 
-        if (in_array('ROLE_ETUDIANT', $user->getRoles(), true)) {
+        if (in_array('ROLE_MEMBRE', $user->getRoles(), true)) {
             $clubIds = array_map(
                 fn($c) => $c->getId(),
                 $user->getClubs()->toArray()

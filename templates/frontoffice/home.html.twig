@@ -301,7 +301,7 @@
   {# ═══════════════════════════════════════════════════════════
      MES FORMATIONS — visible only for logged-in students
      ═══════════════════════════════════════════════════════════ #}
-  {% if app.user and is_granted('ROLE_ETUDIANT') %}
+  {% if app.user and is_granted('ROLE_MEMBRE') %}
 
     {# ── En cours ─────────────────────────────────── #}
     <section class="section" id="mes-formations">

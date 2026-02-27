@@ -27,7 +27,7 @@ class FrontofficeController extends AbstractController
         $participatedIds = [];
         $myClubs         = [];
 
-        if ($user && $this->isGranted('ROLE_ETUDIANT')) {
+        if ($user && $this->isGranted('ROLE_MEMBRE')) {
             // "Mes Formations": formations the student actively participates in
             $mesFormations = $this->formationRepo->findByParticipant($user);
 

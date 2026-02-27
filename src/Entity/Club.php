@@ -5,55 +5,79 @@ namespace App\Entity;
 use App\Repository\ClubRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity(repositoryClass: ClubRepository::class)]
+#[Vich\Uploadable] 
 class Club
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(name: 'id_Club')]
+    private ?int $id_Club = null;
 
     #[ORM\Column(length: 150)]
+    #[Assert\NotBlank]
     private ?string $nom = null;
 
-    /**
-     * The responsable_club user who manages this club.
-     */
-    #[ORM\OneToOne(targetEntity: User::class, inversedBy: 'clubResponsable')]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(max: 1000)]
+    private ?string $description = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $logo = null;
+
+    #[Vich\UploadableField(mapping: 'club_logo', fileNameProperty: 'logo')]
+    #[Assert\File(
+        maxSize: '2M',
+        mimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
+        mimeTypesMessage: 'Veuillez uploader une image valide (jpeg, png, gif).',
+        maxSizeMessage: 'Le fichier ne doit pas dépasser 2Mo.'
+    )]
+    private ?File $logoFile = null;
+
+    #[ORM\Column(nullable: true)] 
+    private ?\DateTimeImmutable $updatedAt = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Assert\LessThanOrEqual(value: 'today')]
+    private ?\DateTime $dateCreation = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url(message: 'Veuillez entrer une URL valide.')]
+    private ?string $siteWeb = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'clubs')]
+    #[ORM\JoinColumn(name: 'responsable_id', referencedColumnName: 'id_User', nullable: true)]
     private ?User $responsable = null;
-
-    /**
-     * Students who joined this club.
-     *
-     * @var Collection<int, User>
-     */
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'clubs')]
-    #[ORM\JoinTable(name: 'club_membre')]
-    private Collection $membres;
-
+    
     /**
      * @var Collection<int, Formation>
      */
-    #[ORM\OneToMany(
-        targetEntity: Formation::class,
-        mappedBy: 'club',
-        cascade: ['persist', 'remove'],
-        orphanRemoval: true
-    )]
+    #[ORM\OneToMany(mappedBy: 'club', targetEntity: Formation::class)]
     private Collection $formations;
+
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'memberClubs')]
+    #[ORM\JoinTable(name: 'club_membre')]
+    #[ORM\JoinColumn(name: 'club_id', referencedColumnName: 'id_Club')]
+    #[ORM\InverseJoinColumn(name: 'user_id', referencedColumnName: 'id_User')]
+    private Collection $membres;
 
     public function __construct()
     {
-        $this->formations = new ArrayCollection();
         $this->membres = new ArrayCollection();
+        $this->formations = new ArrayCollection();
     }
+
+    // --- Getters / Setters ---
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->id_Club;
     }
 
     public function getNom(): ?string
@@ -67,6 +91,75 @@ class Club
         return $this;
     }
 
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    public function getLogo(): ?string
+    {
+        return $this->logo;
+    }
+
+    public function setLogo(?string $logo): static
+    {
+        $this->logo = $logo;
+        return $this;
+    }
+
+    public function setLogoFile(?File $logoFile = null): void
+    {
+        $this->logoFile = $logoFile;
+
+        if ($logoFile !== null) {
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+    }
+
+    public function getLogoFile(): ?File
+    {
+        return $this->logoFile;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+        return $this;
+    }
+
+    public function getDateCreation(): ?\DateTime
+    {
+        return $this->dateCreation;
+    }
+
+    public function setDateCreation(?\DateTime $dateCreation): static
+    {
+        $this->dateCreation = $dateCreation;
+        return $this;
+    }
+
+    public function getSiteWeb(): ?string
+    {
+        return $this->siteWeb;
+    }
+
+    public function setSiteWeb(?string $siteWeb): static
+    {
+        $this->siteWeb = $siteWeb;
+        return $this;
+    }
+
     public function getResponsable(): ?User
     {
         return $this->responsable;
@@ -77,40 +170,6 @@ class Club
         $this->responsable = $responsable;
         return $this;
     }
-
-    // ── Membres ──────────────────────────────────
-
-    /**
-     * @return Collection<int, User>
-     */
-    public function getMembres(): Collection
-    {
-        return $this->membres;
-    }
-
-    public function addMembre(User $user): static
-    {
-        if (!$this->membres->contains($user)) {
-            $this->membres->add($user);
-            $user->addClub($this);
-        }
-        return $this;
-    }
-
-    public function removeMembre(User $user): static
-    {
-        if ($this->membres->removeElement($user)) {
-            $user->removeClub($this);
-        }
-        return $this;
-    }
-
-    public function hasMembre(User $user): bool
-    {
-        return $this->membres->contains($user);
-    }
-
-    // ── Formations ───────────────────────────────
 
     /**
      * @return Collection<int, Formation>
@@ -141,8 +200,31 @@ class Club
         return $this;
     }
 
+    /**
+     * @return Collection<int, User>
+     */
+    public function getMembres(): Collection
+    {
+        return $this->membres;
+    }
+
+    public function addMembre(User $user): static
+    {
+        if (!$this->membres->contains($user)) {
+            $this->membres->add($user);
+        }
+
+        return $this;
+    }
+
+    public function removeMembre(User $user): static
+    {
+        $this->membres->removeElement($user);
+        return $this;
+    }
+
     public function __toString(): string
     {
-        return $this->nom ?? 'Club #' . $this->id;
+        return $this->nom ?? '';
     }
 }

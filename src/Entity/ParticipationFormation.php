@@ -15,8 +15,9 @@ class ParticipationFormation
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'participations')]
-    #[ORM\JoinColumn(nullable: false)]
+    // ✅ FIX: referencedColumnName obligatoire car la PK de User s'appelle 'id_User' et non 'id'
+    #[ORM\ManyToOne(inversedBy: 'participationsFormation')]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id_User', nullable: false)]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'participations')]
@@ -44,7 +45,6 @@ class ParticipationFormation
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
         return $this;
     }
 
@@ -56,7 +56,6 @@ class ParticipationFormation
     public function setFormation(?Formation $formation): static
     {
         $this->formation = $formation;
-
         return $this;
     }
 
@@ -68,7 +67,6 @@ class ParticipationFormation
     public function setDateParticipation(\DateTime $dateParticipation): static
     {
         $this->dateParticipation = $dateParticipation;
-
         return $this;
     }
 }

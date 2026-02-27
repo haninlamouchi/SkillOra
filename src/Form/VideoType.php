@@ -27,12 +27,14 @@ class VideoType extends AbstractType
                 'attr' => ['class' => 'form-control', 'accept' => 'video/*'],
                 'constraints' => [
                     new File([
-                        'maxSize' => '100M',
+                        'maxSize' => '500M',
                         'mimeTypes' => [
                             'video/mp4',
                             'video/webm',
                             'video/ogg',
                             'video/avi',
+                            'video/mov',
+                            'video/mpeg',
                             'video/x-msvideo',
                             'video/quicktime',
                         ],

@@ -19,7 +19,7 @@ security:
             form_login:
                 login_path: app_login
                 check_path: app_login
-                default_target_path: /formations
+                default_target_path: /redirect-after-login
                 always_use_default_target_path: true
                 enable_csrf: true
             logout:
@@ -27,12 +27,15 @@ security:
                 target: front_home
 
     access_control:
-        # Responsable area — full scope requires ROLE_RESPONSABLE_CLUB
-        - { path: ^/responsable, roles: ROLE_RESPONSABLE_CLUB }
+        # Admin area
+        - { path: ^/admins, roles: ROLE_ADMIN }
+
+        # Responsable area — accessible by responsable OR admin
+        - { path: ^/responsable, roles: [ROLE_RESPONSABLE_CLUB, ROLE_ADMIN] }
 
         # Student-only routes (mes formations, en cours, participate, cancel)
-        - { path: ^/formations/mes-formations, roles: ROLE_ETUDIANT }
-        - { path: ^/formations/en-cours, roles: ROLE_ETUDIANT }
+        - { path: ^/formations/mes-formations, roles: ROLE_MEMBRE }
+        - { path: ^/formations/en-cours, roles: ROLE_MEMBRE }
 
         # Quiz area requires at least ROLE_USER
         - { path: ^/formations/\d+/quiz, roles: ROLE_USER }
@@ -47,3 +50,5 @@ when@test:
                 cost: 4 # Lowest possible value for bcrypt
                 time_cost: 3 # Lowest possible value for argon
                 memory_cost: 10 # Lowest possible value for argon
+
+
