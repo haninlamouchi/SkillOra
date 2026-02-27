@@ -121,7 +121,19 @@
                 <a href="{{ path('admin_dashboard') }}" class="btn btn-outline-secondary btn-sm w-100" title="Réinitialiser">
                     <i class="mdi mdi-refresh"></i>
                 </a>
+                
             </div>
+            <div class="col-md-2">
+    <button
+    class="btn btn-primary w-100"
+    data-bs-toggle="modal"
+    data-bs-target="#calendarModal">
+
+    Voir calendrier
+
+    </button>
+</div>
+            
         </form>
     </div>
 </div>
@@ -282,6 +294,35 @@
         {% endif %}
     </div>
 </div>
+<div class="modal fade"
+id="calendarModal">
+
+<div class="modal-dialog modal-lg">
+
+<div class="modal-content">
+
+<div class="modal-header">
+
+<h5>Calendrier formations</h5>
+
+<button
+class="btn-close"
+data-bs-dismiss="modal">
+</button>
+
+</div>
+
+<div class="modal-body">
+
+<div id="calendar"></div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
 
 {# ---------------- JS ---------------- #}
 <script>
@@ -310,6 +351,35 @@
 
         showGrid(); // default
     });
+</script>
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+
+var calendarEl = document.getElementById('calendar');
+
+var calendar = new FullCalendar.Calendar(
+calendarEl,
+{
+
+initialView:'dayGridMonth',
+
+events:[
+{% for f in formations %}{% if f.dateDebut %}
+{ title:'{{ f.titre|e('js') }}', start:'{{ f.dateDebut|date("Y-m-d") }}', end:'{{ f.dateFin ? f.dateFin|date("Y-m-d") : f.dateDebut|date("Y-m-d") }}' },
+{% endif %}{% endfor %}
+]
+
+});
+
+document.getElementById('calendarModal')
+.addEventListener('shown.bs.modal', function () {
+    calendar.render();
+});
+
+});
 </script>
 {% endblock %}
 

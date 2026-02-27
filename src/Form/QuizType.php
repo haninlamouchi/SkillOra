@@ -17,6 +17,7 @@ class QuizType extends AbstractType
         $builder
             ->add('titre', TextType::class, [
                 'label' => 'Titre du Quiz',
+                'empty_data' => '',
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => 'Ex: Quiz d\'évaluation Module 1',
@@ -25,6 +26,7 @@ class QuizType extends AbstractType
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
                 'required' => false,
+                'empty_data' => '',
                 'attr' => [
                     'class' => 'form-control',
                     'rows' => 3,

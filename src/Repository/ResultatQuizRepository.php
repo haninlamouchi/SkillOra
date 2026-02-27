@@ -40,4 +40,29 @@ class ResultatQuizRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    public function userCanGetCertificate($user): bool
+    {
+        // nombre total de quiz
+        $totalQuiz = $this->getEntityManager()
+            ->getRepository(\App\Entity\Quiz::class)
+            ->count([]);
+
+        // résultats du user
+        $resultats = $this->findBy(['user' => $user]);
+
+        // si pas tous les quiz faits
+        if (count($resultats) < $totalQuiz) {
+            return false;
+        }
+
+        // vérifier note >= 70%
+        foreach ($resultats as $resultat) {
+            if ($resultat->getPercentage() < 70) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

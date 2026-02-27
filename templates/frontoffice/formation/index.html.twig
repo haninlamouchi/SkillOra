@@ -259,7 +259,7 @@
                 {% endif %}
             </div>
 
-            {# Right: Sort + Count #}
+            {# Right: Sort + Count + Calendar #}
             <div class="d-flex align-items-center gap-3">
                 <span class="result-count" id="resultCount">
                     <strong>{{ formations|length }}</strong> formation{{ formations|length != 1 ? 's' : '' }}
@@ -270,6 +270,10 @@
                     <option value="alpha">A → Z</option>
                     <option value="popular">Plus populaires</option>
                 </select>
+                <button class="btn btn-sm" style="background:#5a0000;color:#fff;border-radius:10px;font-weight:600;padding:8px 16px;"
+                        data-bs-toggle="modal" data-bs-target="#calendarModal">
+                    <i class="fa fa-calendar me-1"></i> Calendrier
+                </button>
             </div>
         </div>
     </div>
@@ -390,9 +394,53 @@
     </div>
 </section>
 
+{# ═══ CALENDAR MODAL ═══ #}
+<div class="modal fade" id="calendarModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius:16px;overflow:hidden;">
+            <div class="modal-header" style="background:linear-gradient(135deg,#5a0000,#a52a2a);color:#fff;border:none;">
+                <h5 class="modal-title fw-bold"><i class="fa fa-calendar me-2"></i>Calendrier des formations</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="frontCalendar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block javascripts %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script>
+(function () {
+    var calInitialized = false;
+    var modalEl = document.getElementById('calendarModal');
+    if (!modalEl) return;
+    modalEl.addEventListener('shown.bs.modal', function () {
+        if (calInitialized) return;
+        calInitialized = true;
+        var cal = new FullCalendar.Calendar(document.getElementById('frontCalendar'), {
+            initialView: 'dayGridMonth',
+            locale: 'fr',
+            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,listMonth' },
+            buttonText: { today: "Aujourd'hui", month: 'Mois', list: 'Liste' },
+            eventColor: '#5a0000',
+            events: [
+                {% for f in formations %}{% if f.dateDebut %}
+                { title: '{{ f.titre|e('js') }}', start: '{{ f.dateDebut|date("Y-m-d") }}', end: '{{ f.dateFin ? f.dateFin|date("Y-m-d") : f.dateDebut|date("Y-m-d") }}', url: '{{ path("front_formation_show", {id: f.id}) }}' },
+                {% endif %}{% endfor %}
+            ],
+            eventClick: function(info) {
+                if (info.event.url) { info.jsEvent.preventDefault(); window.location.href = info.event.url; }
+            }
+        });
+        cal.render();
+    });
+}());
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput  = document.getElementById('liveSearch');

@@ -28,6 +28,7 @@ class Formation
     )]
     private Collection $videos;
 
+
     /**
      * @var Collection<int, ParticipationFormation>
      */
@@ -38,7 +39,8 @@ class Formation
         orphanRemoval: true
     )]
     private Collection $participations;
-
+    
+    
     #[ORM\Column(length: 200)]
     #[Assert\NotBlank(message: 'Le titre est obligatoire.')]
     #[Assert\Length(max: 200, maxMessage: 'Le titre ne peut pas dépasser {{ limit }} caractères.')]
@@ -80,6 +82,9 @@ class Formation
      */
     #[ORM\OneToMany(targetEntity: Favorite::class, mappedBy: 'formation')]
     private Collection $favorites;
+    
+    #[ORM\OneToMany(mappedBy: 'formation', targetEntity: Favorite::class)]
+    private Collection $favoritesNum;
 
     public function __construct()
     {
@@ -87,6 +92,7 @@ class Formation
         $this->videos = new ArrayCollection();
         $this->participations = new ArrayCollection();
         $this->favorites = new ArrayCollection();
+        $this->favoritesNum = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -98,6 +104,7 @@ class Formation
     {
         return $this->titre;
     }
+    
 
     public function setTitre(string $titre): static
     {
@@ -302,5 +309,9 @@ class Formation
         }
 
         return $this;
+    }
+    public function getFavoritesNum(): Collection
+    {
+        return $this->favoritesNum;
     }
 }

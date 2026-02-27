@@ -13,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Repository\FavoriteRepository;
 
 #[Route('/admins', name: 'admin_')]
 class BackofficeController extends AbstractController
@@ -23,6 +24,7 @@ class BackofficeController extends AbstractController
         private UserRepository $userRepo,
         private ParticipationFormationRepository $participationRepo,
         private ResultatQuizRepository $resultatRepo,
+        private FavoriteRepository $favoriteRepo,
         private EntityManagerInterface $em,
     ) {}
 
@@ -66,39 +68,52 @@ class BackofficeController extends AbstractController
     // FORMATION SHOW (admin view � read + delete only)
     // ---------------------------------------------
 
-    #[Route('/formation/{id}', name: 'formation_show', methods: ['GET'])]
-    public function formationShow(Formation $formation): Response
-    {
-        $quizResults = [];
-        $participantScores = [];
+        #[Route('/formation/{id}', name: 'formation_show', methods: ['GET'])]
+        public function formationShow(Formation $formation): Response
+        {
+            // ✅ COUNT FAVORITES
+            $favoriteCount = $this->favoriteRepo->count([
+                'formation' => $formation
+            ]);
 
-        foreach ($formation->getQuizzes() as $quiz) {
-            $results = $this->resultatRepo->findBy(['quiz' => $quiz], ['datePassage' => 'DESC']);
-            foreach ($results as $result) {
-                $quizResults[] = $result;
+            // ✅ COUNT PARTICIPATIONS
+            $participantCount = $this->participationRepo->count([
+                'formation' => $formation
+            ]);
+            
+            $quizResults = [];
+            $participantScores = [];
 
-                $uid = $result->getUser()->getId();
-                $pct = $result->getTotalPoints() > 0
-                    ? round(($result->getScore() / $result->getTotalPoints()) * 100)
-                    : 0;
+            foreach ($formation->getQuizzes() as $quiz) {
+                $results = $this->resultatRepo->findBy(['quiz' => $quiz], ['datePassage' => 'DESC']);
+                foreach ($results as $result) {
+                    $quizResults[] = $result;
 
-                if (!isset($participantScores[$uid]) || $pct > $participantScores[$uid]['pct']) {
-                    $participantScores[$uid] = [
-                        'score'       => $result->getScore(),
-                        'totalPoints' => $result->getTotalPoints(),
-                        'pct'         => $pct,
-                        'quizTitre'   => $result->getQuiz()->getTitre(),
-                    ];
+                    $uid = $result->getUser()->getId();
+                    $pct = $result->getTotalPoints() > 0
+                        ? round(($result->getScore() / $result->getTotalPoints()) * 100)
+                        : 0;
+
+                    if (!isset($participantScores[$uid]) || $pct > $participantScores[$uid]['pct']) {
+                        $participantScores[$uid] = [
+                            'score'       => $result->getScore(),
+                            'totalPoints' => $result->getTotalPoints(),
+                            'pct'         => $pct,
+                            'quizTitre'   => $result->getQuiz()->getTitre(),
+                            'userName'    => $result->getUser()->getFullName(),
+                        ];
+                    }
                 }
             }
-        }
 
-        return $this->render('backoffice/formation/show.html.twig', [
-            'formation'         => $formation,
-            'quizResults'       => $quizResults,
-            'participantScores' => $participantScores,
-        ]);
-    }
+            return $this->render('backoffice/formation/show.html.twig', [
+                'formation'         => $formation,
+                'quizResults'       => $quizResults,
+                'participantScores' => $participantScores,
+                'favoriteCount'     => $favoriteCount,      
+                'participantCount'  => $participantCount,
+            ]);
+        }
 
     // ---------------------------------------------
     // FORMATION DELETE
@@ -110,7 +125,7 @@ class BackofficeController extends AbstractController
         if ($this->isCsrfTokenValid('delete' . $formation->getId(), $request->request->get('_token'))) {
             $this->em->remove($formation);
             $this->em->flush();
-            $this->addFlash('success', 'Formation supprim�e avec succ�s.');
+            $this->addFlash('success', 'Formation supprimée avec succès.');
         }
 
         return $this->redirectToRoute('admin_dashboard');

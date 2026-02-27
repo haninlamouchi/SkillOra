@@ -70,3 +70,66 @@
     </div>
 </main>
 {% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('form');
+    if (!form) return;
+
+    var fieldMessages = {
+        'quiz_titre':       'Le titre est obligatoire.',
+        'quiz_duree':       'La durée est obligatoire.'
+    };
+
+    function showError(input, message) {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        var err = input.parentNode.querySelector('.field-val-error');
+        if (!err) {
+            err = document.createElement('div');
+            err.className = 'field-val-error text-danger small mt-1';
+            input.parentNode.appendChild(err);
+        }
+        err.textContent = message;
+        err.style.display = 'block';
+    }
+
+    function clearError(input) {
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+        var err = input.parentNode.querySelector('.field-val-error');
+        if (err) err.style.display = 'none';
+    }
+
+    Object.keys(fieldMessages).forEach(function(id) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        input.addEventListener('blur', function() {
+            if (!this.value.trim()) showError(this, fieldMessages[id]);
+            else clearError(this);
+        });
+        input.addEventListener('input', function() {
+            if (this.value.trim()) clearError(this);
+        });
+    });
+
+    form.addEventListener('submit', function(e) {
+        var valid = true;
+        var firstInvalid = null;
+        Object.keys(fieldMessages).forEach(function(id) {
+            var input = document.getElementById(id);
+            if (input && !input.value.trim()) {
+                showError(input, fieldMessages[id]);
+                if (!firstInvalid) firstInvalid = input;
+                valid = false;
+            }
+        });
+        if (!valid) {
+            e.preventDefault();
+            if (firstInvalid) firstInvalid.focus();
+        }
+    });
+});
+</script>
+{% endblock %}

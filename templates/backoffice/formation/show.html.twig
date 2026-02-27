@@ -290,7 +290,7 @@
             {% if video.description %}<p class="mb-0">{{ video.description }}</p>{% endif %}
           </div>
           <div class="v-foot">
-            <form action="{{ path('app_formation_delete_video', {id: formation.id, videoId: video.id}) }}" method="post" onsubmit="return confirm('Supprimer cette vidéo ?')">
+            <form action="{{ path('app_formation_delete_video', {id: formation.id, videoId: video.id}) }}" method="post" data-confirm="Supprimer cette vidéo ?">
               <input type="hidden" name="_token" value="{{ csrf_token('delete_video' ~ video.id) }}">
               <button type="submit" class="btn btn-sm px-3" style="background:#fff5f5;border:1px solid #fecaca;color:#dc2626;border-radius:8px;font-size:.78rem;font-weight:600">
                 <i class="mdi mdi-trash-can-outline me-1"></i>Supprimer
@@ -329,7 +329,8 @@
         <th>Participant</th>
         <th>Email</th>
         <th>Rôle</th>
-        <th class="text-center" style="min-width:150px">Score Quiz</th>
+        <th class="text-center" style="min-width:150px">Meilleur score Quiz</th>
+        <th>Quiz passé</th>
         <th class="pe-4">Inscrit le</th>
       </tr></thead>
       <tbody>
@@ -368,6 +369,9 @@
                 </div>
               </div>
             {% else %}<span class="text-muted small">—</span>{% endif %}
+          </td>
+          <td class="text-muted small">
+            {% if participantScores[uid] is defined %}{{ participantScores[uid].quizTitre }}{% else %}—{% endif %}
           </td>
           <td class="pe-4 text-muted small">{{ participation.dateParticipation|date('d/m/Y') }}</td>
         </tr>
@@ -432,7 +436,7 @@
                style="background:#eff1fe;border:none;color:#3949ab;border-radius:8px;font-size:.78rem;font-weight:600">
               <i class="mdi mdi-eye-outline me-1"></i>Voir
             </a>
-            <form action="{{ path('app_quiz_delete', {formationId: formation.id, id: quiz.id}) }}" method="post" onsubmit="return confirm('Supprimer ce quiz et toutes ses questions ?')">
+            <form action="{{ path('app_quiz_delete', {formationId: formation.id, id: quiz.id}) }}" method="post" data-confirm="Supprimer ce quiz et toutes ses questions ?">
               <input type="hidden" name="_token" value="{{ csrf_token('delete_quiz' ~ quiz.id) }}">
               <button type="submit" class="btn btn-sm px-2"
                       style="background:#fff5f5;border:1px solid #fecaca;color:#dc2626;border-radius:8px;font-size:.78rem">
@@ -472,12 +476,13 @@
         <th>Participant</th>
         <th>Quiz</th>
         <th class="text-center">Score</th>
+        <th class="text-center">Nb questions</th>
         <th class="text-center" style="min-width:160px">Résultat</th>
         <th class="pe-4 text-end">Date</th>
       </tr></thead>
       <tbody>
         {% for res in quizResults %}
-        {% set pct = res.percentage %}
+        {% set pct = res.totalPoints > 0 ? (res.score * 100 / res.totalPoints)|round : 0 %}
         <tr>
           <td class="ps-4 text-center">
             {% if loop.index == 1 %}<div class="rank-dot rank-1"><i class="mdi mdi-trophy" style="font-size:.8rem"></i></div>
@@ -498,6 +503,9 @@
           <td class="text-center">
             <span class="fw-bold">{{ res.score }}</span>
             <span class="text-muted small"> / {{ res.totalPoints }}</span>
+          </td>
+          <td class="text-center">
+            <span class="text-muted small">{{ res.quiz.questions|length }} Q</span>
           </td>
           <td class="text-center">
             <div style="min-width:130px;margin:0 auto">
@@ -560,6 +568,71 @@
     </div>
   </div>
 </div>
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card s-card shadow-sm text-center p-3">
+            <div style="font-size:2rem;">❤️</div>
+            <h6 class="text-muted small mt-1 mb-0">Favoris</h6>
+            <h2 class="fw-bold mb-0" style="color:#5a0000">{{ favoriteCount }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card s-card shadow-sm text-center p-3">
+            <div style="font-size:2rem;">👥</div>
+            <h6 class="text-muted small mt-1 mb-0">Participants</h6>
+            <h2 class="fw-bold mb-0" style="color:#3949ab">{{ participantCount }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card s-card shadow-sm text-center p-3">
+            <div style="font-size:2rem;">🏆</div>
+            <h6 class="text-muted small mt-1 mb-0">Résultats quiz</h6>
+            <h2 class="fw-bold mb-0" style="color:#d97706">{{ quizResults|length }}</h2>
+        </div>
+    </div>
+</div>
+
+
+{# ════════════ SCOREE ════════════ #}
+
+<h4 class="fw-bold mb-3"><i class="mdi mdi-chart-bar text-primary me-2"></i>Scores des participants (meilleur score par personne)</h4>
+
+<div id="chart_div" style="width:100%; height:400px;"></div>
+
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+
+<script>
+google.charts.load('current', {'packages':['corechart']});
+google.charts.setOnLoadCallback(drawChart);
+
+function drawChart() {
+  var data = google.visualization.arrayToDataTable([
+    ['Participant', 'Score (%)', { role: 'style' }, { role: 'annotation' }],
+    {% for userId, s in participantScores %}
+    ['{{ s.userName|e('js') }}', {{ s.pct }}, '{{ s.pct >= 70 ? '#16a34a' : (s.pct >= 50 ? '#d97706' : '#dc2626') }}', '{{ s.pct }}%'],
+    {% endfor %}
+  ]);
+
+  var options = {
+    title: 'Scores Quiz — {{ formation.titre|e('js') }}',
+    titleTextStyle: { fontSize: 15, bold: true, color: '#1e2130' },
+    legend: { position: 'none' },
+    hAxis: { title: 'Participant', textStyle: { fontSize: 11 } },
+    vAxis: { title: 'Score (%)', minValue: 0, maxValue: 100, gridlines: { count: 5 } },
+    bar: { groupWidth: '55%' },
+    annotations: { alwaysOutside: true, textStyle: { fontSize: 11, bold: true } },
+    chartArea: { left: 60, top: 50, right: 20, bottom: 80, width: '100%' },
+    backgroundColor: '#fff',
+  };
+
+  var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+  chart.draw(data, options);
+}
+</script>
+
+
+
+
 
 </div>{# /.fo-page #}
 {% endblock %}
