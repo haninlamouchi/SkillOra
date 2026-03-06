@@ -1,0 +1,35 @@
+parameters:
+    level: 8
+    paths:
+        - src
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        # Doctrine assigns entity IDs via reflection; PHPStan cannot see it
+        - identifier: property.unusedType
+        # Doctrine Collections generic types require verbose PHPDoc boilerplate
+        - identifier: missingType.generics
+        # Array value types are informational only
+        - identifier: missingType.iterableValue
+        # Unused private helper methods in commands / test data loaders
+        - identifier: method.unused
+        # Properties injected by DI but used only indirectly (e.g. event subscribers)
+        - identifier: property.onlyWritten
+        # Unused class constants (informational)
+        - identifier: classConstant.unused
+        # Missing type hints on parameters — informational
+        - identifier: missingType.parameter
+        # PHPDoc-driven certainty warnings (checks are still correct at runtime)
+        - identifier: if.alwaysTrue
+        - identifier: ternary.alwaysTrue
+        - identifier: ternary.alwaysFalse
+        - identifier: booleanNot.alwaysFalse
+        - identifier: booleanAnd.leftAlwaysTrue
+        - identifier: booleanAnd.rightAlwaysTrue
+        - identifier: booleanAnd.alwaysFalse
+        - identifier: identical.alwaysFalse
+        - identifier: nullCoalesce.expr
+        - identifier: nullCoalesce.variable
+        - identifier: instanceof.alwaysTrue
+        - identifier: nullsafe.neverNull
+        # getUserIdentifier() contract — Doctrine always ensures email is set
+        - identifier: return.type

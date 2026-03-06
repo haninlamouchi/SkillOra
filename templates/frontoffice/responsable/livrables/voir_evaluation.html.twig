@@ -1,0 +1,126 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Évaluation du Livrable{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --sk-red:#8b0000; --sk-green:#15803d; }
+.sk-page { padding-top:90px; padding-bottom:60px; }
+.sk-eval-card { background:#fff; border-radius:18px; padding:32px; box-shadow:0 4px 20px rgba(0,0,0,0.08); margin-bottom:24px; }
+.sk-section-title { font-size:1.2rem; font-weight:700; color:var(--sk-red); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.sk-note-big { font-size:3rem; font-weight:900; color:var(--sk-green); text-align:center; margin:20px 0; }
+.sk-critere-row { display:grid; grid-template-columns:1fr 100px; gap:16px; padding:12px; background:#f9f9f9; border-radius:8px; margin-bottom:8px; align-items:center; }
+.sk-membre-eval { background:#f9f9f9; padding:16px; border-radius:12px; margin-bottom:12px; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page container">
+    <a href="{{ path('app_responsable_livrables') }}" style="color:#8b0000; text-decoration:none; font-weight:600;">← Retour aux livrables</a>
+    
+    <h1 style="font-size:2rem; font-weight:800; color:#2d3748; margin:24px 0;">
+        📊 Évaluation du Livrable
+    </h1>
+    
+    <div class="sk-eval-card">
+        <div style="text-align:center;">
+            <h2 style="font-size:1.5rem; font-weight:700; margin-bottom:8px;">{{ livrable.challenge.titre }}</h2>
+            <p style="color:#6b7280; margin-bottom:24px;">Groupe : {{ livrable.groupe.nomGroupe }}</p>
+            
+            <div style="background:linear-gradient(135deg, #dcfce7, #a7f3d0); padding:32px; border-radius:16px;">
+                <div style="font-size:0.9rem; color:#15803d; font-weight:600; text-transform:uppercase; letter-spacing:1px;">Note Globale</div>
+                <div class="sk-note-big">{{ livrable.noteGlobale }}/20</div>
+                <div style="font-size:1.1rem; font-weight:700; color:#15803d;">
+                    {% if livrable.noteGlobale >= 16 %}
+                        ⭐⭐⭐⭐⭐ Excellent !
+                    {% elseif livrable.noteGlobale >= 14 %}
+                        ⭐⭐⭐⭐ Très bien !
+                    {% elseif livrable.noteGlobale >= 12 %}
+                        ⭐⭐⭐ Bien
+                    {% elseif livrable.noteGlobale >= 10 %}
+                        ⭐⭐ Passable
+                    {% else %}
+                        ⭐ À améliorer
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Notes par critère #}
+    <div class="sk-eval-card">
+        <div class="sk-section-title">📊 Détail des Notes</div>
+        
+        <div class="sk-critere-row">
+            <div><strong>Qualité du code</strong></div>
+            <div style="text-align:right; font-weight:700; font-size:1.1rem;">{{ livrable.noteCode }}/20</div>
+        </div>
+        
+        <div class="sk-critere-row">
+            <div><strong>Fonctionnalités</strong></div>
+            <div style="text-align:right; font-weight:700; font-size:1.1rem;">{{ livrable.noteFonctionnalites }}/20</div>
+        </div>
+        
+        <div class="sk-critere-row">
+            <div><strong>Design / UX</strong></div>
+            <div style="text-align:right; font-weight:700; font-size:1.1rem;">{{ livrable.noteDesign }}/20</div>
+        </div>
+        
+        <div class="sk-critere-row">
+            <div><strong>Documentation</strong></div>
+            <div style="text-align:right; font-weight:700; font-size:1.1rem;">{{ livrable.noteDocumentation }}/20</div>
+        </div>
+    </div>
+
+    {# Feedback #}
+    {% if livrable.pointsForts or livrable.pointsAmeliorer or livrable.suggestions %}
+    <div class="sk-eval-card">
+        <div class="sk-section-title">💬 Feedback</div>
+        
+        {% if livrable.pointsForts %}
+        <div style="margin-bottom:20px;">
+            <h4 style="color:#15803d; font-weight:700; margin-bottom:8px;">✅ Points Forts</h4>
+            <div style="background:#dcfce7; padding:16px; border-radius:8px; white-space:pre-line;">{{ livrable.pointsForts }}</div>
+        </div>
+        {% endif %}
+        
+        {% if livrable.pointsAmeliorer %}
+        <div style="margin-bottom:20px;">
+            <h4 style="color:#dc2626; font-weight:700; margin-bottom:8px;">❌ Points à Améliorer</h4>
+            <div style="background:#fee2e2; padding:16px; border-radius:8px; white-space:pre-line;">{{ livrable.pointsAmeliorer }}</div>
+        </div>
+        {% endif %}
+        
+        {% if livrable.suggestions %}
+        <div>
+            <h4 style="color:#3b82f6; font-weight:700; margin-bottom:8px;">💡 Suggestions</h4>
+            <div style="background:#dbeafe; padding:16px; border-radius:8px; white-space:pre-line;">{{ livrable.suggestions }}</div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {# Notes individuelles #}
+    {% if livrable.evaluationsMembres|length > 0 %}
+    <div class="sk-eval-card">
+        <div class="sk-section-title">👥 Notes Individuelles</div>
+        
+        {% for evaluation in livrable.evaluationsMembres %}
+        <div class="sk-membre-eval">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <strong style="font-size:1.05rem;">{{ evaluation.user.fullName }}</strong>
+                <div style="font-size:1.3rem; font-weight:800; color:#15803d;">
+                    {{ evaluation.noteIndividuelle }}/20
+                </div>
+            </div>
+            {% if evaluation.commentaireIndividuel %}
+                <div style="background:#f0f9ff; padding:12px; border-radius:8px; font-size:0.9rem; color:#1e40af;">
+                    💬 {{ evaluation.commentaireIndividuel }}
+                </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

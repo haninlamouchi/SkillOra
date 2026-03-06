@@ -1,0 +1,107 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}Modifier — {{ quiz.titre }} | Admin SkillOra{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root { --sk-primary:#131212; --sk-primary-dark:#040404; --sk-primary-light:#1e1d1d; --sk-red:#bf0000; }
+.fo-page { font-family:"Inter",sans-serif; color:#1e2130; }
+.fo-hero { background:linear-gradient(135deg,#131212 0%,#2a0000 50%,#1e1d1d 100%); border-radius:18px; position:relative; overflow:hidden; padding:32px 36px; }
+.fo-hero::before { content:''; position:absolute; top:-80px; right:-80px; width:380px; height:380px; background:radial-gradient(circle,rgba(191,0,0,.18) 0%,transparent 65%); pointer-events:none; }
+.fo-hero-title { font-size:1.45rem; font-weight:700; color:#fff; letter-spacing:-.02em; }
+.fo-breadcrumb a { color:rgba(255,255,255,.45); font-size:.76rem; text-decoration:none; }
+.fo-breadcrumb a:hover { color:rgba(255,255,255,.7); }
+.fo-breadcrumb-sep { color:rgba(255,255,255,.25); margin:0 6px; font-size:.7rem; }
+.fo-form-card { border:none !important; border-radius:16px !important; box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 20px rgba(0,0,0,.06) !important; overflow:hidden; }
+.fo-form-card .card-header { background:#fff; padding:16px 22px; border-bottom:1px solid #f1f2f6 !important; display:flex; align-items:center; gap:10px; }
+.fo-form-card .card-header .s-icon { width:36px; height:36px; border-radius:50%; background:rgba(191,0,0,.1); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.fo-form-card .card-header .s-icon i { color:var(--sk-red); }
+.fo-form-card .card-header .s-title { font-size:.9rem; font-weight:700; color:#1e2130; }
+.fo-form-card .card-body { padding:24px; }
+.fo-form-card .form-label { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#6b7280; margin-bottom:5px; }
+.fo-form-card .form-control, .fo-form-card .form-select { border-radius:10px; border-color:#e5e7eb; font-size:.875rem; padding:9px 13px; transition:border-color .15s, box-shadow .15s; }
+.fo-form-card .form-control:focus, .fo-form-card .form-select:focus { border-color:var(--sk-red); box-shadow:0 0 0 3px rgba(191,0,0,.1); }
+.fo-form-card textarea.form-control { min-height:100px; resize:vertical; }
+.btn-save { background:var(--sk-red); color:#fff; border:none; border-radius:10px; padding:9px 24px; font-size:.85rem; font-weight:600; display:inline-flex; align-items:center; gap:6px; transition:background .15s, box-shadow .15s; }
+.btn-save:hover { background:#a00000; color:#fff; box-shadow:0 4px 12px rgba(191,0,0,.3); }
+.btn-cancel { background:#f3f4f6; color:#4b5563; border:none; border-radius:10px; padding:9px 20px; font-size:.85rem; font-weight:600; display:inline-flex; align-items:center; gap:6px; text-decoration:none; transition:background .15s; }
+.btn-cancel:hover { background:#e5e7eb; color:#374151; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="fo-page">
+
+{% for type, messages in app.flashes %}
+  {% for message in messages %}
+  <div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }} alert-dismissible fade show d-flex align-items-center gap-2 mb-3 rounded-3" role="alert">
+    <i class="mdi mdi-{{ type == 'success' ? 'check-circle-outline' : 'alert-circle-outline' }} fs-6"></i>
+    <span>{{ message }}</span>
+    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+{% endfor %}
+
+<div class="fo-hero mb-4">
+  <div class="fo-breadcrumb mb-2">
+    <a href="{{ path('admin_dashboard') }}">Dashboard</a>
+    <span class="fo-breadcrumb-sep">›</span>
+    <a href="{{ path('admin_formation_show', {id: formation.id}) }}">{{ formation.titre|slice(0,40) }}{% if formation.titre|length > 40 %}…{% endif %}</a>
+    <span class="fo-breadcrumb-sep">›</span>
+    <a href="{{ path('admin_quiz_show', {formationId: formation.id, id: quiz.id}) }}">{{ quiz.titre|slice(0,35) }}{% if quiz.titre|length > 35 %}…{% endif %}</a>
+    <span class="fo-breadcrumb-sep">›</span>
+    <span style="color:rgba(255,255,255,.7)">Modifier</span>
+  </div>
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div class="fo-hero-title d-flex align-items-center gap-2">
+      <i class="mdi mdi-pencil-outline" style="font-size:1.3rem;color:rgba(255,255,255,.55)"></i>
+      Modifier le Quiz
+    </div>
+    <a href="{{ path('admin_quiz_show', {formationId: formation.id, id: quiz.id}) }}"
+       class="btn btn-sm d-inline-flex align-items-center gap-1"
+       style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);border-radius:8px">
+      <i class="mdi mdi-arrow-left"></i> Retour
+    </a>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card fo-form-card">
+      <div class="card-header">
+        <div class="s-icon"><i class="mdi mdi-information-outline"></i></div>
+        <span class="s-title">Informations du Quiz</span>
+      </div>
+      <div class="card-body">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+        {% if form.vars.submitted and not form.vars.valid %}
+        <div class="alert alert-danger d-flex align-items-center gap-2 rounded-3 mb-3" role="alert">
+          <i class="mdi mdi-alert-circle-outline"></i>
+          <strong>Veuillez corriger les erreurs ci-dessous avant de continuer.</strong>
+        </div>
+        {% endif %}
+
+        <div class="row g-3">
+          <div class="col-md-8">{{ form_row(form.titre) }}</div>
+          <div class="col-md-4">{{ form_row(form.duree) }}</div>
+          <div class="col-12">{{ form_row(form.description) }}</div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4 pt-3" style="border-top:1px solid #f1f2f6">
+          <a href="{{ path('admin_quiz_show', {formationId: formation.id, id: quiz.id}) }}" class="btn-cancel">
+            <i class="mdi mdi-close"></i> Annuler
+          </a>
+          <button type="submit" class="btn-save">
+            <i class="mdi mdi-check"></i> Enregistrer les modifications
+          </button>
+        </div>
+
+        {{ form_end(form) }}
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+{% endblock %}

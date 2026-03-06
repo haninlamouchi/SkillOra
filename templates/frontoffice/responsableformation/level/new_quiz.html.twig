@@ -1,0 +1,725 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Nouveau Quiz — Niveau {{ level.numero }} | SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..144,700;12..144,800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══ Tokens ════════════════════════════════════════════ */
+:root{
+  --r:#8b0000;--rd:#4a0000;--rl:#c23030;--rt:rgba(139,0,0,.07);
+  --ink:#180808;--mu:#8a7070;--bor:rgba(139,0,0,.10);--bg:#f6f5f5;
+  --qcm:#2563eb;--qcm-b:#eff6ff;--qcm-e:#bfdbfe;
+  --mat:#7c3aed;--mat-b:#f5f3ff;--mat-e:#c4b5fd;
+  --err:#dc2626;--err-b:#fef2f2;--err-e:#fca5a5;
+  --bla:#059669;--bla-b:#ecfdf5;--bla-e:#a7f3d0;
+}
+*{box-sizing:border-box;}
+/* ═══ Page & Hero ════════════════════════════════════════ */
+.wz-page{padding-top:70px;background:var(--bg);min-height:100vh;}
+.wz-hero{position:relative;background:linear-gradient(135deg,#3d0000 0%,#8b0000 50%,#c23030 100%);margin-left:calc(-50vw + 50%);margin-right:calc(-50vw + 50%);padding:52px 20px 44px;text-align:center;overflow:hidden;isolation:isolate;}
+.wz-hero::before{content:'';position:absolute;inset:0;z-index:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");background-size:180px;opacity:.5;}
+.wz-ring{position:absolute;z-index:0;border-radius:50%;border:60px solid rgba(255,255,255,.04);}
+.wz-ring-1{width:480px;height:480px;top:-200px;left:-140px;}
+.wz-ring-2{width:340px;height:340px;bottom:-150px;right:-90px;border-width:44px;}
+.wz-hero-inner{position:relative;z-index:1;}
+.wz-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:5px 14px;font-family:'DM Sans',sans-serif;font-size:.77rem;font-weight:600;color:rgba(255,255,255,.9);margin-bottom:12px;}
+.wz-hero h1{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(1.7rem,4vw,2.4rem);font-weight:800;letter-spacing:-.03em;color:#fff;margin:0 0 6px;line-height:1.1;}
+.wz-hero p{font-family:'DM Sans',sans-serif;color:rgba(255,255,255,.6);font-size:.93rem;margin:0;}
+/* ═══ Layout ═══════════════════════════════════════════ */
+.wz-wrap{max-width:780px;margin:0 auto;padding:32px 16px 100px;}
+.wz-back{display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:600;color:var(--mu);text-decoration:none;margin-bottom:26px;transition:color .2s;}
+.wz-back svg{transition:transform .2s;}
+.wz-back:hover{color:var(--r);text-decoration:none;}
+.wz-back:hover svg{transform:translateX(-3px);}
+/* ═══ Progress Rail ═════════════════════════════════════ */
+.wz-rail{display:flex;align-items:center;background:#fff;border-radius:16px;padding:16px 22px;border:1.5px solid var(--bor);box-shadow:0 2px 12px rgba(0,0,0,.04);margin-bottom:28px;gap:0;}
+.wz-stp{display:flex;align-items:center;gap:9px;flex:1;min-width:0;}
+.wz-stp-dot{width:30px;height:30px;border-radius:50%;border:2px solid #e5e7eb;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-size:.80rem;font-weight:800;color:#9ca3af;background:#f9fafb;flex-shrink:0;transition:all .3s;}
+.wz-stp-info{display:flex;flex-direction:column;overflow:hidden;}
+.wz-stp-name{font-family:'Bricolage Grotesque',sans-serif;font-size:.76rem;font-weight:700;color:#6b7280;white-space:nowrap;transition:color .3s;}
+.wz-stp-sub{font-family:'DM Sans',sans-serif;font-size:.67rem;color:#9ca3af;white-space:nowrap;}
+.wz-sep{flex:0 0 20px;height:2px;background:#f3f4f6;border-radius:2px;margin:0 4px;}
+.wz-stp.is-active .wz-stp-dot{border-color:var(--r);color:var(--r);background:var(--rt);}
+.wz-stp.is-active .wz-stp-name{color:var(--r);}
+.wz-stp.is-done .wz-stp-dot{border-color:#22c55e;background:#22c55e;color:#fff;}
+.wz-stp.is-done .wz-stp-name{color:#16a34a;}
+.wz-sep.is-done{background:#22c55e;}
+/* ═══ Step Panels ═══════════════════════════════════════ */
+.wz-panel{display:none;animation:wz-in .3s ease both;}
+.wz-panel.is-visible{display:block;}
+@keyframes wz-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* ═══ Cards ══════════════════════════════════════════════ */
+.wz-card{background:#fff;border-radius:20px;border:1.5px solid var(--bor);box-shadow:0 2px 16px rgba(0,0,0,.05);margin-bottom:18px;overflow:hidden;}
+.wz-card-head{padding:17px 26px;border-bottom:1.5px solid var(--bor);display:flex;align-items:center;gap:12px;}
+.wz-card-icon{width:36px;height:36px;border-radius:11px;background:var(--rt);color:var(--r);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.wz-card-title{font-family:'Bricolage Grotesque',sans-serif;font-size:.97rem;font-weight:800;color:var(--ink);margin:0;}
+.wz-card-sub{font-family:'DM Sans',sans-serif;font-size:.76rem;color:var(--mu);margin:2px 0 0;}
+.wz-card-body{padding:24px 26px;}
+/* ═══ Type Picker (Step 1) ═══════════════════════════════ */
+.wz-type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;}
+.wz-t-radio{display:none;}
+.wz-t-label{position:relative;display:flex;align-items:flex-start;gap:13px;padding:17px 16px;border-radius:15px;border:2px solid #e5e7eb;cursor:pointer;transition:all .22s;background:#fafafa;font-family:'DM Sans',sans-serif;user-select:none;}
+.wz-t-label:hover{border-color:rgba(139,0,0,.3);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.07);}
+.wz-t-icon{font-size:1.8rem;line-height:1;flex-shrink:0;margin-top:1px;}
+.wz-t-text{display:flex;flex-direction:column;gap:3px;}
+.wz-t-name{font-size:.87rem;font-weight:700;color:var(--ink);line-height:1.2;}
+.wz-t-desc{font-size:.73rem;color:#9ca3af;line-height:1.35;}
+.wz-t-check{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;border:2px solid #d1d5db;background:#fff;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.wz-t-check::before{content:'';display:block;width:8px;height:8px;border-radius:50%;background:transparent;transition:background .2s;}
+#wt_quiz:checked   +.wz-t-label{border-color:var(--qcm);background:var(--qcm-b);}
+#wt_quiz:checked   +.wz-t-label .wz-t-name{color:var(--qcm);}
+#wt_quiz:checked   +.wz-t-label .wz-t-check{border-color:var(--qcm);}
+#wt_quiz:checked   +.wz-t-label .wz-t-check::before{background:var(--qcm);}
+#wt_match:checked  +.wz-t-label{border-color:var(--mat);background:var(--mat-b);}
+#wt_match:checked  +.wz-t-label .wz-t-name{color:var(--mat);}
+#wt_match:checked  +.wz-t-label .wz-t-check{border-color:var(--mat);}
+#wt_match:checked  +.wz-t-label .wz-t-check::before{background:var(--mat);}
+#wt_error:checked  +.wz-t-label{border-color:var(--err);background:var(--err-b);}
+#wt_error:checked  +.wz-t-label .wz-t-name{color:var(--err);}
+#wt_error:checked  +.wz-t-label .wz-t-check{border-color:var(--err);}
+#wt_error:checked  +.wz-t-label .wz-t-check::before{background:var(--err);}
+#wt_blank:checked  +.wz-t-label{border-color:var(--bla);background:var(--bla-b);}
+#wt_blank:checked  +.wz-t-label .wz-t-name{color:var(--bla);}
+#wt_blank:checked  +.wz-t-label .wz-t-check{border-color:var(--bla);}
+#wt_blank:checked  +.wz-t-label .wz-t-check::before{background:var(--bla);}
+/* ═══ Inputs ══════════════════════════════════════════════ */
+.wz-field{margin-bottom:15px;}
+.wz-lbl{font-family:'DM Sans',sans-serif;font-size:.73rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:5px;margin-bottom:6px;}
+.wz-req{color:var(--r);font-size:.9em;}
+.wz-input,.wz-textarea{width:100%;padding:10px 14px;border:1.5px solid #e5e7eb;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--ink);background:#f9fafb;transition:border-color .2s,background .2s,box-shadow .2s;outline:none;}
+.wz-input:focus,.wz-textarea:focus{border-color:var(--r);background:#fff;box-shadow:0 0 0 4px rgba(139,0,0,.07);}
+.wz-textarea{min-height:85px;resize:vertical;}
+.wz-grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.wz-input.is-invalid,.wz-textarea.is-invalid{border-color:#dc2626!important;background:#fef2f2!important;}
+/* ═══ Buttons ═════════════════════════════════════════════ */
+.wz-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:10px;font-weight:700;font-family:'DM Sans',sans-serif;font-size:.87rem;border:none;cursor:pointer;transition:all .22s;text-decoration:none;white-space:nowrap;}
+.wz-btn-primary{background:linear-gradient(135deg,var(--rd),var(--rl));color:#fff;}
+.wz-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(139,0,0,.3);color:#fff;text-decoration:none;}
+.wz-btn-success{background:linear-gradient(135deg,#15803d,#22c55e);color:#fff;}
+.wz-btn-success:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(34,197,94,.3);color:#fff;text-decoration:none;}
+.wz-btn-ghost{background:#f3f4f6;color:#374151;border:1.5px solid #e5e7eb;}
+.wz-btn-ghost:hover{border-color:#9ca3af;color:#111;text-decoration:none;}
+.wz-btn-danger{background:#fee2e2;color:#dc2626;border:1.5px solid #fca5a5;}
+.wz-btn-danger:hover{background:#dc2626;color:#fff;border-color:#dc2626;}
+.wz-btn-add{background:var(--rt);color:var(--r);border:1.5px dashed rgba(139,0,0,.3);width:100%;justify-content:center;padding:11px;border-radius:12px;font-size:.84rem;}
+.wz-btn-add:hover{background:rgba(139,0,0,.12);border-color:rgba(139,0,0,.5);}
+.wz-btn-sm{padding:6px 13px;font-size:.78rem;border-radius:8px;}
+/* ═══ Sticky Nav Bar ══════════════════════════════════════ */
+.wz-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 22px;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-top:1.5px solid var(--bor);position:sticky;bottom:0;z-index:50;margin-left:calc(-50vw + 50%);margin-right:calc(-50vw + 50%);box-shadow:0 -4px 20px rgba(0,0,0,.08);}
+.wz-nav-center{font-family:'DM Sans',sans-serif;font-size:.8rem;color:var(--mu);font-weight:600;}
+/* ═══ Error Box ═══════════════════════════════════════════ */
+.wz-err-box{background:#fef2f2;border:1.5px solid #fca5a5;border-radius:12px;padding:11px 15px;font-family:'DM Sans',sans-serif;font-size:.83rem;color:#dc2626;display:none;margin-bottom:14px;}
+.wz-err-box.is-shown{display:block;}
+/* ═══ Question Cards ══════════════════════════════════════ */
+.wz-q{background:#fff;border-radius:15px;border:1.5px solid #e5e7eb;box-shadow:0 2px 10px rgba(0,0,0,.05);margin-bottom:14px;overflow:hidden;animation:wz-in .25s ease both;}
+.wz-q-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;}
+.wz-q-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:.74rem;font-weight:700;}
+.wz-q-body{padding:13px 16px 16px;}
+.wz-q[data-t=quiz]  .wz-q-pill{background:var(--qcm-b);color:var(--qcm);}
+.wz-q[data-t=match] .wz-q-pill{background:var(--mat-b);color:var(--mat);}
+.wz-q[data-t=error] .wz-q-pill{background:var(--err-b);color:var(--err);}
+.wz-q[data-t=blank] .wz-q-pill{background:var(--bla-b);color:var(--bla);}
+/* ═══ QCM opts ════════════════════════════════════════════ */
+.wz-opt{display:flex;align-items:center;gap:9px;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:9px;padding:7px 10px;margin-bottom:7px;transition:border-color .2s;}
+.wz-opt:has(input[type=checkbox]:checked){border-color:#22c55e;background:#f0fdf4;}
+.wz-opt input[type=text]{flex:1;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:.87rem;color:var(--ink);outline:none;padding:2px 3px;}
+.wz-opt-ck{display:flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:.74rem;font-weight:600;color:#6b7280;white-space:nowrap;}
+.wz-opt-ck input[type=checkbox]{width:15px;height:15px;accent-color:#22c55e;cursor:pointer;}
+.wz-del{background:transparent;border:none;cursor:pointer;color:#d1d5db;font-size:.9rem;padding:2px 5px;border-radius:5px;transition:color .2s,background .2s;line-height:1;flex-shrink:0;}
+.wz-del:hover{color:#dc2626;background:#fee2e2;}
+/* ═══ Match Pairs ═════════════════════════════════════════ */
+.wz-pair{display:grid;grid-template-columns:1fr 26px 1fr 26px;align-items:center;gap:8px;margin-bottom:7px;}
+.wz-pair-arrow{width:26px;height:26px;border-radius:50%;background:var(--mat-b);color:var(--mat);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;}
+.wz-pair input[type=text]{padding:8px 11px;border:1.5px solid #e5e7eb;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.86rem;color:var(--ink);background:#f9fafb;outline:none;width:100%;transition:border-color .2s;}
+.wz-pair input:focus{border-color:var(--mat);background:#fff;}
+.wz-pair-hdr{display:grid;grid-template-columns:1fr 26px 1fr 26px;gap:8px;margin-bottom:5px;}
+.wz-pair-hdr span{font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;}
+/* ═══ Fill Blank ══════════════════════════════════════════ */
+.wz-blank{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
+.wz-blank-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:7px;background:var(--bla-b);color:var(--bla);font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:700;white-space:nowrap;flex-shrink:0;}
+.wz-blank input[type=text]{flex:1;padding:8px 11px;border:1.5px solid #e5e7eb;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.86rem;color:var(--ink);background:#f9fafb;outline:none;transition:border-color .2s;}
+.wz-blank input:focus{border-color:var(--bla);background:#fff;}
+/* ═══ Points row ══════════════════════════════════════════ */
+.wz-pts{display:flex;align-items:center;gap:8px;margin-bottom:13px;}
+.wz-pts label{font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.wz-pts .wz-input{width:75px;text-align:center;}
+/* ═══ Hint ════════════════════════════════════════════════ */
+.wz-hint{display:flex;align-items:flex-start;gap:10px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:12px;padding:12px 15px;margin-bottom:18px;}
+.wz-hint p{font-family:'DM Sans',sans-serif;font-size:.81rem;color:#78350f;margin:0;line-height:1.55;}
+.wz-hint code{background:#fef3c7;padding:1px 5px;border-radius:4px;}
+/* ═══ Divider label ═══════════════════════════════════════ */
+.wz-div-lbl{display:flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:.70rem;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.07em;margin:14px 0 10px;}
+.wz-div-lbl::before,.wz-div-lbl::after{content:'';flex:1;height:1px;background:#f3f4f6;}
+/* ═══ Review ══════════════════════════════════════════════ */
+.wz-rv-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--bor);font-family:'DM Sans',sans-serif;font-size:.86rem;}
+.wz-rv-row:last-child{border-bottom:none;}
+.wz-rv-lbl{color:var(--mu);font-weight:600;}
+.wz-rv-val{color:var(--ink);font-weight:700;text-align:right;max-width:60%;}
+.wz-rv-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700;}
+.wz-rv-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-family:'Bricolage Grotesque',sans-serif;font-size:.9rem;font-weight:800;background:var(--rt);color:var(--r);}
+/* ═══ Responsive ══════════════════════════════════════════ */
+@media(max-width:600px){
+  .wz-type-grid{grid-template-columns:1fr;}
+  .wz-grid2{grid-template-columns:1fr;}
+  .wz-card-body{padding:18px 16px;}
+  .wz-rail{padding:12px 14px;}
+  .wz-stp-sub{display:none;}
+  .wz-nav{padding:12px 14px;}
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="wz-page">
+
+  {# ── HERO ──────────────────────────────────── #}
+  <div class="wz-hero">
+    <div class="wz-ring wz-ring-1"></div>
+    <div class="wz-ring wz-ring-2"></div>
+    <div class="wz-hero-inner">
+      <div class="wz-badge">🏆 Niveau {{ level.numero }} — {{ level.titre }}</div>
+      <h1>Créer un Quiz</h1>
+      <p>{{ formation.titre }}</p>
+    </div>
+  </div>
+
+  <div class="wz-wrap">
+    <a href="{{ path('app_level_show', {formationId: formation.id, id: level.id}) }}" class="wz-back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      Retour au niveau
+    </a>
+
+    {% for ftype, msgs in app.flashes %}
+      {% for msg in msgs %}
+        <div class="alert alert-{{ ftype=='success'?'success':'danger' }} alert-dismissible fade show mb-3" role="alert">
+          {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endfor %}
+
+    {# ── Progress Rail ──────────────────────── #}
+    <div class="wz-rail">
+      <div class="wz-stp is-active" id="rail-1">
+        <div class="wz-stp-dot">1</div>
+        <div class="wz-stp-info"><span class="wz-stp-name">Type</span><span class="wz-stp-sub">Format</span></div>
+      </div>
+      <div class="wz-sep" id="sep-1-2"></div>
+      <div class="wz-stp" id="rail-2">
+        <div class="wz-stp-dot">2</div>
+        <div class="wz-stp-info"><span class="wz-stp-name">Infos</span><span class="wz-stp-sub">Titre & durée</span></div>
+      </div>
+      <div class="wz-sep" id="sep-2-3"></div>
+      <div class="wz-stp" id="rail-3">
+        <div class="wz-stp-dot">3</div>
+        <div class="wz-stp-info"><span class="wz-stp-name">Questions</span><span class="wz-stp-sub">Contenu</span></div>
+      </div>
+      <div class="wz-sep" id="sep-3-4"></div>
+      <div class="wz-stp" id="rail-4">
+        <div class="wz-stp-dot">4</div>
+        <div class="wz-stp-info"><span class="wz-stp-name">Publier</span><span class="wz-stp-sub">Récapitulatif</span></div>
+      </div>
+    </div>
+
+    {# FORM — hidden inputs injected at submit time #}
+    <form id="wz-form" method="post"
+          action="{{ path('app_level_quiz_new', {formationId: formation.id, id: level.id}) }}">
+      <div id="wz-hidden"></div>
+
+      {# ═══ STEP 1 — TYPE ══════════════════════ #}
+      <div class="wz-panel is-visible" id="panel-1">
+        <div class="wz-card">
+          <div class="wz-card-head">
+            <div class="wz-card-icon">🎮</div>
+            <div><p class="wz-card-title">Type de Quiz</p><p class="wz-card-sub">Choisissez le format de vos questions</p></div>
+          </div>
+          <div class="wz-card-body">
+            <div id="err-1" class="wz-err-box">Veuillez sélectionner un type de quiz.</div>
+            <div class="wz-type-grid">
+              <div>
+                <input type="radio" class="wz-t-radio" name="_type_pick" id="wt_quiz" value="quiz">
+                <label class="wz-t-label" for="wt_quiz">
+                  <span class="wz-t-icon">📝</span>
+                  <div class="wz-t-text"><span class="wz-t-name">QCM Classique</span><span class="wz-t-desc">Choix multiples — une ou plusieurs bonnes réponses</span></div>
+                  <div class="wz-t-check"></div>
+                </label>
+              </div>
+              <div>
+                <input type="radio" class="wz-t-radio" name="_type_pick" id="wt_match" value="match_pairs">
+                <label class="wz-t-label" for="wt_match">
+                  <span class="wz-t-icon">🔗</span>
+                  <div class="wz-t-text"><span class="wz-t-name">Associer Paires</span><span class="wz-t-desc">Relier chaque élément gauche à son correspondant</span></div>
+                  <div class="wz-t-check"></div>
+                </label>
+              </div>
+              <div>
+                <input type="radio" class="wz-t-radio" name="_type_pick" id="wt_error" value="find_error">
+                <label class="wz-t-label" for="wt_error">
+                  <span class="wz-t-icon">🔍</span>
+                  <div class="wz-t-text"><span class="wz-t-name">Trouver l'Erreur</span><span class="wz-t-desc">Identifier la faute dans un texte ou un code</span></div>
+                  <div class="wz-t-check"></div>
+                </label>
+              </div>
+              <div>
+                <input type="radio" class="wz-t-radio" name="_type_pick" id="wt_blank" value="fill_blank">
+                <label class="wz-t-label" for="wt_blank">
+                  <span class="wz-t-icon">✏️</span>
+                  <div class="wz-t-text"><span class="wz-t-name">Remplir les Blancs</span><span class="wz-t-desc">Compléter les espaces dans une phrase clé</span></div>
+                  <div class="wz-t-check"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# ═══ STEP 2 — INFOS ═════════════════════ #}
+      <div class="wz-panel" id="panel-2">
+        <div class="wz-card">
+          <div class="wz-card-head">
+            <div class="wz-card-icon">📋</div>
+            <div><p class="wz-card-title">Informations générales</p><p class="wz-card-sub">Titre, description et durée estimée</p></div>
+          </div>
+          <div class="wz-card-body">
+            <div id="err-2" class="wz-err-box"></div>
+            <div class="wz-field">
+              <label class="wz-lbl" for="wz-titre">Titre <span class="wz-req">*</span></label>
+              <input type="text" id="wz-titre" class="wz-input" placeholder="ex : Variables en Python — Niveau débutant">
+            </div>
+            <div class="wz-grid2">
+              <div class="wz-field" style="margin-bottom:0;">
+                <label class="wz-lbl" for="wz-desc">Description</label>
+                <textarea id="wz-desc" class="wz-textarea" placeholder="Ce quiz évalue…"></textarea>
+              </div>
+              <div class="wz-field" style="margin-bottom:0;">
+                <label class="wz-lbl" for="wz-duree">⏱ Durée (minutes)</label>
+                <input type="number" id="wz-duree" class="wz-input" placeholder="ex : 15" min="1" max="180">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# ═══ STEP 3 — QUESTIONS ══════════════════ #}
+      <div class="wz-panel" id="panel-3">
+        <div id="err-3" class="wz-err-box"></div>
+
+        <div id="bldr-quiz" class="wz-bldr" style="display:none;">
+          <div class="wz-card">
+            <div class="wz-card-head">
+              <div class="wz-card-icon" style="background:var(--qcm-b);color:var(--qcm);">📝</div>
+              <div><p class="wz-card-title">Questions QCM</p><p class="wz-card-sub">Cochez ✓ la ou les bonne(s) réponse(s)</p></div>
+            </div>
+            <div class="wz-card-body">
+              <div class="wz-hint"><span>💡</span><p>Ajoutez vos propositions et cochez <strong>Correct</strong> sur les bonnes réponses.</p></div>
+              <div id="qcm-list"></div>
+              <button type="button" class="wz-btn wz-btn-add" onclick="addQcmQ()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Ajouter une question QCM
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="bldr-match_pairs" class="wz-bldr" style="display:none;">
+          <div class="wz-card">
+            <div class="wz-card-head">
+              <div class="wz-card-icon" style="background:var(--mat-b);color:var(--mat);">🔗</div>
+              <div><p class="wz-card-title">Ensembles de Paires</p><p class="wz-card-sub">Chaque ligne = une correspondance A → B</p></div>
+            </div>
+            <div class="wz-card-body">
+              <div class="wz-hint"><span>💡</span><p>Créez des ensembles de correspondances A → B que les apprenants devront relier.</p></div>
+              <div id="match-list"></div>
+              <button type="button" class="wz-btn wz-btn-add" onclick="addMatchQ()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Ajouter un ensemble de paires
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="bldr-find_error" class="wz-bldr" style="display:none;">
+          <div class="wz-card">
+            <div class="wz-card-head">
+              <div class="wz-card-icon" style="background:var(--err-b);color:var(--err);">🔍</div>
+              <div><p class="wz-card-title">Trouver l'Erreur</p><p class="wz-card-sub">Texte avec une faute à identifier</p></div>
+            </div>
+            <div class="wz-card-body">
+              <div class="wz-hint"><span>💡</span><p>Rédigez un texte contenant une erreur et précisez la partie incorrecte exacte.</p></div>
+              <div id="error-list"></div>
+              <button type="button" class="wz-btn wz-btn-add" onclick="addErrorQ()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Ajouter une question
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="bldr-fill_blank" class="wz-bldr" style="display:none;">
+          <div class="wz-card">
+            <div class="wz-card-head">
+              <div class="wz-card-icon" style="background:var(--bla-b);color:var(--bla);">✏️</div>
+              <div><p class="wz-card-title">Remplir les Blancs</p><p class="wz-card-sub">Utilisez ___ dans la phrase pour chaque espace</p></div>
+            </div>
+            <div class="wz-card-body">
+              <div class="wz-hint"><span>💡</span><p>Tapez la phrase en insérant <code>___</code> pour chaque blanc, puis listez les réponses dans l'ordre.</p></div>
+              <div id="blank-list"></div>
+              <button type="button" class="wz-btn wz-btn-add" onclick="addBlankQ()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Ajouter une question
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# ═══ STEP 4 — REVIEW ═════════════════════ #}
+      <div class="wz-panel" id="panel-4">
+        <div class="wz-card">
+          <div class="wz-card-head">
+            <div class="wz-card-icon" style="background:#f0fdf4;color:#16a34a;">✅</div>
+            <div><p class="wz-card-title">Récapitulatif</p><p class="wz-card-sub">Vérifiez avant de publier</p></div>
+          </div>
+          <div class="wz-card-body" id="review-body"></div>
+        </div>
+      </div>
+
+    </form>
+  </div>{# /wz-wrap #}
+
+  {# ── Sticky Nav ────────────────────────────── #}
+  <div class="wz-nav">
+    <button type="button" class="wz-btn wz-btn-ghost" id="btn-back" onclick="wzBack()" style="display:none;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      Précédent
+    </button>
+    <span class="wz-nav-center" id="nav-label">Étape 1 / 4</span>
+    <button type="button" class="wz-btn wz-btn-primary" id="btn-next" onclick="wzNext()">
+      Suivant
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    </button>
+    <button type="button" class="wz-btn wz-btn-success" id="btn-submit" onclick="wzSubmit()" style="display:none;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+      Publier le quiz
+    </button>
+  </div>
+
+</div>
+
+<script>
+/* ── State ───────────────────────────────────────────────── */
+const wz = { step:1, type:null, titre:'', desc:'', duree:'' };
+let qcmCount=0, matchCount=0, errorCount=0, blankCount=0;
+
+/* ── Go to step ──────────────────────────────────────────── */
+function wzGo(to) {
+  document.querySelectorAll('.wz-panel').forEach(p => p.classList.remove('is-visible'));
+  document.getElementById('panel-' + to).classList.add('is-visible');
+
+  for (let i=1; i<=4; i++) {
+    const r = document.getElementById('rail-' + i);
+    r.classList.remove('is-active','is-done');
+    if (i < to)  r.classList.add('is-done');
+    if (i === to) r.classList.add('is-active');
+  }
+  for (let i=1; i<=3; i++) {
+    const s = document.getElementById('sep-'+i+'-'+(i+1));
+    s.classList.toggle('is-done', i < to);
+  }
+
+  wz.step = to;
+  document.getElementById('nav-label').textContent = 'Étape ' + to + ' / 4';
+  document.getElementById('btn-back').style.display   = to > 1  ? '' : 'none';
+  document.getElementById('btn-next').style.display   = to < 4  ? '' : 'none';
+  document.getElementById('btn-submit').style.display = to===4  ? '' : 'none';
+
+  if (to === 3) showBuilder(wz.type);
+  if (to === 4) buildReview();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function wzNext() { if (wzValidate(wz.step)) { wzSave(wz.step); wzGo(wz.step+1); } }
+function wzBack() { wzGo(wz.step-1); }
+
+/* ── Validation ──────────────────────────────────────────── */
+function wzValidate(step) {
+  if (step === 1) {
+    const picked = document.querySelector('input[name="_type_pick"]:checked');
+    const box    = document.getElementById('err-1');
+    box.classList.toggle('is-shown', !picked);
+    return !!picked;
+  }
+  if (step === 2) {
+    const t   = document.getElementById('wz-titre');
+    const box = document.getElementById('err-2');
+    t.classList.remove('is-invalid');
+    if (!t.value.trim()) {
+      t.classList.add('is-invalid');
+      box.textContent = 'Le titre du quiz est obligatoire.';
+      box.classList.add('is-shown');
+      t.focus();
+      return false;
+    }
+    box.classList.remove('is-shown');
+    return true;
+  }
+  if (step === 3) {
+    const box   = document.getElementById('err-3');
+    const bldr  = document.getElementById('bldr-' + wz.type);
+    const count = bldr ? bldr.querySelectorAll('.wz-q').length : 0;
+    if (count === 0) {
+      box.textContent = 'Ajoutez au moins une question avant de continuer.';
+      box.classList.add('is-shown');
+      return false;
+    }
+    box.classList.remove('is-shown');
+    return true;
+  }
+  return true;
+}
+
+/* ── Save step data ──────────────────────────────────────── */
+function wzSave(step) {
+  if (step === 1) wz.type  = document.querySelector('input[name="_type_pick"]:checked').value;
+  if (step === 2) {
+    wz.titre = document.getElementById('wz-titre').value.trim();
+    wz.desc  = document.getElementById('wz-desc').value.trim();
+    wz.duree = document.getElementById('wz-duree').value.trim();
+  }
+}
+
+/* ── Show correct builder ────────────────────────────────── */
+function showBuilder(type) {
+  document.querySelectorAll('.wz-bldr').forEach(b => b.style.display='none');
+  const b = document.getElementById('bldr-' + type);
+  if (!b) return;
+  b.style.display = '';
+  const listMap = {quiz:'qcm-list', match_pairs:'match-list', find_error:'error-list', fill_blank:'blank-list'};
+  if (document.getElementById(listMap[type]).children.length === 0) {
+    ({quiz:addQcmQ, match_pairs:addMatchQ, find_error:addErrorQ, fill_blank:addBlankQ}[type])();
+  }
+}
+
+/* ── Review ──────────────────────────────────────────────── */
+const TL = {
+  quiz:        {name:'QCM Classique',     icon:'📝', s:'background:var(--qcm-b);color:var(--qcm)'},
+  match_pairs: {name:'Associer Paires',   icon:'🔗', s:'background:var(--mat-b);color:var(--mat)'},
+  find_error:  {name:"Trouver l'Erreur",  icon:'🔍', s:'background:var(--err-b);color:var(--err)'},
+  fill_blank:  {name:'Remplir les Blancs',icon:'✏️', s:'background:var(--bla-b);color:var(--bla)'},
+};
+function buildReview() {
+  const tl  = TL[wz.type]||{};
+  const map = {quiz:'qcm-list', match_pairs:'match-list', find_error:'error-list', fill_blank:'blank-list'};
+  const qn  = (document.getElementById(map[wz.type])||{querySelectorAll:()=>({length:0})}).querySelectorAll('.wz-q').length;
+  document.getElementById('review-body').innerHTML = `
+    <div class="wz-rv-row"><span class="wz-rv-lbl">Type de quiz</span><span class="wz-rv-badge" style="${tl.s||''}">${tl.icon||''} ${tl.name||wz.type}</span></div>
+    <div class="wz-rv-row"><span class="wz-rv-lbl">Titre</span><span class="wz-rv-val">${esc(wz.titre)}</span></div>
+    ${wz.desc?`<div class="wz-rv-row"><span class="wz-rv-lbl">Description</span><span class="wz-rv-val" style="font-weight:400;">${esc(wz.desc)}</span></div>`:''}
+    ${wz.duree?`<div class="wz-rv-row"><span class="wz-rv-lbl">Durée</span><span class="wz-rv-val">${esc(wz.duree)} min</span></div>`:''}
+    <div class="wz-rv-row"><span class="wz-rv-lbl">Questions</span><span class="wz-rv-num">${qn}</span></div>
+    <div style="margin-top:20px;background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:13px;padding:14px 16px;display:flex;gap:11px;align-items:center;">
+      <span style="font-size:1.3rem;">🚀</span>
+      <p style="font-family:'DM Sans',sans-serif;font-size:.83rem;color:#065f46;margin:0;line-height:1.5;">
+        Tout est prêt ! Cliquez sur <strong>Publier le quiz</strong> pour sauvegarder.
+      </p>
+    </div>`;
+}
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ── Submit ──────────────────────────────────────────────── */
+function wzSubmit() {
+  const hidden = document.getElementById('wz-hidden');
+  hidden.innerHTML = '';
+  const inp = (n,v) => { const e=document.createElement('input');e.type='hidden';e.name=n;e.value=v;hidden.appendChild(e); };
+
+  inp('type',        wz.type);
+  inp('titre',       wz.titre);
+  inp('description', wz.desc);
+  inp('duree',       wz.duree);
+
+  const listMap = {quiz:'qcm-list', match_pairs:'match-list', find_error:'error-list', fill_blank:'blank-list'};
+  const cards   = document.getElementById(listMap[wz.type]).querySelectorAll('.wz-q');
+  let qi = 0;
+  cards.forEach(card => {
+    const cv = card.querySelector('[data-field=contenu]');
+    if (!cv || !cv.value.trim()) return;
+    inp(`questions[${qi}][contenu]`, cv.value.trim());
+    const pv = card.querySelector('[data-field=points]');
+    if (pv) inp(`questions[${qi}][points]`, pv.value||'1');
+
+    if (wz.type === 'quiz') {
+      card.querySelectorAll('.wz-opt').forEach((o,oi)=>{
+        const t=o.querySelector('[data-field=opt_text]'), c=o.querySelector('[data-field=opt_ck]');
+        if(t&&t.value.trim()){inp(`questions[${qi}][options][${oi}][contenu]`,t.value.trim());inp(`questions[${qi}][options][${oi}][correct]`,c&&c.checked?'1':'');}
+      });
+    }
+    if (wz.type === 'match_pairs') {
+      card.querySelectorAll('.wz-pair').forEach((r,pi)=>{
+        const l=r.querySelector('[data-field=pair_left]'),rr=r.querySelector('[data-field=pair_right]');
+        if(l&&rr&&l.value.trim()&&rr.value.trim()){inp(`questions[${qi}][pairs][${pi}][left]`,l.value.trim());inp(`questions[${qi}][pairs][${pi}][right]`,rr.value.trim());}
+      });
+    }
+    if (wz.type === 'find_error') {
+      const w=card.querySelector('[data-field=wrong_part]'),e=card.querySelector('[data-field=explication]');
+      if(w) inp(`questions[${qi}][wrong_part]`,  w.value.trim());
+      if(e) inp(`questions[${qi}][explication]`, e.value.trim());
+    }
+    if (wz.type === 'fill_blank') {
+      card.querySelectorAll('.wz-blank').forEach((r,bi)=>{
+        const b=r.querySelector('[data-field=blank_ans]');
+        if(b&&b.value.trim()) inp(`questions[${qi}][blanks][${bi}]`,b.value.trim());
+      });
+    }
+    qi++;
+  });
+  document.getElementById('wz-form').submit();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   QCM BUILDER
+═══════════════════════════════════════════════════════════ */
+function addQcmQ() {
+  const idx = qcmCount++;
+  const c   = document.createElement('div');
+  c.className = 'wz-q'; c.dataset.t = 'quiz';
+  c.innerHTML = `
+    <div class="wz-q-head">
+      <span class="wz-q-pill">📝 Question ${idx+1}</span>
+      <button type="button" class="wz-btn wz-btn-danger wz-btn-sm" onclick="this.closest('.wz-q').remove()">✕ Supprimer</button>
+    </div>
+    <div class="wz-q-body">
+      <div class="wz-field">
+        <label class="wz-lbl">Énoncé <span class="wz-req">*</span></label>
+        <textarea class="wz-textarea" data-field="contenu" placeholder="ex : Quel mot-clé déclare une variable en PHP ?"></textarea>
+      </div>
+      <div class="wz-pts"><label>Points</label><input type="number" class="wz-input" data-field="points" value="1" min="1" max="100"></div>
+      <div class="wz-div-lbl">Propositions de réponse</div>
+      <div class="wz-opts-w" data-qidx="${idx}"></div>
+      <button type="button" class="wz-btn wz-btn-ghost wz-btn-sm" style="margin-top:4px;" onclick="addQcmOpt(${idx})">+ Réponse</button>
+    </div>`;
+  document.getElementById('qcm-list').appendChild(c);
+  addQcmOpt(idx); addQcmOpt(idx); addQcmOpt(idx);
+}
+function addQcmOpt(qi) {
+  const w = document.querySelector(`.wz-opts-w[data-qidx="${qi}"]`);
+  if (!w) return;
+  const oi = w.children.length;
+  const r  = document.createElement('div');
+  r.className = 'wz-opt';
+  r.innerHTML = `
+    <input type="text" data-field="opt_text" placeholder="Réponse ${oi+1}…">
+    <label class="wz-opt-ck"><input type="checkbox" data-field="opt_ck"> Correct</label>
+    <button type="button" class="wz-del" onclick="this.closest('.wz-opt').remove()">✕</button>`;
+  w.appendChild(r);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MATCH PAIRS BUILDER
+═══════════════════════════════════════════════════════════ */
+function addMatchQ() {
+  const idx = matchCount++;
+  const c   = document.createElement('div');
+  c.className = 'wz-q'; c.dataset.t = 'match';
+  c.innerHTML = `
+    <div class="wz-q-head">
+      <span class="wz-q-pill">🔗 Ensemble ${idx+1}</span>
+      <button type="button" class="wz-btn wz-btn-danger wz-btn-sm" onclick="this.closest('.wz-q').remove()">✕ Supprimer</button>
+    </div>
+    <div class="wz-q-body">
+      <div class="wz-field">
+        <label class="wz-lbl">Instruction <span class="wz-req">*</span></label>
+        <input type="text" class="wz-input" data-field="contenu" placeholder="ex : Associez chaque technologie à sa description">
+      </div>
+      <div class="wz-pair-hdr"><span>Élément A</span><span></span><span>Élément B</span><span></span></div>
+      <div class="wz-pairs-w" data-qidx="${idx}"></div>
+      <button type="button" class="wz-btn wz-btn-ghost wz-btn-sm" style="margin-top:4px;" onclick="addPairRow(${idx})">+ Paire</button>
+    </div>`;
+  document.getElementById('match-list').appendChild(c);
+  addPairRow(idx); addPairRow(idx); addPairRow(idx);
+}
+function addPairRow(qi) {
+  const w = document.querySelector(`.wz-pairs-w[data-qidx="${qi}"]`);
+  if (!w) return;
+  const r = document.createElement('div');
+  r.className = 'wz-pair';
+  r.innerHTML = `
+    <input type="text" data-field="pair_left"  placeholder="ex : HTML">
+    <div class="wz-pair-arrow">→</div>
+    <input type="text" data-field="pair_right" placeholder="ex : Balisage web">
+    <button type="button" class="wz-del" onclick="this.closest('.wz-pair').remove()">✕</button>`;
+  w.appendChild(r);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FIND ERROR BUILDER
+═══════════════════════════════════════════════════════════ */
+function addErrorQ() {
+  const idx = errorCount++;
+  const c   = document.createElement('div');
+  c.className = 'wz-q'; c.dataset.t = 'error';
+  c.innerHTML = `
+    <div class="wz-q-head">
+      <span class="wz-q-pill">🔍 Question ${idx+1}</span>
+      <button type="button" class="wz-btn wz-btn-danger wz-btn-sm" onclick="this.closest('.wz-q').remove()">✕ Supprimer</button>
+    </div>
+    <div class="wz-q-body">
+      <div class="wz-field">
+        <label class="wz-lbl">Texte contenant l'erreur <span class="wz-req">*</span></label>
+        <textarea class="wz-textarea" data-field="contenu" placeholder="ex : &lt;html&gt;&lt;body&gt;&lt;p&gt;Hello Word&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;"></textarea>
+      </div>
+      <div class="wz-grid2">
+        <div class="wz-field" style="margin-bottom:0;">
+          <label class="wz-lbl">Partie incorrecte <span class="wz-req">*</span></label>
+          <input type="text" class="wz-input" data-field="wrong_part" placeholder="ex : Word">
+        </div>
+        <div class="wz-field" style="margin-bottom:0;">
+          <label class="wz-lbl">Explication <span style="color:#9ca3af;font-weight:400;">(optionnel)</span></label>
+          <input type="text" class="wz-input" data-field="explication" placeholder="ex : Le mot correct est « World »">
+        </div>
+      </div>
+      <div class="wz-pts" style="margin-top:13px;"><label>Points</label><input type="number" class="wz-input" data-field="points" value="1" min="1" max="100"></div>
+    </div>`;
+  document.getElementById('error-list').appendChild(c);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FILL BLANK BUILDER
+═══════════════════════════════════════════════════════════ */
+function addBlankQ() {
+  const idx = blankCount++;
+  const c   = document.createElement('div');
+  c.className = 'wz-q'; c.dataset.t = 'blank';
+  c.innerHTML = `
+    <div class="wz-q-head">
+      <span class="wz-q-pill">✏️ Question ${idx+1}</span>
+      <button type="button" class="wz-btn wz-btn-danger wz-btn-sm" onclick="this.closest('.wz-q').remove()">✕ Supprimer</button>
+    </div>
+    <div class="wz-q-body">
+      <div class="wz-field">
+        <label class="wz-lbl">Phrase avec blancs (<code style="background:var(--bla-b);color:var(--bla);padding:1px 5px;border-radius:4px;">___</code>) <span class="wz-req">*</span></label>
+        <textarea class="wz-textarea" data-field="contenu" placeholder="ex : Symfony est un ___ PHP basé sur le patron ___."></textarea>
+      </div>
+      <div class="wz-pts"><label>Points</label><input type="number" class="wz-input" data-field="points" value="1" min="1" max="100"></div>
+      <div class="wz-div-lbl">Réponses attendues (dans l'ordre)</div>
+      <div class="wz-blanks-w" data-qidx="${idx}"></div>
+      <button type="button" class="wz-btn wz-btn-ghost wz-btn-sm" style="margin-top:4px;" onclick="addBlankRow(${idx})">+ Réponse</button>
+    </div>`;
+  document.getElementById('blank-list').appendChild(c);
+  addBlankRow(idx);
+}
+function addBlankRow(qi) {
+  const w = document.querySelector(`.wz-blanks-w[data-qidx="${qi}"]`);
+  if (!w) return;
+  const bi = w.children.length;
+  const r  = document.createElement('div');
+  r.className = 'wz-blank';
+  r.innerHTML = `
+    <span class="wz-blank-badge">Blanc ${bi+1}</span>
+    <input type="text" data-field="blank_ans" placeholder="Réponse attendue…">
+    <button type="button" class="wz-del" onclick="this.closest('.wz-blank').remove()">✕</button>`;
+  w.appendChild(r);
+}
+
+/* ── Init ────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => wzGo(1));
+</script>
+{% endblock %}

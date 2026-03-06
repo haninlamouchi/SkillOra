@@ -1,0 +1,1075 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}{{ formation.titre }} — SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+<script>google.charts.load('current', {packages: ['corechart', 'bar']});</script>
+<style>
+:root { --sk-red:#8b0000; --sk-red-dark:#4a0000; --sk-red-light:#c0392b; --sk-ink:#180808; --sk-muted:#8a7070; --sk-border:rgba(139,0,0,0.09); }
+.sk-page { padding-top:70px; }
+
+.sk-hero { position:relative; background:linear-gradient(135deg,#3d0000 0%,#8b0000 48%,#c23030 100%); margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%); padding:60px 20px 52px; text-align:center; overflow:hidden; isolation:isolate; }
+.sk-hero::before { content:''; position:absolute; inset:0; z-index:0; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E"); background-size:180px; opacity:0.5; }
+.sk-hero-ring-l,.sk-hero-ring-r { position:absolute; z-index:0; border-radius:50%; border:72px solid rgba(255,255,255,0.035); }
+.sk-hero-ring-l { width:520px; height:520px; top:-210px; left:-160px; }
+.sk-hero-ring-r { width:380px; height:380px; bottom:-160px; right:-100px; border-width:50px; }
+.sk-hero-inner { position:relative; z-index:1; }
+.sk-hero h1 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(1.8rem,4vw,2.6rem); font-weight:800; letter-spacing:-0.03em; color:#fff; margin:0 0 8px; line-height:1.1; }
+.sk-hero p { font-family:'DM Sans',sans-serif; color:rgba(255,255,255,0.60); font-size:0.97rem; margin:0; }
+
+.sk-content { padding:36px 0 56px; }
+.sk-back { display:inline-flex; align-items:center; gap:6px; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:600; color:var(--sk-muted); text-decoration:none; margin-bottom:24px; transition:color 0.2s; }
+.sk-back:hover { color:var(--sk-red); text-decoration:none; }
+
+.sk-topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:28px; }
+.sk-topbar-title { font-family:'Bricolage Grotesque',sans-serif; font-size:1.3rem; font-weight:800; color:var(--sk-ink); margin:0; }
+.sk-topbar-actions { display:flex; gap:8px; }
+
+/* buttons */
+.sk-btn { display:inline-flex; align-items:center; gap:7px; padding:9px 18px; border-radius:10px; font-weight:700; font-family:'DM Sans',sans-serif; font-size:0.85rem; border:none; cursor:pointer; transition:all 0.25s; text-decoration:none; }
+.sk-btn-primary { background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); color:#fff; }
+.sk-btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(139,0,0,0.3); color:#fff; text-decoration:none; }
+.sk-btn-ghost { background:#f3f4f6; color:#374151; border:1.5px solid #e5e7eb; }
+.sk-btn-ghost:hover { border-color:#9ca3af; color:#111; text-decoration:none; }
+.sk-btn-warn { background:transparent; color:#d97706; border:1.5px solid #fcd34d; }
+.sk-btn-warn:hover { background:#d97706; color:#fff; text-decoration:none; }
+.sk-btn-danger { background:transparent; color:#dc2626; border:1.5px solid #fca5a5; }
+.sk-btn-danger:hover { background:#dc2626; color:#fff; border-color:#dc2626; text-decoration:none; }
+.sk-btn-success { background:linear-gradient(135deg,#15803d,#22c55e); color:#fff; }
+.sk-btn-success:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(34,197,94,0.3); color:#fff; text-decoration:none; }
+.sk-btn-blue { background:linear-gradient(135deg,#1d4ed8,#3b82f6); color:#fff; }
+.sk-btn-blue:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(59,130,246,0.3); color:#fff; text-decoration:none; }
+.sk-btn-sm { padding:6px 13px; font-size:0.80rem; }
+.sk-btn-sm.active {
+  background-color: #0d6efd;
+  color: white;
+}
+.content-section {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.memory-cards { margin-top: 18px; }
+.memory-cards h3 { font-family:'Bricolage Grotesque',sans-serif; font-size:1rem; margin-bottom:10px; color:var(--sk-ink); }
+.memory-card { background:#fff; border:1.5px solid var(--sk-border); border-radius:12px; padding:14px; margin-top:10px; }
+.memory-card .front { font-weight:700; color:var(--sk-ink); margin-bottom:8px; }
+.memory-card .back { color:var(--sk-muted); margin-bottom:10px; }
+.card-feedback { display:flex; gap:8px; }
+.correct-btn,.wrong-btn { border:none; border-radius:8px; padding:6px 10px; font-size:0.78rem; cursor:pointer; }
+.correct-btn { background:#dcfce7; color:#15803d; }
+.wrong-btn { background:#fee2e2; color:#dc2626; }
+
+#card-modal .sk-modal-body { display:grid; gap:10px; }
+#card-modal .sk-modal-body input {
+  padding:10px 14px;
+  border:1.5px solid #e5e7eb;
+  border-radius:10px;
+  font-family:'DM Sans',sans-serif;
+  font-size:0.88rem;
+  background:#f9f9f9;
+}
+#card-modal .sk-modal-body input:focus { outline:none; border-color:var(--sk-red); background:#fff; }
+
+
+
+
+.sk-btn-icon { width:34px; height:34px; padding:0; justify-content:center; border-radius:9px; }
+
+/* layout */
+.sk-layout { display:grid; grid-template-columns:1fr 300px; gap:20px; margin-bottom:24px; }
+
+/* section cards */
+.sk-card { background:#fff; border-radius:18px; border:1.5px solid var(--sk-border); box-shadow:0 2px 10px rgba(0,0,0,0.04); overflow:hidden; margin-bottom:20px; animation:sk-up 0.4s ease both; }
+.sk-card-head { padding:18px 24px; border-bottom:1.5px solid var(--sk-border); display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.sk-card-head-title { font-family:'Bricolage Grotesque',sans-serif; font-size:0.95rem; font-weight:800; color:var(--sk-ink); margin:0; }
+.sk-card-body { padding:24px; }
+
+/* info rows */
+.sk-info-row { display:grid; grid-template-columns:140px 1fr; gap:8px; padding:10px 0; border-bottom:1px solid var(--sk-border); font-family:'DM Sans',sans-serif; font-size:0.88rem; }
+.sk-info-row:last-child { border-bottom:none; }
+.sk-info-label { color:var(--sk-muted); font-weight:600; }
+.sk-info-value { color:var(--sk-ink); }
+.sk-info-value a { color:#2563eb; text-decoration:none; font-weight:600; }
+.sk-info-value a:hover { text-decoration:underline; }
+
+/* mini stats */
+.sk-mini-stats { display:flex; justify-content:space-around; padding:20px; }
+.sk-mini-stat { text-align:center; }
+.sk-mini-stat-val { font-family:'Bricolage Grotesque',sans-serif; font-size:1.6rem; font-weight:800; color:var(--sk-ink); line-height:1; }
+.sk-mini-stat-lbl { font-family:'DM Sans',sans-serif; font-size:0.75rem; color:var(--sk-muted); margin-top:4px; }
+
+.sk-cover { width:100%; max-height:200px; object-fit:cover; display:block; border-bottom:1.5px solid var(--sk-border); }
+.sk-cover-placeholder { width:100%; height:160px; background:linear-gradient(135deg,#fdf0f0,#f5dede); display:flex; align-items:center; justify-content:center; font-size:3rem; border-bottom:1.5px solid var(--sk-border); }
+
+/* videos */
+.sk-videos-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+.sk-video-card { background:#f9f9f9; border-radius:14px; overflow:hidden; border:1.5px solid var(--sk-border); }
+.sk-video-card video { width:100%; display:block; max-height:180px; background:#000; }
+.sk-video-info { padding:12px 14px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.sk-video-title { font-family:'Bricolage Grotesque',sans-serif; font-size:0.9rem; font-weight:700; color:var(--sk-ink); margin:0 0 4px; }
+.sk-video-desc { font-family:'DM Sans',sans-serif; font-size:0.78rem; color:var(--sk-muted); margin:0; }
+
+/* quiz cards */
+.sk-quiz-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; }
+.sk-quiz-card { background:#f9f9f9; border-radius:14px; border:1.5px solid var(--sk-border); display:flex; flex-direction:column; overflow:hidden; transition:border-color 0.2s,transform 0.2s; }
+.sk-quiz-card:hover { border-color:rgba(139,0,0,0.20); transform:translateY(-2px); }
+.sk-quiz-card-body { padding:16px 18px; flex:1; }
+.sk-quiz-icon { width:44px; height:44px; border-radius:12px; background:rgba(13,110,253,0.09); color:#2563eb; display:flex; align-items:center; justify-content:center; font-size:1.2rem; margin-bottom:12px; }
+.sk-quiz-title { font-family:'Bricolage Grotesque',sans-serif; font-size:0.92rem; font-weight:800; color:var(--sk-ink); margin:0 0 4px; }
+.sk-quiz-sub { font-family:'DM Sans',sans-serif; font-size:0.78rem; color:var(--sk-muted); margin:0 0 8px; }
+.sk-quiz-desc { font-family:'DM Sans',sans-serif; font-size:0.80rem; color:var(--sk-muted); line-height:1.5; }
+.sk-quiz-meta { display:flex; gap:10px; font-family:'DM Sans',sans-serif; font-size:0.76rem; color:#9ca3af; padding-top:10px; }
+.sk-quiz-footer { padding:10px 18px; border-top:1.5px solid var(--sk-border); display:flex; justify-content:space-between; align-items:center; gap:8px; }
+
+/* table */
+.sk-table-wrap { overflow-x:auto; }
+.sk-table { width:100%; border-collapse:collapse; font-family:'DM Sans',sans-serif; font-size:0.86rem; }
+.sk-table thead th { padding:12px 16px; text-align:left; font-size:0.70rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--sk-muted); background:#f9f9f9; border-bottom:1.5px solid var(--sk-border); }
+.sk-table tbody tr { border-bottom:1px solid var(--sk-border); transition:background 0.15s; }
+.sk-table tbody tr:last-child { border-bottom:none; }
+.sk-table tbody tr:hover { background:#fafafa; }
+.sk-table td { padding:12px 16px; color:var(--sk-ink); vertical-align:middle; }
+
+.sk-avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Bricolage Grotesque',sans-serif; font-size:0.78rem; font-weight:800; flex-shrink:0; overflow:hidden; }
+.sk-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+
+.sk-score-good { background:#dcfce7; color:#15803d; }
+.sk-score-mid  { background:#fef9c3; color:#854d0e; }
+.sk-score-bad  { background:#fee2e2; color:#dc2626; }
+.sk-score-badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:50px; font-size:0.71rem; font-weight:700; font-family:'DM Sans',sans-serif; margin-left:4px; }
+.sk-role { display:inline-flex; align-items:center; padding:3px 9px; border-radius:50px; font-size:0.69rem; font-weight:700; font-family:'DM Sans',sans-serif; }
+.sk-role-admin { background:#fee2e2; color:#dc2626; }
+.sk-role-resp  { background:#fef9c3; color:#854d0e; }
+.sk-role-other { background:#eff6ff; color:#2563eb; }
+
+.sk-empty-inline { text-align:center; padding:40px 20px; }
+.sk-empty-inline .icon { font-size:3rem; opacity:0.25; margin-bottom:10px; }
+.sk-empty-inline p { font-family:'DM Sans',sans-serif; font-size:0.88rem; color:var(--sk-muted); margin-bottom:14px; }
+
+/* pagination */
+.sk-pagination { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; padding:14px 18px; border-top:1.5px solid var(--sk-border); }
+.sk-pag-info { font-family:'DM Sans',sans-serif; font-size:0.82rem; color:var(--sk-muted); }
+.sk-pag-info strong { color:var(--sk-ink); }
+.sk-pag-controls { display:flex; align-items:center; gap:6px; }
+.sk-pag-btn, .sk-pag-num { display:inline-flex; align-items:center; justify-content:center; padding:6px 13px; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.82rem; font-weight:600; text-decoration:none; transition:all .18s; border:1.5px solid var(--sk-border); color:var(--sk-ink); background:#fff; }
+.sk-pag-btn:hover:not(.sk-pag-disabled), .sk-pag-num:hover { border-color:var(--sk-red); color:var(--sk-red); text-decoration:none; }
+.sk-pag-num { min-width:34px; }
+.sk-pag-active { background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); color:#fff !important; border-color:transparent; }
+.sk-pag-disabled { opacity:.4; pointer-events:none; cursor:default; }
+
+.sk-flash { border-radius:12px; padding:12px 18px; margin-bottom:14px; font-family:'DM Sans',sans-serif; font-size:0.87rem; display:flex; align-items:center; gap:10px; }
+.sk-flash-success { background:#dcfce7; color:#15803d; border:1.5px solid #bbf7d0; }
+.sk-flash-danger  { background:#fee2e2; color:#dc2626; border:1.5px solid #fecaca; }
+
+/* modal */
+.sk-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; display:none; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
+.sk-modal-overlay.open { display:flex; }
+.sk-modal { background:#fff; border-radius:20px; padding:0; max-width:560px; width:92%; box-shadow:0 24px 64px rgba(0,0,0,0.18); animation:sk-up 0.3s ease; overflow:hidden; }
+.sk-modal-head { padding:22px 28px; border-bottom:1.5px solid var(--sk-border); display:flex; justify-content:space-between; align-items:center; }
+.sk-modal-head-title { font-family:'Bricolage Grotesque',sans-serif; font-size:1rem; font-weight:800; color:var(--sk-ink); margin:0; }
+.sk-modal-close { background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--sk-muted); line-height:1; padding:0; }
+.sk-modal-close:hover { color:var(--sk-ink); }
+.sk-modal-body { padding:24px 28px; display:grid; gap:16px; }
+.sk-modal-footer { padding:16px 28px; border-top:1.5px solid var(--sk-border); display:flex; justify-content:flex-end; gap:10px; background:#f9f9f9; }
+.sk-modal-body label { font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:700; color:#374151; text-transform:uppercase; letter-spacing:0.07em; display:block; margin-bottom:5px; }
+.sk-modal-body input[type="text"],
+.sk-modal-body input[type="file"],
+.sk-modal-body textarea,
+.sk-modal-body select { padding:10px 14px; border:1.5px solid #e5e7eb; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:0.88rem; color:var(--sk-ink); background:#f9f9f9; width:100%; outline:none; transition:border-color 0.2s; }
+.sk-modal-body input:focus,
+.sk-modal-body textarea:focus,
+.sk-modal-body select:focus { border-color:var(--sk-red); background:#fff; }
+.sk-modal-body textarea { resize:vertical; min-height:80px; }
+.sk-modal-hint { font-family:'DM Sans',sans-serif; font-size:0.75rem; color:var(--sk-muted); margin-top:4px; }
+.sk-upload-zone { border:2px dashed #e2e8f0; border-radius:10px; padding:14px; background:#f9fafb; }
+.sk-upload-zone:hover { border-color:var(--sk-red); }
+
+@keyframes sk-up { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+.sk-hero { animation:sk-up 0.5s cubic-bezier(.22,.68,0,1) both; }
+.sk-card:nth-child(1){animation-delay:.05s} .sk-card:nth-child(2){animation-delay:.10s} .sk-card:nth-child(3){animation-delay:.15s} .sk-card:nth-child(4){animation-delay:.20s} .sk-card:nth-child(5){animation-delay:.25s}
+@media(max-width:900px){ .sk-layout{grid-template-columns:1fr;} }
+@media(max-width:680px){ .sk-hero{padding:52px 20px 44px;} }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+  <div class="sk-hero">
+    <div class="sk-hero-ring-l"></div>
+    <div class="sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <h1>📚 {{ formation.titre }}</h1>
+      {% if formation.terminee %}
+        <span style="margin-left:10px;background:#16a34a;color:white;padding:5px 10px;border-radius:8px;font-size:0.7rem;">
+          Terminée
+        </span>
+      {% else %}
+        <span style="margin-left:10px;background:#f59e0b;color:white;padding:5px 10px;border-radius:8px;font-size:0.7rem;">
+          En cours
+        </span>
+      {% endif %}
+      <p>Détails de la formation</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sk-content">
+
+      {% for type, messages in app.flashes %}
+        {% for message in messages %}
+          <div class="sk-flash sk-flash-{{ type == 'success' ? 'success' : 'danger' }}">
+            {{ type == 'success' ? '✅' : '❌' }} {{ message }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      <div class="sk-topbar">
+        <a href="{{ path('app_formation_index') }}" class="sk-back">← Retour aux formations</a>
+        <div class="sk-topbar-actions">
+          <a href="{{ path('app_formation_edit', {id: formation.id}) }}" class="sk-btn sk-btn-warn sk-btn-sm">✏️ Modifier</a>
+        </div>
+      </div>
+
+      <!-- Layout -->
+      <div class="sk-layout">
+        <div>
+          <div class="sk-card">
+            <div class="sk-card-head"><span class="sk-card-head-title">ℹ️ Détails de la formation</span></div>
+            <div class="sk-card-body">
+              <div class="sk-info-row"><span class="sk-info-label">Description</span><span class="sk-info-value">{{ formation.description ?? '—' }}</span></div>
+              <div class="sk-info-row"><span class="sk-info-label">Club</span><span class="sk-info-value">{{ formation.club ?? '—' }}</span></div>
+              <div class="sk-info-row"><span class="sk-info-label">Date de début</span><span class="sk-info-value">{{ formation.dateDebut ? formation.dateDebut|date('d/m/Y') : '—' }}</span></div>
+              <div class="sk-info-row"><span class="sk-info-label">Date de fin</span><span class="sk-info-value">{{ formation.dateFin ? formation.dateFin|date('d/m/Y') : '—' }}</span></div>
+              <div class="sk-info-row">
+                <span class="sk-info-label">Status</span>
+                <span class="sk-info-value">
+                  <form action="{{ path('app_formation_update_status', {id: formation.id}) }}" method="post" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('update_status_' ~ formation.id) }}">
+                    <select name="terminee" class="sk-btn sk-btn-ghost sk-btn-sm" style="padding-right:28px;">
+                      <option value="0" {{ formation.terminee ? '' : 'selected' }}>En cours</option>
+                      <option value="1" {{ formation.terminee ? 'selected' : '' }}>Terminée</option>
+                    </select>
+                    <button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">💾 Enregistrer</button>
+                  </form>
+                </span>
+              </div>
+              
+              {% if formation.isPaid %}
+                <div class="sk-info-row"><span class="sk-info-label">Tarif</span><span class="sk-info-value">💰 {{ formation.prix ? formation.prix|number_format(2, '.', ' ') ~ ' TND' : 'Payante' }}</span></div>
+              {% else %}
+                <div class="sk-info-row"><span class="sk-info-label">Tarif</span><span class="sk-info-value" style="color:#15803d;font-weight:600;">✓ Gratuite</span></div>
+              {% endif %}
+
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="sk-card">
+            {% if formation.image %}
+              <img class="sk-cover" src="{{ formation.image }}" alt="{{ formation.titre }}">
+            {% else %}
+              <div class="sk-cover-placeholder">🎓</div>
+            {% endif %}
+            <div class="sk-mini-stats">
+              <div class="sk-mini-stat"><div class="sk-mini-stat-val">{{ formation.videos|length }}</div><div class="sk-mini-stat-lbl">Vidéos</div></div>
+              <div class="sk-mini-stat"><div class="sk-mini-stat-val">{{ formation.participations|length }}</div><div class="sk-mini-stat-lbl">Participants</div></div>
+              <div class="sk-mini-stat"><div class="sk-mini-stat-val">{{ formation.quizzes|length }}</div><div class="sk-mini-stat-lbl">Quiz</div></div>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+
+
+
+
+    
+    <div class="sk-card2" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
+      <div class="filter-btn sk-topbar-actions sk-btn sk-btn-ghost sk-btn-sm active" data-section="videos">Apprendre</div>
+      <div class="filter-btn sk-topbar-actions sk-btn sk-btn-ghost sk-btn-sm" data-section="quiz">Pratiquer</div>
+      <div class="filter-btn sk-topbar-actions sk-btn sk-btn-ghost sk-btn-sm" data-section="test">Évaluer</div>
+      <div class="filter-btn sk-topbar-actions sk-btn sk-btn-ghost sk-btn-sm" data-section="participants">Participants</div>
+      <div class="filter-btn sk-topbar-actions sk-btn sk-btn-ghost sk-btn-sm" data-section="charts">📊 Statistiques</div>
+    </div>
+
+
+    <!------------ learning section ------------>
+    <div class="content-section" id="videos">
+      <!-- Videos -->
+      <div class="sk-card">
+        <div class="sk-card-head">
+          <span class="sk-card-head-title">🎬 Vidéos ({{ formation.videos|length }})</span>
+          <button type="button" class="sk-btn sk-btn-primary sk-btn-sm" onclick="document.getElementById('modalVideo').classList.add('open')">➕ Ajouter une vidéo</button>
+        </div>
+        <div class="sk-card-body">
+          {% if formation.videos|length > 0 %}
+            <div class="sk-videos-grid">
+              {% for video in formation.videos %}
+                <div class="sk-video-card">
+                  <video controls>
+                    <source src="{{ video.videoPath }}" type="video/mp4">
+                  </video>
+                  <div class="sk-video-info">
+                    <div style="flex:1">
+                      <div class="sk-video-title">{{ video.titre }}</div>
+                      {% if video.description %}<div class="sk-video-desc">{{ video.description }}</div>{% endif %}
+                    </div>
+                    <form action="{{ path('app_formation_delete_video', {id: formation.id, videoId: video.id}) }}" method="post" style="margin:0" onsubmit="return confirm('Supprimer cette vidéo ?')">
+                      <input type="hidden" name="_token" value="{{ csrf_token('delete_video' ~ video.id) }}">
+                      <button type="submit" class="sk-btn sk-btn-danger sk-btn-sm sk-btn-icon">🗑️</button>
+                    </form>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="sk-empty-inline"><div class="icon">🎬</div><p>Aucune vidéo pour cette formation.</p></div>
+          {% endif %}
+        </div>
+      </div>
+
+      
+      <div class="memory-cards">
+        <h3>Cartes Mémoire</h3> 
+        <button type="button" class="sk-btn sk-btn-primary sk-btn-sm"  onclick="document.getElementById('modalAI').classList.add('open')">>Générer avec IA</button>
+        
+        <button id="add-card-btn" type="button" class="sk-btn sk-btn-primary sk-btn-sm">
+        ➕ Ajouter une carte
+        </button>
+
+        {% for card in formation.flashcards %}
+        <div class="memory-card">
+          <div class="front">{{ card.question }}</div>
+          <div class="back">{{ card.answer }}</div>
+
+          <div class="card-feedback"> 
+            <button
+              type="button"
+              class="sk-btn sk-btn-warn sk-btn-sm edit-card-btn"
+              data-id="{{ card.id }}"
+              data-question="{{ card.question|e('html_attr') }}"
+              data-answer="{{ card.answer|e('html_attr') }}"
+              data-action="{{ path('app_flashcard_edit', {id: formation.id, cardId: card.id}) }}"
+              data-token="{{ csrf_token('edit_flashcard_' ~ card.id) }}"
+            >✏️ Modifier</button>
+            <form action="{{ path('app_flashcard_delete', {id: formation.id, cardId: card.id}) }}" method="post" style="margin:0" onsubmit="return confirm('Supprimer cette carte ?')">
+              <input type="hidden" name="_token" value="{{ csrf_token('delete_flashcard_' ~ card.id) }}">
+              <button type="submit" class="sk-btn sk-btn-danger sk-btn-sm">🗑️ Supprimer</button>
+            </form>
+          </div>
+        </div>
+        {% else %}
+        <p>Aucune carte mémoire.</p>
+        {% endfor %}
+      </div>
+
+    </div>
+
+
+
+    <!------------ practice section ------------>
+      <div class="content-section d-none" id="quiz">
+        <!-- Levels & Quizzes -->
+        <div class="sk-card">
+          <div class="sk-card-head">
+            <span class="sk-card-head-title">🏆 Niveaux & Quiz ({{ formation.levels|length }} niveau{{ formation.levels|length > 1 ? 'x' : '' }})</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <a href="{{ path('app_level_index', {formationId: formation.id}) }}" class="sk-btn sk-btn-ghost sk-btn-sm">📋 Gérer les niveaux</a>
+              <a href="{{ path('app_level_new', {formationId: formation.id}) }}" class="sk-btn sk-btn-primary sk-btn-sm">➕ Nouveau niveau</a>
+            </div>
+          </div>
+          <div class="sk-card-body">
+            {% if formation.levels|length > 0 %}
+              <div style="display:flex;flex-direction:column;gap:16px;">
+                {% for level in formation.levels|sort((a,b) => a.numero <=> b.numero) %}
+                  <div style="background:#f9f9f9;border-radius:14px;border:1.5px solid var(--sk-border);padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+                    <div style="display:flex;align-items:center;gap:14px;">
+                      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#4a0000,#8b0000);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.1rem;flex-shrink:0;">{{ level.numero }}</div>
+                      <div>
+                        <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:0.95rem;color:var(--sk-ink);">{{ level.titre }}</div>
+                        <div style="font-family:'DM Sans',sans-serif;font-size:0.78rem;color:#9ca3af;margin-top:2px;">
+                          🎯 {{ level.quizzes|length }} quiz{{ level.quizzes|length > 1 ? 'zes' : '' }}
+                          {% if level.scoreRequired %} · ⭐ Score requis : {{ level.scoreRequired }}{% endif %}
+                        </div>
+                      </div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                      <a href="{{ path('app_level_show', {formationId: formation.id, id: level.id}) }}" class="sk-btn sk-btn-ghost sk-btn-sm">👁️ Voir quiz</a>
+                      <a href="{{ path('app_level_quiz_new', {formationId: formation.id, id: level.id}) }}" class="sk-btn sk-btn-primary sk-btn-sm">➕ Quiz</a>
+                      <a href="{{ path('app_level_edit', {formationId: formation.id, id: level.id}) }}" class="sk-btn sk-btn-warn sk-btn-sm">✏️</a>
+                      <form action="{{ path('app_level_delete', {formationId: formation.id, id: level.id}) }}" method="post" style="margin:0" onsubmit="return confirm('Supprimer ce niveau et tous ses quiz ?')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete_level' ~ level.id) }}">
+                        <button class="sk-btn sk-btn-danger sk-btn-sm">🗑️</button>
+                      </form>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="sk-empty-inline">
+                <div class="icon">🏆</div>
+                <p>Aucun niveau pour cette formation.</p>
+                <a href="{{ path('app_level_new', {formationId: formation.id}) }}" class="sk-btn sk-btn-primary sk-btn-sm">➕ Créer le premier niveau</a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+        <!-- Quiz Results -->
+        <div class="sk-card">
+          {% set totalQR = quizResults|length %}
+          {% set pageCountQR = totalQR > 0 ? ((totalQR - 1) // 5 + 1) : 0 %}
+          <div class="sk-card-head"><span class="sk-card-head-title">🏆 Résultats des Quiz ({{ totalQR }})</span></div>
+          {% if totalQR > 0 %}
+            <div class="sk-table-wrap">
+              <table class="sk-table">
+                <thead>
+                  <tr>
+                    <th>#</th><th>Participant</th><th>Quiz</th>
+                    <th style="text-align:center">Score</th><th style="text-align:center">Résultat</th>
+                    <th style="text-align:right">Date</th>
+                  </tr>
+                </thead>
+                <tbody id="quiz-table-body">
+                  {% for res in quizResults %}
+                    <tr class="qr-row" data-idx="{{ loop.index0 }}">
+                      <td class="qr-row-num" style="color:var(--sk-muted)">{{ loop.index }}</td>
+                      <td>
+                        <div style="display:flex;align-items:center;gap:10px">
+                          <div class="sk-avatar">{{ res.user.fullName|first|upper }}</div>
+                          <div>
+                            <div style="font-weight:700;font-size:0.87rem">{{ res.user.fullName }}</div>
+                            <div style="font-size:0.75rem;color:var(--sk-muted)">{{ res.user.email }}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td style="font-size:0.85rem">{{ res.quiz.titre }}</td>
+                      <td style="text-align:center;font-weight:700">{{ res.score }} / {{ res.totalPoints }}</td>
+                      <td style="text-align:center">
+                        {% set pct = res.percentage %}
+                        <span class="sk-score-badge {% if pct >= 70 %}sk-score-good{% elseif pct >= 50 %}sk-score-mid{% else %}sk-score-bad{% endif %}">{{ pct }}%</span>
+                      </td>
+                      <td style="text-align:right;color:var(--sk-muted);font-size:0.82rem">{{ res.datePassage|date('d/m/Y H:i') }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            {% if totalQR > 5 %}
+            <div class="sk-pagination" id="quiz-pagination">
+              <div class="sk-pag-info" id="qr-info">
+                Affichage <strong>1–5</strong> sur <strong>{{ totalQR }}</strong> résultats
+              </div>
+              <div class="sk-pag-controls">
+                <a href="#" id="qr-prev" class="sk-pag-btn sk-pag-disabled">← Précédent</a>
+                {% for p in 1..pageCountQR %}
+                  <a href="#" class="qr-pag-num sk-pag-num {{ p == 1 ? 'sk-pag-active' : '' }}" data-page="{{ p }}">{{ p }}</a>
+                {% endfor %}
+                <a href="#" id="qr-next" class="sk-pag-btn {{ pageCountQR <= 1 ? 'sk-pag-disabled' : '' }}">Suivant →</a>
+              </div>
+            </div>
+            {% endif %}
+
+          {% else %}
+            <div class="sk-empty-inline"><div class="icon">🏆</div><p>Aucun résultat de quiz.</p></div>
+          {% endif %}
+        </div>
+      </div>
+
+
+
+      <!-- Evaluation -->
+      <div class="content-section d-none" id="test">
+        {% if formation.exam %}
+          {# Exam exists — show summary #}
+          <div class="sk-card">
+            <div class="sk-card-head">
+              <span class="sk-card-head-title">🎓 Examen Final — {{ formation.exam.titre }}</span>
+              <a href="{{ path('resp_exam_show', {formationId: formation.id}) }}" class="sk-btn sk-btn-primary sk-btn-sm">⚙️ Gérer l'examen</a>
+            </div>
+            <div class="sk-card-body">
+              <div class="sk-info-row"><span class="sk-info-label">Questions</span><span class="sk-info-value">{{ formation.exam.questions|length }}</span></div>
+              <div class="sk-info-row"><span class="sk-info-label">Score de réussite</span><span class="sk-info-value">{{ formation.exam.passingScore }}%</span></div>
+              <div class="sk-info-row"><span class="sk-info-label">Erreurs max</span><span class="sk-info-value">{{ formation.exam.maxMistakes }}</span></div>
+              <div class="sk-info-row"><span class="sk-info-label">Tentatives</span><span class="sk-info-value">{{ formation.exam.attempts|length }}</span></div>
+              {% if formation.exam.description %}
+                <div class="sk-info-row"><span class="sk-info-label">Description</span><span class="sk-info-value">{{ formation.exam.description }}</span></div>
+              {% endif %}
+              {% if formation.exam.attempts|length > 0 %}
+                <div style="margin-top:16px;">
+                  <table style="width:100%;border-collapse:collapse;font-family:'DM Sans',sans-serif;font-size:0.84rem;">
+                    <thead>
+                      <tr style="border-bottom:1.5px solid var(--sk-border);">
+                        <th style="padding:8px 12px;text-align:left;color:var(--sk-muted);font-size:0.70rem;text-transform:uppercase;">Participant</th>
+                        <th style="padding:8px 12px;text-align:center;">Score</th>
+                        <th style="padding:8px 12px;text-align:center;">Résultat</th>
+                        <th style="padding:8px 12px;text-align:right;">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for a in formation.exam.attempts %}
+                      <tr style="border-bottom:1px solid var(--sk-border);">
+                        <td style="padding:8px 12px;font-weight:700;">{{ a.user.fullName }}</td>
+                        <td style="padding:8px 12px;text-align:center;">{{ a.score }}/{{ a.totalPoints }}</td>
+                        <td style="padding:8px 12px;text-align:center;">
+                          {% if a.status == 'passed' %}
+                            <span style="background:#dcfce7;color:#15803d;padding:2px 9px;border-radius:50px;font-size:0.70rem;font-weight:700;">✓ Réussi</span>
+                          {% elseif a.status == 'stopped' %}
+                            <span style="background:#fee2e2;color:#dc2626;padding:2px 9px;border-radius:50px;font-size:0.70rem;font-weight:700;">⛔ Arrêté</span>
+                          {% else %}
+                            <span style="background:#fef9c3;color:#854d0e;padding:2px 9px;border-radius:50px;font-size:0.70rem;font-weight:700;">✗ Échoué</span>
+                          {% endif %}
+                        </td>
+                        <td style="padding:8px 12px;text-align:right;color:var(--sk-muted);font-size:0.80rem;">{{ a.startedAt|date('d/m/Y') }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {% else %}
+          {# No exam yet #}
+          <div class="sk-card">
+            <div class="sk-card-head"><span class="sk-card-head-title">🎓 Examen de certification</span></div>
+            <div class="sk-card-body">
+              <div style="text-align:center;padding:30px 20px;">
+                <div style="font-size:3.5rem;margin-bottom:14px;">🎓</div>
+                <p style="font-family:'DM Sans',sans-serif;font-size:0.92rem;color:var(--sk-muted);margin:0 0 20px;">Aucun examen final créé pour cette formation.<br>Créez un examen QCM + réponse libre avec évaluation automatique.</p>
+                <a href="{{ path('resp_exam_show', {formationId: formation.id}) }}" class="sk-btn sk-btn-primary">➕ Créer l'examen final</a>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+
+
+      {# ══════════════════════════════════════════════════════
+         📊 CHARTS SECTION — Google Charts (3 visualisations)
+         ══════════════════════════════════════════════════════ #}
+      <div class="content-section d-none" id="charts">
+
+        {# Build JS arrays from Twig data #}
+        {% set studentRows = [] %}
+        {% set passCount   = 0 %}
+        {% set failCount   = 0 %}
+        {% set noQuiz      = 0 %}
+        {% set buckets     = [0,0,0,0,0] %}{# 0-20,20-40,40-60,60-80,80-100 #}
+
+        {% for participation in formation.participations %}
+          {% set uid  = participation.user.id %}
+          {% set name = participation.user.fullName %}
+          {% if participantScores[uid] is defined %}
+            {% set pct = participantScores[uid].pct %}
+            {% set studentRows = studentRows|merge([{'name': name, 'pct': pct}]) %}
+            {% if pct >= 50 %}{% set passCount = passCount + 1 %}
+            {% else %}{% set failCount = failCount + 1 %}{% endif %}
+            {% if pct <= 20 %}{% set buckets = [buckets[0]+1, buckets[1], buckets[2], buckets[3], buckets[4]] %}
+            {% elseif pct <= 40 %}{% set buckets = [buckets[0], buckets[1]+1, buckets[2], buckets[3], buckets[4]] %}
+            {% elseif pct <= 60 %}{% set buckets = [buckets[0], buckets[1], buckets[2]+1, buckets[3], buckets[4]] %}
+            {% elseif pct <= 80 %}{% set buckets = [buckets[0], buckets[1], buckets[2], buckets[3]+1, buckets[4]] %}
+            {% else %}{% set buckets = [buckets[0], buckets[1], buckets[2], buckets[3], buckets[4]+1] %}{% endif %}
+          {% else %}
+            {% set noQuiz = noQuiz + 1 %}
+          {% endif %}
+        {% endfor %}
+
+        <div id="gcharts-bar"   style="width:100%;height:320px;" class="sk-card" style="padding:20px;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+          <div id="gcharts-pie" class="sk-card" style="width:100%;height:300px;"></div>
+          <div id="gcharts-col" class="sk-card" style="width:100%;height:300px;"></div>
+        </div>
+
+        <script>
+        // ── Google Charts data from Twig ──────────────────────
+        const studentData  = {{ studentRows|json_encode|raw }};
+        const passCount    = {{ passCount }};
+        const failCount    = {{ failCount }};
+        const noQuizCount  = {{ noQuiz }};
+        const bucketCounts = {{ buckets|json_encode|raw }};
+
+        google.charts.setOnLoadCallback(drawAllCharts);
+
+        function drawAllCharts() {
+          drawBar();
+          drawPie();
+          drawCol();
+        }
+
+        // ── 1. Bar chart: score per student ───────────────────
+        function drawBar() {
+          const data = new google.visualization.DataTable();
+          data.addColumn('string', 'Étudiant');
+          data.addColumn('number', 'Score %');
+          data.addColumn({type:'string', role:'style'});
+          data.addColumn({type:'string', role:'annotation'});
+
+          if (studentData.length === 0) {
+            data.addRows([['Aucune donnée', 0, 'color:#e5e7eb', '']]);
+          } else {
+            studentData.forEach(s => {
+              const clr = s.pct >= 70 ? '#16a34a' : s.pct >= 50 ? '#d97706' : '#dc2626';
+              data.addRow([s.name, s.pct, 'color:' + clr, s.pct + '%']);
+            });
+          }
+
+          const options = {
+            title: '📊 Performance par étudiant',
+            titleTextStyle: { fontName:'DM Sans', fontSize:15, bold:true, color:'#180808' },
+            hAxis: { title:'Score (%)', minValue:0, maxValue:100, format:"#'%'", textStyle:{fontName:'DM Sans'} },
+            vAxis: { textStyle:{fontName:'DM Sans',fontSize:12} },
+            legend: 'none',
+            bars: 'horizontal',
+            bar: { groupWidth:'60%' },
+            chartArea: { left:140, top:50, width:'75%', height:'80%' },
+            backgroundColor: 'transparent',
+            fontName: 'DM Sans',
+          };
+          const chart = new google.visualization.BarChart(document.getElementById('gcharts-bar'));
+          chart.draw(data, options);
+        }
+
+        // ── 2. Donut chart: pass / fail / no attempt ──────────
+        function drawPie() {
+          const data = google.visualization.arrayToDataTable([
+            ['Statut', 'Étudiants'],
+            ['Réussi (≥50%)',   passCount],
+            ['Échoué (<50%)',   failCount],
+            ['Sans quiz',       noQuizCount],
+          ]);
+          const options = {
+            title: '🥇 Taux de réussite',
+            titleTextStyle: { fontName:'DM Sans', fontSize:14, bold:true, color:'#180808' },
+            pieHole: 0.42,
+            colors: ['#16a34a','#dc2626','#9ca3af'],
+            legend: { position:'bottom', textStyle:{fontName:'DM Sans',fontSize:12} },
+            chartArea: { top:44, width:'90%', height:'72%' },
+            backgroundColor: 'transparent',
+            fontName: 'DM Sans',
+          };
+          const chart = new google.visualization.PieChart(document.getElementById('gcharts-pie'));
+          chart.draw(data, options);
+        }
+
+        // ── 3. Column chart: score distribution buckets ───────
+        function drawCol() {
+          const data = google.visualization.arrayToDataTable([
+            ['Tranche', 'Étudiants', {role:'style'}, {role:'annotation'}],
+            ['0–20 %',  bucketCounts[0], 'color:#dc2626', bucketCounts[0]||''],
+            ['20–40 %', bucketCounts[1], 'color:#f97316', bucketCounts[1]||''],
+            ['40–60 %', bucketCounts[2], 'color:#d97706', bucketCounts[2]||''],
+            ['60–80 %', bucketCounts[3], 'color:#22c55e', bucketCounts[3]||''],
+            ['80–100%', bucketCounts[4], 'color:#16a34a', bucketCounts[4]||''],
+          ]);
+          const options = {
+            title: '📈 Distribution des scores',
+            titleTextStyle: { fontName:'DM Sans', fontSize:14, bold:true, color:'#180808' },
+            hAxis: { textStyle:{fontName:'DM Sans',fontSize:12} },
+            vAxis: { title:'Nb étudiants', format:'#', minValue:0, textStyle:{fontName:'DM Sans'} },
+            legend: 'none',
+            bar: { groupWidth:'55%' },
+            chartArea: { left:50, top:44, width:'85%', height:'72%' },
+            backgroundColor: 'transparent',
+            fontName: 'DM Sans',
+          };
+          const chart = new google.visualization.ColumnChart(document.getElementById('gcharts-col'));
+          chart.draw(data, options);
+        }
+
+        // Redraw on tab activation
+        document.querySelector('[data-section="charts"]')?.addEventListener('click', () => {
+          setTimeout(drawAllCharts, 60);
+        });
+        </script>
+      </div>
+
+      <!-- Participants -->
+      <div class="content-section d-none" id="participants">
+        <!-- Participants -->
+        <div class="sk-card">
+          <div class="sk-card-head">
+            <span class="sk-card-head-title">👥 Participants ({{ formation.participations|length }})</span>
+            <button type="button" class="sk-btn sk-btn-blue sk-btn-sm" onclick="document.getElementById('modalParticipant').classList.add('open')">➕ Ajouter un participant</button>
+          </div>
+          {% if formation.participations|length > 0 %}
+            <div class="sk-table-wrap">
+              <table class="sk-table">
+                <thead>
+                  <tr>
+                    <th>#</th><th>Participant</th><th>Email</th><th>Rôle</th>
+                    <th style="text-align:center">Score Quiz</th><th>Date</th>
+                    <th style="text-align:right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for participation in formation.participations %}
+                    {% set uid = participation.user.id %}
+                    <tr>
+                      <td style="color:var(--sk-muted)">{{ loop.index }}</td>
+                      <td>
+                        <div style="display:flex;align-items:center;gap:10px">
+                          <div class="sk-avatar">
+                            {% if participation.user.photo %}<img src="{{ participation.user.photo }}" alt="">
+                            {% else %}{{ participation.user.fullName|first|upper }}{% endif %}
+                          </div>
+                          <span style="font-weight:700">{{ participation.user.fullName }}</span>
+                        </div>
+                      </td>
+                      <td style="color:var(--sk-muted)">{{ participation.user.email }}</td>
+                      <td>
+                        {% set role = participation.user.role %}
+                        <span class="sk-role {% if role=='admin' %}sk-role-admin{% elseif role=='responsable_club' %}sk-role-resp{% else %}sk-role-other{% endif %}">{{ role }}</span>
+                      </td>
+                      <td style="text-align:center">
+                        {% if participantScores[uid] is defined %}
+                          {% set s = participantScores[uid] %}
+                          <span style="font-weight:700">{{ s.score }}/{{ s.totalPoints }}</span>
+                          <span class="sk-score-badge {% if s.pct >= 70 %}sk-score-good{% elseif s.pct >= 50 %}sk-score-mid{% else %}sk-score-bad{% endif %}">{{ s.pct }}%</span>
+                          <div style="font-size:0.70rem;color:var(--sk-muted);margin-top:2px">{{ s.quizTitre }}</div>
+                        {% else %}<span style="color:var(--sk-muted)">—</span>{% endif %}
+                      </td>
+                      <td style="color:var(--sk-muted)">{{ participation.dateParticipation|date('d/m/Y H:i') }}</td>
+                      <td style="text-align:right">
+                        <form action="{{ path('app_formation_remove_participant', {id: formation.id, participationId: participation.id}) }}" method="post" style="margin:0" onsubmit="return confirm('Retirer ce participant ?')">
+                          <input type="hidden" name="_token" value="{{ csrf_token('remove_participant' ~ participation.id) }}">
+                          <button type="submit" class="sk-btn sk-btn-danger sk-btn-sm">❌ Retirer</button>
+                        </form>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="sk-empty-inline"><div class="icon">👥</div><p>Aucun participant inscrit.</p></div>
+          {% endif %}
+        </div>
+      </div>     
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Video -->
+<div class="sk-modal-overlay" id="modalVideo">
+  <div class="sk-modal">
+    <div class="sk-modal-head">
+      <span class="sk-modal-head-title">🎬 Ajouter une vidéo</span>
+      <button class="sk-modal-close" onclick="document.getElementById('modalVideo').classList.remove('open')">✕</button>
+    </div>
+    {{ form_start(videoForm, {
+      'action': path('app_formation_add_video', {id: formation.id}),
+      'method': 'POST',
+      'attr': {'novalidate': 'novalidate'}
+    }) }}
+      <div class="sk-modal-body">
+        <div>
+          {{ form_label(videoForm.titre, 'Titre') }}
+          {{ form_widget(videoForm.titre) }}
+          {{ form_errors(videoForm.titre) }}
+        </div>
+        <div>
+          {{ form_label(videoForm.videoFile, 'Fichier vidéo') }}
+          <div class="sk-upload-zone">{{ form_widget(videoForm.videoFile) }}</div>
+          <div class="sk-modal-hint">Formats acceptés : MP4, WebM, OGG, AVI, MOV — Max 100 Mo</div>
+          {{ form_errors(videoForm.videoFile) }}
+        </div>
+        <div>
+          {{ form_label(videoForm.description, 'Description (optionnel)') }}
+          {{ form_widget(videoForm.description) }}
+          {{ form_errors(videoForm.description) }}
+        </div>
+      </div>
+      <div class="sk-modal-footer">
+        <button type="button" class="sk-btn sk-btn-ghost" onclick="document.getElementById('modalVideo').classList.remove('open')">Annuler</button>
+        <button type="submit" class="sk-btn sk-btn-primary">➕ Ajouter</button>
+      </div>
+      {{ form_end(videoForm) }}
+  </div>
+</div>
+
+<!-- MODAL: Add Participant -->
+<div class="sk-modal-overlay" id="modalParticipant">
+  <div class="sk-modal">
+    <div class="sk-modal-head">
+      <span class="sk-modal-head-title">👤 Ajouter un participant</span>
+      <button class="sk-modal-close" onclick="document.getElementById('modalParticipant').classList.remove('open')">✕</button>
+    </div>
+    {{ form_start(participationForm, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="sk-modal-body">
+      <div>
+        {{ form_label(participationForm.user, 'Sélectionner un utilisateur') }}
+        {{ form_widget(participationForm.user) }}
+        {{ form_errors(participationForm.user) }}
+      </div>
+    </div>
+    <div class="sk-modal-footer">
+      <button type="button" class="sk-btn sk-btn-ghost" onclick="document.getElementById('modalParticipant').classList.remove('open')">Annuler</button>
+      <button type="submit" class="sk-btn sk-btn-blue">➕ Inscrire</button>
+    </div>
+    {{ form_end(participationForm) }}
+  </div>
+</div>
+
+<div id="card-modal" class="sk-modal-overlay">
+  <div class="sk-modal">
+    <div class="sk-modal-head">
+      <span id="card-modal-title" class="sk-modal-head-title">🧠 Ajouter une carte</span>
+      <button type="button" class="sk-modal-close" id="close-card-modal">✕</button>
+    </div>
+    <form id="card-form" method="post" action="{{ path('app_flashcard_add', {id: formation.id}) }}">
+      <div class="sk-modal-body">
+        <input type="hidden" name="_token" id="card-token" value="{{ csrf_token('add_flashcard_' ~ formation.id) }}">
+        <div>
+          <label for="question-input">Question</label>
+          <input id="question-input" type="text" name="question" placeholder="Question" required>
+        </div>
+        <div>
+          <label for="answer-input">Réponse</label>
+          <input id="answer-input" type="text" name="answer" placeholder="Réponse" required>
+        </div>
+      </div>
+      <div class="sk-modal-footer">
+        <button type="button" class="sk-btn sk-btn-ghost" id="cancel-card-modal">Annuler</button>
+        <button id="save-card-btn" type="submit" class="sk-btn sk-btn-primary">💾 Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- AI Modal -->
+<div id="modalAI" class="sk-modal-overlay">
+  <div class="sk-modal">
+    
+    <div class="sk-modal-head">
+      <h3 class="sk-modal-head-title">🤖 Assistant IA</h3>
+      <button type="button"
+              class="sk-modal-close"
+              onclick="document.getElementById('modalAI').classList.remove('open')">
+        ×
+      </button>
+    </div>
+
+    <form method="post" action="{{ path('app_flashcard_add', {id: formation.id}) }}">
+      <input type="hidden" name="_ai" value="1">
+      <input type="hidden" name="_token" value="{{ csrf_token('ai_flashcard_' ~ formation.id) }}">
+
+      <div class="sk-modal-body">
+
+        <div>
+          <label>Nombre de cartes</label>
+          <input type="number" name="count" value="5" min="1" max="20">
+        </div>
+
+        <div>
+          <label>Sujet / Demande</label>
+          <textarea name="prompt"
+                    placeholder="Ex: Les bases de JavaScript, les variables, les boucles…"
+                    required></textarea>
+        </div>
+
+      </div>
+
+      <div class="sk-modal-footer">
+        <button type="button"
+                class="sk-btn sk-btn-ghost"
+                onclick="document.getElementById('modalAI').classList.remove('open')">
+          Annuler
+        </button>
+        <button type="submit" class="sk-btn sk-btn-primary">
+          🚀 Générer
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+
+<script>
+  const buttons = document.querySelectorAll('.filter-btn');
+  const sections = document.querySelectorAll('.content-section');
+
+  buttons.forEach(button => {
+    button.addEventListener('click', () => {
+      const target = button.dataset.section;
+
+      buttons.forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+
+      sections.forEach(section => {
+        section.classList.add('d-none');
+      });
+
+      const targetSection = document.getElementById(target);
+      if (targetSection) {
+        targetSection.classList.remove('d-none');
+      }
+    });
+  });
+</script>
+<script>
+  // Close modals on overlay click
+  document.querySelectorAll('.sk-modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+  });
+</script>
+<script>
+  const addCardBtn = document.getElementById('add-card-btn');
+  const cardModal = document.getElementById('card-modal');
+  const closeCardBtn = document.getElementById('close-card-modal');
+  const cancelCardBtn = document.getElementById('cancel-card-modal');
+  const cardForm = document.getElementById('card-form');
+  const cardModalTitle = document.getElementById('card-modal-title');
+  const cardTokenInput = document.getElementById('card-token');
+  const questionInput = document.getElementById('question-input');
+  const answerInput = document.getElementById('answer-input');
+  const editCardButtons = document.querySelectorAll('.edit-card-btn');
+
+  const addAction = '{{ path('app_flashcard_add', {id: formation.id}) }}';
+  const addToken = '{{ csrf_token('add_flashcard_' ~ formation.id) }}';
+
+  function openCardModal() {
+    cardModal?.classList.add('open');
+    questionInput?.focus();
+  }
+
+  function closeCardModal() {
+    cardModal?.classList.remove('open');
+  }
+
+  addCardBtn?.addEventListener('click', () => {
+    if (!cardForm) {
+      return;
+    }
+    cardModalTitle.textContent = '🧠 Ajouter une carte';
+    cardForm.action = addAction;
+    cardTokenInput.value = addToken;
+    questionInput.value = '';
+    answerInput.value = '';
+    openCardModal();
+  });
+
+  editCardButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!cardForm) {
+        return;
+      }
+      const question = btn.dataset.question || '';
+      const answer = btn.dataset.answer || '';
+      const editAction = btn.dataset.action || addAction;
+      const editToken = btn.dataset.token || addToken;
+
+      cardModalTitle.textContent = '✏️ Modifier la carte';
+      cardForm.action = editAction;
+      cardTokenInput.value = editToken;
+      questionInput.value = question;
+      answerInput.value = answer;
+      openCardModal();
+    });
+  });
+
+  closeCardBtn?.addEventListener('click', closeCardModal);
+  cancelCardBtn?.addEventListener('click', closeCardModal);
+</script>
+<script>
+(function () {
+  var PER_PAGE = 5;
+  var rows = Array.from(document.querySelectorAll('#quiz-table-body .qr-row'));
+  if (!rows.length) return;
+  var total = rows.length;
+  var pageCount = Math.ceil(total / PER_PAGE);
+  var cur = 1;
+
+  function showPage(p) {
+    cur = p;
+    var s = (p - 1) * PER_PAGE;
+    var e = s + PER_PAGE;
+    rows.forEach(function (tr, i) {
+      tr.style.display = (i >= s && i < e) ? '' : 'none';
+      if (i >= s && i < e) tr.querySelector('.qr-row-num').textContent = i + 1;
+    });
+    var info = document.getElementById('qr-info');
+    if (info) info.innerHTML = 'Affichage <strong>' + (s + 1) + '\u2013' + Math.min(e, total) + '</strong> sur <strong>' + total + '</strong> résultats';
+    var prev = document.getElementById('qr-prev');
+    var next = document.getElementById('qr-next');
+    if (prev) prev.classList.toggle('sk-pag-disabled', p <= 1);
+    if (next) next.classList.toggle('sk-pag-disabled', p >= pageCount);
+    document.querySelectorAll('.qr-pag-num').forEach(function (a) {
+      a.classList.toggle('sk-pag-active', +a.dataset.page === p);
+    });
+  }
+
+  showPage(1);
+
+  var prev = document.getElementById('qr-prev');
+  var next = document.getElementById('qr-next');
+  if (prev) prev.addEventListener('click', function (e) { e.preventDefault(); if (cur > 1) showPage(cur - 1); });
+  if (next) next.addEventListener('click', function (e) { e.preventDefault(); if (cur < pageCount) showPage(cur + 1); });
+  document.querySelectorAll('.qr-pag-num').forEach(function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); showPage(+a.dataset.page); });
+  });
+})();
+</script>
+
+<!-- ================= AI MODAL ================= -->
+<div id="modalAI" class="sk-modal-overlay">
+  <div class="sk-modal">
+
+    <div class="sk-modal-head">
+      <h3 class="sk-modal-head-title">🤖 Générer des cartes avec IA</h3>
+      <button type="button"
+              class="sk-modal-close"
+              onclick="document.getElementById('modalAI').classList.remove('open')">
+        ×
+      </button>
+    </div>
+
+    <form method="post">
+      <div class="sk-modal-body">
+
+        <label>Combien de cartes générer ?</label>
+        <input type="number" name="count" min="1" max="20" value="5" required>
+
+        <label>Sujet / Instructions</label>
+        <textarea name="prompt"
+                  placeholder="Ex: Génère des cartes mémoire sur les bases de JavaScript..."
+                  required></textarea>
+
+        {% if aiResult is defined and aiResult %}
+          <label>Réponse IA</label>
+          <textarea readonly style="min-height:150px;">{{ aiResult }}</textarea>
+        {% endif %}
+
+      </div>
+
+      <div class="sk-modal-footer">
+        <button type="button"
+                class="sk-btn sk-btn-ghost"
+                onclick="document.getElementById('modalAI').classList.remove('open')">
+          Annuler
+        </button>
+        <button type="submit" class="sk-btn sk-btn-primary">
+          🚀 Générer
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+{% if aiResult is defined and aiResult %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById('modalAI').classList.add('open');
+});
+</script>
+{% endif %}
+
+
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Participations - Admin{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="card-title mb-0">👥 Liste des Participations</h4>
+                </div>
+                
+                {# Barre de recherche #}
+                <form method="get" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Rechercher par challenge ou groupe..." value="{{ search }}">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="mdi mdi-magnify"></i> Rechercher
+                        </button>
+                        {% if search %}
+                            <a href="{{ path('admin_participations') }}" class="btn btn-secondary">Réinitialiser</a>
+                        {% endif %}
+                    </div>
+                </form>
+                
+                {% if participations is empty %}
+                    <div class="text-center py-5">
+                        <i class="mdi mdi-account-multiple" style="font-size: 64px; color: #ccc;"></i>
+                        <p class="text-muted mt-3">Aucune participation trouvée</p>
+                    </div>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Challenge</th>
+                                    <th>Groupe</th>
+                                    <th>Membres</th>
+                                    <th>Date participation</th>
+                                    <th>Livrable</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for participation in participations %}
+                                    <tr>
+                                        <td><strong>{{ participation.challenge.titre }}</strong></td>
+                                        <td>{{ participation.groupe.nomGroupe }}</td>
+                                        <td>
+                                            <span class="badge badge-info mb-1">{{ participation.groupe.membres|length }} membre(s)</span>
+                                            {% for membre in participation.groupe.membres %}
+                                                <div style="font-size: 0.82rem; color: #555;">
+                                                    👤 {{ membre.user.prenom }} {{ membre.user.nom }}
+                                                </div>
+                                            {% endfor %}
+                                        </td>
+                                        <td>{{ participation.dateParticipation|date('d/m/Y H:i') }}</td>
+                                        <td>
+                                            {% set livrable = participation.groupe.livrables|filter(l => l.challenge.id == participation.challenge.id)|first %}
+                                            {% if livrable %}
+                                                {% if livrable.statut == 'valide' %}
+                                                    <span class="badge badge-success">✅ Validé</span>
+                                                {% elseif livrable.statut == 'refuse' %}
+                                                    <span class="badge badge-danger">❌ Refusé</span>
+                                                {% else %}
+                                                    <span class="badge badge-warning">⏳ En attente</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="badge badge-secondary">Aucun</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <p class="text-muted">Total : {{ participations|length }} participation(s)</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

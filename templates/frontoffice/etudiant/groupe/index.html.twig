@@ -1,0 +1,137 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Mes Groupes — SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --sk-red:#8b0000; --sk-red-dark:#4a0000; --sk-red-light:#c0392b; --sk-white:#fff; --sk-ink:#180808; --sk-muted:#8a7070; --sk-border:rgba(139,0,0,0.09); }
+.sk-page { padding-top:70px; }
+.sk-hero { position:relative; background:linear-gradient(135deg,#3d0000 0%,#8b0000 48%,#c23030 100%); margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%); padding:72px 20px 64px; text-align:center; overflow:hidden; isolation:isolate; }
+.sk-hero::before { content:''; position:absolute; inset:0; z-index:0; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E"); background-size:180px; opacity:0.5; }
+.sk-hero-ring-l,.sk-hero-ring-r { position:absolute; z-index:0; border-radius:50%; border:72px solid rgba(255,255,255,0.035); }
+.sk-hero-ring-l { width:520px; height:520px; top:-210px; left:-160px; }
+.sk-hero-ring-r { width:380px; height:380px; bottom:-160px; right:-100px; border-width:50px; }
+.sk-hero-inner { position:relative; z-index:1; max-width:640px; margin:0 auto; }
+.sk-hero h1 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(2rem,5vw,3rem); font-weight:800; letter-spacing:-0.03em; color:#fff; margin:0 0 12px; line-height:1.1; }
+.sk-hero p { font-family:'DM Sans',sans-serif; color:rgba(255,255,255,0.60); font-size:1rem; margin:0 auto 32px; max-width:440px; line-height:1.7; }
+.sk-search { display:flex; align-items:center; background:rgba(255,255,255,0.97); border-radius:100px; padding:5px 5px 5px 22px; max-width:520px; margin:0 auto; box-shadow:0 12px 40px rgba(0,0,0,0.22); gap:8px; }
+.sk-search input { flex:1; border:none; outline:none; font-family:'DM Sans',sans-serif; font-size:0.92rem; color:var(--sk-ink); background:transparent; min-width:0; }
+.sk-search input::placeholder { color:#bbb; }
+.sk-search button { width:40px; height:40px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(139,0,0,0.28); transition:transform 0.2s; }
+.sk-search button:hover { transform:scale(1.08); }
+.sk-search button svg { width:17px; height:17px; stroke:#fff; fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+.sk-content { padding:36px 0 56px; }
+.sk-topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+.sk-label { font-family:'DM Sans',sans-serif; font-size:0.68rem; font-weight:600; letter-spacing:0.13em; text-transform:uppercase; color:var(--sk-muted); display:flex; align-items:center; gap:12px; }
+.sk-label::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--sk-border),transparent); }
+.sk-filters { background:#fff; border-radius:16px; padding:18px 24px; box-shadow:0 2px 12px rgba(0,0,0,0.06); margin-bottom:24px; border:1px solid #f0f0f0; }
+.sk-filters form { display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; }
+.sk-field { display:flex; flex-direction:column; gap:5px; }
+.sk-field label { font-family:'DM Sans',sans-serif; font-size:0.69rem; font-weight:700; color:var(--sk-muted); text-transform:uppercase; letter-spacing:0.08em; }
+.sk-field select { padding:9px 14px; border:1.5px solid #e5e7eb; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:0.88rem; color:var(--sk-ink); background:#f9f9f9; outline:none; }
+.sk-btn { display:inline-flex; align-items:center; gap:7px; padding:9px 18px; border-radius:10px; font-weight:700; font-family:'DM Sans',sans-serif; font-size:0.85rem; border:none; cursor:pointer; transition:all 0.25s; text-decoration:none; }
+.sk-btn-primary { background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); color:#fff; }
+.sk-btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(139,0,0,0.3); color:#fff; text-decoration:none; }
+.sk-btn-outline { background:transparent; color:var(--sk-red); border:1.5px solid var(--sk-red); }
+.sk-btn-outline:hover { background:var(--sk-red); color:#fff; text-decoration:none; }
+.sk-btn-ghost { background:#f3f4f6; color:#374151; border:1.5px solid #e5e7eb; }
+.sk-btn-ghost:hover { border-color:#9ca3af; color:#111; text-decoration:none; }
+.sk-btn-warn { background:linear-gradient(135deg,#92400e,#d97706); color:#fff; }
+.sk-btn-warn:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(217,119,6,0.3); color:#fff; text-decoration:none; }
+.sk-btn-new { background:linear-gradient(135deg,#15803d,#22c55e); color:#fff; }
+.sk-btn-new:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(34,197,94,0.3); color:#fff; text-decoration:none; }
+.sk-btn-sm { padding:7px 14px; font-size:0.81rem; }
+.sk-list { display:grid; gap:14px; }
+.sk-groupe-card { background:#fff; border-radius:16px; padding:22px 24px; border:1.5px solid var(--sk-border); box-shadow:0 2px 8px rgba(0,0,0,0.04); animation:sk-up 0.4s ease both; transition:transform 0.25s cubic-bezier(.22,.68,0,1.2),box-shadow 0.25s,border-color 0.2s; }
+.sk-groupe-card:hover { transform:translateY(-3px); box-shadow:0 12px 32px rgba(139,0,0,0.09); border-color:rgba(139,0,0,0.18); }
+.sk-groupe-title { font-family:'Bricolage Grotesque',sans-serif; font-size:1.05rem; font-weight:800; color:var(--sk-ink); margin:0 0 14px; }
+.sk-membres-list { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.sk-membre-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 11px; border-radius:50px; background:#f3f4f6; border:1.5px solid #e5e7eb; font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:600; color:var(--sk-ink); }
+.sk-membre-chip.chef { background:#fef9c3; border-color:#fde047; color:#854d0e; }
+.sk-groupe-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.sk-empty { text-align:center; padding:60px 20px; background:#fff; border-radius:16px; border:1.5px dashed #e5e7eb; }
+.sk-empty-icon { font-size:3.5rem; margin-bottom:16px; }
+.sk-empty h3 { font-family:'Bricolage Grotesque',sans-serif; font-size:1.1rem; font-weight:700; color:var(--sk-ink); margin-bottom:8px; }
+.sk-empty p { font-family:'DM Sans',sans-serif; color:#6b6b6b; font-size:0.88rem; }
+@keyframes sk-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.sk-hero { animation:sk-up 0.5s cubic-bezier(.22,.68,0,1) both; }
+.sk-groupe-card:nth-child(1){animation-delay:.08s} .sk-groupe-card:nth-child(2){animation-delay:.15s} .sk-groupe-card:nth-child(3){animation-delay:.22s}
+@media(max-width:680px){ .sk-hero{padding:56px 20px 48px;} }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+  <div class="sk-hero">
+    <div class="sk-hero-ring-l"></div>
+    <div class="sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <h1>👥 Mes Groupes</h1>
+      <p>Créez et gérez vos groupes de travail</p>
+      <form method="get" action="{{ path('app_etudiant_groupe') }}">
+        <div class="sk-search">
+          <input type="text" name="search" value="{{ search }}" placeholder="Rechercher un groupe…">
+          <button type="submit" aria-label="Rechercher">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sk-content">
+      <div class="sk-topbar">
+        <div class="sk-label">{{ groupes|length }} groupe(s)</div>
+        <a href="{{ path('app_etudiant_groupe_new') }}" class="sk-btn sk-btn-new">➕ Créer un groupe</a>
+      </div>
+
+      <div class="sk-filters">
+        <form method="get">
+          {% if search %}<input type="hidden" name="search" value="{{ search }}">{% endif %}
+          <div class="sk-field">
+            <label>Ordre</label>
+            <select name="order">
+              <option value="ASC"  {% if order=='ASC'  %}selected{% endif %}>A → Z</option>
+              <option value="DESC" {% if order=='DESC' %}selected{% endif %}>Z → A</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end">
+            <button type="submit" class="sk-btn sk-btn-primary">Filtrer</button>
+            <a href="{{ path('app_etudiant_groupe') }}" class="sk-btn sk-btn-outline">Réinit.</a>
+          </div>
+        </form>
+      </div>
+
+      {% if groupes is empty %}
+        <div class="sk-empty">
+          <div class="sk-empty-icon">👤</div>
+          <h3>Aucun groupe</h3>
+          <p>Créez votre premier groupe pour participer aux challenges.</p>
+          <a href="{{ path('app_etudiant_groupe_new') }}" class="sk-btn sk-btn-new" style="margin-top:16px">➕ Créer un groupe</a>
+        </div>
+      {% else %}
+        <div class="sk-list">
+          {% for groupe in groupes %}
+            <div class="sk-groupe-card">
+              <h3 class="sk-groupe-title">{{ groupe.nomGroupe }}</h3>
+              <div class="sk-membres-list">
+                {% for membre in groupe.membres %}
+                  <span class="sk-membre-chip {% if membre.role=='chef' %}chef{% endif %}">
+                    {% if membre.role=='chef' %}⭐{% else %}👤{% endif %} {{ membre.user.nom }} {{ membre.user.prenom }}
+                  </span>
+                {% endfor %}
+              </div>
+              <div class="sk-groupe-actions">
+                <a href="{{ path('app_etudiant_groupe_show', {id: groupe.id}) }}" class="sk-btn sk-btn-ghost sk-btn-sm">👁️ Voir détails</a>
+                <a href="{{ path('app_etudiant_groupe_add_member', {id: groupe.id}) }}" class="sk-btn sk-btn-new sk-btn-sm">➕ Ajouter membre</a>
+                <a href="{{ path('app_etudiant_groupe_edit', {id: groupe.id}) }}" class="sk-btn sk-btn-warn sk-btn-sm">✏️ Modifier</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}{{ exam.titre }} — {{ formation.titre }}{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<style>
+:root { --sk-red:#8b0000; --sk-red-dark:#4a0000; --sk-ink:#180808; --sk-muted:#8a7070; --sk-border:rgba(139,0,0,0.09); }
+.sk-page { padding-top:70px; }
+.exam-hero { background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 60%,#3b82f6 100%); padding:60px 20px 52px; text-align:center; margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%); }
+.exam-hero h1 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(1.8rem,4vw,2.4rem); font-weight:800; color:#fff; margin:0 0 8px; }
+.exam-hero p { color:rgba(255,255,255,0.65); font-size:0.97rem; margin:0; }
+.sk-content { padding:36px 0 56px; }
+.info-card { background:#fff; border-radius:18px; border:1.5px solid var(--sk-border); box-shadow:0 2px 12px rgba(0,0,0,0.05); overflow:hidden; max-width:660px; margin:0 auto 24px; }
+.info-card-head { padding:18px 24px; border-bottom:1.5px solid var(--sk-border); font-family:'Bricolage Grotesque',sans-serif; font-size:1rem; font-weight:800; color:var(--sk-ink); }
+.info-card-body { padding:24px; }
+.rules-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
+.rules-list li { display:flex; align-items:flex-start; gap:12px; font-family:'DM Sans',sans-serif; font-size:0.9rem; color:var(--sk-ink); }
+.rule-icon { font-size:1.3rem; flex-shrink:0; }
+.sk-btn { display:inline-flex; align-items:center; gap:7px; padding:12px 26px; border-radius:12px; font-weight:700; font-family:'DM Sans',sans-serif; font-size:0.95rem; border:none; cursor:pointer; transition:all .25s; text-decoration:none; }
+.sk-btn-blue { background:linear-gradient(135deg,#1d4ed8,#3b82f6); color:#fff; }
+.sk-btn-blue:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(59,130,246,0.35); color:#fff; text-decoration:none; }
+.sk-btn-ghost { background:#f3f4f6; color:#374151; border:1.5px solid #e5e7eb; }
+.sk-btn-ghost:hover { color:#111; text-decoration:none; }
+.last-attempt { border-radius:14px; padding:16px 20px; margin-bottom:20px; max-width:660px; margin-left:auto; margin-right:auto; font-family:'DM Sans',sans-serif; font-size:0.88rem; }
+.last-passed { background:#dcfce7; border:1.5px solid #bbf7d0; color:#15803d; }
+.last-failed  { background:#fee2e2; border:1.5px solid #fecaca; color:#dc2626; }
+.last-stopped { background:#fef9c3; border:1.5px solid #fde68a; color:#854d0e; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+  <div class="exam-hero">
+    <div class="container">
+      <h1>🎓 {{ exam.titre }}</h1>
+      <p>{{ formation.titre }}</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sk-content">
+
+      {% if lastAttempt %}
+        <div class="last-attempt {{ lastAttempt.status == 'passed' ? 'last-passed' : (lastAttempt.status == 'stopped' ? 'last-stopped' : 'last-failed') }}">
+          {% if lastAttempt.status == 'passed' %}
+            ✅ Votre dernière tentative : <strong>Réussi</strong> — {{ lastAttempt.percentage }}%
+          {% elseif lastAttempt.status == 'stopped' %}
+            ⛔ Votre dernière tentative : <strong>Arrêtée</strong> ({{ lastAttempt.mistakeCount }} erreurs)
+          {% else %}
+            ✗ Votre dernière tentative : <strong>Échouée</strong> — {{ lastAttempt.percentage }}%
+          {% endif %}
+          — <a href="{{ path('front_exam_result', {formationId: formation.id, attemptId: lastAttempt.id}) }}" style="font-weight:700;">Voir le détail</a>
+        </div>
+      {% endif %}
+
+      <div class="info-card">
+        <div class="info-card-head">📋 Règles de l'examen</div>
+        <div class="info-card-body">
+          <ul class="rules-list">
+            <li><span class="rule-icon">❓</span><span><strong>{{ exam.questions|length }} question{{ exam.questions|length > 1 ? 's' : '' }}</strong> — toutes randomisées</span></li>
+            <li><span class="rule-icon">🎯</span><span>Score minimum pour réussir : <strong>{{ exam.passingScore }}%</strong></span></li>
+            <li><span class="rule-icon">⛔</span><span>Maximum <strong>{{ exam.maxMistakes }} erreur{{ exam.maxMistakes > 1 ? 's' : '' }}</strong> — l'examen s'arrête automatiquement au-delà</span></li>
+            <li><span class="rule-icon">🔀</span><span>Les questions et les choix sont <strong>mélangés</strong> à chaque tentative</span></li>
+            {% if exam.description %}
+              <li><span class="rule-icon">ℹ️</span><span>{{ exam.description }}</span></li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+
+      {% if exam.questions|length == 0 %}
+        <div style="text-align:center;font-family:'DM Sans',sans-serif;color:var(--sk-muted);padding:16px;">L'examen n'a pas encore de questions. Revenez plus tard.</div>
+      {% else %}
+        <div style="text-align:center;margin-top:8px;">
+          <form action="{{ path('front_exam_start', {formationId: formation.id}) }}" method="post" style="display:inline;">
+            <input type="hidden" name="_token" value="{{ csrf_token('exam_start_' ~ formation.id) }}">
+            <button type="submit" class="sk-btn sk-btn-blue">🚀 {{ lastAttempt ? 'Recommencer l\'examen' : 'Démarrer l\'examen' }}</button>
+          </form>
+          <a href="{{ path('front_formation_show', {id: formation.id}) }}" class="sk-btn sk-btn-ghost" style="margin-left:12px;">← Retour</a>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,689 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Résultat — {{ quiz.titre }} | SkillOra{% endblock %}
+
+{% block stylesheets %}
+<style>
+    /* ═══════════════════════════════════════════
+       RESULT PAGE — SkillOra
+    ═══════════════════════════════════════════ */
+
+    .result-hero {
+        background: linear-gradient(135deg, #5a0000 0%, #8b1a1a 50%, #a52a2a 100%);
+        padding: 80px 0 50px;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+    .result-hero::before {
+        content: '';
+        position: absolute;
+        width: 500px; height: 500px;
+        top: -150px; right: -100px;
+        background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .result-hero h1 { font-size: 2rem; font-weight: 700; }
+    .result-hero .breadcrumb a { color: rgba(255,255,255,0.7); text-decoration: none; }
+    .result-hero .breadcrumb-item.active { color: rgba(255,255,255,0.9); }
+    .result-hero .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.5); }
+
+    .result-content { padding: 50px 0 80px; background: #f5f5f7; min-height: 60vh; }
+
+    /* ── Score Card ── */
+    .score-card {
+        border: none;
+        border-radius: 24px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.1);
+        text-align: center;
+        padding: 3.5rem 2rem;
+        margin-bottom: 2.5rem;
+        overflow: hidden;
+        position: relative;
+    }
+    .score-card.success { background: linear-gradient(135deg, #d4edda, #b7e4c7); }
+    .score-card.warning { background: linear-gradient(135deg, #fff3cd, #ffe9a0); }
+    .score-card.failure { background: linear-gradient(135deg, #f8d7da, #f1aeb5); }
+
+    /* Animated circle */
+    .score-ring-wrapper {
+        position: relative;
+        width: 180px;
+        height: 180px;
+        margin: 0 auto 1.5rem;
+    }
+    .score-ring-bg {
+        fill: none;
+        stroke: rgba(0,0,0,0.08);
+        stroke-width: 10;
+    }
+    .score-ring-fill {
+        fill: none;
+        stroke-width: 10;
+        stroke-linecap: round;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+        transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .score-card.success .score-ring-fill { stroke: #28a745; }
+    .score-card.warning .score-ring-fill { stroke: #e0a800; }
+    .score-card.failure .score-ring-fill { stroke: #dc3545; }
+
+    .score-center-text {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+    .score-percent {
+        font-size: 2.8rem;
+        font-weight: 800;
+        line-height: 1;
+        display: block;
+    }
+    .score-card.success .score-percent { color: #155724; }
+    .score-card.warning .score-percent { color: #856404; }
+    .score-card.failure .score-percent { color: #721c24; }
+    .score-pts {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 4px;
+        display: block;
+    }
+
+    .result-message {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .result-detail { font-size: 1rem; color: #555; }
+
+    /* ── Stats Bar ── */
+    .stats-bar {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 24px;
+        flex-wrap: wrap;
+    }
+    .stat-box {
+        text-align: center;
+    }
+    .stat-box .stat-val {
+        font-size: 1.6rem;
+        font-weight: 800;
+        display: block;
+    }
+    .stat-box .stat-lbl {
+        font-size: 0.82rem;
+        color: #555;
+    }
+    .stat-box.stat-correct .stat-val { color: #28a745; }
+    .stat-box.stat-wrong .stat-val { color: #dc3545; }
+    .stat-box.stat-skipped .stat-val { color: #6c757d; }
+
+    /* ── Review Cards ── */
+    .review-heading {
+        font-weight: 700;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #5a0000;
+        display: inline-block;
+    }
+
+    .review-card {
+        background: #fff;
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1rem;
+        border-left: 5px solid transparent;
+        transition: all 0.3s;
+    }
+    .review-card:hover { box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
+    .review-card.card-correct { border-left-color: #28a745; }
+    .review-card.card-wrong   { border-left-color: #dc3545; }
+    .review-card.card-skipped { border-left-color: #6c757d; }
+
+    .question-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 1rem;
+    }
+    .q-number {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 0.85rem; color: #fff; flex-shrink: 0;
+    }
+    .q-number.correct { background: #28a745; }
+    .q-number.wrong   { background: #dc3545; }
+    .q-number.skipped  { background: #6c757d; }
+
+    .q-header-text { font-weight: 600; color: #333; font-size: 1.05rem; }
+    .q-points-badge {
+        font-size: 0.78rem;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+        margin-left: auto;
+        white-space: nowrap;
+    }
+    .q-points-badge.earned { background: #d4edda; color: #155724; }
+    .q-points-badge.lost   { background: #f8d7da; color: #721c24; }
+    .q-points-badge.none   { background: #e2e3e5; color: #383d41; }
+
+    .review-option {
+        padding: 10px 16px;
+        margin: 5px 0;
+        border-radius: 10px;
+        font-size: 0.93rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 2px solid transparent;
+        transition: all 0.2s;
+    }
+    .review-option .opt-letter {
+        width: 28px; height: 28px;
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 0.8rem;
+        flex-shrink: 0;
+        border: 2px solid #ddd;
+        color: #999;
+        background: #fff;
+    }
+
+    /* Correct answer */
+    .review-option.is-correct {
+        background: #d4edda;
+        border-color: #28a745;
+    }
+    .review-option.is-correct .opt-letter {
+        background: #28a745; color: #fff; border-color: #28a745;
+    }
+
+    /* User selected + correct */
+    .review-option.user-correct {
+        background: #d4edda;
+        border-color: #28a745;
+    }
+    .review-option.user-correct .opt-letter {
+        background: #28a745; color: #fff; border-color: #28a745;
+    }
+
+    /* User selected + wrong */
+    .review-option.user-wrong {
+        background: #f8d7da;
+        border-color: #dc3545;
+    }
+    .review-option.user-wrong .opt-letter {
+        background: #dc3545; color: #fff; border-color: #dc3545;
+    }
+
+    /* Neutral */
+    .review-option.neutral {
+        background: #f8f9fa;
+    }
+
+    .opt-icon {
+        margin-left: auto;
+        font-size: 1rem;
+    }
+
+    /* ── Action Buttons ── */
+    .btn-back {
+        background: #5a0000; color: #fff; border: none;
+        border-radius: 12px; padding: 14px 32px;
+        font-weight: 700; font-size: 1rem;
+        transition: all 0.3s;
+    }
+    .btn-back:hover {
+        background: #7a1a1a; color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(90,0,0,0.3);
+    }
+
+    /* ── Level Progress Stepper ── */
+    .level-stepper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        margin-top: 24px;
+        flex-wrap: wrap;
+    }
+    .stepper-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+    }
+    .stepper-item:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 16px;
+        left: calc(50% + 18px);
+        width: calc(100% - 4px);
+        height: 3px;
+        background: rgba(255,255,255,0.25);
+        z-index: 0;
+    }
+    .stepper-item:not(:last-child).step-done::after { background: rgba(255,255,255,0.7); }
+    .step-circle {
+        width: 34px; height: 34px;
+        border-radius: 50%;
+        border: 3px solid rgba(255,255,255,0.4);
+        background: rgba(255,255,255,0.1);
+        display: flex; align-items: center; justify-content: center;
+        font-size: .78rem; font-weight: 800; color: rgba(255,255,255,0.6);
+        position: relative; z-index: 1;
+        transition: all .3s;
+        margin: 0 22px;
+    }
+    .step-circle.step-done   { background: rgba(255,255,255,0.9); color: #5a0000; border-color: #fff; }
+    .step-circle.step-active { background: #fff; color: #5a0000; border-color: #fff; box-shadow: 0 0 0 4px rgba(255,255,255,0.3); transform: scale(1.15); }
+    .step-label {
+        font-size: .65rem; font-weight: 700; color: rgba(255,255,255,0.55);
+        margin-top: 5px; text-align: center; max-width: 70px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .step-label.active-label { color: rgba(255,255,255,0.95); }
+
+    /* ── Level Result Panel ── */
+    .level-result-panel {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 4px 30px rgba(0,0,0,0.08);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-top: 5px solid #5a0000;
+    }
+    .level-result-panel.panel-success { border-top-color: #22c55e; }
+    .level-result-panel.panel-fail    { border-top-color: #ef4444; }
+    .level-stat-row {
+        display: flex; align-items: center; justify-content: center;
+        gap: 36px; flex-wrap: wrap; margin-top: 16px;
+    }
+    .level-stat-item { text-align: center; }
+    .level-stat-val  { font-size: 2rem; font-weight: 800; display: block; line-height: 1; }
+    .level-stat-lbl  { font-size: .75rem; color: #888; margin-top: 3px; }
+
+    /* ── Nav Buttons ── */
+    .result-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        margin: 2rem 0 3rem;
+    }
+    .btn-next-quiz {
+        display: inline-flex; align-items: center; gap: 10px;
+        padding: 17px 44px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #5a0000, #8b1a1a);
+        color: #fff; font-weight: 800; font-size: 1.1rem;
+        text-decoration: none; border: none;
+        box-shadow: 0 6px 24px rgba(90,0,0,0.28);
+        transition: all .25s;
+    }
+    .btn-next-quiz:hover { background: linear-gradient(135deg, #7a1a1a, #a52a2a); color:#fff; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(90,0,0,0.35); text-decoration:none; }
+    .btn-level-result {
+        display: inline-flex; align-items: center; gap: 10px;
+        padding: 17px 44px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #15803d, #22c55e);
+        color: #fff; font-weight: 800; font-size: 1.1rem;
+        text-decoration: none; border: none;
+        box-shadow: 0 6px 24px rgba(21,128,61,0.28);
+        transition: all .25s;
+    }
+    .btn-level-result:hover { background: linear-gradient(135deg, #166534, #16a34a); color:#fff; transform: translateY(-2px); text-decoration:none; }
+    .btn-retry-quiz {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 28px; border-radius: 12px;
+        background: #fef3c7; color: #92400e;
+        border: 2px solid #fcd34d;
+        font-weight: 700; font-size: .92rem;
+        text-decoration: none; transition: all .2s;
+    }
+    .btn-retry-quiz:hover { background: #d97706; color:#fff; border-color:#d97706; text-decoration:none; }
+    .result-sec-actions {
+        display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    }
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeUp 0.5s ease forwards;
+    }
+    @keyframes fadeUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+{% set percentage = resultat.percentage %}
+{% set scoreClass = percentage >= 70 ? 'success' : (percentage >= 50 ? 'warning' : 'failure') %}
+
+{# Count correct / wrong / skipped #}
+{% set correctCount = 0 %}
+{% set wrongCount = 0 %}
+{% set skippedCount = 0 %}
+{% for question in quiz.questions %}
+    {% set userOpt = userAnswers[question.id ~ ''] is defined ? userAnswers[question.id ~ ''] : null %}
+    {% set correctOpt = correctAnswers[question.id] ?? null %}
+    {% if userOpt is null %}
+        {% set skippedCount = skippedCount + 1 %}
+    {% elseif userOpt == correctOpt ~ '' %}
+        {% set correctCount = correctCount + 1 %}
+    {% else %}
+        {% set wrongCount = wrongCount + 1 %}
+    {% endif %}
+{% endfor %}
+
+{# ═══════════════════════════════════════════
+    HERO
+═══════════════════════════════════════════ #}
+<section class="result-hero">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ path('front_home') }}">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('front_formation_index') }}">Formations</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('front_formation_show', {id: formation.id}) }}">{{ formation.titre }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Résultat</li>
+            </ol>
+        </nav>
+        <h1><i class="fa fa-trophy me-2"></i>{{ quiz.titre }}</h1>
+
+        {# Level progress stepper #}
+        {% if levelStats %}
+        <div style="margin-top:8px;font-size:.82rem;opacity:.8;">
+            Niveau « {{ levelStats.titre }} » —
+            Quiz {{ quizIndex + 1 }} sur {{ levelStats.total }}
+        </div>
+        <div class="level-stepper">
+            {% for i in 1..levelStats.total %}
+                {% set isDone   = i <= quizIndex %}
+                {% set isActive = i == quizIndex + 1 %}
+                <div class="stepper-item {{ isDone ? 'step-done' : '' }}">
+                    <div class="step-circle {{ isDone ? 'step-done' : (isActive ? 'step-active' : '') }}">
+                        {% if isDone %}<i class="fa fa-check"></i>{% else %}{{ i }}{% endif %}
+                    </div>
+                    <div class="step-label {{ isActive ? 'active-label' : '' }}">Quiz {{ i }}</div>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{# ═══════════════════════════════════════════
+    RESULT
+═══════════════════════════════════════════ #}
+<section class="result-content">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                {# ══ INTERMEDIATE QUIZ: just show "next quiz" CTA, no score ══ #}
+                {% if nextQuiz %}
+
+                <div class="score-card success fade-up" style="padding:3rem 2rem">
+                    <div style="font-size:4rem;margin-bottom:.5rem">✅</div>
+                    <div class="result-message" style="font-size:1.4rem">Quiz terminé !</div>
+                    <p class="result-detail">
+                        Bonne continuation — le quiz suivant vous attend.
+                    </p>
+                    <div class="stats-bar" style="margin-bottom:0">
+                        <div class="stat-box stat-correct">
+                            <span class="stat-val">{{ correctCount }}</span>
+                            <span class="stat-lbl"><i class="fa fa-check me-1"></i>Correctes</span>
+                        </div>
+                        <div class="stat-box stat-wrong">
+                            <span class="stat-val">{{ wrongCount }}</span>
+                            <span class="stat-lbl"><i class="fa fa-times me-1"></i>Fausses</span>
+                        </div>
+                        <div class="stat-box stat-skipped">
+                            <span class="stat-val">{{ skippedCount }}</span>
+                            <span class="stat-lbl"><i class="fa fa-minus me-1"></i>Non répondues</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-actions fade-up" style="animation-delay:.2s">
+                    <a href="{{ path('front_quiz_start', {formationId: formation.id, id: nextQuiz.id}) }}"
+                       class="btn-next-quiz">
+                        Quiz suivant &nbsp;<i class="fa fa-arrow-right"></i>
+                    </a>
+                    <div class="result-sec-actions">
+                        <a href="{{ path('front_quiz_start', {formationId: formation.id, id: quiz.id}) }}"
+                           class="btn-retry-quiz">
+                            <i class="fa fa-refresh"></i> Réessayer ce quiz
+                        </a>
+                        <a href="{{ path('front_formation_show', {id: formation.id}) }}"
+                           class="btn btn-outline-secondary px-4" style="border-radius:12px;font-weight:700">
+                            <i class="fa fa-arrow-left me-1"></i> Formation
+                        </a>
+                    </div>
+                </div>
+
+                {# ══ LAST QUIZ: level panel + full score + review ══ #}
+                {% else %}
+
+                {# ── Level aggregate result (shown only when all quizzes in the level are done) ── #}
+                {% if levelStats and levelStats.allDone %}
+                {% set panelClass = levelStats.passed ? 'panel-success' : 'panel-fail' %}
+                <div class="level-result-panel {{ panelClass }} fade-up" style="animation-delay:.15s">
+                    <div class="d-flex align-items-center gap-3 mb-1">
+                        <span style="font-size:1.8rem">{{ levelStats.passed ? '🏆' : '🔄' }}</span>
+                        <div>
+                            <h5 class="mb-0 fw-800">Niveau « {{ levelStats.titre }} » terminé</h5>
+                            <div style="font-size:.82rem;color:#888">{{ levelStats.total }} quiz{{ levelStats.total > 1 ? 'zes' : '' }} complétés</div>
+                        </div>
+                        <span class="ms-auto px-3 py-1 rounded-pill fw-700" style="font-size:.9rem;background:{{ levelStats.passed ? '#dcfce7' : '#fee2e2' }};color:{{ levelStats.passed ? '#15803d' : '#991b1b' }}">
+                            {{ levelStats.passed ? '✅ Niveau réussi' : '❌ Non réussi' }}
+                        </span>
+                    </div>
+                    <div class="level-stat-row">
+                        <div class="level-stat-item">
+                            <span class="level-stat-val" style="color:{{ levelStats.passed ? '#15803d' : '#dc2626' }}">{{ levelStats.pct }}%</span>
+                            <div class="level-stat-lbl">Score total</div>
+                        </div>
+                        <div class="level-stat-item">
+                            <span class="level-stat-val" style="color:#374151">{{ levelStats.totalScore }}/{{ levelStats.totalMax }}</span>
+                            <div class="level-stat-lbl">Points</div>
+                        </div>
+                        <div class="level-stat-item">
+                            <span class="level-stat-val" style="color:#6b7280">50%</span>
+                            <div class="level-stat-lbl">Seuil requis</div>
+                        </div>
+                    </div>
+                    {# Progress bar #}
+                    <div style="margin-top:16px;background:#e5e7eb;border-radius:8px;height:10px;overflow:hidden">
+                        <div style="width:{{ levelStats.pct }}%;height:100%;background:{{ levelStats.passed ? '#22c55e' : '#ef4444' }};border-radius:8px;transition:width 1s ease"></div>
+                    </div>
+                    {% if not levelStats.passed %}
+                    <p class="text-muted small mt-3 mb-0"><i class="fa fa-info-circle me-1"></i>Obtenez au moins 50% pour débloquer le niveau suivant. Retentez les quiz que vous avez ratés !</p>
+                    {% else %}
+                    <p class="text-muted small mt-3 mb-0"><i class="fa fa-check-circle text-success me-1"></i>Le niveau suivant est débloqué. Continuez votre progression !</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {# ── Score Card with Animated Ring ── #}
+                <div class="score-card {{ scoreClass }} fade-up">
+                    <div class="score-ring-wrapper">
+                        <svg width="180" height="180" viewBox="0 0 180 180">
+                            <circle class="score-ring-bg" cx="90" cy="90" r="80"/>
+                            <circle class="score-ring-fill" id="scoreRing" cx="90" cy="90" r="80"
+                                    stroke-dasharray="502.65"
+                                    stroke-dashoffset="502.65"/>
+                        </svg>
+                        <div class="score-center-text">
+                            <span class="score-percent" id="scorePercent">0%</span>
+                            <span class="score-pts">{{ resultat.score }}/{{ resultat.totalPoints }} pts</span>
+                        </div>
+                    </div>
+
+                    <div class="result-message">
+                        {% if percentage >= 70 %}
+                            <i class="fa fa-trophy" style="color: #ffc107"></i> Félicitations !
+                        {% elseif percentage >= 50 %}
+                            <i class="fa fa-thumbs-up" style="color: #856404"></i> Pas mal !
+                        {% else %}
+                            <i class="fa fa-refresh" style="color: #721c24"></i> Courage !
+                        {% endif %}
+                    </div>
+                    <p class="result-detail">
+                        {% if percentage >= 70 %}
+                            Excellent travail ! Vous maîtrisez bien le sujet de « {{ quiz.titre }} ».
+                        {% elseif percentage >= 50 %}
+                            Bon effort ! Révisez les sujets que vous avez manqués pour vous améliorer.
+                        {% else %}
+                            Ne vous découragez pas. Révisez la formation et réessayez.
+                        {% endif %}
+                    </p>
+
+                    {# Stats Bar #}
+                    <div class="stats-bar">
+                        <div class="stat-box stat-correct">
+                            <span class="stat-val">{{ correctCount }}</span>
+                            <span class="stat-lbl"><i class="fa fa-check me-1"></i>Correctes</span>
+                        </div>
+                        <div class="stat-box stat-wrong">
+                            <span class="stat-val">{{ wrongCount }}</span>
+                            <span class="stat-lbl"><i class="fa fa-times me-1"></i>Fausses</span>
+                        </div>
+                        <div class="stat-box stat-skipped">
+                            <span class="stat-val">{{ skippedCount }}</span>
+                            <span class="stat-lbl"><i class="fa fa-minus me-1"></i>Non répondues</span>
+                        </div>
+                    </div>
+
+                    <p class="text-muted small mt-3 mb-0">
+                        <i class="fa fa-clock-o me-1"></i>Passé le {{ resultat.datePassage|date('d/m/Y à H:i') }}
+                    </p>
+                </div>
+
+                {# ── Review Section ── #}
+                <h4 class="review-heading fade-up" style="animation-delay: 0.2s">
+                    <i class="fa fa-list-ol me-2" style="color: #5a0000"></i>Révision des réponses
+                </h4>
+
+                {% set letters = ['A', 'B', 'C', 'D', 'E', 'F'] %}
+
+                {% for question in quiz.questions %}
+                    {% set userOptId = userAnswers[question.id ~ ''] is defined ? userAnswers[question.id ~ ''] : null %}
+                    {% set correctOptId = correctAnswers[question.id] ?? null %}
+                    {% set isCorrect = (userOptId is not null) and (userOptId == correctOptId ~ '') %}
+                    {% set isSkipped = userOptId is null %}
+
+                    <div class="review-card {{ isSkipped ? 'card-skipped' : (isCorrect ? 'card-correct' : 'card-wrong') }} fade-up" style="animation-delay: {{ 0.25 + loop.index0 * 0.08 }}s">
+                        <div class="question-header">
+                            <span class="q-number {{ isSkipped ? 'skipped' : (isCorrect ? 'correct' : 'wrong') }}">{{ loop.index }}</span>
+                            <span class="q-header-text">{{ question.contenu }}</span>
+                            {% if isCorrect %}
+                                <span class="q-points-badge earned"><i class="fa fa-check me-1"></i>+{{ question.points ?? 1 }} pt{{ (question.points ?? 1) > 1 ? 's' : '' }}</span>
+                            {% elseif isSkipped %}
+                                <span class="q-points-badge none"><i class="fa fa-minus me-1"></i>0 pt</span>
+                            {% else %}
+                                <span class="q-points-badge lost"><i class="fa fa-times me-1"></i>0 pt</span>
+                            {% endif %}
+                        </div>
+                        <div class="options-review">
+                            {% for option in question.optionQuestions %}
+                                {% set isThisCorrect = option.isEstCorrect %}
+                                {% set isThisSelected = (userOptId is not null) and (option.id ~ '' == userOptId ~ '') %}
+
+                                {% if isThisSelected and isThisCorrect %}
+                                    {% set optClass = 'user-correct' %}
+                                {% elseif isThisSelected and not isThisCorrect %}
+                                    {% set optClass = 'user-wrong' %}
+                                {% elseif isThisCorrect %}
+                                    {% set optClass = 'is-correct' %}
+                                {% else %}
+                                    {% set optClass = 'neutral' %}
+                                {% endif %}
+
+                                <div class="review-option {{ optClass }}">
+                                    <span class="opt-letter">{{ letters[loop.index0] ?? loop.index }}</span>
+                                    <span>{{ option.contenu }}</span>
+                                    {% if isThisSelected and isThisCorrect %}
+                                        <span class="opt-icon"><i class="fa fa-check-circle text-success"></i></span>
+                                    {% elseif isThisSelected and not isThisCorrect %}
+                                        <span class="opt-icon"><i class="fa fa-times-circle text-danger"></i></span>
+                                    {% elseif isThisCorrect %}
+                                        <span class="opt-icon"><i class="fa fa-check text-success"></i></span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {# ── Navigation Actions (last quiz only) ── #}
+                <div class="result-actions fade-up" style="animation-delay: {{ 0.3 + quiz.questions|length * 0.08 }}s">
+                    <a href="{{ path('front_formation_show', {id: formation.id}) }}"
+                       class="btn-level-result">
+                        <i class="fa fa-trophy"></i>
+                        Voir ma progression
+                    </a>
+                    <div class="result-sec-actions">
+                        <a href="{{ path('front_quiz_start', {formationId: formation.id, id: quiz.id}) }}"
+                           class="btn-retry-quiz">
+                            <i class="fa fa-refresh"></i> Réessayer ce quiz
+                        </a>
+                        <a href="{{ path('front_formation_show', {id: formation.id}) }}"
+                           class="btn btn-outline-secondary px-4" style="border-radius:12px;font-weight:700">
+                            <i class="fa fa-arrow-left me-1"></i> Formation
+                        </a>
+                    </div>
+                </div>
+
+                {% endif %}{# end nextQuiz/else #}
+
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Animate score ring (last quiz only)
+    var ring = document.getElementById('scoreRing');
+    var percentEl = document.getElementById('scorePercent');
+    if (!ring || !percentEl) return;
+
+    var percentage = {{ resultat.percentage }};
+    var circumference = 502.65;
+    var offset = circumference - (circumference * percentage / 100);
+    var ring = document.getElementById('scoreRing');
+    var percentEl = document.getElementById('scorePercent');
+
+    // Delay animation for visual effect
+    setTimeout(function () {
+        ring.style.strokeDashoffset = offset;
+
+        // Count up animation
+        var current = 0;
+        var step = percentage / 40;
+        var interval = setInterval(function () {
+            current += step;
+            if (current >= percentage) {
+                current = percentage;
+                clearInterval(interval);
+            }
+            percentEl.textContent = Math.round(current) + '%';
+        }, 30);
+    }, 400);
+});
+</script>
+{% endblock %}

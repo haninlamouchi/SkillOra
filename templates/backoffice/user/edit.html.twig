@@ -1,0 +1,95 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Edit Profile - {{ user.prenom }} {{ user.nom }}{% endblock %}
+
+{% block body %}
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 grid-margin">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="card-title mb-0">✏️ Edit Profile</h4>
+                <a href="{{ path('app_admin_dashboard') }}" class="btn btn-sm btn-secondary">
+                    <i class="mdi mdi-arrow-left me-1"></i> Back
+                </a>
+            </div>
+
+            {# Affiche les erreurs #}
+            {% if not form.vars.valid and form.vars.submitted %}
+                <div class="alert alert-danger">
+                    ⚠️ Errors found:
+                    {{ form_errors(form) }}
+                </div>
+            {% endif %}
+
+            <div class="card" style="border-radius:15px;">
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">First Name</label>
+                            {{ form_widget(form.prenom, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.prenom) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Last Name</label>
+                            {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.nom) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email</label>
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.email) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone</label>
+                            {{ form_widget(form.telephone, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.telephone) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Date of Birth</label>
+                            {{ form_widget(form.dateNaissance, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.dateNaissance) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Password</label>
+                            {{ form_widget(form.password, {'attr': {'class': 'form-control', 'placeholder': '••••••••'}}) }}
+                            {{ form_errors(form.password) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Profile Photo</label>
+                            {{ form_widget(form.photoFile, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.photoFile) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Role</label>
+                            {{ form_widget(form.role, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.role) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Registration Date</label>
+                            {{ form_widget(form.dateInscription, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+
+                    <hr class="mt-4">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn fw-semibold"
+                                style="background:#c10609; color:white; padding:10px 24px; border-radius:8px;">
+                            <i class="mdi mdi-content-save me-1"></i> Save Changes
+                        </button>
+                        <a href="{{ path('app_admin_dashboard') }}" class="btn btn-outline-secondary fw-semibold"
+                           style="padding:10px 24px; border-radius:8px;">
+                            <i class="mdi mdi-close me-1"></i> Cancel
+                        </a>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

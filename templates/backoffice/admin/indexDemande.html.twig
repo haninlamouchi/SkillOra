@@ -1,0 +1,152 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}Demandes de création | Admin{% endblock %}
+
+{% block stylesheets %}
+<style>
+.club-logo { width:80px; height:40px; object-fit:contain; border-radius:6px; border:1px solid #eee; background:#fafafa; }
+.no-logo {
+    width:40px; height:40px; border-radius:50%;
+    background:linear-gradient(135deg,#c10609,#8b0507);
+    color:#fff; font-weight:800; font-size:0.82rem;
+    display:flex; align-items:center; justify-content:center;
+}
+.no-avatar {
+    width:40px; height:40px; border-radius:50%;
+    background:linear-gradient(135deg,#c10609,#8b0507);
+    color:#fff; font-weight:800; font-size:0.82rem;
+    display:flex; align-items:center; justify-content:center;
+}
+.table tbody tr { cursor:default; transition:background 0.15s; }
+.table tbody tr:hover { background:rgba(193,6,9,0.04) !important; }
+.count-badge { background:#c10609; color:#fff; padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:800; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12 grid-margin">
+        <div class="card" style="border-radius:12px; border-top:3px solid #c10609;">
+            <div class="card-body">
+
+                {# Flash messages #}
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                    <h4 class="card-title mb-0">
+                        <i class="mdi mdi-plus-circle me-2" style="color:#c10609;"></i>
+                        Demandes de création de clubs
+                        <span class="count-badge ms-2">{{ demandes|length }}</span>
+                    </h4>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead style="background:#fafafa;">
+                            <tr>
+                                <th>Logo</th>
+                                <th>Nom</th>
+                                <th>Description</th>
+                                <th>Date Création</th>
+                                <th>Site Web</th>
+                                <th>Responsable</th>
+                                <th style="width:160px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for demande in demandes %}
+                        <tr>
+                            <td>
+                                {% if demande.logo %}
+                                    <img src="{{ vich_uploader_asset(demande, 'logoFile') }}"
+                                         alt="{{ demande.nom }}"
+                                         class="club-logo">
+                                {% else %}
+                                    <div class="no-logo">
+                                        {{ demande.nom|slice(0,2)|upper }}
+                                    </div>
+                                {% endif %}
+                            </td>
+
+                            <td><span class="fw-semibold">{{ demande.nom }}</span></td>
+
+                            <td class="text-muted small">
+                                {{ demande.description|u.truncate(80, '…') }}
+                            </td>
+
+                            <td class="text-muted small">
+                                {{ demande.dateCreation ? demande.dateCreation|date('d/m/Y') : '—' }}
+                            </td>
+
+                            <td class="text-muted small">
+                                {% if demande.siteWeb %}
+                                    <a href="{{ demande.siteWeb }}" target="_blank" rel="noopener">
+                                        <i class="mdi mdi-web"></i> Voir
+                                    </a>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if demande.responsable %}
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="no-avatar">
+                                        {{ demande.responsable.prenom|slice(0,1)|upper ~ demande.responsable.nom|slice(0,1)|upper }}
+                                    </div>
+                                    <span class="fw-semibold">
+                                        {{ demande.responsable.prenom }} {{ demande.responsable.nom }}
+                                    </span>
+                                </div>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <form method="post"
+                                      action="{{ path('admin_club_accepter', {'id': demande.id}) }}"
+                                      style="display:inline"
+                                      onsubmit="return confirm('Accepter cette demande ?')">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-success me-1"
+                                            title="Accepter">
+                                        <i class="mdi mdi-check"></i>
+                                    </button>
+                                </form>
+
+                                <form method="post"
+                                      action="{{ path('admin_club_refuser', {'id': demande.id}) }}"
+                                      style="display:inline"
+                                      onsubmit="return confirm('Refuser cette demande ?')">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger"
+                                            title="Refuser">
+                                        <i class="mdi mdi-close"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="mdi mdi-plus-circle-outline" style="font-size:2rem;opacity:0.3;"></i>
+                                <p class="mt-2 mb-0">Aucune demande de création en attente.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

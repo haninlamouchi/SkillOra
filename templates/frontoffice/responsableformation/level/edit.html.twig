@@ -1,0 +1,97 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Modifier Niveau — {{ level.titre }} | SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--sk-red:#8b0000;--sk-red-dark:#4a0000;--sk-white:#fff;--sk-ink:#180808;--sk-muted:#8a7070;--sk-border:rgba(139,0,0,0.09);}
+.sk-page{padding-top:70px;}
+.sk-hero{position:relative;background:linear-gradient(135deg,#3d0000 0%,#8b0000 48%,#c23030 100%);margin-left:calc(-50vw + 50%);margin-right:calc(-50vw + 50%);padding:60px 20px 52px;text-align:center;overflow:hidden;isolation:isolate;}
+.sk-hero-inner{position:relative;z-index:1;}
+.sk-hero h1{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(1.8rem,4vw,2.4rem);font-weight:800;color:#fff;margin:0 0 10px;}
+.sk-hero p{font-family:'DM Sans',sans-serif;color:rgba(255,255,255,0.60);font-size:0.97rem;margin:0;}
+.sk-hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px;font-family:'DM Sans',sans-serif;font-size:0.78rem;color:rgba(255,255,255,0.85);margin-bottom:14px;}
+.sk-content{padding:36px 0 56px;}
+.sk-back{display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:600;color:var(--sk-muted);text-decoration:none;margin-bottom:24px;}
+.sk-back:hover{color:var(--sk-red);text-decoration:none;}
+.sk-form-card{background:#fff;border-radius:20px;padding:36px 40px;border:1.5px solid var(--sk-border);box-shadow:0 4px 20px rgba(0,0,0,0.06);}
+.sk-form-section{margin-bottom:28px;}
+.sk-form-section-title{font-family:'Bricolage Grotesque',sans-serif;font-size:0.88rem;font-weight:700;color:var(--sk-ink);margin:0 0 16px;padding-bottom:10px;border-bottom:1.5px solid var(--sk-border);}
+.sk-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.sk-form-card input,.sk-form-card textarea,.sk-form-card select{padding:10px 14px;border:1.5px solid #e5e7eb;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--sk-ink);background:#f9f9f9;transition:border-color 0.2s;outline:none;width:100%;}
+.sk-form-card input:focus,.sk-form-card textarea:focus,.sk-form-card select:focus{border-color:var(--sk-red);background:#fff;box-shadow:0 0 0 3px rgba(139,0,0,0.07);}
+.sk-form-card textarea{min-height:100px;resize:vertical;}
+.sk-form-card label{font-family:'DM Sans',sans-serif;font-size:0.79rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.07em;display:block;margin-bottom:6px;}
+.sk-form-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:24px;border-top:1.5px solid var(--sk-border);margin-top:8px;}
+.sk-btn{display:inline-flex;align-items:center;gap:7px;padding:11px 24px;border-radius:10px;font-weight:700;font-family:'DM Sans',sans-serif;font-size:0.88rem;border:none;cursor:pointer;transition:all 0.25s;text-decoration:none;}
+.sk-btn-success{background:linear-gradient(135deg,#15803d,#22c55e);color:#fff;}
+.sk-btn-success:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(34,197,94,0.3);color:#fff;text-decoration:none;}
+.sk-btn-ghost{background:#f3f4f6;color:#374151;border:1.5px solid #e5e7eb;}
+.sk-btn-ghost:hover{border-color:#9ca3af;color:#111;text-decoration:none;}
+@media(max-width:680px){.sk-grid-2{grid-template-columns:1fr;}.sk-form-card{padding:24px 20px;}}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+  <div class="sk-hero">
+    <div class="sk-hero-inner">
+      <div class="sk-hero-badge">📚 {{ formation.titre }}</div>
+      <h1>✏️ Modifier le niveau</h1>
+      <p>Niveau {{ level.numero }} — {{ level.titre }}</p>
+    </div>
+  </div>
+
+  <div class="container" style="max-width:680px;">
+    <div class="sk-content">
+
+      <a href="{{ path('app_level_show', {formationId: formation.id, id: level.id}) }}" class="sk-back">← Retour au niveau</a>
+
+      {% for type, msgs in app.flashes %}
+        {% for msg in msgs %}
+          <div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }} alert-dismissible fade show mb-4" role="alert">
+            {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      <form method="post" action="{{ path('app_level_edit', {formationId: formation.id, id: level.id}) }}">
+        <div class="sk-form-card">
+
+          <div class="sk-form-section">
+            <div class="sk-form-section-title">🏆 Informations du niveau</div>
+
+            <div class="sk-grid-2" style="margin-bottom:16px;">
+              <div>
+                <label for="numero">Numéro du niveau</label>
+                <input type="number" id="numero" name="numero" min="1" value="{{ level.numero }}" required>
+              </div>
+              <div>
+                <label for="scoreRequired">Score requis (optionnel)</label>
+                <input type="number" id="scoreRequired" name="scoreRequired" min="0" value="{{ level.scoreRequired ?? '' }}" placeholder="ex: 70">
+              </div>
+            </div>
+
+            <div style="margin-bottom:16px;">
+              <label for="titre">Titre du niveau *</label>
+              <input type="text" id="titre" name="titre" value="{{ level.titre }}" required>
+            </div>
+
+            <div>
+              <label for="description">Description (optionnel)</label>
+              <textarea id="description" name="description">{{ level.description }}</textarea>
+            </div>
+          </div>
+
+          <div class="sk-form-actions">
+            <a href="{{ path('app_level_show', {formationId: formation.id, id: level.id}) }}" class="sk-btn sk-btn-ghost">Annuler</a>
+            <button type="submit" class="sk-btn sk-btn-success">💾 Enregistrer</button>
+          </div>
+
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

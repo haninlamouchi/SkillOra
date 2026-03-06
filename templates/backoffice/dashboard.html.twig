@@ -1,0 +1,864 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}Dashboard | SkillOra Admin{% endblock %}
+
+{% block body %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+* { font-family: 'Outfit', sans-serif; box-sizing: border-box; }
+
+/* ════════════════════════════════════════
+   LAYOUT
+════════════════════════════════════════ */
+.sk-dashboard { padding: 0 4px; }
+
+/* ════════════════════════════════════════
+   PAGE HEADER
+════════════════════════════════════════ */
+.sk-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 0 18px;
+    border-bottom: 1px solid #f0e8e8;
+    margin-bottom: 24px;
+}
+.sk-header-left h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #0d0505;
+    letter-spacing: -0.04em;
+    margin: 0;
+    line-height: 1;
+}
+.sk-header-left p {
+    margin: 5px 0 0;
+    font-size: 0.82rem;
+    color: #9a7878;
+    font-weight: 500;
+}
+.sk-header-right { display: flex; align-items: center; gap: 10px; }
+
+.sk-date-chip {
+    background: #f7f2f2;
+    border: 1px solid #ecdede;
+    border-radius: 8px;
+    padding: 7px 13px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b4040;
+    font-family: 'JetBrains Mono', monospace;
+}
+.sk-live {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: linear-gradient(135deg, rgba(139,0,0,0.06), rgba(139,0,0,0.03));
+    border: 1px solid rgba(139,0,0,0.14);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: #8b0000;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.sk-live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #8b0000;
+    animation: blink 1.6s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.3;transform:scale(0.6)} }
+
+/* ════════════════════════════════════════
+   KPI STRIP
+════════════════════════════════════════ */
+.sk-kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.sk-kpi {
+    background: #fff;
+    border: 1px solid #f0eaea;
+    border-radius: 14px;
+    padding: 16px 16px 14px;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.sk-kpi:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.08); transform: translateY(-2px); }
+.sk-kpi-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 14px 14px 0 0;
+}
+.sk-kpi-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.sk-kpi-ico {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+.sk-kpi-trend {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 6px;
+}
+.t-green { background: #f0fdf4; color: #16a34a; }
+.t-blue  { background: #eff6ff; color: #2563eb; }
+.t-orange{ background: #fff7ed; color: #d97706; }
+.t-gray  { background: #f8f8f8; color: #6b7280; }
+
+.sk-kpi-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #0d0505;
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+.sk-kpi-lbl {
+    font-size: 0.67rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #b09090;
+    margin-top: 3px;
+}
+.sk-kpi-sub {
+    font-size: 0.7rem;
+    color: #c0a0a0;
+    margin-top: 6px;
+    font-weight: 500;
+    border-top: 1px solid #f5eded;
+    padding-top: 6px;
+}
+
+/* ════════════════════════════════════════
+   CARDS
+════════════════════════════════════════ */
+.sk-card {
+    background: #fff;
+    border: 1px solid #f0eaea;
+    border-radius: 16px;
+    padding: 22px;
+    height: 100%;
+}
+.sk-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+.sk-card-title { font-size: 0.92rem; font-weight: 700; color: #0d0505; letter-spacing: -0.01em; }
+.sk-card-sub   { font-size: 0.74rem; color: #a08080; font-weight: 500; margin-top: 2px; }
+.sk-card-link  {
+    font-size: 0.7rem; font-weight: 700; color: #8b0000;
+    text-decoration: none; text-transform: uppercase;
+    letter-spacing: 0.07em; white-space: nowrap;
+}
+.sk-card-link:hover { color: #600000; text-decoration: none; }
+
+/* ════════════════════════════════════════
+   TABLE
+════════════════════════════════════════ */
+.sk-tbl { width: 100%; border-collapse: collapse; }
+.sk-tbl thead th {
+    font-size: 0.62rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: #c0a0a0; padding: 0 10px 9px;
+    text-align: left;
+    border-bottom: 1px solid #f5eded;
+}
+.sk-tbl tbody td {
+    padding: 9px 10px;
+    border-bottom: 1px solid #f9f2f2;
+    font-size: 0.8rem;
+    vertical-align: middle;
+    color: #2d1515;
+}
+.sk-tbl tbody tr:last-child td { border-bottom: none; }
+.sk-tbl tbody tr:hover td { background: rgba(139,0,0,0.015); }
+
+.sk-ava {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg,#5a0000,#c0392b);
+    color: #fff; display: flex; align-items: center;
+    justify-content: center; font-size: 0.7rem; font-weight: 700;
+    flex-shrink: 0;
+}
+.sk-pill {
+    display: inline-flex; align-items: center;
+    padding: 3px 9px; border-radius: 20px;
+    font-size: 0.63rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+.pill-warn   { background:#fff7ed; color:#b45309; }
+.pill-blue   { background:#eff6ff; color:#1d4ed8; }
+.pill-green  { background:#f0fdf4; color:#15803d; }
+.pill-red    { background:#fef2f2; color:#dc2626; }
+.pill-purple { background:#faf5ff; color:#7c3aed; }
+
+/* ════════════════════════════════════════
+   ACTIONS RAPIDES
+════════════════════════════════════════ */
+.sk-action {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 11px; border-radius: 10px;
+    border: 1px solid #f0eaea; background: #fff;
+    text-decoration: none; color: #2d1515;
+    font-size: 0.8rem; font-weight: 600;
+    transition: all 0.16s; margin-bottom: 7px;
+}
+.sk-action:last-child { margin-bottom: 0; }
+.sk-action:hover {
+    border-color: rgba(139,0,0,0.2);
+    background: #fdf8f8;
+    color: #8b0000;
+    text-decoration: none;
+    transform: translateX(3px);
+    box-shadow: 0 2px 8px rgba(139,0,0,0.07);
+}
+.sk-action-ico {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; flex-shrink: 0;
+}
+.sk-action-badge {
+    margin-left: auto;
+    background: #dc2626; color: #fff;
+    font-size: 0.62rem; font-weight: 800;
+    padding: 2px 7px; border-radius: 10px;
+    animation: blink 2s ease-in-out infinite;
+}
+.sk-action-arrow { margin-left: auto; color: #d4b0b0; font-size: 0.8rem; transition: transform 0.16s; }
+.sk-action:hover .sk-action-arrow { transform: translateX(3px); color: #8b0000; }
+
+/* ════════════════════════════════════════
+   MINI USER LIST
+════════════════════════════════════════ */
+.sk-user-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid #f9f2f2;
+}
+.sk-user-row:last-child { border-bottom: none; }
+.sk-user-name { font-size: 0.82rem; font-weight: 600; color: #1a0808; }
+.sk-user-role { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #b08080; }
+.sk-user-link {
+    margin-left: auto; font-size: 0.67rem; font-weight: 700;
+    color: #8b0000; text-decoration: none; letter-spacing: 0.04em;
+    padding: 3px 9px; border: 1px solid rgba(139,0,0,0.18);
+    border-radius: 6px; transition: all 0.15s;
+}
+.sk-user-link:hover { background: #8b0000; color: #fff; text-decoration: none; }
+
+/* ════════════════════════════════════════
+   PROGRESS BARS
+════════════════════════════════════════ */
+.sk-prog-row { margin-bottom: 11px; }
+.sk-prog-head {
+    display: flex; justify-content: space-between;
+    font-size: 0.74rem; font-weight: 600; color: #4b2020;
+    margin-bottom: 5px;
+}
+.sk-prog-head span:last-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem; color: #9a7070;
+}
+.sk-prog-track {
+    height: 5px; border-radius: 10px;
+    background: #f5eded; overflow: hidden;
+}
+.sk-prog-fill {
+    height: 100%; border-radius: 10px;
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ════════════════════════════════════════
+   ACTIVITY FEED
+════════════════════════════════════════ */
+.sk-feed-item {
+    display: flex; align-items: flex-start; gap: 11px;
+    padding: 9px 0; border-bottom: 1px solid #f9f2f2;
+}
+.sk-feed-item:last-child { border-bottom: none; }
+.sk-feed-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    flex-shrink: 0; margin-top: 5px;
+}
+.sk-feed-text { font-size: 0.78rem; color: #3d1a1a; font-weight: 500; line-height: 1.4; }
+.sk-feed-meta { font-size: 0.67rem; color: #b08080; margin-top: 2px; }
+
+/* ════════════════════════════════════════
+   SECTION LABEL
+════════════════════════════════════════ */
+.sk-section-lbl {
+    font-size: 0.62rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: #c8a8a8; margin-bottom: 12px; display: block;
+}
+
+/* ════════════════════════════════════════
+   SUMMARY ROW
+════════════════════════════════════════ */
+.sk-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+}
+.sk-summary-tile {
+    background: #fdf8f8;
+    border: 1px solid #f0eaea;
+    border-radius: 10px;
+    padding: 12px 14px;
+    text-align: center;
+}
+.sk-summary-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.4rem; font-weight: 600;
+    color: #0d0505; line-height: 1;
+}
+.sk-summary-lbl {
+    font-size: 0.65rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: #b09090; margin-top: 3px;
+}
+</style>
+
+<div class="sk-dashboard">
+
+{# ══ PAGE HEADER ══ #}
+<div class="sk-header">
+    <div class="sk-header-left">
+        <h1>Dashboard Admin</h1>
+        <p>Bonjour, <strong>{{ user.prenom }}</strong> — voici l'état de SkillOra en temps réel</p>
+    </div>
+    <div class="sk-header-right">
+        <div class="sk-date-chip">{{ "now"|date("d MMM Y") }}</div>
+        <div class="sk-live"><div class="sk-live-dot"></div>Live</div>
+    </div>
+</div>
+
+{# ══ KPI STRIP ══ #}
+<div class="sk-kpi-strip">
+
+    <div class="sk-kpi">
+        <div class="sk-kpi-bar" style="background:#8b0000;"></div>
+        <div class="sk-kpi-top">
+            <div class="sk-kpi-ico" style="background:rgba(139,0,0,0.07);">👤</div>
+            <span class="sk-kpi-trend t-green">membres</span>
+        </div>
+        <div class="sk-kpi-num">{{ totalUsers }}</div>
+        <div class="sk-kpi-lbl">Utilisateurs</div>
+        <div class="sk-kpi-sub">Inscrits sur la plateforme</div>
+    </div>
+
+    <div class="sk-kpi">
+        <div class="sk-kpi-bar" style="background:#15803d;"></div>
+        <div class="sk-kpi-top">
+            <div class="sk-kpi-ico" style="background:rgba(21,128,61,0.07);">💬</div>
+            <span class="sk-kpi-trend t-orange">
+                {{ publicationsEnAttente|length }} en attente
+            </span>
+        </div>
+        <div class="sk-kpi-num">{{ totalForums }}</div>
+        <div class="sk-kpi-lbl">Publications</div>
+        <div class="sk-kpi-sub">Total soumises au forum</div>
+    </div>
+
+    <div class="sk-kpi">
+        <div class="sk-kpi-bar" style="background:#d97706;"></div>
+        <div class="sk-kpi-top">
+            <div class="sk-kpi-ico" style="background:rgba(217,119,6,0.07);">🏆</div>
+            <span class="sk-kpi-trend t-gray">total</span>
+        </div>
+        <div class="sk-kpi-num">{{ totalChallenges }}</div>
+        <div class="sk-kpi-lbl">Challenges</div>
+        <div class="sk-kpi-sub">Lancés par les responsables</div>
+    </div>
+
+    <div class="sk-kpi">
+        <div class="sk-kpi-bar" style="background:#2563eb;"></div>
+        <div class="sk-kpi-top">
+            <div class="sk-kpi-ico" style="background:rgba(37,99,235,0.07);">🏛️</div>
+            <span class="sk-kpi-trend t-blue">actifs</span>
+        </div>
+        <div class="sk-kpi-num">{{ totalClubs }}</div>
+        <div class="sk-kpi-lbl">Clubs</div>
+        <div class="sk-kpi-sub">Clubs enregistrés</div>
+    </div>
+
+    <div class="sk-kpi">
+        <div class="sk-kpi-bar" style="background:#7c3aed;"></div>
+        <div class="sk-kpi-top">
+            <div class="sk-kpi-ico" style="background:rgba(124,58,237,0.07);">📚</div>
+            <span class="sk-kpi-trend t-green">actives</span>
+        </div>
+        <div class="sk-kpi-num">{{ totalFormations }}</div>
+        <div class="sk-kpi-lbl">Formations</div>
+        <div class="sk-kpi-sub">Disponibles aux membres</div>
+    </div>
+
+    <div class="sk-kpi">
+        <div class="sk-kpi-bar" style="background:#0891b2;"></div>
+        <div class="sk-kpi-top">
+            <div class="sk-kpi-ico" style="background:rgba(8,145,178,0.07);">🗨️</div>
+            <span class="sk-kpi-trend t-blue">postés</span>
+        </div>
+        <div class="sk-kpi-num">{{ totalCommentaires }}</div>
+        <div class="sk-kpi-lbl">Commentaires</div>
+        <div class="sk-kpi-sub">Sur toutes publications</div>
+    </div>
+
+</div>
+
+{# ══ ROW 1 : Charts ══ #}
+<div class="row mb-3">
+    <div class="col-lg-8 mb-3 mb-lg-0">
+        <div class="sk-card">
+            <div class="sk-card-head">
+                <div>
+                    <div class="sk-card-title">Activité mensuelle de la plateforme</div>
+                    <div class="sk-card-sub">Publications soumises & inscriptions — {{ "now"|date("Y") }}</div>
+                </div>
+            </div>
+            <canvas id="overviewChart" height="100"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="sk-card">
+            <div class="sk-card-head">
+                <div>
+                    <div class="sk-card-title">Répartition des contenus</div>
+                    <div class="sk-card-sub">Distribution globale SkillOra</div>
+                </div>
+            </div>
+            <canvas id="doughnutChart" height="160"></canvas>
+
+            <div class="sk-summary-grid">
+                <div class="sk-summary-tile">
+                    <div class="sk-summary-num" style="color:#8b0000;">{{ publicationsEnAttente|length }}</div>
+                    <div class="sk-summary-lbl">En attente</div>
+                </div>
+                <div class="sk-summary-tile">
+                    <div class="sk-summary-num" style="color:#15803d;">{{ totalForums - publicationsEnAttente|length }}</div>
+                    <div class="sk-summary-lbl">Validées</div>
+                </div>
+                <div class="sk-summary-tile">
+                    <div class="sk-summary-num" style="color:#2563eb;">{{ totalClubs }}</div>
+                    <div class="sk-summary-lbl">Clubs actifs</div>
+                </div>
+                <div class="sk-summary-tile">
+                    <div class="sk-summary-num" style="color:#7c3aed;">{{ totalFormations }}</div>
+                    <div class="sk-summary-lbl">Formations</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ══ ROW 2 : Table publications ══ #}
+<div class="row mb-3">
+    <div class="col-lg-12">
+        <div class="sk-card">
+            <div class="sk-card-head">
+                <div>
+                    <div class="sk-card-title">Publications en attente de validation</div>
+                    <div class="sk-card-sub">
+                        {% if publicationsEnAttente|length > 0 %}
+                            <span style="color:#b45309;font-weight:700;">{{ publicationsEnAttente|length }}</span> publication(s) nécessitent une action
+                        {% else %}
+                            ✓ Toutes les publications ont été traitées
+                        {% endif %}
+                    </div>
+                </div>
+                <a href="{{ path('admin_forum_publications') }}" class="sk-card-link">Voir tout →</a>
+            </div>
+            <table class="sk-tbl">
+                <thead>
+                    <tr>
+                        <th>Auteur</th>
+                        <th>Titre de la publication</th>
+                        <th>Type</th>
+                        <th>Club</th>
+                        <th>Date soumission</th>
+                        <th>Statut</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if publicationsEnAttente|length > 0 %}
+                        {% for pub in publicationsEnAttente %}
+                        <tr>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    {% if pub.user.photo is defined and pub.user.photo %}
+                                        <img src="{{ asset('uploads/photos/' ~ pub.user.photo) }}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+                                    {% else %}
+                                        <div class="sk-ava">{{ pub.user.prenom|slice(0,1)|upper }}{{ pub.user.nom|slice(0,1)|upper }}</div>
+                                    {% endif %}
+                                    <div>
+                                        <div style="font-weight:600;font-size:0.8rem;">{{ pub.user.prenom }} {{ pub.user.nom }}</div>
+                                        <div style="font-size:0.67rem;color:#b08080;text-transform:uppercase;letter-spacing:0.06em;">{{ pub.user.role }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="font-weight:500;max-width:220px;">
+                                {{ pub.titre|length > 45 ? pub.titre|slice(0,45) ~ '…' : pub.titre }}
+                            </td>
+                            <td><span class="sk-pill pill-blue">{{ pub.typecontenu.value }}</span></td>
+                            <td style="color:#6b4040;font-size:0.78rem;">
+                                {{ pub.user.clubs is defined and pub.user.clubs|length > 0 ? pub.user.clubs[0].nom : '—' }}
+                            </td>
+                            <td style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#9a7070;">
+                                {{ pub.datePublication ? pub.datePublication|date('d/m/Y') : '—' }}
+                            </td>
+                            <td><span class="sk-pill pill-warn">En attente</span></td>
+                            <td>
+                                <a href="{{ path('admin_forum_publications') }}"
+                                   style="font-size:0.68rem;font-weight:700;color:#8b0000;text-decoration:none;padding:4px 10px;border:1px solid rgba(139,0,0,0.2);border-radius:6px;white-space:nowrap;transition:all 0.15s;"
+                                   onmouseover="this.style.background='#8b0000';this.style.color='#fff';"
+                                   onmouseout="this.style.background='transparent';this.style.color='#8b0000';">
+                                    Traiter →
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" style="text-align:center;padding:36px;color:#b08080;font-size:0.82rem;">
+                                <div style="font-size:1.4rem;margin-bottom:6px;">✓</div>
+                                Aucune publication en attente de validation
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{# ══ ROW 3 : Actions + Répartition + Inscrits + Feed ══ #}
+<div class="row mb-3">
+
+    {# Actions rapides #}
+    <div class="col-lg-3 mb-3 mb-lg-0">
+        <div class="sk-card">
+            <div class="sk-card-head">
+                <div>
+                    <div class="sk-card-title">Actions rapides</div>
+                    <div class="sk-card-sub">Accès direct aux modules admin</div>
+                </div>
+            </div>
+
+            <a href="{{ path('app_user_index') }}" class="sk-action">
+                <div class="sk-action-ico" style="background:rgba(139,0,0,0.07);color:#8b0000;"><i class="mdi mdi-account-multiple"></i></div>
+                <span>Gérer les utilisateurs</span>
+                <span class="sk-action-arrow">›</span>
+            </a>
+            <a href="{{ path('admin_forum_publications') }}" class="sk-action">
+                <div class="sk-action-ico" style="background:rgba(21,128,61,0.07);color:#15803d;"><i class="mdi mdi-forum-outline"></i></div>
+                <span>Publications forum</span>
+                {% if publicationsEnAttente|length > 0 %}
+                    <span class="sk-action-badge">{{ publicationsEnAttente|length }}</span>
+                {% else %}
+                    <span class="sk-action-arrow">›</span>
+                {% endif %}
+            </a>
+            <a href="{{ path('admin_forum_commentaires') }}" class="sk-action">
+                <div class="sk-action-ico" style="background:rgba(8,145,178,0.07);color:#0891b2;"><i class="mdi mdi-comment-multiple-outline"></i></div>
+                <span>Commentaires</span>
+                <span class="sk-action-arrow">›</span>
+            </a>
+            <a href="{{ path('admin_club_index') }}" class="sk-action">
+                <div class="sk-action-ico" style="background:rgba(37,99,235,0.07);color:#2563eb;"><i class="mdi mdi-account-group"></i></div>
+                <span>Gérer les clubs</span>
+                <span class="sk-action-arrow">›</span>
+            </a>
+            <a href="{{ path('admin_adhesion_index') }}" class="sk-action">
+                <div class="sk-action-ico" style="background:rgba(37,99,235,0.07);color:#2563eb;"><i class="mdi mdi-account-plus-outline"></i></div>
+                <span>Demandes d'adhésion</span>
+                <span class="sk-action-arrow">›</span>
+            </a>
+            <a href="{{ path('admin_challenges') }}" class="sk-action">
+                <div class="sk-action-ico" style="background:rgba(217,119,6,0.07);color:#d97706;"><i class="mdi mdi-trophy-outline"></i></div>
+                <span>Challenges</span>
+                <span class="sk-action-arrow">›</span>
+            </a>
+            <a href="{{ path('admin_livrables') }}" class="sk-action">
+                <div class="sk-action-ico" style="background:rgba(217,119,6,0.07);color:#d97706;"><i class="mdi mdi-inbox-arrow-down"></i></div>
+                <span>Livrables à évaluer</span>
+                <span class="sk-action-arrow">›</span>
+            </a>
+            <a href="{{ path('admin_dashboard') }}" class="sk-action">
+                <div class="sk-action-ico" style="background:rgba(124,58,237,0.07);color:#7c3aed;"><i class="mdi mdi-book-open-page-variant"></i></div>
+                <span>Formations</span>
+                <span class="sk-action-arrow">›</span>
+            </a>
+        </div>
+    </div>
+
+    {# Répartition utilisateurs #}
+    <div class="col-lg-3 mb-3 mb-lg-0">
+        <div class="sk-card">
+            <div class="sk-card-head">
+                <div>
+                    <div class="sk-card-title">Répartition des rôles</div>
+                    <div class="sk-card-sub">Distribution des {{ totalUsers }} utilisateurs</div>
+                </div>
+            </div>
+
+            <canvas id="rolesChart" height="155" style="margin-bottom:18px;"></canvas>
+
+            <span class="sk-section-lbl">Instrument Sans par rôle</span>
+
+            <div class="sk-prog-row">
+                <div class="sk-prog-head">
+                    <span>Étudiants (membres)</span>
+                    <span>
+                        <a href="{{ path('app_admin_users_by_role', {role: 'etudiant'}) }}" style="color:#8b0000;font-size:0.67rem;text-decoration:none;">voir →</a>
+                    </span>
+                </div>
+                <div class="sk-prog-track"><div class="sk-prog-fill" style="width:65%;background:#8b0000;"></div></div>
+            </div>
+
+            <div class="sk-prog-row">
+                <div class="sk-prog-head">
+                    <span>Responsables club</span>
+                    <span>
+                        <a href="{{ path('app_admin_users_by_role', {role: 'responsable_club'}) }}" style="color:#2563eb;font-size:0.67rem;text-decoration:none;">voir →</a>
+                    </span>
+                </div>
+                <div class="sk-prog-track"><div class="sk-prog-fill" style="width:25%;background:#2563eb;"></div></div>
+            </div>
+
+            <div class="sk-prog-row">
+                <div class="sk-prog-head">
+                    <span>Administrateurs</span>
+                    <span>
+                        <a href="{{ path('app_admin_users_by_role', {role: 'admin'}) }}" style="color:#d97706;font-size:0.67rem;text-decoration:none;">voir →</a>
+                    </span>
+                </div>
+                <div class="sk-prog-track"><div class="sk-prog-fill" style="width:10%;background:#d97706;"></div></div>
+            </div>
+        </div>
+    </div>
+
+    {# Derniers inscrits #}
+    <div class="col-lg-3 mb-3 mb-lg-0">
+        <div class="sk-card">
+            <div class="sk-card-head">
+                <div>
+                    <div class="sk-card-title">Derniers inscrits</div>
+                    <div class="sk-card-sub">Nouveaux membres de la plateforme</div>
+                </div>
+                <a href="{{ path('app_user_index') }}" class="sk-card-link">Tous →</a>
+            </div>
+
+            {% for u in dernierUtilisateurs %}
+            <div class="sk-user-row">
+                {% if u.photo is defined and u.photo %}
+                    <img src="{{ asset('uploads/photos/' ~ u.photo) }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+                {% else %}
+                    <div class="sk-ava" style="width:36px;height:36px;font-size:0.78rem;">
+                        {{ u.prenom|slice(0,1)|upper }}{{ u.nom|slice(0,1)|upper }}
+                    </div>
+                {% endif %}
+                <div style="flex:1;min-width:0;">
+                    <div class="sk-user-name">{{ u.prenom }} {{ u.nom }}</div>
+                    <div class="sk-user-role">{{ u.role }}</div>
+                </div>
+                <a href="{{ path('app_admin_users_by_role', {role: u.role}) }}" class="sk-user-link">Voir</a>
+            </div>
+            {% else %}
+                <div style="text-align:center;padding:30px 0;color:#b08080;font-size:0.82rem;">Aucun utilisateur récent</div>
+            {% endfor %}
+
+            {# Mini stats supplémentaires #}
+            <div class="sk-summary-grid" style="margin-top:18px;">
+                <div class="sk-summary-tile">
+                    <div class="sk-summary-num" style="color:#d97706;">{{ totalChallenges }}</div>
+                    <div class="sk-summary-lbl">Challenges</div>
+                </div>
+                <div class="sk-summary-tile">
+                    <div class="sk-summary-num" style="color:#0891b2;">{{ totalCommentaires }}</div>
+                    <div class="sk-summary-lbl">Commentaires</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Activité récente #}
+    <div class="col-lg-3">
+        <div class="sk-card">
+            <div class="sk-card-head">
+                <div>
+                    <div class="sk-card-title">Activité récente</div>
+                    <div class="sk-card-sub">État actuel de la plateforme</div>
+                </div>
+            </div>
+
+            <div class="sk-feed-item">
+                <div class="sk-feed-dot" style="background:#dc2626;"></div>
+                <div>
+                    <div class="sk-feed-text">
+                        {% if publicationsEnAttente|length > 0 %}
+                            <strong>{{ publicationsEnAttente|length }}</strong> publication(s) en attente de validation
+                        {% else %}
+                            Toutes les publications ont été validées
+                        {% endif %}
+                    </div>
+                    <div class="sk-feed-meta">Forum · Modération requise</div>
+                </div>
+            </div>
+
+            <div class="sk-feed-item">
+                <div class="sk-feed-dot" style="background:#2563eb;"></div>
+                <div>
+                    <div class="sk-feed-text"><strong>{{ totalClubs }}</strong> club(s) actif(s) sur la plateforme</div>
+                    <div class="sk-feed-meta">Clubs · Gestion des adhésions</div>
+                </div>
+            </div>
+
+            <div class="sk-feed-item">
+                <div class="sk-feed-dot" style="background:#7c3aed;"></div>
+                <div>
+                    <div class="sk-feed-text"><strong>{{ totalFormations }}</strong> formation(s) disponible(s)</div>
+                    <div class="sk-feed-meta">Formations · Contenu pédagogique</div>
+                </div>
+            </div>
+
+            <div class="sk-feed-item">
+                <div class="sk-feed-dot" style="background:#d97706;"></div>
+                <div>
+                    <div class="sk-feed-text"><strong>{{ totalChallenges }}</strong> challenge(s) lancé(s)</div>
+                    <div class="sk-feed-meta">Challenges · Livrables à évaluer</div>
+                </div>
+            </div>
+
+            <div class="sk-feed-item">
+                <div class="sk-feed-dot" style="background:#15803d;"></div>
+                <div>
+                    <div class="sk-feed-text"><strong>{{ totalCommentaires }}</strong> commentaire(s) posté(s)</div>
+                    <div class="sk-feed-meta">Forum · Engagement membres</div>
+                </div>
+            </div>
+
+            <div class="sk-feed-item">
+                <div class="sk-feed-dot" style="background:#8b0000;"></div>
+                <div>
+                    <div class="sk-feed-text"><strong>{{ totalUsers }}</strong> membre(s) inscrit(s)</div>
+                    <div class="sk-feed-meta">Utilisateurs · Plateforme globale</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+</div>{# end sk-dashboard #}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const gridColor = 'rgba(0,0,0,0.04)';
+    const fontFam = 'Outfit';
+    const monoFam = 'JetBrains Mono';
+
+    // ── Activité mensuelle
+    new Chart(document.getElementById('overviewChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'],
+            datasets: [
+                {
+                    label: 'Publications soumises',
+                    data: {{ publicationsParMois|json_encode }},
+                    backgroundColor: '#8b0000',
+                    borderRadius: 6, borderSkipped: false,
+                },
+                {
+                    label: 'Nouveaux inscrits',
+                    data: {{ inscriptionsParMois|json_encode }},
+                    backgroundColor: 'rgba(139,0,0,0.13)',
+                    borderRadius: 6, borderSkipped: false,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top', labels: { font: { family: fontFam, size: 11, weight: '600' }, padding: 16 } }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { family: fontFam, size: 11 } } },
+                y: { beginAtZero: true, grid: { color: gridColor }, ticks: { font: { family: monoFam, size: 10 } } }
+            }
+        }
+    });
+
+    // ── Doughnut contenus
+    new Chart(document.getElementById('doughnutChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Utilisateurs','Publications','Challenges','Clubs','Formations'],
+            datasets: [{
+                data: [{{ totalUsers }}, {{ totalForums }}, {{ totalChallenges }}, {{ totalClubs }}, {{ totalFormations }}],
+                backgroundColor: ['#8b0000','#15803d','#d97706','#2563eb','#7c3aed'],
+                borderWidth: 3, borderColor: '#fff', hoverOffset: 6,
+            }]
+        },
+        options: {
+            responsive: true, cutout: '72%',
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 10, font: { family: fontFam, size: 10, weight: '600' } } }
+            }
+        }
+    });
+
+    // ── Répartition rôles (donut)
+    new Chart(document.getElementById('rolesChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Étudiants','Responsables','Admins'],
+            datasets: [{
+                data: [65, 25, 10],
+                backgroundColor: ['#8b0000','#2563eb','#d97706'],
+                borderWidth: 3, borderColor: '#fff', hoverOffset: 4,
+            }]
+        },
+        options: {
+            responsive: true, cutout: '68%',
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 10, font: { family: fontFam, size: 10, weight: '600' } } }
+            }
+        }
+    });
+
+    // ── Animate progress bars
+    document.querySelectorAll('.sk-prog-fill').forEach(bar => {
+        const w = bar.style.width;
+        bar.style.width = '0';
+        setTimeout(() => { bar.style.width = w; }, 400);
+    });
+
+});
+</script>
+
+{% endblock %}

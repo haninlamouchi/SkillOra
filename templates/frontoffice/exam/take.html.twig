@@ -1,0 +1,560 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}{{ exam.titre }} — SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<style>
+:root { --sk-red:#8b0000; --sk-ink:#180808; --sk-muted:#8a7070; --sk-border:rgba(139,0,0,0.09); --blue:#2563eb; }
+.sk-page { padding-top:70px; min-height:100vh; background:#f1f5f9; }
+.exam-topbar { position:sticky; top:0; z-index:100; background:#fff; border-bottom:1.5px solid var(--sk-border); padding:12px 0; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+.exam-topbar-inner { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; max-width:760px; margin:0 auto; padding:0 20px; }
+.exam-title { font-family:'Bricolage Grotesque',sans-serif; font-size:0.95rem; font-weight:800; color:var(--sk-ink); }
+.exam-meta { display:flex; align-items:center; gap:16px; }
+.meta-badge { display:inline-flex; align-items:center; gap:5px; font-family:'DM Sans',sans-serif; font-size:0.82rem; font-weight:700; }
+.mistakes-badge { color:#dc2626; }
+.progress-bar-wrap { max-width:760px; margin:0 auto; padding:10px 20px 0; }
+.progress-bar-track { background:#e2e8f0; border-radius:50px; height:6px; overflow:hidden; }
+.progress-bar-fill { background:linear-gradient(90deg,#2563eb,#3b82f6); height:100%; border-radius:50px; transition:width .4s ease; }
+/* Question card */
+.q-pane { max-width:760px; margin:28px auto 40px; padding:0 20px; }
+.q-card { background:#fff; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.08); padding:32px 36px; animation:qin .3s ease; }
+@keyframes qin { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+.q-num { font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:700; color:var(--sk-muted); text-transform:uppercase; letter-spacing:.07em; margin-bottom:10px; }
+.q-text { font-family:'Bricolage Grotesque',sans-serif; font-size:1.2rem; font-weight:800; color:var(--sk-ink); line-height:1.35; margin-bottom:24px; }
+.choice-btn { width:100%; text-align:left; padding:14px 18px; border:2px solid #e5e7eb; border-radius:12px; background:#fff; font-family:'DM Sans',sans-serif; font-size:0.92rem; font-weight:500; color:var(--sk-ink); cursor:pointer; transition:all .2s; margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+.choice-btn:hover:not(:disabled) { border-color:#2563eb; background:#eff6ff; }
+.choice-btn.selected { border-color:#2563eb; background:#eff6ff; color:#1d4ed8; font-weight:700; }
+.choice-btn.correct { border-color:#16a34a; background:#dcfce7; color:#15803d; font-weight:700; }
+.choice-btn.wrong   { border-color:#dc2626; background:#fee2e2; color:#dc2626; }
+.choice-letter { width:30px; height:30px; border-radius:8px; background:#f1f5f9; font-weight:800; font-size:0.82rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .2s; }
+.choice-btn.selected .choice-letter { background:#2563eb; color:#fff; }
+.choice-btn.correct  .choice-letter { background:#16a34a; color:#fff; }
+.choice-btn.wrong    .choice-letter { background:#dc2626; color:#fff; }
+.choice-btn.missed   { border-color:#16a34a; background:#dcfce7; color:#15803d; opacity:.8; }
+.choice-btn.missed   .choice-letter { background:#16a34a; color:#fff; }
+/* Multi-MCQ */
+.multi-choice-btn { display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:13px 18px; border:2px solid #e5e7eb; border-radius:12px; background:#fff; font-family:'DM Sans',sans-serif; font-size:0.92rem; font-weight:500; color:var(--sk-ink); cursor:pointer; transition:all .2s; margin-bottom:10px; }
+.multi-choice-btn:hover:not(.locked) { border-color:#2563eb; background:#eff6ff; }
+.multi-choice-btn.checked { border-color:#2563eb; background:#eff6ff; color:#1d4ed8; font-weight:700; }
+.multi-choice-btn.correct { border-color:#16a34a; background:#dcfce7; color:#15803d; font-weight:700; }
+.multi-choice-btn.wrong   { border-color:#dc2626; background:#fee2e2; color:#dc2626; }
+.multi-choice-btn.missed  { border-color:#16a34a; background:#dcfce7; opacity:.8; }
+.checkbox-box { width:22px; height:22px; border:2px solid #cbd5e1; border-radius:6px; background:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:0.75rem; transition:all .2s; }
+.multi-choice-btn.checked .checkbox-box { background:#2563eb; border-color:#2563eb; color:#fff; }
+.multi-choice-btn.correct .checkbox-box { background:#16a34a; border-color:#16a34a; color:#fff; }
+.multi-choice-btn.wrong   .checkbox-box { background:#dc2626; border-color:#dc2626; color:#fff; }
+.multi-choice-btn.missed  .checkbox-box { background:#16a34a; border-color:#16a34a; color:#fff; }
+/* Drag-drop sortable reorder */
+.sortable-container { border:2px dashed #cbd5e1; border-radius:14px; padding:14px; min-height:52px; background:#f8fafc; margin-bottom:14px; display:flex; flex-direction:column; gap:8px; transition:border-color .2s; }
+.sortable-container.dragover { border-color:#2563eb; background:#eff6ff; }
+.sortable-item { background:#fff; border:1.5px solid #e2e8f0; border-radius:9px; padding:11px 16px; font-family:'DM Sans',sans-serif; font-size:0.9rem; font-weight:600; color:var(--sk-ink); cursor:grab; display:flex; align-items:center; gap:10px; transition:all .15s; user-select:none; }
+.sortable-item:active { cursor:grabbing; opacity:.8; box-shadow:0 4px 14px rgba(0,0,0,0.12); }
+.sortable-item.dragging { opacity:.4; }
+.sortable-item.correct-pos { border-color:#16a34a; background:#dcfce7; color:#15803d; cursor:default; }
+.sortable-item.wrong-pos   { border-color:#dc2626; background:#fee2e2; color:#dc2626; cursor:default; }
+.drag-handle { color:#9ca3af; font-size:0.9rem; flex-shrink:0; }
+.drag-pos-num { width:24px; height:24px; border-radius:6px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; color:var(--sk-muted); flex-shrink:0; }
+/* Fill drag zone */
+.fill-input { width:100%; padding:14px 18px; border:2px solid #e5e7eb; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:0.95rem; outline:none; transition:border-color .2s; box-sizing:border-box; }
+.fill-input:focus { border-color:#2563eb; }
+.fill-input.correct { border-color:#16a34a; background:#dcfce7; }
+.fill-input.wrong   { border-color:#dc2626; background:#fee2e2; }
+.drag-zone { border:2px dashed #cbd5e1; border-radius:12px; padding:18px; min-height:60px; display:flex; align-items:center; justify-content:center; background:#f8fafc; margin-bottom:12px; font-family:'DM Sans',sans-serif; font-size:0.9rem; color:var(--sk-muted); transition:border-color .2s; }
+.drag-zone.dragover { border-color:#2563eb; background:#eff6ff; }
+.drag-zone.filled { border-style:solid; border-color:#2563eb; background:#f0f9ff; color:var(--sk-ink); font-weight:700; }
+.drag-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+.drag-chip { background:#e2e8f0; border-radius:8px; padding:7px 14px; font-family:'DM Sans',sans-serif; font-size:0.88rem; font-weight:600; cursor:grab; user-select:none; transition:all .15s; }
+.drag-chip:hover { background:#cbd5e1; }
+.drag-chip.used { opacity:.35; cursor:default; pointer-events:none; }
+/* Word-pick chip */
+.word-pick-chips { display:flex; flex-wrap:wrap; gap:10px; margin-top:4px; }
+.word-pick-chip { padding:10px 20px; border:2px solid #e5e7eb; border-radius:10px; background:#fff; font-family:'DM Sans',sans-serif; font-size:0.95rem; font-weight:600; cursor:pointer; transition:all .2s; user-select:none; }
+.word-pick-chip:hover:not(.locked) { border-color:#2563eb; background:#eff6ff; color:#1d4ed8; }
+.word-pick-chip.selected { border-color:#2563eb; background:#eff6ff; color:#1d4ed8; }
+.word-pick-chip.correct  { border-color:#16a34a; background:#dcfce7; color:#15803d; }
+.word-pick-chip.wrong    { border-color:#dc2626; background:#fee2e2; color:#dc2626; }
+.word-pick-chip.missed   { border-color:#16a34a; background:#dcfce7; color:#15803d; opacity:.7; }
+/* Word blank in sentence */
+.word-blank { display:inline-block; min-width:90px; padding:2px 10px; background:#f1f5f9; border-bottom:3px solid #2563eb; border-radius:4px; color:#2563eb; font-weight:800; font-style:italic; transition:all .3s; }
+.word-blank.blank-correct { background:#dcfce7; border-color:#16a34a; color:#15803d; }
+.word-blank.blank-wrong   { background:#fee2e2; border-color:#dc2626; color:#dc2626; }
+/* Hint */
+.q-hint { font-family:'DM Sans',sans-serif; font-size:0.80rem; color:#64748b; margin-bottom:14px; }
+.feedback-box { margin-top:16px; padding:14px 18px; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:0.9rem; display:none; }
+.fb-correct { background:#dcfce7; color:#15803d; border:1.5px solid #bbf7d0; }
+.fb-wrong   { background:#fee2e2; color:#dc2626; border:1.5px solid #fecaca; }
+.q-actions { display:flex; justify-content:space-between; align-items:center; margin-top:24px; flex-wrap:wrap; gap:10px; }
+.sk-btn { display:inline-flex; align-items:center; gap:7px; padding:11px 24px; border-radius:12px; font-weight:700; font-family:'DM Sans',sans-serif; font-size:0.92rem; border:none; cursor:pointer; transition:all .25s; text-decoration:none; }
+.sk-btn-blue { background:linear-gradient(135deg,#1d4ed8,#3b82f6); color:#fff; }
+.sk-btn-blue:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(59,130,246,.35); }
+.sk-btn-blue:disabled { opacity:.5; cursor:not-allowed; transform:none; box-shadow:none; }
+/* Stopped overlay */
+.stop-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:500; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+.stop-overlay.show { display:flex; }
+.stop-card { background:#fff; border-radius:22px; padding:48px 40px; max-width:480px; width:90%; text-align:center; box-shadow:0 24px 64px rgba(0,0,0,.2); }
+.stop-card .icon { font-size:4rem; margin-bottom:16px; }
+.stop-card h2 { font-family:'Bricolage Grotesque',sans-serif; font-size:1.5rem; font-weight:800; color:var(--sk-ink); margin:0 0 10px; }
+.stop-card p { font-family:'DM Sans',sans-serif; color:var(--sk-muted); font-size:0.92rem; margin:0 0 24px; }
+</style>
+{% endblock %}
+
+{% block body %}
+{# Pass data as JSON #}
+<script>
+const EXAM_DATA = {{ questionsData|json_encode|raw }};
+const MAX_MISTAKES = {{ maxMistakes }};
+const SUBMIT_URL = '{{ path('front_exam_submit', {formationId: formation.id, attemptId: attempt.id}) }}';
+const CSRF = '{{ csrf_token('exam_submit_' ~ attempt.id) }}';
+</script>
+
+<div class="sk-page">
+  {# Sticky top bar #}
+  <div class="exam-topbar">
+    <div class="exam-topbar-inner">
+      <div class="exam-title">🎓 {{ exam.titre }}</div>
+      <div class="exam-meta">
+        <span class="meta-badge" id="qCounter">Question 1 / {{ questionsData|length }}</span>
+        <span class="meta-badge mistakes-badge" id="mistakeBadge">⛔ 0 / {{ maxMistakes }} erreurs</span>
+      </div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  {# Question pane #}
+  <div class="q-pane">
+    <div class="q-card" id="questionCard">
+      <div class="q-num" id="qNum">Question 1 / {{ questionsData|length }}</div>
+      <div class="q-text" id="qText">…</div>
+      <div class="q-hint" id="qHint"></div>
+      <div id="qBody"></div>
+      <div class="feedback-box" id="feedbackBox"></div>
+      <div class="q-actions">
+        <span style="font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--sk-muted);" id="pointsLabel"></span>
+        <button class="sk-btn sk-btn-blue" id="confirmBtn" onclick="confirmAnswer()" disabled>✓ Confirmer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Stopped overlay #}
+<div class="stop-overlay" id="stopOverlay">
+  <div class="stop-card">
+    <div class="icon" id="overlayIcon">⛔</div>
+    <h2 id="overlayTitle">Examen arrêté</h2>
+    <p id="overlayMsg"></p>
+    <a id="overlayLink" href="#" class="sk-btn sk-btn-blue">Voir les résultats</a>
+  </div>
+</div>
+
+<script>
+let currentIdx   = 0;
+let mistakeCount = 0;
+let answered     = false;
+let allAnswers   = {}; // questionId => given answer
+let forceStopped = false;
+const letters    = ['A','B','C','D','E','F'];
+
+function renderQuestion() {
+  if (currentIdx >= EXAM_DATA.length) {
+    finishExam(false);
+    return;
+  }
+  answered = false;
+  const q  = EXAM_DATA[currentIdx];
+
+  document.getElementById('qNum').textContent     = `Question ${currentIdx+1} / ${EXAM_DATA.length}`;
+  document.getElementById('qCounter').textContent = `Question ${currentIdx+1} / ${EXAM_DATA.length}`;
+  document.getElementById('qText').textContent    = q.text;
+  document.getElementById('pointsLabel').textContent = `${q.points} point${q.points>1?'s':''}`;
+  document.getElementById('feedbackBox').style.display = 'none';
+  document.getElementById('feedbackBox').className = 'feedback-box';
+  document.getElementById('confirmBtn').disabled = true;
+
+  // Progress
+  const pct = Math.round((currentIdx / EXAM_DATA.length) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+
+  const body = document.getElementById('qBody');
+  const hint = document.getElementById('qHint');
+  body.innerHTML = '';
+
+  if (q.type === 'mcq') {
+    hint.textContent = 'Sélectionnez une réponse.';
+    q.choices.forEach((c, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.dataset.choiceId = c.id;
+      btn.innerHTML = `<span class="choice-letter">${letters[i]||i+1}</span> ${escHtml(c.text)}`;
+      btn.onclick = () => { if (!answered) selectChoice(btn); };
+      body.appendChild(btn);
+    });
+
+  } else if (q.type === 'multi_mcq') {
+    hint.textContent = 'Sélectionnez toutes les bonnes réponses (plusieurs possibles).';
+    q.choices.forEach((c, i) => {
+      const btn = document.createElement('div');
+      btn.className = 'multi-choice-btn';
+      btn.dataset.choiceId = c.id;
+      btn.dataset.checked  = '0';
+      btn.innerHTML = `<span class="checkbox-box"></span><span class="choice-letter">${letters[i]||i+1}</span> ${escHtml(c.text)}`;
+      btn.onclick = () => { if (!answered) toggleMultiChoice(btn); };
+      body.appendChild(btn);
+    });
+
+  } else if (q.type === 'fill') {
+    hint.textContent = 'Glissez la réponse vers la zone OU tapez-la directement.';
+    const words = shuffleArray((q.correct_answer||'').split(/\s+/).concat(generateDistractors(q.correct_answer||'')));
+    const zone  = document.createElement('div');
+    zone.className = 'drag-zone';
+    zone.id = 'dropZone';
+    zone.textContent = 'Glissez la réponse ici…';
+
+    const chips = document.createElement('div');
+    chips.className = 'drag-chips';
+    words.forEach(w => {
+      const chip = document.createElement('div');
+      chip.className = 'drag-chip';
+      chip.textContent = w;
+      chip.draggable = true;
+      chip.dataset.word = w;
+      chip.ondragstart = e => { e.dataTransfer.setData('text', w); };
+      chip.onclick = () => {
+        if (answered) return;
+        zone.textContent = w;
+        zone.classList.add('filled');
+        inp.value = w;
+        document.querySelectorAll('.drag-chip').forEach(c => c.classList.remove('used'));
+        chip.classList.add('used');
+        document.getElementById('confirmBtn').disabled = false;
+      };
+      chips.appendChild(chip);
+    });
+
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'fill-input';
+    inp.placeholder = 'Ou tapez votre réponse…';
+    inp.id = 'fillInput';
+    inp.oninput = () => { document.getElementById('confirmBtn').disabled = !inp.value.trim(); };
+
+    zone.ondragover  = e => { e.preventDefault(); zone.classList.add('dragover'); };
+    zone.ondragleave = () => zone.classList.remove('dragover');
+    zone.ondrop      = e => {
+      e.preventDefault();
+      const val = e.dataTransfer.getData('text');
+      zone.textContent = val;
+      zone.classList.remove('dragover');
+      zone.classList.add('filled');
+      inp.value = val;
+      document.querySelectorAll('.drag-chip').forEach(c => c.classList.remove('used'));
+      document.querySelectorAll('.drag-chip').forEach(c => { if (c.dataset.word === val) c.classList.add('used'); });
+      document.getElementById('confirmBtn').disabled = false;
+    };
+
+    body.appendChild(zone);
+    body.appendChild(chips);
+    body.appendChild(inp);
+
+  } else if (q.type === 'word_pick') {
+    hint.textContent = 'Cliquez sur le bon mot pour compléter la phrase.';
+    // Replace ____ in question text with a styled blank span
+    const qTextEl = document.getElementById('qText');
+    const parts = q.text.split('____');
+    qTextEl.innerHTML = '';
+    parts.forEach((part, i) => {
+      qTextEl.appendChild(document.createTextNode(part));
+      if (i < parts.length - 1) {
+        const blank = document.createElement('span');
+        blank.className = 'word-blank';
+        blank.id = 'wordBlank';
+        blank.textContent = '________';
+        qTextEl.appendChild(blank);
+      }
+    });
+    // Word chips (choices are shuffled by server)
+    const chipsWrap = document.createElement('div');
+    chipsWrap.className = 'word-pick-chips';
+    q.choices.forEach(c => {
+      const chip = document.createElement('div');
+      chip.className = 'word-pick-chip';
+      chip.dataset.choiceId = c.id;
+      chip.dataset.text = c.text;
+      chip.textContent = c.text;
+      chip.onclick = () => { if (!answered) selectWordPickChip(chip); };
+      chipsWrap.appendChild(chip);
+    });
+    body.appendChild(chipsWrap);
+
+  } else if (q.type === 'drag_drop') {
+    hint.textContent = 'Faites glisser les éléments pour les mettre dans le bon ordre.';
+    const container = document.createElement('div');
+    container.className = 'sortable-container';
+    container.id = 'sortableList';
+    // choices are already shuffled by the server
+    q.choices.forEach((c, i) => {
+      const item = document.createElement('div');
+      item.className = 'sortable-item';
+      item.dataset.text = c.text;
+      item.draggable = true;
+      item.innerHTML = `<span class="drag-handle">⠿</span><span class="drag-pos-num">${i+1}</span> ${escHtml(c.text)}`;
+      container.appendChild(item);
+    });
+    initSortable(container);
+    body.appendChild(container);
+    document.getElementById('confirmBtn').disabled = false; // always ready
+  }
+}
+
+function selectChoice(btn) {
+  if (answered) return;
+  document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('confirmBtn').disabled = false;
+}
+
+function selectWordPickChip(chip) {
+  if (answered) return;
+  document.querySelectorAll('.word-pick-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+  const blank = document.getElementById('wordBlank');
+  if (blank) { blank.textContent = chip.dataset.text; }
+  document.getElementById('confirmBtn').disabled = false;
+}
+
+function toggleMultiChoice(btn) {  const isChecked = btn.dataset.checked === '1';
+  btn.dataset.checked = isChecked ? '0' : '1';
+  btn.classList.toggle('checked', !isChecked);
+  btn.querySelector('.checkbox-box').textContent = isChecked ? '' : '✓';
+  const anyChecked = document.querySelectorAll('.multi-choice-btn[data-checked="1"]').length > 0;
+  document.getElementById('confirmBtn').disabled = !anyChecked;
+}
+
+let dragSrc = null;
+function initSortable(container) {
+  container.addEventListener('dragstart', e => {
+    const item = e.target.closest('.sortable-item');
+    if (!item) return;
+    dragSrc = item;
+    e.dataTransfer.effectAllowed = 'move';
+    setTimeout(() => item.classList.add('dragging'), 0);
+  });
+  container.addEventListener('dragend', e => {
+    const item = e.target.closest('.sortable-item');
+    if (item) item.classList.remove('dragging');
+    dragSrc = null;
+    reindexPositions(container);
+  });
+  container.addEventListener('dragover', e => {
+    e.preventDefault();
+    const target = e.target.closest('.sortable-item');
+    if (!target || target === dragSrc) return;
+    const rect  = target.getBoundingClientRect();
+    const after = e.clientY > rect.top + rect.height / 2;
+    if (after) target.after(dragSrc);
+    else        target.before(dragSrc);
+  });
+}
+
+function reindexPositions(container) {
+  container.querySelectorAll('.sortable-item').forEach((item, i) => {
+    const posEl = item.querySelector('.drag-pos-num');
+    if (posEl) posEl.textContent = i + 1;
+  });
+}
+
+function confirmAnswer() {
+  if (answered) return;
+  answered = true;
+  document.getElementById('confirmBtn').disabled = true;
+
+  const q       = EXAM_DATA[currentIdx];
+  let givenAns  = null;
+  let isCorrect = null; // null means determined server-side
+
+  if (q.type === 'mcq') {
+    const selected = document.querySelector('.choice-btn.selected');
+    if (!selected) { answered = false; return; }
+    givenAns  = parseInt(selected.dataset.choiceId);
+    isCorrect = givenAns === q.correct_choice_id;
+    document.querySelectorAll('.choice-btn').forEach(b => {
+      b.disabled = true;
+      const cid = parseInt(b.dataset.choiceId);
+      if (cid === q.correct_choice_id) b.classList.add('correct');
+      else if (b.classList.contains('selected')) b.classList.add('wrong');
+      b.classList.remove('selected');
+    });
+
+  } else if (q.type === 'multi_mcq') {
+    const checked = Array.from(document.querySelectorAll('.multi-choice-btn[data-checked="1"]'));
+    if (!checked.length) { answered = false; return; }
+    givenAns  = checked.map(b => parseInt(b.dataset.choiceId));
+    const gSet = new Set(givenAns);
+    const cSet = new Set(q.correct_choice_ids || []);
+    isCorrect = gSet.size === cSet.size && [...gSet].every(v => cSet.has(v));
+    document.querySelectorAll('.multi-choice-btn').forEach(b => {
+      b.classList.add('locked');
+      const cid   = parseInt(b.dataset.choiceId);
+      const chk   = b.dataset.checked === '1';
+      const right = cSet.has(cid);
+      if (chk && right) b.classList.add('correct');
+      else if (chk)     b.classList.add('wrong');
+      else if (right)   b.classList.add('missed');
+    });
+
+  } else if (q.type === 'fill') {
+    const inp = document.getElementById('fillInput');
+    givenAns  = inp ? inp.value.trim() : (document.getElementById('dropZone')?.textContent || '');
+    isCorrect = (givenAns||'').toLowerCase() === (q.correct_answer||'').toLowerCase().trim();
+    if (inp) { inp.disabled = true; inp.className = 'fill-input ' + (isCorrect ? 'correct' : 'wrong'); }
+
+  } else if (q.type === 'word_pick') {
+    const selected = document.querySelector('.word-pick-chip.selected');
+    if (!selected) { answered = false; return; }
+    givenAns  = parseInt(selected.dataset.choiceId);
+    isCorrect = givenAns === q.correct_choice_id;
+    // Update blank visual
+    const blank = document.getElementById('wordBlank');
+    if (blank) blank.className = 'word-blank ' + (isCorrect ? 'blank-correct' : 'blank-wrong');
+    // Reveal all chips
+    document.querySelectorAll('.word-pick-chip').forEach(ch => {
+      ch.classList.add('locked');
+      const cid = parseInt(ch.dataset.choiceId);
+      if (cid === q.correct_choice_id) ch.classList.add('correct');
+      else if (ch.classList.contains('selected')) ch.classList.add('wrong');
+      ch.classList.remove('selected');
+    });
+
+  } else if (q.type === 'drag_drop') {
+    const container = document.getElementById('sortableList');
+    const items = Array.from(container.querySelectorAll('.sortable-item'));
+    givenAns = items.map(i => i.dataset.text);
+    items.forEach(i => { i.draggable = false; i.style.cursor = 'default'; });
+    isCorrect = null; // graded server-side
+  }
+
+  allAnswers[q.id] = givenAns;
+
+  if (isCorrect === null) {
+    // drag_drop: no client feedback, just advance
+    scheduleNext(true);
+    return;
+  }
+
+  showFeedback(isCorrect, q);
+  if (!isCorrect) {
+    mistakeCount++;
+    updateMistakeBadge();
+    if (mistakeCount >= MAX_MISTAKES) {
+      forceStopped = true;
+      finishExam(true);
+      return;
+    }
+  }
+  scheduleNext(isCorrect);
+}
+
+function showFeedback(correct, q) {
+  const fb = document.getElementById('feedbackBox');
+  fb.style.display = 'block';
+  if (correct) {
+    fb.className = 'feedback-box fb-correct';
+    fb.textContent = '✅ Bonne réponse !';
+  } else {
+    fb.className = 'feedback-box fb-wrong';
+    if (q.type === 'fill') {
+      fb.textContent = `❌ Mauvaise réponse. Réponse attendue : "${q.correct_answer}"`;
+    } else if (q.type === 'multi_mcq') {
+      fb.textContent = '❌ Réponse incorrecte — les bonnes réponses sont surlignées en vert.';
+    } else if (q.type === 'word_pick') {
+      const correctChip = q.choices.find(c => c.id === q.correct_choice_id);
+      fb.textContent = `❌ Mauvaise réponse. Le mot correct est : "${correctChip ? correctChip.text : '?'}"` ;
+    } else {
+      fb.textContent = '❌ Mauvaise réponse !';
+    }
+  }
+}
+
+function updateMistakeBadge() {
+  document.getElementById('mistakeBadge').textContent = `⛔ ${mistakeCount} / ${MAX_MISTAKES} erreurs`;
+  document.getElementById('mistakeBadge').style.color = mistakeCount >= MAX_MISTAKES ? '#b91c1c' : '#dc2626';
+}
+
+function scheduleNext() {
+  setTimeout(() => {
+    currentIdx++;
+    if (currentIdx >= EXAM_DATA.length) {
+      finishExam(false);
+    } else {
+      document.getElementById('questionCard').style.animation = 'none';
+      requestAnimationFrame(() => {
+        document.getElementById('questionCard').style.animation = '';
+        renderQuestion();
+      });
+    }
+  }, 1400);
+}
+
+async function finishExam(stopped) {
+  forceStopped = stopped;
+  const payload = { answers: allAnswers, force_stopped: stopped };
+  try {
+    const resp = await fetch(SUBMIT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await resp.json();
+    if (data.redirect) {
+      showOverlay(data.status, data.percentage, data.mistakes, data.redirect);
+    }
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+function showOverlay(status, pct, mistakes, redirectUrl) {
+  const overlay = document.getElementById('stopOverlay');
+  overlay.classList.add('show');
+  if (status === 'stopped') {
+    document.getElementById('overlayIcon').textContent  = '⛔';
+    document.getElementById('overlayTitle').textContent = 'Examen arrêté !';
+    document.getElementById('overlayMsg').textContent   = `Vous avez dépassé le nombre d'erreurs autorisé (${MAX_MISTAKES}).`;
+  } else if (status === 'passed') {
+    document.getElementById('overlayIcon').textContent  = '🏆';
+    document.getElementById('overlayTitle').textContent = 'Félicitations !';
+    document.getElementById('overlayMsg').textContent   = `Vous avez réussi l'examen avec ${pct}%.`;
+  } else {
+    document.getElementById('overlayIcon').textContent  = '😔';
+    document.getElementById('overlayTitle').textContent = 'Examen échoué';
+    document.getElementById('overlayMsg').textContent   = `Score obtenu : ${pct}%. Vous pouvez réessayer.`;
+  }
+  document.getElementById('overlayLink').href = redirectUrl;
+}
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function generateDistractors(answer) {
+  // Simple distractors for drag-drop
+  const words  = ['non', 'autre', 'faux', 'jamais', 'toujours'];
+  const sample = words.sort(() => Math.random()-.5).slice(0,2);
+  return sample;
+}
+
+function escHtml(str) {
+  const d = document.createElement('div');
+  d.appendChild(document.createTextNode(str));
+  return d.innerHTML;
+}
+
+// Initialize
+renderQuestion();
+</script>
+{% endblock %}

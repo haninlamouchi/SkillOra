@@ -1,0 +1,102 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}{{ club.nom }} — SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --sk-red:#8b0000; --sk-red-dark:#4a0000; --sk-red-light:#c0392b; --sk-ink:#180808; --sk-muted:#8a7070; --sk-border:rgba(139,0,0,0.09); }
+.sk-page { padding-top:70px; }
+.sk-hero { position:relative; background:linear-gradient(135deg,#3d0000 0%,#8b0000 48%,#c23030 100%); margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%); padding:60px 20px 52px; text-align:center; overflow:hidden; isolation:isolate; }
+.sk-hero::before { content:''; position:absolute; inset:0; z-index:0; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E"); background-size:180px; opacity:0.5; }
+.sk-hero-ring-l,.sk-hero-ring-r { position:absolute; z-index:0; border-radius:50%; border:72px solid rgba(255,255,255,0.035); }
+.sk-hero-ring-l { width:520px; height:520px; top:-210px; left:-160px; }
+.sk-hero-ring-r { width:380px; height:380px; bottom:-160px; right:-100px; border-width:50px; }
+.sk-hero-inner { position:relative; z-index:1; }
+.sk-hero-logo { width:88px; height:88px; border-radius:18px; background:rgba(255,255,255,0.12); border:1.5px solid rgba(255,255,255,0.18); display:flex; align-items:center; justify-content:center; font-size:2.4rem; overflow:hidden; margin:0 auto 18px; }
+.sk-hero-logo img { width:100%; height:100%; object-fit:cover; }
+.sk-hero h1 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(1.8rem,4vw,2.6rem); font-weight:800; letter-spacing:-0.03em; color:#fff; margin:0 0 8px; line-height:1.1; }
+.sk-hero p { font-family:'DM Sans',sans-serif; color:rgba(255,255,255,0.60); font-size:0.97rem; margin:0 auto; max-width:500px; line-height:1.6; }
+
+.sk-content { padding:36px 0 56px; }
+
+/* Meta bar */
+.sk-meta-bar { display:grid; grid-template-columns:repeat(3,1fr); gap:0; background:#fff; border-radius:16px; border:1.5px solid var(--sk-border); box-shadow:0 2px 10px rgba(0,0,0,0.04); overflow:hidden; margin-bottom:20px; animation:sk-up 0.4s 0.1s ease both; }
+.sk-meta-item { padding:18px 22px; display:flex; align-items:center; gap:12px; border-right:1.5px solid var(--sk-border); }
+.sk-meta-item:last-child { border-right:none; }
+.sk-meta-icon { width:38px; height:38px; border-radius:10px; background:rgba(139,0,0,0.07); color:var(--sk-red); display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+.sk-meta-label { font-family:'DM Sans',sans-serif; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--sk-muted); display:block; margin-bottom:2px; }
+.sk-meta-val { font-family:'DM Sans',sans-serif; font-size:0.87rem; font-weight:700; color:var(--sk-ink); }
+.sk-meta-val a { color:var(--sk-red); text-decoration:none; }
+.sk-meta-val a:hover { text-decoration:underline; }
+
+/* Actions card */
+.sk-actions-card { background:#fff; border-radius:16px; padding:26px 28px; border:1.5px solid var(--sk-border); box-shadow:0 2px 10px rgba(0,0,0,0.04); animation:sk-up 0.4s 0.15s ease both; }
+.sk-actions-title { font-family:'DM Sans',sans-serif; font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--sk-muted); margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+.sk-actions-title::after { content:''; flex:1; height:1px; background:var(--sk-border); }
+.sk-actions-row { display:flex; gap:10px; flex-wrap:wrap; }
+
+.sk-btn { display:inline-flex; align-items:center; gap:7px; padding:10px 20px; border-radius:10px; font-weight:700; font-family:'DM Sans',sans-serif; font-size:0.85rem; border:none; cursor:pointer; transition:all 0.25s; text-decoration:none; }
+.sk-btn-primary { background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); color:#fff; }
+.sk-btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(139,0,0,0.3); color:#fff; text-decoration:none; }
+.sk-btn-ghost { background:#f3f4f6; color:#374151; border:1.5px solid #e5e7eb; }
+.sk-btn-ghost:hover { border-color:#9ca3af; color:#111; text-decoration:none; }
+
+@keyframes sk-up { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+.sk-hero { animation:sk-up 0.5s cubic-bezier(.22,.68,0,1) both; }
+@media(max-width:680px){ .sk-meta-bar{grid-template-columns:1fr;} .sk-meta-item{border-right:none;border-bottom:1.5px solid var(--sk-border);} .sk-meta-item:last-child{border-bottom:none;} }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+  <div class="sk-hero">
+    <div class="sk-hero-ring-l"></div>
+    <div class="sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <div class="sk-hero-logo">
+        {% if club.logo %}
+          <img src="{{ vich_uploader_asset(club, 'logoFile') }}" alt="{{ club.nom }}">
+        {% else %}🏛️{% endif %}
+      </div>
+      <h1>{{ club.nom }}</h1>
+      {% if club.description %}<p>{{ club.description }}</p>{% endif %}
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sk-content">
+
+      <!-- Meta bar -->
+      <div class="sk-meta-bar">
+        {% if club.dateCreation %}
+        <div class="sk-meta-item">
+          <div class="sk-meta-icon">📅</div>
+          <div><span class="sk-meta-label">Création</span><span class="sk-meta-val">{{ club.dateCreation|date('d/m/Y') }}</span></div>
+        </div>
+        {% endif %}
+        {% if club.siteWeb %}
+        <div class="sk-meta-item">
+          <div class="sk-meta-icon">🌐</div>
+          <div><span class="sk-meta-label">Site web</span><span class="sk-meta-val"><a href="{{ club.siteWeb }}" target="_blank">{{ club.siteWeb }}</a></span></div>
+        </div>
+        {% endif %}
+        <div class="sk-meta-item">
+          <div class="sk-meta-icon">👤</div>
+          <div><span class="sk-meta-label">Responsable</span><span class="sk-meta-val">{{ club.responsable ? club.responsable.prenom ~ ' ' ~ club.responsable.nom : '—' }}</span></div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="sk-actions-card">
+        <div class="sk-actions-title">Actions</div>
+        <div class="sk-actions-row">
+          <a href="{{ path('club_edit', {'id': club.id}) }}" class="sk-btn sk-btn-primary">✏️ Modifier le club</a>
+          <a href="{{ path('responsable_adhesion_index') }}" class="sk-btn sk-btn-ghost">👥 Gérer les adhésions</a>
+          <a href="{{ path('club_members', {'id': club.id}) }}" class="sk-btn sk-btn-ghost">👫 Voir les membres</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

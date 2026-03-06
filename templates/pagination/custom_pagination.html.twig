@@ -1,0 +1,83 @@
+{# Pagination personnalisée moderne #}
+{% if pageCount > 1 %}
+<nav aria-label="Pagination" style="margin: 2rem 0;">
+    <ul style="display: flex; justify-content: center; gap: 0.5rem; list-style: none; padding: 0; margin: 0;">
+        
+        {# Bouton Précédent #}
+        {% if previous is defined %}
+            <li>
+                <a href="{{ path(route, query|merge({(pageParameterName): previous})) }}" 
+                   style="display: flex; align-items: center; justify-content: center; min-width: 45px; height: 45px; padding: 0.5rem 1.5rem; background: white; border: 2px solid #e2e8f0; border-radius: 10px; color: #4a5568; text-decoration: none; font-weight: 700; transition: all 0.3s;">
+                    ‹ Préc
+                </a>
+            </li>
+        {% else %}
+            <li>
+                <span style="display: flex; align-items: center; justify-content: center; min-width: 45px; height: 45px; padding: 0.5rem 1.5rem; background: #f7fafc; border: 2px solid #e2e8f0; border-radius: 10px; color: #cbd5e0; font-weight: 700; cursor: not-allowed; opacity: 0.5;">
+                    ‹ Préc
+                </span>
+            </li>
+        {% endif %}
+
+        {# Pages #}
+        {% if startPage > 1 %}
+            <li>
+                <a href="{{ path(route, query|merge({(pageParameterName): 1})) }}" 
+                   style="display: flex; align-items: center; justify-content: center; min-width: 45px; height: 45px; padding: 0.5rem 1rem; background: white; border: 2px solid #e2e8f0; border-radius: 10px; color: #4a5568; text-decoration: none; font-weight: 600; transition: all 0.3s;">
+                    1
+                </a>
+            </li>
+            {% if startPage > 2 %}
+                <li style="display: flex; align-items: center; padding: 0 0.5rem; color: #718096;">...</li>
+            {% endif %}
+        {% endif %}
+
+        {% for page in pagesInRange %}
+            {% if page == current %}
+                <li>
+                    <span style="display: flex; align-items: center; justify-content: center; min-width: 45px; height: 45px; padding: 0.5rem 1rem; background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%); border: 2px solid #e53e3e; border-radius: 10px; color: white; font-weight: 700; box-shadow: 0 4px 12px rgba(229, 62, 62, 0.4);">
+                        {{ page }}
+                    </span>
+                </li>
+            {% else %}
+                <li>
+                    <a href="{{ path(route, query|merge({(pageParameterName): page})) }}" 
+                       style="display: flex; align-items: center; justify-content: center; min-width: 45px; height: 45px; padding: 0.5rem 1rem; background: white; border: 2px solid #e2e8f0; border-radius: 10px; color: #4a5568; text-decoration: none; font-weight: 600; transition: all 0.3s;"
+                       onmouseover="this.style.background='linear-gradient(135deg, #e53e3e 0%, #c53030 100%)'; this.style.borderColor='#e53e3e'; this.style.color='white'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 16px rgba(229, 62, 62, 0.4)';"
+                       onmouseout="this.style.background='white'; this.style.borderColor='#e2e8f0'; this.style.color='#4a5568'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                        {{ page }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if endPage < pageCount %}
+            {% if endPage < pageCount - 1 %}
+                <li style="display: flex; align-items: center; padding: 0 0.5rem; color: #718096;">...</li>
+            {% endif %}
+            <li>
+                <a href="{{ path(route, query|merge({(pageParameterName): pageCount})) }}" 
+                   style="display: flex; align-items: center; justify-content: center; min-width: 45px; height: 45px; padding: 0.5rem 1rem; background: white; border: 2px solid #e2e8f0; border-radius: 10px; color: #4a5568; text-decoration: none; font-weight: 600; transition: all 0.3s;">
+                    {{ pageCount }}
+                </a>
+            </li>
+        {% endif %}
+
+        {# Bouton Suivant #}
+        {% if next is defined %}
+            <li>
+                <a href="{{ path(route, query|merge({(pageParameterName): next})) }}" 
+                   style="display: flex; align-items: center; justify-content: center; min-width: 45px; height: 45px; padding: 0.5rem 1.5rem; background: white; border: 2px solid #e2e8f0; border-radius: 10px; color: #4a5568; text-decoration: none; font-weight: 700; transition: all 0.3s;">
+                    Suiv ›
+                </a>
+            </li>
+        {% else %}
+            <li>
+                <span style="display: flex; align-items: center; justify-content: center; min-width: 45px; height: 45px; padding: 0.5rem 1.5rem; background: #f7fafc; border: 2px solid #e2e8f0; border-radius: 10px; color: #cbd5e0; font-weight: 700; cursor: not-allowed; opacity: 0.5;">
+                    Suiv ›
+                </span>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}

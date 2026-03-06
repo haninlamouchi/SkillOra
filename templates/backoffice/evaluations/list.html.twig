@@ -1,0 +1,118 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}Évaluations — Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h6>📊 Toutes les Évaluations</h6>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    
+                    {# Filtres #}
+                    <div class="px-4 py-3">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-5">
+                                <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Rechercher un challenge ou groupe...">
+                            </div>
+                            <div class="col-md-3">
+                                <select name="statut" class="form-select">
+                                    <option value="">Tous les statuts</option>
+                                    <option value="valide" {% if filterStatut=='valide' %}selected{% endif %}>✅ Validés</option>
+                                    <option value="refuse" {% if filterStatut=='refuse' %}selected{% endif %}>❌ Refusés</option>
+                                    <option value="en_attente" {% if filterStatut=='en_attente' %}selected{% endif %}>⏳ En attente</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary">Filtrer</button>
+                                <a href="{{ path('app_admin_evaluations') }}" class="btn btn-outline-secondary">Réinitialiser</a>
+                            </div>
+                        </form>
+                    </div>
+
+                    {% if livrables is empty %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Aucune évaluation trouvée</p>
+                        </div>
+                    {% else %}
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Challenge</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Groupe</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Soumis le</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Évalué le</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Note</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Statut</th>
+                                        <th class="text-secondary opacity-7">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for livrable in livrables %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex px-2 py-1">
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="mb-0 text-sm">{{ livrable.challenge.titre }}</h6>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ livrable.groupe.nomGroupe }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ livrable.dateSoumission|date('d/m/Y H:i') }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">
+                                                {% if livrable.dateEvaluation %}
+                                                    {{ livrable.dateEvaluation|date('d/m/Y H:i') }}
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </p>
+                                        </td>
+                                        <td class="text-center">
+                                            {% if livrable.noteGlobale %}
+                                                <span class="badge badge-sm bg-gradient-success">{{ livrable.noteGlobale }}/20</span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if livrable.statut == 'valide' %}
+                                                <span class="badge badge-sm bg-gradient-success">✅ Validé</span>
+                                            {% elseif livrable.statut == 'refuse' %}
+                                                <span class="badge badge-sm bg-gradient-danger">❌ Refusé</span>
+                                            {% else %}
+                                                <span class="badge badge-sm bg-gradient-warning">⏳ En attente</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if livrable.statut == 'valide' %}
+                                                <a href="{{ path('app_admin_evaluation_detail', {id: livrable.id}) }}" class="btn btn-link text-primary text-gradient px-3 mb-0">
+                                                    <i class="fas fa-eye text-dark me-2"></i>Voir
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="px-4 py-3">
+                            {{ knp_pagination_render(livrables) }}
+                            <p class="text-muted text-sm">{{ livrables.getTotalItemCount }} évaluation(s)</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

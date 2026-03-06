@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SkillOra{% endblock %}</title>
+
+    <link rel="stylesheet" href="{{ asset('assets/frontoffice/vendor/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/fontawesome.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/templatemo-scholar.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/owl.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/frontoffice/css/animate.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+    /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            list-style: none;
+            padding: 0;
+            margin: 2rem 0;
+        }
+
+        .pagination li { display: inline-block; }
+
+        .pagination li a,
+        .pagination li span,
+        .pagination .page-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 45px;
+            height: 45px;
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            color: #4a5568;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .pagination li a:hover,
+        .pagination .page-link:hover {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            border-color: #e53e3e;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(229, 62, 62, 0.4);
+        }
+
+        .pagination li.active span,
+        .pagination li.active .page-link,
+        .pagination .current {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            border-color: #e53e3e;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+        }
+
+        .pagination li.disabled span,
+        .pagination li.disabled .page-link {
+            background: #f7fafc;
+            border-color: #e2e8f0;
+            color: #cbd5e0;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .pagination li.previous a,
+        .pagination li.next a {
+            font-weight: 700;
+            padding: 0.5rem 1.5rem;
+        }
+
+        .pagination .page-item { display: inline-block; }
+
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            border-color: #e53e3e;
+            color: white;
+        }
+
+        /* ============================================================
+           SKILLORA — Design System
+           ============================================================ */
+        :root {
+            --red: #e74c3c; --red-dark: #c0392b; --red-light: #fdedec;
+            --red-glow: rgba(231, 76, 60, 0.15);
+            --darkred: #8b0000; --darkred-light: #a81c1c; --darkred-deep: #5a0000;
+            --black: #111111; --grey-dark: #2c2c2c; --grey: #6b6b6b;
+            --grey-light: #f7f8fa; --grey-border: #e5e7eb; --white: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 14px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.1);
+            --shadow-red: 0 4px 20px rgba(139, 0, 0, 0.25);
+            --radius: 16px; --radius-sm: 10px; --radius-pill: 50px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        body { font-family: var(--font); }
+
+        /* ============================================================
+           1. HEADER / NAVBAR
+           ============================================================ */
+        .header-area.header-sticky {
+            position: fixed !important; top: 0 !important; left: 0; right: 0; z-index: 1000;
+            background: linear-gradient(90deg, #5a0000 0%, #8b0000 50%, #a52a2a 100%) !important;
+            border-radius: 0 !important; border-bottom: none !important;
+            box-shadow: 0 4px 25px rgba(90,0,0,0.35) !important;
+            opacity: 1 !important; transform: none !important; padding: 0 !important;
+        }
+        .header-area.header-sticky .main-nav { background: transparent !important; align-items: center; min-height: 70px; }
+        .header-area.header-sticky .main-nav .logo h1 { font-size: 26px; font-weight: 800; color: #fff !important; letter-spacing: 2px; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .header-area.header-sticky .main-nav ul.nav { margin-top: 0 !important; border-radius: 0 !important; }
+        .header-area.header-sticky .main-nav .nav li { height: 70px; line-height: 70px; }
+        .header-area.header-sticky .main-nav .nav li a {
+            color: rgba(255,255,255,0.8) !important; font-weight: 600; font-size: 14px;
+            padding: 8px 16px; height: auto; line-height: normal; transition: var(--transition);
+            border-bottom: 3px solid transparent;
+        }
+        .header-area.header-sticky .main-nav .nav li a:hover {
+            color: #fff !important; border-bottom-color: #fff; opacity: 1 !important;
+            background: rgba(255,255,255,0.1) !important; border-radius: 8px;
+        }
+        .header-area.header-sticky .main-nav .nav li a.active {
+            color: #fff !important; border-bottom-color: #fff;
+            background: rgba(255,255,255,0.15) !important; border-radius: 8px;
+        }
+        .background-header.header-sticky {
+            background: linear-gradient(90deg, #5a0000 0%, #8b0000 50%, #a52a2a 100%) !important;
+            border-radius: 0 !important; border-bottom: none !important;
+            box-shadow: 0 4px 25px rgba(90,0,0,0.35) !important; top: 0 !important; padding: 0 !important;
+        }
+        .background-header .main-nav .logo, .background-header .main-nav #search { margin-top: 0 !important; }
+        .background-header .main-nav .nav { margin-top: 0 !important; }
+        .background-header .main-nav .nav li { height: 70px !important; line-height: 70px !important; }
+
+        /* ---------- Dropdown ---------- */
+        .nav-dropdown { position: relative; }
+        .nav-dropdown > a::after { content: ' \f107'; font-family: 'Font Awesome 5 Free'; font-weight: 900; font-size: 0.7rem; margin-left: 5px; }
+        .nav-dropdown-menu {
+            position: absolute; top: 100%; left: 0; min-width: 240px;
+            background: linear-gradient(180deg, #5a0000 0%, #3a0000 100%);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; margin-top: 8px;
+            box-shadow: 0 12px 40px rgba(90,0,0,0.6);
+            opacity: 0; visibility: hidden; transform: translateY(8px);
+            transition: all 0.3s ease; z-index: 2000; padding: 12px 0; list-style: none; margin: 0;
+        }
+        .nav-dropdown:hover .nav-dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+        .nav-dropdown-menu li { height: auto !important; line-height: normal !important; }
+        .nav-dropdown-menu li a {
+            display: block; padding: 11px 22px !important; font-size: 13.5px !important;
+            color: rgba(255,255,255,0.75) !important; border-bottom: none !important;
+            transition: var(--transition); white-space: nowrap;
+        }
+        .nav-dropdown-menu li a:hover { color: #fff !important; background: rgba(255,255,255,0.15) !important; padding-left: 26px !important; }
+        .nav-dropdown-menu li a i { width: 18px; text-align: center; margin-right: 10px; color: #fff; font-size: 0.85rem; }
+        .nav-dropdown-menu .dropdown-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 8px 0; }
+
+        /* ---------- User Pill ---------- */
+        .nav-user-pill {
+            display: inline-flex; align-items: center; gap: 9px;
+            background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);
+            padding: 6px 16px 6px 10px; border-radius: 50px; margin-left: 8px;
+            font-size: 13px !important; color: #fff !important; font-weight: 600;
+            cursor: default; height: auto !important; line-height: normal !important;
+        }
+        .nav-user-pill .user-avatar {
+            width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.3);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 700; border: 1px solid rgba(255,255,255,0.4);
+        }
+        .nav-user-pill .user-role { color: rgba(255,255,255,0.7); font-size: 11px; font-weight: 400; margin-left: 2px; }
+
+        /* ---------- Boutons Guest (Login / Sign Up) ---------- */
+        .nav-btn-login {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 7px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
+            text-decoration: none; transition: var(--transition);
+            border: 2px solid rgba(255,255,255,0.5); color: #fff !important;
+            background: transparent; height: auto !important; line-height: normal !important;
+        }
+        .nav-btn-login:hover { background: rgba(255,255,255,0.15); border-color: #fff; color: #fff !important; text-decoration: none; }
+
+        .nav-btn-signup {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 7px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
+            text-decoration: none; transition: var(--transition);
+            background: #fff; color: var(--darkred) !important; border: 2px solid #fff;
+            height: auto !important; line-height: normal !important; margin-left: 6px;
+        }
+        .nav-btn-signup:hover { background: var(--red-light); border-color: #fff; color: var(--darkred-deep) !important; text-decoration: none; transform: translateY(-1px); }
+
+        /* Logout link */
+        .nav-logout { color: rgba(255,255,255,0.65) !important; font-size: 13px !important; font-weight: 600; }
+        .nav-logout:hover { color: #ff8080 !important; background: rgba(255,100,100,0.12) !important; border-radius: 6px; }
+
+        /* ============================================================
+           AVATAR DROPDOWN — Mon Compte
+           ============================================================ */
+        .nav-avatar-dropdown {
+            position: relative;
+            display: flex;
+            align-items: center;
+            height: 70px;
+        }
+
+        .nav-avatar-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 2.5px solid rgba(255,255,255,0.5);
+            cursor: pointer;
+            background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.25), 0 0 0 0 rgba(255,255,255,0.3);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .nav-avatar-btn:hover {
+            border-color: #fff;
+            transform: scale(1.08);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.35), 0 0 0 4px rgba(255,255,255,0.15);
+        }
+
+        .nav-avatar-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .nav-avatar-btn .avatar-initials {
+            font-size: 15px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            line-height: 1;
+        }
+
+        /* Online dot indicator */
+        .nav-avatar-btn::after {
+            content: '';
+            position: absolute;
+            bottom: 1px;
+            right: 1px;
+            width: 10px;
+            height: 10px;
+            background: #2ecc71;
+            border: 2px solid #8b0000;
+            border-radius: 50%;
+        }
+
+        /* Avatar dropdown panel */
+        .nav-avatar-panel {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 230px;
+            background: linear-gradient(180deg, #4a0000 0%, #2e0000 100%);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 16px;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px) scale(0.97);
+            transform-origin: top right;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 3000;
+            overflow: hidden;
+        }
+
+        .nav-avatar-dropdown:hover .nav-avatar-panel {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Panel header */
+        .nav-avatar-panel-header {
+            padding: 16px 18px 14px;
+            background: rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-avatar-panel-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+            overflow: hidden;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-avatar-panel-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .nav-avatar-panel-avatar .panel-initials {
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .nav-avatar-panel-info { flex: 1; min-width: 0; }
+        .nav-avatar-panel-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .nav-avatar-panel-role {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 2px;
+        }
+
+        /* Panel links */
+        .nav-avatar-panel-links {
+            padding: 8px 0;
+            list-style: none;
+            margin: 0;
+        }
+
+        .nav-avatar-panel-links li { height: auto !important; line-height: normal !important; }
+
+        .nav-avatar-panel-links li a {
+            display: flex !important;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px !important;
+            font-size: 13px !important;
+            color: rgba(255,255,255,0.7) !important;
+            text-decoration: none;
+            transition: var(--transition);
+            border-bottom: none !important;
+            border-radius: 0;
+            white-space: nowrap;
+        }
+
+        .nav-avatar-panel-links li a:hover {
+            color: #fff !important;
+            background: rgba(255,255,255,0.1) !important;
+            padding-left: 22px !important;
+        }
+
+        .nav-avatar-panel-links li a i {
+            width: 18px;
+            text-align: center;
+            font-size: 13px;
+            color: rgba(231, 76, 60, 0.8);
+            flex-shrink: 0;
+        }
+
+        .nav-avatar-panel-links li a:hover i { color: var(--red); }
+
+        .nav-avatar-panel-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.08);
+            margin: 4px 0;
+        }
+
+        /* Logout row — special red tint */
+        .nav-avatar-panel-links .panel-logout a {
+            color: rgba(255,130,130,0.8) !important;
+        }
+        .nav-avatar-panel-links .panel-logout a:hover {
+            color: #ff8080 !important;
+            background: rgba(255,80,80,0.1) !important;
+        }
+        .nav-avatar-panel-links .panel-logout a i { color: rgba(231,76,60,0.9); }
+
+        /* ============================================================
+           2. HERO SECTIONS
+           ============================================================ */
+        .page-hero, .form-hero, .rc-hero, .sup-hero, .forum-hero, .auth-hero {
+            background: linear-gradient(135deg, var(--darkred-deep) 0%, #8b1a1a 50%, #a52a2a 100%);
+            padding: 100px 0 70px; position: relative; overflow: hidden;
+        }
+        .page-hero::before, .form-hero::before, .rc-hero::before, .sup-hero::before,
+        .forum-hero::before, .auth-hero::before {
+            content: ''; position: absolute; top: -50%; right: -20%; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .page-hero h1, .form-hero h1, .rc-hero h1, .sup-hero h1, .forum-hero h1, .auth-hero h1 {
+            color: var(--white); font-weight: 800; margin: 0 0 6px; position: relative; z-index: 1;
+        }
+        .page-hero p, .form-hero p, .rc-hero p, .sup-hero p, .forum-hero p, .auth-hero p {
+            color: rgba(255,255,255,0.85); font-size: 1rem; margin: 0; position: relative; z-index: 1;
+        }
+
+        .show-card-header {
+            background: linear-gradient(135deg, var(--darkred) 0%, var(--darkred-deep) 100%) !important;
+            padding: 32px 36px; position: relative;
+        }
+        .show-card-header::before {
+            content: ''; position: absolute; top: -50%; right: -10%; width: 200px; height: 200px;
+            border-radius: 50%; background: var(--red); opacity: 0.08;
+        }
+        .pub-card-head { background: linear-gradient(135deg, var(--darkred) 0%, var(--darkred-deep) 100%) !important; }
+
+        /* ============================================================
+           3. FORM COMPONENTS
+           ============================================================ */
+        .form-card {
+            background: var(--white); border-radius: var(--radius); padding: 32px 36px;
+            box-shadow: var(--shadow-sm); animation: fadeUp 0.5s ease both;
+        }
+        .form-help {
+            background: var(--red-light); border-left: 4px solid var(--red); padding: 14px 18px;
+            border-radius: var(--radius-sm); margin-bottom: 24px; font-size: 0.88rem; color: var(--red-dark);
+        }
+        .form-help i { margin-right: 6px; }
+        .form-group { margin-bottom: 22px; }
+        .form-group label, .form-card label {
+            display: block; color: var(--black); font-weight: 700; font-size: 0.9rem; margin-bottom: 8px;
+        }
+        .form-card input[type="text"], .form-card input[type="email"], .form-card input[type="password"],
+        .form-card input[type="number"], .form-card input[type="date"], .form-card input[type="time"],
+        .form-card input[type="datetime-local"], .form-card input[type="file"],
+        .form-card textarea, .form-card select {
+            width: 100%; padding: 12px 16px; border: 2px solid var(--grey-border); border-radius: var(--radius-sm);
+            font-size: 0.9rem; background: var(--grey-light); color: var(--black); transition: var(--transition);
+            box-sizing: border-box; font-family: inherit;
+        }
+        .form-card input:focus, .form-card textarea:focus, .form-card select:focus {
+            outline: none; border-color: var(--red); background: var(--white); box-shadow: 0 0 0 3px var(--red-glow);
+        }
+        .form-card textarea { min-height: 140px; resize: vertical; }
+        .form-actions {
+            display: flex; gap: 12px; margin-top: 28px; padding-top: 20px;
+            border-top: 1px solid var(--grey-border);
+        }
+        .btn-back-form {
+            flex: 1; background: var(--grey-light); color: var(--grey-dark); padding: 12px 20px;
+            border-radius: var(--radius-sm); border: 1px solid var(--grey-border); font-weight: 700;
+            font-size: 0.9rem; text-decoration: none; display: flex; align-items: center;
+            justify-content: center; gap: 8px; transition: var(--transition);
+        }
+        .btn-back-form:hover { border-color: var(--black); color: var(--black); text-decoration: none; }
+        .btn-submit {
+            flex: 2; background: var(--darkred); color: var(--white); padding: 12px 28px;
+            border-radius: var(--radius-sm); border: none; font-weight: 700; font-size: 0.9rem;
+            cursor: pointer; transition: var(--transition); display: flex; align-items: center;
+            justify-content: center; gap: 8px;
+        }
+        .btn-submit:hover { background: var(--red); transform: translateY(-2px); box-shadow: var(--shadow-red); }
+
+        /* ============================================================
+           4. BUTTONS
+           ============================================================ */
+        .btn-new {
+            background: var(--darkred); color: var(--white); padding: 13px 30px; border-radius: var(--radius-sm);
+            border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 10px; transition: var(--transition);
+        }
+        .btn-new:hover { background: var(--red); transform: translateY(-2px); box-shadow: var(--shadow-red); color: var(--white); text-decoration: none; }
+        .btn-add {
+            background: var(--darkred); color: var(--white); padding: 11px 24px; border-radius: var(--radius-sm);
+            text-decoration: none; font-weight: 700; font-size: 0.9rem; display: inline-flex;
+            align-items: center; gap: 8px; transition: var(--transition); border: none;
+        }
+        .btn-add:hover { background: var(--red); color: var(--white); text-decoration: none; transform: translateY(-2px); box-shadow: var(--shadow-red); }
+        .btn-show { background: var(--black); color: var(--white); }
+        .btn-show:hover { background: var(--darkred); color: var(--white); text-decoration: none; }
+        .btn-edit, .btn-card-edit { background: var(--grey-light); color: var(--grey-dark); border: 1px solid var(--grey-border); }
+        .btn-edit:hover, .btn-card-edit:hover { border-color: var(--black); color: var(--black); text-decoration: none; background: var(--white); }
+        .btn-del, .btn-card-delete { background: transparent; color: var(--red); border: 1px solid var(--red-light); }
+        .btn-del:hover, .btn-card-delete:hover { background: var(--red); color: var(--white); text-decoration: none; border-color: var(--red); }
+        .btn-card-view, .btn-act-view { background: var(--darkred); color: var(--white); }
+        .btn-card-view:hover, .btn-act-view:hover { background: var(--red); color: var(--white); text-decoration: none; }
+
+        /* ============================================================
+           5. SEARCH BAR
+           ============================================================ */
+        .search-bar {
+            background: var(--white); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px;
+            box-shadow: var(--shadow-sm); display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+        }
+        .search-bar input {
+            flex: 1; min-width: 200px; padding: 11px 16px; border: 2px solid var(--grey-border);
+            border-radius: var(--radius-sm); font-size: 0.9rem; background: var(--grey-light); color: var(--black); transition: var(--transition);
+        }
+        .search-bar input:focus { outline: none; border-color: var(--red); background: var(--white); box-shadow: 0 0 0 3px var(--red-glow); }
+        .search-bar input::placeholder { color: #b0b0b0; }
+        .search-bar select {
+            padding: 11px 14px; border: 2px solid var(--grey-border); border-radius: var(--radius-sm);
+            font-size: 0.9rem; background: var(--white); color: var(--grey-dark); cursor: pointer;
+            min-width: 150px; transition: var(--transition);
+        }
+        .search-bar select:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px var(--red-glow); }
+        .btn-reset {
+            background: none; border: 2px solid var(--grey-border); border-radius: var(--radius-sm);
+            padding: 11px 18px; cursor: pointer; color: var(--grey); font-size: 0.85rem;
+            font-weight: 600; transition: var(--transition);
+        }
+        .btn-reset:hover { border-color: var(--red); color: var(--red); background: var(--red-light); }
+
+        /* ============================================================
+           6. BADGES
+           ============================================================ */
+        .badge-type { background: var(--darkred); color: var(--white); padding: 5px 14px; border-radius: var(--radius-pill); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
+        .show-badge { position: absolute; top: 18px; right: 20px; background: var(--red); color: var(--white); padding: 5px 16px; border-radius: var(--radius-pill); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .pub-card-badge { position: absolute; top: 12px; right: 14px; background: var(--red); color: var(--white); padding: 3px 12px; border-radius: var(--radius-pill); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+        .badge-status.published, .status-published, .show-status.published { background: rgba(39, 174, 96, 0.12); color: #27ae60; }
+        .badge-status.pending, .status-pending, .show-status.pending { background: rgba(243, 156, 18, 0.12); color: #f39c12; }
+
+        /* ============================================================
+           7. DELETE ZONE
+           ============================================================ */
+        .delete-zone { margin-top: 32px; padding-top: 24px; border-top: 2px dashed var(--red); }
+        .delete-warning { background: var(--red-light); border-left: 4px solid var(--red); padding: 16px 18px; border-radius: var(--radius-sm); margin-bottom: 16px; color: var(--red-dark); font-size: 0.88rem; line-height: 1.5; }
+        .delete-warning strong { display: block; margin-bottom: 6px; font-size: 0.95rem; }
+        .btn-delete { width: 100%; background: var(--red); color: var(--white); padding: 12px 28px; border-radius: var(--radius-sm); border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-delete:hover { background: var(--red-dark); transform: translateY(-2px); }
+
+        /* ============================================================
+           8. EMPTY STATE
+           ============================================================ */
+        .empty-state { text-align: center; padding: 80px 30px; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+        .empty-state-icon { width: 90px; height: 90px; border-radius: 50%; background: var(--red-light); margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; color: var(--red); }
+        .empty-state h3 { color: var(--black); font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
+        .empty-state p { color: var(--grey); font-size: 0.95rem; margin-bottom: 28px; }
+
+        /* ============================================================
+           9. FORUM CARDS & COMMENTS
+           ============================================================ */
+        .post-avatar { background: linear-gradient(135deg, var(--darkred), var(--red)) !important; box-shadow: 0 3px 10px rgba(139,0,0,0.2); }
+        .post-role.role-membre { background: #fef2f2; color: var(--darkred); }
+        .post-type-badge { background: #fef2f2; color: var(--darkred); }
+        .post-comments i { color: var(--darkred); }
+        .btn-voir { background: linear-gradient(135deg, var(--darkred), var(--red)) !important; box-shadow: 0 3px 12px rgba(139,0,0,0.2); }
+        .btn-voir:hover { box-shadow: 0 6px 20px rgba(139,0,0,0.3); }
+        .comment-avatar { background: var(--darkred); }
+        .comment-avatar.own { background: var(--red); }
+        .comments-count { background: var(--darkred); }
+        .comment-card.own-comment { border-left: 4px solid var(--darkred); }
+
+        /* ============================================================
+           10. CURRENT FILE
+           ============================================================ */
+        .current-file { margin: 12px 0; padding: 16px; background: var(--grey-light); border-left: 4px solid var(--darkred); border-radius: var(--radius-sm); }
+        .current-file strong { display: block; color: var(--black); margin-bottom: 10px; font-size: 0.9rem; }
+        .current-file img, .current-file video { max-width: 100%; max-height: 280px; border-radius: var(--radius-sm); display: block; }
+        .current-file small { display: block; margin-top: 8px; color: var(--grey); font-size: 0.82rem; }
+
+        /* ============================================================
+           11. ANIMATIONS
+           ============================================================ */
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ============================================================
+           12. FOOTER
+           ============================================================ */
+        .skillora-footer {
+            background: linear-gradient(135deg, #1a0000 0%, #2d0000 40%, #3a0000 100%);
+            color: rgba(255,255,255,0.6); border-top: none; margin-top: 0; font-size: 0.88rem;
+        }
+        .footer-accent {
+            height: 3px;
+            background: linear-gradient(90deg, #5a0000, #e74c3c 40%, #8b0000 60%, #e74c3c, #5a0000);
+            background-size: 300% 100%; animation: footerShimmer 5s linear infinite;
+        }
+        @keyframes footerShimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+        .footer-inner { display: flex; align-items: flex-start; gap: 0; max-width: 1100px; margin: 0 auto; padding: 32px 32px 24px; }
+        .footer-brand { flex: 0 0 260px; padding-right: 32px; }
+        .footer-logo { font-size: 1.6rem; font-weight: 800; color: #fff; letter-spacing: 1.5px; margin-bottom: 8px; }
+        .footer-logo span { color: var(--red); }
+        .footer-tagline { font-size: 0.83rem; line-height: 1.6; color: rgba(255,255,255,0.5); margin-bottom: 14px; }
+        .footer-social { display: flex; gap: 7px; }
+        .footer-social a { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); font-size: 0.75rem; transition: var(--transition); text-decoration: none; }
+        .footer-social a:hover { background: var(--darkred); border-color: var(--darkred); color: #fff; transform: translateY(-2px); }
+        .footer-vdivider { width: 1px; align-self: stretch; background: rgba(255,255,255,0.08); margin: 0 32px; flex-shrink: 0; }
+        .footer-col { flex: 1; }
+        .footer-col + .footer-col { margin-left: 24px; padding-left: 24px; border-left: 1px solid rgba(255,255,255,0.08); }
+        .footer-col-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #fff; margin: 0 0 14px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); position: relative; }
+        .footer-col-title::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 22px; height: 2px; background: var(--red); border-radius: 2px; }
+        .footer-col ul { list-style: none; padding: 0; margin: 0; }
+        .footer-col ul li { margin-bottom: 7px; }
+        .footer-col ul li a { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.55); font-size: 0.85rem; text-decoration: none; transition: var(--transition); padding: 3px 0; }
+        .footer-col ul li a i { width: 15px; font-size: 0.72rem; color: rgba(231,76,60,0.65); transition: var(--transition); }
+        .footer-col ul li a:hover { color: #fff; padding-left: 4px; }
+        .footer-col ul li a:hover i { color: var(--red); }
+        .footer-contact-list li { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 11px !important; }
+        .fci { width: 28px; height: 28px; border-radius: 7px; background: rgba(139,0,0,0.4); border: 1px solid rgba(231,76,60,0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--red); font-size: 0.7rem; }
+        .footer-contact-list li span:last-child { color: rgba(255,255,255,0.55); font-size: 0.84rem; line-height: 1.5; padding-top: 4px; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.07); padding: 12px 32px; max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; color: rgba(255,255,255,0.3); }
+        .footer-bottom-links { display: flex; gap: 18px; }
+        .footer-bottom-links a { color: rgba(255,255,255,0.3); text-decoration: none; transition: var(--transition); font-size: 0.78rem; }
+        .footer-bottom-links a:hover { color: var(--red); }
+
+        /* ============================================================
+           13. BACK TO TOP
+           ============================================================ */
+        .back-to-top { position: fixed; bottom: 30px; right: 30px; width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--darkred), var(--red)); color: #fff; border: none; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 16px rgba(139,0,0,0.4); opacity: 0; visibility: hidden; transform: translateY(20px); transition: var(--transition); z-index: 999; }
+        .back-to-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+        .back-to-top:hover { transform: translateY(-4px); box-shadow: 0 6px 24px rgba(139,0,0,0.5); }
+
+        /* ============================================================
+           14. RESPONSIVE
+           ============================================================ */
+        @media (max-width: 900px) {
+            .footer-inner { flex-wrap: wrap; gap: 20px; padding: 24px 20px 16px; }
+            .footer-brand { flex: 0 0 100%; padding-right: 0; }
+            .footer-vdivider { display: none; }
+            .footer-col { flex: 1 1 140px; margin-left: 0 !important; padding-left: 0 !important; border-left: none !important; }
+            .footer-bottom { flex-direction: column; gap: 6px; text-align: center; padding: 10px 20px; }
+        }
+        @media (max-width: 768px) {
+            .page-hero, .form-hero, .rc-hero, .sup-hero { padding: 80px 0 50px; }
+            .search-bar { flex-direction: column; }
+            .search-bar input, .search-bar select { width: 100%; }
+            .form-card { padding: 24px 20px; }
+            .form-actions { flex-direction: column; }
+        }
+    </style>
+
+    {% block stylesheets %}{% endblock %}
+</head>
+
+<body>
+
+{# ===== Resolve user ===== #}
+{% set _user = null %}
+{% if currentUser is defined and currentUser %}
+    {% set _user = currentUser %}
+{% elseif navUser is defined and navUser %}
+    {% set _user = navUser %}
+{% endif %}
+{% set _uq = _user ? '?u=' ~ _user.id : '' %}
+
+{# Redirection automatique vers dashboard si connecté et sur la page d'accueil #}
+{% if _user is defined and _user %}
+    {% if app.request.attributes.get('_route') in ['front_home', 'front_home_user'] %}
+        {% if _user.role == 'responsable_club' %}
+            <script>window.location.href = '{{ path('app_responsable_dashboard_user') }}';</script>
+        {% elseif _user.role == 'membre' %}
+            <script>window.location.href = '{{ path('app_membre_dashboard') }}';</script>
+        {% endif %}
+    {% endif %}
+{% endif %}
+
+<!-- HEADER -->
+<header class="header-area header-sticky">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <nav class="main-nav">
+                    {# ── Logo avec lien selon rôle ── #}
+                    {% if _user %}
+                        {% if _user.role == 'responsable_club' %}
+                            <a href="{{ path('app_responsable_dashboard_user') }}" class="logo">
+                                <h1>Skill<span style="color: var(--red);">Ora</span></h1>
+                            </a>
+                        {% elseif _user.role == 'membre' %}
+                            <a href="{{ path('app_membre_dashboard') }}" class="logo">
+                                <h1>Skill<span style="color: var(--red);">Ora</span></h1>
+                            </a>
+                        {% else %}
+                            <a href="{{ path('front_home_user', {userId: _user.id}) }}" class="logo">
+                                <h1>Skill<span style="color: var(--red);">Ora</span></h1>
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ path('front_home') }}" class="logo">
+                            <h1>Skill<span style="color: var(--red);">Ora</span></h1>
+                        </a>
+                    {% endif %}
+
+                    <ul class="nav">
+                        {# ── Accueil ── #}
+                        <li>
+                            {% if _user %}
+                                {% if _user.role == 'responsable_club' %}
+                                    <a href="{{ path('app_responsable_dashboard_user') }}" class="active">Accueil</a>
+                                {% elseif _user.role == 'membre' %}
+                                    <a href="{{ path('app_membre_dashboard') }}" class="active">Accueil</a>
+                                {% else %}
+                                    <a href="{{ path('front_home_user', {userId: _user.id}) }}" class="active">Accueil</a>
+                                {% endif %}
+                            {% else %}
+                                <a href="{{ path('front_home') }}" class="active">Accueil</a>
+                            {% endif %}
+                        </li>
+
+                        {% if _user %}
+
+                            {# ════════════════════════════
+                               MEMBRE
+                               ════════════════════════════ #}
+                            {% if _user.role == 'membre' %}
+
+                                {% block nav_modules_membre %}
+                                <li class="nav-dropdown">
+                                    <a href="#">Forum</a>
+                                    <ul class="nav-dropdown-menu">
+                                        <li><a href="{{ path('app_forum_index') }}{{ _uq }}"><i class="far fa-comments"></i> Parcourir le Forum</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('app_publication_index') }}{{ _uq }}"><i class="far fa-file-alt"></i> Mes Publications</a></li>
+                                        <li><a href="{{ path('app_publication_new', {id: _user.id}) }}{{ _uq }}"><i class="fas fa-plus"></i> Nouvelle Publication</a></li>
+                                    </ul>
+                                </li>
+                                {% endblock %}
+
+                                <li class="nav-dropdown">
+                                    <a href="#">Clubs</a>
+                                    <ul class="nav-dropdown-menu">
+                                        <li><a href="{{ path('user_club_index') }}"><i class="fas fa-th-large"></i> Tous les clubs</a></li>
+                                        <li><a href="{{ path('user_mes_clubs') }}"><i class="fas fa-star"></i> Mes clubs</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('user_club_new') }}"><i class="fas fa-plus-circle"></i> Proposer un club</a></li>
+                                        <li><a href="{{ path('user_club_recommandations') }}"><i class="fas fa-robot"></i> Clubs recommandés</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="nav-dropdown">
+                                    <a href="#">Challenges</a>
+                                    <ul class="nav-dropdown-menu">
+                                        <li><a href="{{ path('app_etudiant_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard Challenges</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('app_etudiant_challenges') }}"><i class="fas fa-trophy"></i> Parcourir les Challenges</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('app_etudiant_groupe') }}"><i class="fas fa-users"></i> Mes Groupes</a></li>
+                                        <li><a href="{{ path('app_etudiant_groupe_new') }}"><i class="fas fa-plus-circle"></i> Créer un Groupe</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('app_etudiant_participations') }}"><i class="fas fa-flag-checkered"></i> Mes Participations</a></li>
+                                        <li><a href="{{ path('app_etudiant_livrables') }}"><i class="fas fa-upload"></i> Mes Livrables</a></li>
+                                        <li><a href="{{ path('app_etudiant_favoris') }}"><i class="fas fa-star"></i> Mes Favoris</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="nav-dropdown">
+                                    <a href="#">Formations</a>
+                                    <ul class="nav-dropdown-menu">
+                                        <li><a href="{{ path('front_formation_index') }}"><i class="fas fa-graduation-cap"></i> Catalogue Formations</a></li>
+                                    </ul>
+                                </li>
+
+                                {# Avatar dropdown — MEMBRE #}
+                                <li class="nav-avatar-dropdown">
+                                    <div class="nav-avatar-btn">
+                                        {% if _user.photo is defined and _user.photo %}
+                                            <img src="{{ asset('uploads/photos/' ~ _user.photo) }}" alt="{{ _user.prenom }}">
+                                        {% else %}
+                                            <span class="avatar-initials">{{ _user.prenom|slice(0,1)|upper }}{{ _user.nom|slice(0,1)|upper }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="nav-avatar-panel">
+                                        <div class="nav-avatar-panel-header">
+                                            <div class="nav-avatar-panel-avatar">
+                                                {% if _user.photo is defined and _user.photo %}
+                                                    <img src="{{ asset('uploads/photos/' ~ _user.photo) }}" alt="{{ _user.prenom }}">
+                                                {% else %}
+                                                    <span class="panel-initials">{{ _user.prenom|slice(0,1)|upper }}{{ _user.nom|slice(0,1)|upper }}</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="nav-avatar-panel-info">
+                                                <div class="nav-avatar-panel-name">{{ _user.prenom }} {{ _user.nom }}</div>
+                                                <div class="nav-avatar-panel-role">Membre</div>
+                                            </div>
+                                        </div>
+                                        <ul class="nav-avatar-panel-links">
+                                            <li><a href="{{ path('app_membre_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                                            <li><a href="{{ path('app_user_show', {id: _user.id}) }}"><i class="fas fa-user"></i> Mon Profil</a></li>
+                                            <li><a href="{{ path('app_user_edit', {id: _user.id}) }}"><i class="fas fa-edit"></i> Modifier Profil</a></li>
+                                            <li class="nav-avatar-panel-divider"></li>
+                                            <li class="panel-logout"><a href="{{ path('app_logout') }}"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+
+                            {# ════════════════════════════
+                               RESPONSABLE CLUB
+                               ════════════════════════════ #}
+                            {% elseif _user.role == 'responsable_club' %}
+
+                                {% block nav_modules_responsable %}
+                                <li class="nav-dropdown">
+                                    <a href="#">Forum</a>
+                                    <ul class="nav-dropdown-menu">
+                                        <li><a href="{{ path('app_forum_index') }}{{ _uq }}"><i class="far fa-comments"></i> Parcourir le Forum</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('app_responsable_club_publication_index') }}{{ _uq }}"><i class="far fa-file-alt"></i> Mes Publications</a></li>
+                                        <li><a href="{{ path('app_responsable_club_publication_new') }}{{ _uq }}"><i class="fas fa-plus"></i> Nouvelle Publication</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('app_responsable_club_commentaire_index') }}"><i class="fas fa-shield-alt"></i> Supervision Commentaires</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('app_responsable_forum_dashboard') }}"><i class="fas fa-chart-line"></i> Dashboard Forum</a></li>
+                                    </ul>
+                                </li>
+                                {% endblock %}
+
+                                <li class="nav-dropdown">
+                                    <a href="#">Mon Club</a>
+                                    <ul class="nav-dropdown-menu">
+                                        <li><a href="{{ path('club_show') }}"><i class="fas fa-eye"></i> Détail du club</a></li>
+                                        <li><a href="{{ path('club_edit') }}"><i class="fas fa-edit"></i> Modifier le club</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('responsable_adhesion_index') }}"><i class="fas fa-user-check"></i> Demandes d'adhésion</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('user_club_index') }}"><i class="fas fa-th-large"></i> Voir tous les clubs</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="nav-dropdown">
+                                    <a href="#">Challenges</a>
+                                    <ul class="nav-dropdown-menu">
+                                        <li><a href="{{ path('app_responsable_dashboard_ch') }}"><i class="fas fa-tachometer-alt"></i> Dashboard Challenges</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('app_responsable_challenges') }}"><i class="fas fa-trophy"></i> Mes Challenges</a></li>
+                                        <li><a href="{{ path('app_responsable_challenge_new') }}"><i class="fas fa-plus-circle"></i> Créer un Challenge</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('app_responsable_participations') }}"><i class="fas fa-flag-checkered"></i> Participations</a></li>
+                                        <li><a href="{{ path('app_responsable_livrables') }}"><i class="fas fa-inbox"></i> Livrables à évaluer</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="nav-dropdown">
+                                    <a href="#">Formations</a>
+                                    <ul class="nav-dropdown-menu">
+                                        <li><a href="{{ path('responsable_formation_index') }}"><i class="fas fa-graduation-cap"></i> Mes Formations</a></li>
+                                        <li><a href="{{ path('responsable_formation_new') }}"><i class="fas fa-plus-circle"></i> Nouvelle Formation</a></li>
+                                    </ul>
+                                </li>
+
+                                {# Avatar dropdown — RESPONSABLE #}
+                                <li class="nav-avatar-dropdown">
+                                    <div class="nav-avatar-btn">
+                                        {% if _user.photo is defined and _user.photo %}
+                                            <img src="{{ asset('uploads/photos/' ~ _user.photo) }}" alt="{{ _user.prenom }}">
+                                        {% else %}
+                                            <span class="avatar-initials">{{ _user.prenom|slice(0,1)|upper }}{{ _user.nom|slice(0,1)|upper }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="nav-avatar-panel">
+                                        <div class="nav-avatar-panel-header">
+                                            <div class="nav-avatar-panel-avatar">
+                                                {% if _user.photo is defined and _user.photo %}
+                                                    <img src="{{ asset('uploads/photos/' ~ _user.photo) }}" alt="{{ _user.prenom }}">
+                                                {% else %}
+                                                    <span class="panel-initials">{{ _user.prenom|slice(0,1)|upper }}{{ _user.nom|slice(0,1)|upper }}</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="nav-avatar-panel-info">
+                                                <div class="nav-avatar-panel-name">{{ _user.prenom }} {{ _user.nom }}</div>
+                                                <div class="nav-avatar-panel-role">Responsable de Club</div>
+                                            </div>
+                                        </div>
+                                        <ul class="nav-avatar-panel-links">
+                                            <li><a href="{{ path('app_responsable_dashboard_user') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                                            <li><a href="{{ path('app_user_show', {id: _user.id}) }}"><i class="fas fa-user"></i> Mon Profil</a></li>
+                                            <li><a href="{{ path('app_user_edit', {id: _user.id}) }}"><i class="fas fa-edit"></i> Modifier Profil</a></li>
+                                            <li class="nav-avatar-panel-divider"></li>
+                                            <li class="panel-logout"><a href="{{ path('app_logout') }}"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+
+                            {# ════════════════════════════
+                               ADMIN
+                               ════════════════════════════ #}
+                            {% elseif _user.role == 'admin' %}
+                                <li><a href="{{ path('app_admin_dashboard') }}">Tableau de Bord</a></li>
+
+                                {% block nav_modules_admin %}
+                                <li class="nav-dropdown">
+                                    <a href="#">Forum</a>
+                                    <ul class="nav-dropdown-menu">
+                                        <li><a href="{{ path('app_forum_index') }}{{ _uq }}"><i class="far fa-comments"></i> Parcourir le Forum</a></li>
+                                    </ul>
+                                </li>
+                                {% endblock %}
+
+                                <li class="nav-dropdown">
+                                    <a href="#">Admin</a>
+                                    <ul class="nav-dropdown-menu">
+                                        <li><a href="{{ path('app_admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                                        <li><a href="{{ path('app_user_index') }}"><i class="fas fa-users"></i> Gestion Utilisateurs</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('app_logout') }}" class="nav-logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+                                    </ul>
+                                </li>
+
+                                {# Avatar dropdown — ADMIN #}
+                                <li class="nav-avatar-dropdown">
+                                    <div class="nav-avatar-btn">
+                                        {% if _user.photo is defined and _user.photo %}
+                                            <img src="{{ asset('uploads/photos/' ~ _user.photo) }}" alt="{{ _user.prenom }}">
+                                        {% else %}
+                                            <span class="avatar-initials">{{ _user.prenom|slice(0,1)|upper }}{{ _user.nom|slice(0,1)|upper }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="nav-avatar-panel">
+                                        <div class="nav-avatar-panel-header">
+                                            <div class="nav-avatar-panel-avatar">
+                                                {% if _user.photo is defined and _user.photo %}
+                                                    <img src="{{ asset('uploads/photos/' ~ _user.photo) }}" alt="{{ _user.prenom }}">
+                                                {% else %}
+                                                    <span class="panel-initials">{{ _user.prenom|slice(0,1)|upper }}{{ _user.nom|slice(0,1)|upper }}</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="nav-avatar-panel-info">
+                                                <div class="nav-avatar-panel-name">{{ _user.prenom }} {{ _user.nom }}</div>
+                                                <div class="nav-avatar-panel-role">Administrateur</div>
+                                            </div>
+                                        </div>
+                                        <ul class="nav-avatar-panel-links">
+                                            <li><a href="{{ path('app_admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                                            <li><a href="{{ path('app_user_index') }}"><i class="fas fa-users"></i> Gestion Utilisateurs</a></li>
+                                            <li class="nav-avatar-panel-divider"></li>
+                                            <li class="panel-logout"><a href="{{ path('app_logout') }}"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+
+                            {# ════════════════════════════
+                               ETUDIANT (rétrocompat)
+                               ════════════════════════════ #}
+                            {% elseif _user.role == 'etudiant' %}
+
+                                {% block nav_modules_etudiant %}
+
+                                </li>
+                                {% endblock %}
+
+                                <li class="nav-dropdown">
+                                    <a href="#">Clubs</a>
+                                    <ul class="nav-dropdown-menu">
+                                        <li><a href="{{ path('user_club_index') }}"><i class="fas fa-th-large"></i> Tous les clubs</a></li>
+                                        <li><a href="{{ path('user_mes_clubs') }}"><i class="fas fa-star"></i> Mes clubs</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ path('user_club_new') }}"><i class="fas fa-plus-circle"></i> Proposer un club</a></li>
+                                        <li><a href="{{ path('user_club_recommandations') }}"><i class="fas fa-robot"></i> Clubs recommandés</a></li>
+                                    </ul>
+                                </li>
+
+                                {# Avatar dropdown — ETUDIANT #}
+                                <li class="nav-avatar-dropdown">
+                                    <div class="nav-avatar-btn">
+                                        {% if _user.photo is defined and _user.photo %}
+                                            <img src="{{ asset('uploads/photos/' ~ _user.photo) }}" alt="{{ _user.prenom }}">
+                                        {% else %}
+                                            <span class="avatar-initials">{{ _user.prenom|slice(0,1)|upper }}{{ _user.nom|slice(0,1)|upper }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="nav-avatar-panel">
+                                        <div class="nav-avatar-panel-header">
+                                            <div class="nav-avatar-panel-avatar">
+                                                {% if _user.photo is defined and _user.photo %}
+                                                    <img src="{{ asset('uploads/photos/' ~ _user.photo) }}" alt="{{ _user.prenom }}">
+                                                {% else %}
+                                                    <span class="panel-initials">{{ _user.prenom|slice(0,1)|upper }}{{ _user.nom|slice(0,1)|upper }}</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="nav-avatar-panel-info">
+                                                <div class="nav-avatar-panel-name">{{ _user.prenom }} {{ _user.nom }}</div>
+                                                <div class="nav-avatar-panel-role">Étudiant</div>
+                                            </div>
+                                        </div>
+                                        <ul class="nav-avatar-panel-links">
+                                            <li><a href="{{ path('app_user_show', {id: _user.id}) }}"><i class="fas fa-user"></i> Mon Profil</a></li>
+                                            <li><a href="{{ path('app_user_edit', {id: _user.id}) }}"><i class="fas fa-edit"></i> Modifier Profil</a></li>
+                                            <li class="nav-avatar-panel-divider"></li>
+                                            <li class="panel-logout"><a href="{{ path('app_logout') }}"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+
+                            {% endif %}
+
+                        {% else %}
+                            {# ════════════════════════════
+                               INVITÉ
+                               ════════════════════════════ #}
+                            <li><a href="{{ path('front_home') }}#contact">Club</a></li>
+                            <li><a href="{{ path('front_home') }}#contact">Challenges</a></li>
+                            <li><a href="{{ path('front_home') }}#services">Formations</a></li>
+                            {% block nav_modules_guest %}
+                            <li><a href="{{ path('app_forum_index') }}">Forum</a></li>
+                            {% endblock %}
+                            <li><a href="{{ path('front_home') }}#contact">Contact</a></li>
+                            <li style="height:auto !important; line-height:normal !important; display:flex; align-items:center;"></li>
+                        {% endif %}
+
+                        {# 🔔 Cloche de notifications (connecté uniquement) #}
+                        {% if _user %}
+                        <li style="display:flex;align-items:center;">
+                            {{ include('Forum/_notification_bell.html.twig') }}
+                        </li>
+                        {% endif %}
+                    </ul>
+
+                    <a class="menu-trigger"><span>Menu</span></a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<!-- FLASH MESSAGES -->
+{% for type, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="sk-flash sk-flash--{{ type }}">
+            <span class="sk-flash-icon">
+                {% if type == 'success' %}✅{% elseif type == 'error' %}❌{% elseif type == 'warning' %}⚠️{% else %}ℹ️{% endif %}
+            </span>
+            <span class="sk-flash-msg">{{ message }}</span>
+            <button class="sk-flash-close" onclick="this.parentElement.remove()">×</button>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<style>
+.sk-flash {
+    position: fixed; top: 82px; right: 24px; z-index: 9999;
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px; border-radius: 12px;
+    font-size: 0.88rem; font-weight: 600;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    max-width: 420px; animation: flashIn 0.35s ease;
+}
+@keyframes flashIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+.sk-flash--success { background: #f0fdf4; color: #15803d; border-left: 4px solid #22c55e; }
+.sk-flash--error   { background: #fef2f2; color: #b91c1c; border-left: 4px solid #ef4444; }
+.sk-flash--warning { background: #fffbeb; color: #92400e; border-left: 4px solid #f59e0b; }
+.sk-flash--info    { background: #eff6ff; color: #1d4ed8; border-left: 4px solid #3b82f6; }
+.sk-flash-icon { font-size: 1rem; flex-shrink: 0; }
+.sk-flash-msg  { flex: 1; }
+.sk-flash-close {
+    background: none; border: none; font-size: 1.2rem;
+    cursor: pointer; color: inherit; opacity: 0.5;
+    padding: 0; line-height: 1; flex-shrink: 0;
+}
+.sk-flash-close:hover { opacity: 1; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.sk-flash').forEach(function(el, i) {
+        el.style.top = (82 + i * 70) + 'px';
+        setTimeout(function() {
+            el.style.transition = 'opacity 0.4s, transform 0.4s';
+            el.style.opacity = '0';
+            el.style.transform = 'translateX(40px)';
+            setTimeout(function() { el.remove(); }, 400);
+        }, 4000);
+    });
+});
+</script>
+
+<!-- MAIN CONTENT -->
+{% block body %}{% endblock %}
+
+<!-- FOOTER -->
+<footer class="skillora-footer">
+    <div class="footer-accent"></div>
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <div class="footer-logo">Skill<span>Ora</span></div>
+            <p class="footer-tagline">Plateforme collaborative d'apprentissage<br>pour étudiants, clubs et formateurs.</p>
+            <div class="footer-social">
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+        <div class="footer-vdivider"></div>
+        <div class="footer-col">
+            <h5 class="footer-col-title">Liens Rapides</h5>
+            <ul>
+                <li><a href="{% if _user %}{{ path('front_home_user', {userId: _user.id}) }}{% else %}{{ path('front_home') }}{% endif %}"><i class="fas fa-home"></i>Accueil</a></li>
+                <li><a href="{{ path('app_forum_index') }}{{ _uq }}"><i class="fas fa-comments"></i>Forum</a></li>
+                {% if _user and (_user.role == 'membre' or _user.role == 'etudiant') %}
+                    <li><a href="{{ path('user_club_index') }}"><i class="fas fa-users"></i>Clubs</a></li>
+                    <li><a href="{{ path('app_publication_index') }}{{ _uq }}"><i class="fas fa-file-alt"></i>Mes Publications</a></li>
+                {% elseif _user and _user.role == 'responsable_club' %}
+                    <li><a href="{{ path('club_show') }}"><i class="fas fa-users"></i>Mon Club</a></li>
+                    <li><a href="{{ path('app_responsable_club_publication_index') }}{{ _uq }}"><i class="fas fa-file-alt"></i>Mes Publications</a></li>
+                {% endif %}
+                {% if not _user %}
+                    <li><a href="{{ path('app_login') }}"><i class="fas fa-sign-in-alt"></i>Connexion</a></li>
+                    <li><a href="{{ path('app_register') }}"><i class="fas fa-user-plus"></i>S'inscrire</a></li>
+                {% endif %}
+                <li><a href="#"><i class="fas fa-graduation-cap"></i>Formations</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h5 class="footer-col-title">Contact</h5>
+            <ul class="footer-contact-list">
+                <li><span class="fci"><i class="fas fa-map-marker-alt"></i></span><span>Esprit, Les Berges du Lac, Tunis</span></li>
+                <li><span class="fci"><i class="fas fa-envelope"></i></span><span>contact@skillora.tn</span></li>
+                <li><span class="fci"><i class="fas fa-phone-alt"></i></span><span>+216 71 000 000</span></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>&copy; {{ "now"|date("Y") }} SkillOra — Tous droits réservés.</span>
+        <div class="footer-bottom-links">
+            <a href="#">Mentions légales</a>
+            <a href="#">Confidentialité</a>
+            <a href="#">Cookies</a>
+        </div>
+    </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" title="Retour en haut"><i class="fas fa-chevron-up"></i></button>
+
+<script src="{{ asset('assets/frontoffice/vendor/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset('assets/frontoffice/vendor/bootstrap/js/bootstrap.min.js') }}"></script>
+<script src="{{ asset('assets/frontoffice/js/isotope.min.js') }}"></script>
+<script src="{{ asset('assets/frontoffice/js/owl-carousel.js') }}"></script>
+<script src="{{ asset('assets/frontoffice/js/counter.js') }}"></script>
+<script src="{{ asset('assets/frontoffice/js/custom.js') }}"></script>
+<script>
+    (function() {
+        var btn = document.getElementById('backToTop');
+        window.addEventListener('scroll', function() { btn.classList.toggle('visible', window.scrollY > 300); });
+        btn.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    })();
+</script>
+
+{% block javascripts %}{% endblock %}

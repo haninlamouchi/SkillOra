@@ -1,0 +1,253 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Nouvelle Question — {{ quiz.titre }} — SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --sk-red:#8b0000; --sk-red-dark:#4a0000; --sk-red-light:#c0392b; --sk-white:#fff; --sk-ink:#180808; --sk-muted:#8a7070; --sk-border:rgba(139,0,0,0.09); }
+.sk-page { padding-top:70px; }
+.sk-hero { position:relative; background:linear-gradient(135deg,#3d0000 0%,#8b0000 48%,#c23030 100%); margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%); padding:60px 20px 52px; text-align:center; overflow:hidden; isolation:isolate; }
+.sk-hero::before { content:''; position:absolute; inset:0; z-index:0; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E"); background-size:180px; opacity:0.5; }
+.sk-hero-ring-l,.sk-hero-ring-r { position:absolute; z-index:0; border-radius:50%; border:72px solid rgba(255,255,255,0.035); }
+.sk-hero-ring-l { width:520px; height:520px; top:-210px; left:-160px; }
+.sk-hero-ring-r { width:380px; height:380px; bottom:-160px; right:-100px; border-width:50px; }
+.sk-hero-inner { position:relative; z-index:1; }
+.sk-hero h1 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(1.8rem,4vw,2.6rem); font-weight:800; letter-spacing:-0.03em; color:#fff; margin:0 0 10px; line-height:1.1; }
+.sk-hero p { font-family:'DM Sans',sans-serif; color:rgba(255,255,255,0.60); font-size:0.97rem; margin:0; }
+.sk-hero-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:4px 12px; font-family:'DM Sans',sans-serif; font-size:0.78rem; color:rgba(255,255,255,0.85); margin-bottom:14px; }
+
+.sk-content { padding:36px 0 56px; }
+.sk-back { display:inline-flex; align-items:center; gap:6px; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:600; color:var(--sk-muted); text-decoration:none; margin-bottom:24px; transition:color 0.2s; }
+.sk-back:hover { color:var(--sk-red); text-decoration:none; }
+
+.sk-card { background:#fff; border-radius:20px; border:1.5px solid var(--sk-border); box-shadow:0 4px 20px rgba(0,0,0,0.06); margin-bottom:20px; overflow:hidden; animation:sk-up 0.45s 0.1s ease both; }
+.sk-card-header { padding:16px 24px; border-bottom:1.5px solid var(--sk-border); display:flex; justify-content:space-between; align-items:center; background:#fff; }
+.sk-card-header h5 { font-family:'Bricolage Grotesque',sans-serif; font-size:0.92rem; font-weight:700; color:var(--sk-ink); margin:0; }
+.sk-card-header small { font-family:'DM Sans',sans-serif; font-size:0.78rem; color:var(--sk-muted); }
+.sk-card-body { padding:24px; }
+
+.sk-grid-q { display:grid; grid-template-columns:3fr 1fr; gap:16px; }
+.sk-card input[type="text"],
+.sk-card input[type="number"],
+.sk-card textarea,
+.sk-card select,
+.sk-card .form-control {
+  padding:10px 14px; border:1.5px solid #e5e7eb; border-radius:10px;
+  font-family:'DM Sans',sans-serif; font-size:0.9rem; color:var(--sk-ink);
+  background:#f9f9f9; transition:border-color 0.2s,background 0.2s; outline:none; width:100%;
+}
+.sk-card input:focus,.sk-card textarea:focus,.sk-card select:focus,.sk-card .form-control:focus {
+  border-color:var(--sk-red); background:#fff; box-shadow:0 0 0 3px rgba(139,0,0,0.07);
+}
+.sk-card label { font-family:'DM Sans',sans-serif; font-size:0.79rem; font-weight:700; color:#374151; text-transform:uppercase; letter-spacing:0.07em; display:block; margin-bottom:6px; }
+.sk-card .invalid-feedback { font-family:'DM Sans',sans-serif; font-size:0.78rem; color:#dc2626; margin-top:4px; }
+
+.sk-option-row { display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:12px; border:1.5px solid #e5e7eb; margin-bottom:12px; transition:all 0.2s; background:#fff; }
+.sk-option-row:hover { border-color:#d1d5db; background:#fafafa; }
+.sk-option-row.is-correct { border-color:#22c55e !important; background:rgba(34,197,94,0.06) !important; }
+.sk-option-letter { width:34px; height:34px; border-radius:9px; background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-family:'Bricolage Grotesque',sans-serif; font-size:0.85rem; font-weight:800; flex-shrink:0; transition:background 0.2s; }
+.sk-option-row.is-correct .sk-option-letter { background:linear-gradient(135deg,#15803d,#22c55e); }
+.sk-option-input { flex:1; }
+.sk-option-input input[type="text"] { padding:9px 12px; border:1.5px solid #e5e7eb; border-radius:9px; font-family:'DM Sans',sans-serif; font-size:0.88rem; color:var(--sk-ink); background:#f9f9f9; width:100%; outline:none; transition:border-color 0.2s; }
+.sk-option-input input[type="text"]:focus { border-color:var(--sk-red); background:#fff; box-shadow:0 0 0 3px rgba(139,0,0,0.07); }
+.sk-option-check { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.sk-option-check input[type="checkbox"] { width:18px; height:18px; accent-color:#22c55e; cursor:pointer; }
+.sk-option-check label { font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:700; color:#15803d; cursor:pointer; margin:0; text-transform:none; letter-spacing:0; }
+/* hide the ordre field */
+.sk-option-row input[type="hidden"] { display:none; }
+
+.sk-error { font-family:'DM Sans',sans-serif; font-size:0.8rem; color:#dc2626; margin-top:6px; display:none; }
+
+.sk-form-actions { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
+.sk-btn { display:inline-flex; align-items:center; gap:7px; padding:11px 24px; border-radius:10px; font-weight:700; font-family:'DM Sans',sans-serif; font-size:0.88rem; border:none; cursor:pointer; transition:all 0.25s; text-decoration:none; }
+.sk-btn-primary { background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); color:#fff; }
+.sk-btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(139,0,0,0.3); color:#fff; text-decoration:none; }
+.sk-btn-ghost { background:#f3f4f6; color:#374151; border:1.5px solid #e5e7eb; }
+.sk-btn-ghost:hover { border-color:#9ca3af; color:#111; text-decoration:none; }
+
+.sk-flash { border-radius:12px; padding:12px 18px; font-family:'DM Sans',sans-serif; font-size:0.88rem; margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+.sk-flash-success { background:rgba(34,197,94,0.1); border:1.5px solid rgba(34,197,94,0.3); color:#15803d; }
+.sk-flash-danger  { background:rgba(220,38,38,0.08); border:1.5px solid rgba(220,38,38,0.2); color:#dc2626; }
+.sk-flash-warning { background:rgba(234,179,8,0.1); border:1.5px solid rgba(234,179,8,0.3); color:#854d0e; }
+
+@keyframes sk-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@media(max-width:680px){ .sk-grid-q{grid-template-columns:1fr;} }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+
+  <div class="sk-hero">
+    <div class="sk-hero-ring-l"></div>
+    <div class="sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <div class="sk-hero-badge">🧩 {{ quiz.titre }}</div>
+      <h1>➕ Ajouter une Question</h1>
+      <p>Formation : {{ formation.titre }}</p>
+    </div>
+  </div>
+
+  <div class="container" style="max-width:860px;">
+    <div class="sk-content">
+
+      {% for type, messages in app.flashes %}
+        {% for message in messages %}
+          <div class="sk-flash sk-flash-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }}">
+            {{ type == 'success' ? '✅' : (type == 'warning' ? '⚠️' : '❌') }} {{ message }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      <a href="{{ path('app_quiz_show', {formationId: formation.id, id: quiz.id}) }}" class="sk-back">
+        ← Retour au quiz
+      </a>
+
+      {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'question-form'}}) }}
+
+      {# Question + points #}
+      <div class="sk-card">
+        <div class="sk-card-header">
+          <h5>❓ Intitulé de la Question</h5>
+        </div>
+        <div class="sk-card-body">
+          <div class="sk-grid-q">
+            <div>
+              {{ form_row(form.contenu) }}
+              <div id="contenu-error" class="sk-error">Le contenu de la question est obligatoire !</div>
+            </div>
+            <div>{{ form_row(form.points) }}</div>
+          </div>
+        </div>
+      </div>
+
+      {# Options #}
+      <div class="sk-card">
+        <div class="sk-card-header">
+          <h5>☑️ Options de réponse</h5>
+          <small>Cochez la ou les réponses correctes</small>
+        </div>
+        <div class="sk-card-body">
+          {% set letters = ['A','B','C','D'] %}
+          {% for optionForm in form.optionQuestions %}
+          <div class="sk-option-row" data-index="{{ loop.index0 }}">
+            <span class="sk-option-letter">{{ letters[loop.index0] ?? loop.index }}</span>
+            <div class="sk-option-input">
+              {{ form_widget(optionForm.contenu, {'attr': {
+                'placeholder': 'Option ' ~ (letters[loop.index0] ?? loop.index) ~ '...',
+                'class': 'option-contenu-field'
+              }}) }}
+              <div class="sk-error option-error"></div>
+            </div>
+            <div class="sk-option-check">
+              {{ form_widget(optionForm.estCorrect, {'attr': {'class': 'correct-check'}}) }}
+              <label>Correcte</label>
+            </div>
+            {{ form_widget(optionForm.ordre) }}
+          </div>
+          {% endfor %}
+          <div id="correct-answer-error" class="sk-error" style="font-weight:700;">
+            ⚠️ Veuillez cocher au moins une réponse correcte !
+          </div>
+        </div>
+      </div>
+
+      <div class="sk-form-actions">
+        <a href="{{ path('app_quiz_show', {formationId: formation.id, id: quiz.id}) }}" class="sk-btn sk-btn-ghost">
+          ← Annuler
+        </a>
+        <button type="submit" form="question-form" class="sk-btn sk-btn-primary">
+          ✅ Enregistrer la question
+        </button>
+      </div>
+
+      {{ form_end(form) }}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  // ── Highlight correct rows on checkbox change ──
+  function refreshRowStyles() {
+    document.querySelectorAll('.sk-option-row').forEach(function (row) {
+      const chk = row.querySelector('.correct-check');
+      if (chk) row.classList.toggle('is-correct', chk.checked);
+    });
+  }
+  document.querySelectorAll('.correct-check').forEach(function (chk) {
+    chk.addEventListener('change', function () {
+      refreshRowStyles();
+      document.getElementById('correct-answer-error').style.display = 'none';
+    });
+  });
+  refreshRowStyles();
+
+  // ── Clear contenu error on typing ──
+  document.querySelectorAll('[id$="_contenu"]').forEach(function (field) {
+    field.addEventListener('input', function () {
+      // main question field
+      const contenuErr = document.getElementById('contenu-error');
+      if (contenuErr) contenuErr.style.display = 'none';
+      // option field
+      const row = this.closest('.sk-option-row');
+      if (row) {
+        const err = row.querySelector('.option-error');
+        if (err) err.style.display = 'none';
+      }
+      this.style.borderColor = '';
+    });
+  });
+
+  // ── Form submit validation ──
+  document.getElementById('question-form').addEventListener('submit', function (e) {
+    var hasError = false;
+
+    // 1. Validate main question contenu
+    // Symfony generates id like "question_contenu" but we match by name ending
+    var contenuField = this.querySelector('textarea[id$="_contenu"], input[id$="_contenu"]:not([id*="optionQuestion"])');
+    // fallback: first textarea or text input in the form that is not inside an option row
+    if (!contenuField) {
+      contenuField = document.querySelector('.sk-card-body textarea, .sk-card-body input[type="text"]');
+    }
+    var contenuError = document.getElementById('contenu-error');
+    if (contenuField && contenuField.value.trim() === '') {
+      e.preventDefault();
+      contenuError.style.display = 'block';
+      contenuField.style.borderColor = '#dc2626';
+      contenuField.focus();
+      hasError = true;
+    }
+
+    // 2. Validate each option is filled
+    document.querySelectorAll('.option-contenu-field').forEach(function (opt, i) {
+      const row = opt.closest('.sk-option-row');
+      const errDiv = row ? row.querySelector('.option-error') : null;
+      if (opt.value.trim() === '') {
+        e.preventDefault();
+        opt.style.borderColor = '#dc2626';
+        if (errDiv) {
+          errDiv.textContent = 'L\'option ' + String.fromCharCode(65 + i) + ' est obligatoire !';
+          errDiv.style.display = 'block';
+        }
+        if (!hasError) opt.focus();
+        hasError = true;
+      }
+    });
+
+    // 3. Validate at least one correct answer checked
+    var correctError = document.getElementById('correct-answer-error');
+    if (document.querySelectorAll('.correct-check:checked').length === 0) {
+      e.preventDefault();
+      correctError.style.display = 'block';
+      hasError = true;
+    }
+
+    // If no JS errors, let the form submit normally
+  });
+});
+</script>
+{% endblock %}

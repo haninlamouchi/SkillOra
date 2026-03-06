@@ -1,0 +1,176 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}Détail Évaluation — Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <a href="{{ path('app_admin_evaluations') }}" class="btn btn-outline-primary btn-sm mb-3">
+                <i class="fas fa-arrow-left me-2"></i>Retour aux évaluations
+            </a>
+        </div>
+    </div>
+
+    {# En-tête #}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="mb-2">{{ livrable.challenge.titre }}</h3>
+                    <p class="text-muted mb-3">Groupe : {{ livrable.groupe.nomGroupe }}</p>
+                    <p class="text-sm text-muted">Évalué le {{ livrable.dateEvaluation|date('d/m/Y à H:i') }}</p>
+                    
+                    <div class="bg-gradient-success p-4 rounded-3 d-inline-block mt-3">
+                        <p class="text-white text-xs mb-1">NOTE GLOBALE</p>
+                        <h1 class="text-white mb-0">{{ livrable.noteGlobale }}/20</h1>
+                        <p class="text-white text-sm mb-0">
+                            {% if livrable.noteGlobale >= 16 %}⭐⭐⭐⭐⭐ Excellent
+                            {% elseif livrable.noteGlobale >= 14 %}⭐⭐⭐⭐ Très bien
+                            {% elseif livrable.noteGlobale >= 12 %}⭐⭐⭐ Bien
+                            {% elseif livrable.noteGlobale >= 10 %}⭐⭐ Passable
+                            {% else %}⭐ À améliorer{% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Liens #}
+    <div class="row mb-4">
+        <div class="col-md-6">
+            {% if livrable.githubUrl %}
+            <div class="card bg-gradient-info">
+                <div class="card-body">
+                    <a href="{{ livrable.githubUrl }}" target="_blank" class="text-white text-decoration-none">
+                        <i class="fab fa-github fa-2x mb-2"></i>
+                        <p class="mb-0">Voir le repository GitHub →</p>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            {% set hasRealFile = livrable.fichier and (livrable.fichier starts with 'github_') == false %}
+            {% if hasRealFile %}
+            <div class="card bg-gradient-success">
+                <div class="card-body">
+                    <a href="{{ asset('uploads/' ~ livrable.fichier) }}" download class="text-white text-decoration-none">
+                        <i class="fas fa-download fa-2x mb-2"></i>
+                        <p class="mb-0">Télécharger le fichier</p>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Notes par critère #}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h6>📊 Détail des Notes</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                                <span class="font-weight-bold">Qualité du code</span>
+                                <span class="badge bg-gradient-primary">{{ livrable.noteCode }}/20</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                                <span class="font-weight-bold">Fonctionnalités</span>
+                                <span class="badge bg-gradient-primary">{{ livrable.noteFonctionnalites }}/20</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                                <span class="font-weight-bold">Design / UX</span>
+                                <span class="badge bg-gradient-primary">{{ livrable.noteDesign }}/20</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                                <span class="font-weight-bold">Documentation</span>
+                                <span class="badge bg-gradient-primary">{{ livrable.noteDocumentation }}/20</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Feedback #}
+    {% if livrable.pointsForts or livrable.pointsAmeliorer or livrable.suggestions %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h6>💬 Feedback du Responsable</h6>
+                </div>
+                <div class="card-body">
+                    {% if livrable.pointsForts %}
+                    <div class="mb-3">
+                        <h6 class="text-success">✅ Points Forts</h6>
+                        <div class="p-3 bg-gradient-success bg-opacity-10 rounded">
+                            <p class="mb-0" style="white-space:pre-line;">{{ livrable.pointsForts }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if livrable.pointsAmeliorer %}
+                    <div class="mb-3">
+                        <h6 class="text-danger">❌ Points à Améliorer</h6>
+                        <div class="p-3 bg-gradient-danger bg-opacity-10 rounded">
+                            <p class="mb-0" style="white-space:pre-line;">{{ livrable.pointsAmeliorer }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if livrable.suggestions %}
+                    <div>
+                        <h6 class="text-info">💡 Suggestions</h6>
+                        <div class="p-3 bg-gradient-info bg-opacity-10 rounded">
+                            <p class="mb-0" style="white-space:pre-line;">{{ livrable.suggestions }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Notes individuelles #}
+    {% if livrable.evaluationsMembres|length > 0 %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h6>👥 Notes Individuelles</h6>
+                </div>
+                <div class="card-body">
+                    {% for evaluation in livrable.evaluationsMembres %}
+                    <div class="p-3 bg-light rounded mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">{{ evaluation.user.fullName }}</h6>
+                            <span class="badge bg-gradient-success fs-5">{{ evaluation.noteIndividuelle }}/20</span>
+                        </div>
+                        {% if evaluation.commentaireIndividuel %}
+                        <div class="bg-white p-2 rounded">
+                            <small class="text-muted">💬 {{ evaluation.commentaireIndividuel }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

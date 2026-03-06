@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
+
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+# See also https://symfony.com/doc/current/service_container/import.html
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+# yaml-language-server: $schema=../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
+
+parameters:
+    uploads_directory: '%kernel.project_dir%/public/uploads'
+    publications_directory: '%kernel.project_dir%/public/uploads/publications'
+    photos_directory: '%kernel.project_dir%/public/uploads/photos'
+    formations_images_directory: '%kernel.project_dir%/public/uploads/formations'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    App\Controller\:
+        resource: '../src/Controller/'
+        tags: ['controller.service_arguments']
+
+    App\Service\GithubService:
+        arguments:
+            $githubToken: '%env(GITHUB_TOKEN)%'
+
+    App\Service\BrevoMailingService:
+        arguments:
+            $brevoApiKey: '%env(BREVO_API_KEY)%'
+
+    App\Service\ModerationService:
+        arguments:
+            $sightengineUser:   '%env(SIGHTENGINE_USER)%'
+            $sightengineSecret: '%env(SIGHTENGINE_SECRET)%'
+    
+    App\Service\AiSuggestionService:
+        arguments:
+            $groqApiKey: '%env(GROQ_API_KEY)%'
+    
+    App\Service\GroqService:
+        arguments:
+            $groqApiKey: '%env(GROQ_API_KEY)%'
+    
+    App\Service\PublicationAIService:
+        arguments:
+            $groqApiKey: '%env(GROQ_API_KEY)%'
+       # ✅ Twilio SMS Service
+    App\Service\SmsService:
+        arguments:
+            $twilioSid:   '%env(TWILIO_SID)%'
+            $twilioToken: '%env(TWILIO_TOKEN)%'
+            $twilioFrom:  '%env(TWILIO_FROM)%'
+    # ✅ Gemini AI Service
+    App\Service\GeminiService:
+        arguments:
+            $geminiApiKey: '%env(GEMINI_API_KEY)%'
+    
+    App\Service\CloudinaryService:
+        arguments:
+            $cloudinaryUrl: '%env(CLOUDINARY_URL)%'
+
+  

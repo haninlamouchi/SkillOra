@@ -1,0 +1,197 @@
+﻿{% extends 'backoffice/base.html.twig' %}
+{% block title %}Modifier la Question â€” {{ quiz.titre }} | Admin SkillOra{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root { --sk-primary:#131212; --sk-primary-dark:#040404; --sk-primary-light:#1e1d1d; --sk-red:#bf0000; }
+.fo-page { font-family:"Inter",sans-serif; color:#1e2130; }
+.fo-hero { background:linear-gradient(135deg,#131212 0%,#2a0000 50%,#1e1d1d 100%); border-radius:18px; position:relative; overflow:hidden; padding:32px 36px; }
+.fo-hero::before { content:''; position:absolute; top:-80px; right:-80px; width:380px; height:380px; background:radial-gradient(circle,rgba(191,0,0,.18) 0%,transparent 65%); pointer-events:none; }
+.fo-hero-title { font-size:1.45rem; font-weight:700; color:#fff; letter-spacing:-.02em; }
+.fo-breadcrumb a { color:rgba(255,255,255,.45); font-size:.76rem; text-decoration:none; }
+.fo-breadcrumb a:hover { color:rgba(255,255,255,.7); }
+.fo-breadcrumb-sep { color:rgba(255,255,255,.25); margin:0 6px; font-size:.7rem; }
+.fo-form-card { border:none !important; border-radius:16px !important; box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 20px rgba(0,0,0,.06) !important; overflow:hidden; margin-bottom:16px; }
+.fo-form-card .card-header { background:#fff; padding:16px 22px; border-bottom:1px solid #f1f2f6 !important; display:flex; align-items:center; gap:10px; }
+.fo-form-card .card-header .s-icon { width:36px; height:36px; border-radius:50%; background:rgba(191,0,0,.1); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.fo-form-card .card-header .s-icon i { color:var(--sk-red); }
+.fo-form-card .card-header .s-title { font-size:.9rem; font-weight:700; color:#1e2130; }
+.fo-form-card .card-body { padding:24px; }
+.fo-form-card .form-label { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#6b7280; margin-bottom:5px; }
+.fo-form-card .form-control, .fo-form-card .form-select { border-radius:10px; border-color:#e5e7eb; font-size:.875rem; padding:9px 13px; transition:border-color .15s, box-shadow .15s; }
+.fo-form-card .form-control:focus, .fo-form-card .form-select:focus { border-color:var(--sk-red); box-shadow:0 0 0 3px rgba(191,0,0,.1); }
+.fo-form-card textarea.form-control { min-height:80px; resize:vertical; }
+.opt-row { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:12px; border:1px solid #eef0f8; background:#f8f9fe; transition:all .2s; margin-bottom:10px; }
+.opt-row:last-child { margin-bottom:0; }
+.opt-row:hover { border-color:#e2e8f0; background:#f1f5ff; }
+.opt-row.is-correct { border-color:rgba(34,197,94,.3) !important; background:rgba(34,197,94,.06) !important; }
+.opt-badge { width:30px; height:30px; border-radius:8px; background:#e5e7eb; color:#6b7280; font-weight:800; font-size:.75rem; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+.opt-row.is-correct .opt-badge { background:#16a34a; color:#fff; }
+.opt-checkbox-wrap { display:flex; align-items:center; gap:6px; margin-left:auto; flex-shrink:0; }
+.opt-checkbox-wrap .form-check-input { width:18px; height:18px; border-radius:5px; cursor:pointer; }
+.opt-checkbox-wrap .form-check-input:checked { background-color:#16a34a; border-color:#16a34a; }
+.opt-checkbox-wrap label { font-size:.75rem; font-weight:700; color:#6b7280; cursor:pointer; white-space:nowrap; }
+.opt-row.is-correct .opt-checkbox-wrap label { color:#16a34a; }
+.btn-save { background:var(--sk-red); color:#fff; border:none; border-radius:10px; padding:9px 24px; font-size:.85rem; font-weight:600; display:inline-flex; align-items:center; gap:6px; transition:background .15s, box-shadow .15s; }
+.btn-save:hover { background:#a00000; color:#fff; box-shadow:0 4px 12px rgba(191,0,0,.3); }
+.btn-cancel { background:#f3f4f6; color:#4b5563; border:none; border-radius:10px; padding:9px 20px; font-size:.85rem; font-weight:600; display:inline-flex; align-items:center; gap:6px; text-decoration:none; transition:background .15s; }
+.btn-cancel:hover { background:#e5e7eb; color:#374151; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="fo-page">
+
+{% for type, messages in app.flashes %}
+  {% for message in messages %}
+  <div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }} alert-dismissible fade show d-flex align-items-center gap-2 mb-3 rounded-3" role="alert">
+    <i class="mdi mdi-{{ type == 'success' ? 'check-circle-outline' : 'alert-circle-outline' }} fs-6"></i>
+    <span>{{ message }}</span>
+    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+{% endfor %}
+
+<div class="fo-hero mb-4">
+  <div class="fo-breadcrumb mb-2">
+    <a href="{{ path('admin_dashboard') }}">Dashboard</a>
+    <span class="fo-breadcrumb-sep">â€º</span>
+    <a href="{{ path('admin_formation_show', {id: formation.id}) }}">{{ formation.titre|slice(0,40) }}{% if formation.titre|length > 40 %}â€¦{% endif %}</a>
+    <span class="fo-breadcrumb-sep">â€º</span>
+    <a href="{{ path('admin_quiz_show', {formationId: formation.id, id: quiz.id}) }}">{{ quiz.titre|slice(0,35) }}{% if quiz.titre|length > 35 %}â€¦{% endif %}</a>
+    <span class="fo-breadcrumb-sep">â€º</span>
+    <span style="color:rgba(255,255,255,.7)">Modifier la question</span>
+  </div>
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div class="fo-hero-title d-flex align-items-center gap-2">
+      <i class="mdi mdi-pencil-outline" style="font-size:1.3rem;color:rgba(255,255,255,.55)"></i>
+      Modifier la Question
+    </div>
+    <a href="{{ path('admin_quiz_show', {formationId: formation.id, id: quiz.id}) }}"
+       class="btn btn-sm d-inline-flex align-items-center gap-1"
+       style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);border-radius:8px">
+      <i class="mdi mdi-arrow-left"></i> Retour
+    </a>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'question-form'}}) }}
+
+    {% if form.vars.submitted and not form.vars.valid %}
+    <div class="alert alert-danger d-flex align-items-center gap-2 rounded-3 mb-3" role="alert">
+      <i class="mdi mdi-alert-circle-outline"></i>
+      <strong>Veuillez corriger les erreurs ci-dessous avant de continuer.</strong>
+    </div>
+    {% endif %}
+
+    {# Question content + points #}
+    <div class="card fo-form-card">
+      <div class="card-header">
+        <div class="s-icon"><i class="mdi mdi-help-circle-outline"></i></div>
+        <span class="s-title">IntitulÃ© de la Question</span>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-9">{{ form_row(form.contenu) }}</div>
+          <div class="col-md-3">{{ form_row(form.points) }}</div>
+        </div>
+      </div>
+    </div>
+
+    {# Options #}
+    <div class="card fo-form-card">
+      <div class="card-header">
+        <div class="s-icon"><i class="mdi mdi-format-list-checks"></i></div>
+        <span class="s-title">Options de rÃ©ponse</span>
+        <span style="font-size:.72rem;color:#9ca3af;margin-left:4px">â€” cochez la ou les rÃ©ponses correctes</span>
+      </div>
+      <div class="card-body">
+        {% set letters = ['A','B','C','D'] %}
+        {% for optionForm in form.optionQuestions %}
+        <div class="opt-row" id="opt-row-{{ loop.index0 }}">
+          <div class="opt-badge">{{ letters[loop.index0] ?? loop.index }}</div>
+          <div class="flex-grow-1">
+            {{ form_widget(optionForm.contenu, {'attr': {'placeholder': 'Texte de l\'option ' ~ (letters[loop.index0] ?? loop.index) ~ 'â€¦', 'class': 'form-control'}}) }}
+            {{ form_errors(optionForm.contenu) }}
+          </div>
+          <div class="opt-checkbox-wrap">
+            {{ form_widget(optionForm.estCorrect, {'attr': {'class': 'form-check-input correct-check', 'id': 'opt-check-' ~ loop.index0}}) }}
+            <label for="opt-check-{{ loop.index0 }}">Correcte</label>
+          </div>
+          {{ form_widget(optionForm.ordre) }}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-5 pt-1">
+      <a href="{{ path('admin_quiz_show', {formationId: formation.id, id: quiz.id}) }}" class="btn-cancel">
+        <i class="mdi mdi-close"></i> Annuler
+      </a>
+      <button type="submit" class="btn-save">
+        <i class="mdi mdi-check"></i> Enregistrer les modifications
+      </button>
+    </div>
+
+    {{ form_end(form) }}
+  </div>
+</div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.correct-check').forEach(function(chk, i) {
+    var row = document.getElementById('opt-row-' + i);
+    function sync() { if(row) row.classList.toggle('is-correct', chk.checked); }
+    sync();
+    chk.addEventListener('change', sync);
+  });
+  function showInlineError(field, msg) {
+    field.classList.add('is-invalid');
+    var fb = field.parentNode.querySelector('.js-invalid-fb');
+    if (!fb) { fb = document.createElement('div'); fb.className = 'invalid-feedback d-block js-invalid-fb'; field.parentNode.appendChild(fb); }
+    fb.textContent = msg;
+  }
+  function clearErrors() {
+    document.querySelectorAll('.is-invalid').forEach(function(el){el.classList.remove('is-invalid');});
+    document.querySelectorAll('.js-invalid-fb').forEach(function(el){el.remove();});
+    var b = document.getElementById('js-error-banner'); if(b) b.remove();
+  }
+  function showBanner(form, msg) {
+    if (document.getElementById('js-error-banner')) return;
+    var b = document.createElement('div');
+    b.id = 'js-error-banner';
+    b.className = 'alert alert-danger d-flex align-items-center gap-2 rounded-3 mb-3';
+    b.innerHTML = '<i class="mdi mdi-alert-circle-outline"></i><strong>' + (msg || 'Veuillez corriger les erreurs ci-dessous.') + '</strong>';
+    form.prepend(b);
+  }
+  document.querySelector('.question-form').addEventListener('submit', function(e) {
+    clearErrors();
+    var valid = true; var form = this;
+    var contenu = document.getElementById('question_contenu');
+    if (!contenu || contenu.value.trim() === '') {
+      e.preventDefault(); valid = false;
+      if(contenu) showInlineError(contenu, "L'intitulÃ© de la question est obligatoire.");
+      showBanner(form);
+    }
+    document.querySelectorAll('[id^="question_optionQuestions_"][id$="_contenu"]').forEach(function(opt, i) {
+      if (opt.value.trim() === '') {
+        e.preventDefault(); valid = false;
+        showInlineError(opt, "Le texte de l'option " + String.fromCharCode(65+i) + ' est obligatoire.');
+        showBanner(form);
+      }
+    });
+    if (valid && document.querySelectorAll('.correct-check:checked').length === 0) {
+      e.preventDefault();
+      showBanner(form, 'Veuillez cocher au moins une rÃ©ponse correcte parmi les options.');
+    }
+  });
+});
+</script>
+{% endblock %}

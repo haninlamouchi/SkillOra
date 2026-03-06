@@ -1,0 +1,789 @@
+{#
+  templates/components/_publication_ai_helper.html.twig
+  
+  Composant d'aide IA pour créer une publication
+  Utilise Groq pour générer une description à partir de mots-clés
+  
+  Paramètres:
+  - title_input_id: ID de l'input titre (ex: 'publication_titre')
+  - content_input_id: ID de l'input contenu (ex: 'publication_contenu')
+  - show_suggestions: true | false (afficher suggestions d'écriture)
+#}
+
+<div class="publication-ai-helper" data-ai-helper>
+  
+  {# Étape 1: Génération IA #}
+  <div class="ai-section">
+    
+    <div class="ai-header">
+      <span style="font-size: 24px;">🤖</span>
+      <h3>Créer une publication avec l'IA</h3>
+    </div>
+
+    <p class="ai-description">
+      Entrez des mots-clés et l'IA générera un titre et une description pour votre publication.
+    </p>
+
+    {# Input mots-clés #}
+    <div class="ai-form-group">
+      <label for="ai-keywords" class="ai-label">
+        Mots-clés (séparés par des virgules ou espaces)
+      </label>
+      <input 
+        type="text" 
+        id="ai-keywords"
+        placeholder="Ex: symfony, php, api rest, développement backend"
+        class="ai-input"
+        data-ai-keywords
+      >
+      <p class="ai-hint">
+        Exemple: "machine learning python tensorflow"
+      </p>
+    </div>
+
+    {# Selecteurs de paramètres #}
+    <div class="ai-grid">
+      
+      {# Ton #}
+      <div class="ai-form-group">
+        <label for="ai-tone" class="ai-label">
+          Ton
+        </label>
+        <select id="ai-tone" class="ai-select" data-ai-tone>
+          <option value="friendly">Amical & engageant</option>
+          <option value="formal">Formel & professionnel</option>
+          <option value="technical">Technique & précis</option>
+          <option value="casual">Décontracté & accessible</option>
+        </select>
+      </div>
+
+      {# Longueur #}
+      <div class="ai-form-group">
+        <label for="ai-length" class="ai-label">
+          Longueur
+        </label>
+        <select id="ai-length" class="ai-select" data-ai-length>
+          <option value="300">Court (300 caractères)</option>
+          <option value="500" selected>Moyen (500 caractères)</option>
+          <option value="800">Long (800 caractères)</option>
+        </select>
+      </div>
+    </div>
+
+    {# Bouton génération #}
+    <button 
+      type="button"
+      id="ai-generate-btn"
+      class="ai-btn ai-btn-primary"
+      style="width: 100%;"
+      data-ai-generate-btn>
+      <span>✨</span>
+      <span>Générer titre et contenu</span>
+    </button>
+
+    {# Loading indicator #}
+    <div id="ai-loading" class="ai-loading">
+      <div class="ai-spinner">⏳</div>
+      <span>Génération en cours...</span>
+    </div>
+
+    {# Error message #}
+    <div id="ai-error" class="ai-alert ai-alert-error" data-ai-error>
+    </div>
+  </div>
+
+  {# Étape 2: Formulaire de publication (masqué au début) #}
+  <div id="ai-publication-form" class="ai-section" style="display: none;">
+    
+    <div class="ai-header">
+      <span style="font-size: 24px;">📝</span>
+      <h3>Finaliser votre publication</h3>
+    </div>
+
+    {# Titre #}
+    <div class="ai-form-group">
+      <label for="pub-title" class="ai-label">
+        Titre
+      </label>
+      <input 
+        type="text" 
+        id="pub-title"
+        class="ai-input"
+        placeholder="Titre de la publication"
+      >
+    </div>
+
+    {# Description #}
+    <div class="ai-form-group">
+      <label for="pub-content" class="ai-label">
+        Contenu
+      </label>
+      <textarea 
+        id="pub-content"
+        class="ai-input"
+        rows="6"
+        placeholder="Description de la publication"
+      ></textarea>
+    </div>
+
+    {# Type de contenu #}
+    <div class="ai-form-group">
+      <label for="pub-type" class="ai-label">
+        Type de contenu
+      </label>
+      <select id="pub-type" class="ai-select">
+        <option value="texte">Texte seul</option>
+        <option value="image">Image</option>
+        <option value="video">Vidéo</option>
+      </select>
+    </div>
+
+    {# Upload image/vidéo (masqué par défaut) #}
+    <div id="pub-media-upload" class="ai-form-group" style="display: none;">
+      <label for="pub-media" class="ai-label">
+        📁 Fichier (Image ou Vidéo)
+      </label>
+      <input 
+        type="file" 
+        id="pub-media"
+        class="ai-input"
+        accept="image/*,video/*"
+      >
+      <p class="ai-hint">
+        Formats acceptés: <strong>Images</strong> (JPG, PNG, GIF) • <strong>Vidéos</strong> (MP4, WEBM, MOV)
+      </p>
+    </div>
+
+    {# Boutons d'action #}
+    <div class="ai-buttons">
+      <button 
+        type="button"
+        id="ai-regenerate-btn"
+        class="ai-btn ai-btn-secondary">
+        🔄 Régénérer
+      </button>
+
+      <button 
+        type="button"
+        id="ai-publish-btn"
+        class="ai-btn ai-btn-success">
+        🚀 Publier
+      </button>
+    </div>
+
+    {# Success message #}
+    <div id="ai-success" class="ai-alert ai-alert-success" data-ai-success>
+      <span>✓</span>
+      <span id="ai-success-message">Publication créée avec succès!</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function initAIHelper() {
+  console.log('AI Helper: Initializing...');
+  
+  // Retry logic for when component is added dynamically
+  function tryInitialize() {
+    const helper = document.querySelector('[data-ai-helper]');
+    if (!helper) {
+      console.warn('AI Helper: Component not found in DOM, retrying...');
+      setTimeout(tryInitialize, 100);
+      return;
+    }
+
+    console.log('AI Helper: Component found, initializing event listeners...');
+
+    // Get DOM elements
+    const keywordsInput = document.getElementById('ai-keywords');
+    const toneSelect = document.getElementById('ai-tone');
+    const lengthSelect = document.getElementById('ai-length');
+    const generateBtn = document.getElementById('ai-generate-btn');
+    
+    const loadingEl = document.getElementById('ai-loading');
+    const errorEl = document.getElementById('ai-error');
+    const successEl = document.getElementById('ai-success');
+    
+    // Step 2 form elements
+    const publicationForm = document.getElementById('ai-publication-form');
+    const titleInput = document.getElementById('pub-title');
+    const contentInput = document.getElementById('pub-content');
+    const typeSelect = document.getElementById('pub-type');
+    const mediaUploadDiv = document.getElementById('pub-media-upload');
+    const mediaInput = document.getElementById('pub-media');
+    const regenerateBtn = document.getElementById('ai-regenerate-btn');
+    const publishBtn = document.getElementById('ai-publish-btn');
+
+    // Verify required elements
+    if (!keywordsInput || !generateBtn) {
+      console.error('AI Helper: Required elements not found', {
+        keywordsInput: !!keywordsInput,
+        generateBtn: !!generateBtn,
+        toneSelect: !!toneSelect,
+        lengthSelect: !!lengthSelect
+      });
+      return;
+    }
+
+    console.log('AI Helper: All elements found, attaching event listeners...');
+
+    // UI helpers (définies AVANT les event listeners)
+    function showLoading() {
+      console.log('AI Helper: Showing loading...');
+      loadingEl.classList.add('show');
+    }
+
+    function hideLoading() {
+      console.log('AI Helper: Hiding loading...');
+      loadingEl.classList.remove('show');
+    }
+
+    function showError(message) {
+      console.log('AI Helper: Showing error:', message);
+      errorEl.textContent = message;
+      errorEl.classList.add('show');
+      setTimeout(() => {
+        errorEl.classList.remove('show');
+      }, 5000);
+    }
+
+    function hideError() {
+      errorEl.classList.remove('show');
+    }
+
+    function showSuccess(message = 'Publication créée avec succès!') {
+      const successMessageEl = document.getElementById('ai-success-message');
+      if (successMessageEl) {
+        successMessageEl.textContent = message;
+      }
+      successEl.classList.add('show');
+    }
+
+    function hideSuccess() {
+      successEl.classList.remove('show');
+    }
+
+    // STEP 1: Generate title and description
+    if (generateBtn) {
+      console.log('AI Helper: Attaching click event to generate button');
+      generateBtn.addEventListener('click', async function(e) {
+        console.log('AI Helper: Generate button clicked!');
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const keywords = keywordsInput.value.trim();
+        console.log('AI Helper: Keywords:', keywords);
+        
+        if (!keywords) {
+          console.log('AI Helper: No keywords entered, showing error');
+          showError('Veuillez entrer au moins un mot-clé');
+          return;
+        }
+
+        console.log('AI Helper: Calling generateTitleAndDescription...');
+        await generateTitleAndDescription(keywords);
+      });
+    }
+
+    // STEP 2: Content type selector (show/hide media upload)
+    if (typeSelect) {
+      console.log('AI Helper: Attaching change event to type selector');
+      typeSelect.addEventListener('change', () => {
+        const selectedType = typeSelect.value;
+        console.log('AI Helper: Type changed to:', selectedType);
+        
+        if (selectedType === 'image' || selectedType === 'video') {
+          mediaUploadDiv.style.display = 'block';
+          console.log('AI Helper: Media upload shown');
+        } else {
+          mediaUploadDiv.style.display = 'none';
+          mediaInput.value = ''; // Clear file input
+          console.log('AI Helper: Media upload hidden');
+        }
+      });
+    }
+
+    // STEP 2: Regenerate button (go back to step 1)
+    if (regenerateBtn) {
+      regenerateBtn.addEventListener('click', () => {
+        // Clear form
+        titleInput.value = '';
+        contentInput.value = '';
+        typeSelect.value = 'texte';
+        mediaInput.value = '';
+        mediaUploadDiv.style.display = 'none';
+        
+        // Hide step 2, show step 1 (use style.display to override inline style)
+        publicationForm.style.display = 'none';
+        hideError();
+        hideSuccess();
+      });
+    }
+
+    // STEP 2: Publish button (create publication)
+    if (publishBtn) {
+      publishBtn.addEventListener('click', async () => {
+        const title = titleInput.value.trim();
+        const content = contentInput.value.trim();
+        const type = typeSelect.value;
+
+        // Validate
+        if (!title || !content) {
+          showError('Veuillez remplir le titre et le contenu');
+          return;
+        }
+
+        // If type is image/video, check for media file
+        if ((type === 'image' || type === 'video') && !mediaInput.files[0]) {
+          showError('Veuillez sélectionner un fichier ' + type);
+          return;
+        }
+
+        await publishPublication(title, content, type, mediaInput.files[0]);
+      });
+    }
+
+    // API: Generate title and description
+    async function generateTitleAndDescription(keywords) {
+      console.log('AI Helper: generateTitleAndDescription called with keywords:', keywords);
+      showLoading();
+      hideError();
+      hideSuccess();
+
+      try {
+        console.log('AI Helper: Preparing fetch request...');
+        const response = await fetch('/api/publication-ai/generate-full', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          body: JSON.stringify({
+            keywords: keywords,
+            tone: toneSelect.value,
+            maxLength: parseInt(lengthSelect.value),
+          }),
+        });
+
+        console.log('AI Helper: Response received, status:', response.status);
+
+        if (!response.ok) {
+          const data = await response.json();
+          console.error('AI Helper: Response not OK:', data);
+          throw new Error(data.error || 'Erreur lors de la génération');
+        }
+
+        const data = await response.json();
+        console.log('AI Helper: Response data:', data);
+        
+        if (data.success) {
+          console.log('AI Helper: Success! Title:', data.title);
+          console.log('AI Helper: Form elements check:', {
+            titleInput: !!titleInput,
+            contentInput: !!contentInput,
+            publicationForm: !!publicationForm
+          });
+          
+          // Populate Step 2 form with AI-generated content
+          if (titleInput && contentInput && publicationForm) {
+            titleInput.value = data.title;
+            contentInput.value = data.description;
+            console.log('AI Helper: Form populated, title:', titleInput.value);
+            
+            // Show Step 2 form (use style.display to override inline style)
+            publicationForm.style.display = 'block';
+            console.log('AI Helper: Form display set to block');
+            
+            // Scroll to form
+            publicationForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            console.log('AI Helper: Scrolled to form');
+          } else {
+            console.error('AI Helper: Form elements not found!', {
+              titleInput: !!titleInput,
+              contentInput: !!contentInput,
+              publicationForm: !!publicationForm
+            });
+            showError('Erreur: Éléments du formulaire introuvables');
+          }
+        } else {
+          console.error('AI Helper: Generation failed:', data.error);
+          showError(data.error || 'Erreur lors de la génération');
+        }
+
+      } catch (err) {
+        console.error('AI Helper: Exception caught:', err);
+        showError(err.message || 'Erreur lors de la génération');
+      } finally {
+        console.log('AI Helper: Hiding loading...');
+        hideLoading();
+      }
+    }
+
+    // API: Create publication
+    async function publishPublication(title, content, type, mediaFile) {
+      console.log('AI Helper: Publishing...', { title, content, type, hasMedia: !!mediaFile });
+      showLoading();
+      hideError();
+      hideSuccess();
+
+      try {
+        // Create FormData for multipart/form-data submission
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('content', content);
+        formData.append('type', type);
+        
+        if (mediaFile) {
+          formData.append('media', mediaFile);
+          console.log('AI Helper: Media file attached:', mediaFile.name);
+        }
+
+        const response = await fetch('/api/publication-ai/publish', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          body: formData,
+        });
+
+        console.log('AI Helper: Publish response status:', response.status);
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({ error: 'Erreur serveur' }));
+          console.error('AI Helper: Publish error:', data);
+          throw new Error(data.error || 'Erreur lors de la publication');
+        }
+
+        const data = await response.json();
+        console.log('AI Helper: Publish success:', data);
+        
+        if (data.success) {
+          // Show success message from server
+          showSuccess(data.message || 'Publication créée avec succès!');
+          
+          // Reset form after 2 seconds and close modal
+          setTimeout(() => {
+            // Reset Step 1
+            keywordsInput.value = '';
+            toneSelect.value = 'professionnel';
+            lengthSelect.value = '300';
+            
+            // Reset Step 2
+            titleInput.value = '';
+            contentInput.value = '';
+            typeSelect.value = 'texte';
+            mediaInput.value = '';
+            mediaUploadDiv.style.display = 'none';
+            publicationForm.style.display = 'none';
+            
+            hideSuccess();
+            
+            // Close modal
+            const modal = document.getElementById('aiHelperModal');
+            if (modal) {
+              modal.style.display = 'none';
+            }
+            
+            // Reload page to show new publication
+            window.location.reload();
+          }, 2000);
+        } else {
+          console.error('AI Helper: Publish failed:', data);
+          showError(data.error || 'Erreur lors de la publication');
+        }
+
+      } catch (err) {
+        console.error('AI Helper: Publish exception:', err);
+        showError(err.message || 'Erreur lors de la publication');
+      } finally {
+        hideLoading();
+      }
+    }
+
+  } // End of tryInitialize
+
+  // Start initialization
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', tryInitialize);
+  } else {
+    tryInitialize();
+  }
+})(); // End of IIFE
+</script>
+
+<style>
+.publication-ai-helper {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.ai-section {
+  background: linear-gradient(to right, #eff6ff, #eef2ff);
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.ai-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.ai-header h3 {
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.ai-description {
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 15px;
+}
+
+.ai-form-group {
+  margin-bottom: 15px;
+}
+
+.ai-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.ai-input, .ai-select {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #111827;
+  background-color: #ffffff;
+  transition: all 0.2s;
+}
+
+.ai-input:focus, .ai-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.ai-input::placeholder {
+  color: #9ca3af;
+}
+
+.ai-input[type="file"] {
+  padding: 8px 12px;
+  cursor: pointer;
+  background-color: #f9fafb;
+}
+
+.ai-input[type="file"]:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.ai-hint {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 5px;
+}
+
+.ai-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.ai-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.ai-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ai-btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.ai-btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.ai-btn-secondary {
+  background-color: #6366f1;
+  color: white;
+}
+
+.ai-btn-secondary:hover {
+  background-color: #4f46e5;
+}
+
+.ai-btn-success {
+  background-color: #10b981;
+  color: white;
+}
+
+.ai-btn-success:hover {
+  background-color: #059669;
+}
+
+.ai-btn-purple {
+  background-color: #a855f7;
+  color: white;
+}
+
+.ai-btn-purple:hover {
+  background-color: #9333ea;
+}
+
+.ai-loading {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  color: #3b82f6;
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.ai-loading.show {
+  display: flex;
+}
+
+.ai-spinner {
+  animation: spin 1s linear infinite;
+  font-size: 20px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.ai-alert {
+  display: none;
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.ai-alert.show {
+  display: block;
+}
+
+.ai-alert-error {
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.ai-alert-success {
+  background-color: #d1fae5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-alert-success.show {
+  display: flex;
+}
+
+.ai-preview-panel {
+  display: none;
+  background-color: #f9fafb;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.ai-preview-panel.show {
+  display: block;
+}
+
+.ai-preview-panel h4 {
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 15px 0;
+}
+
+.ai-preview-text {
+  padding: 15px;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.6;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 15px;
+}
+
+.ai-suggestions-panel {
+  display: none;
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.ai-suggestions-panel.show {
+  display: block;
+}
+
+.ai-suggestions-panel h4 {
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 15px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-suggestion-item {
+  padding: 12px;
+  background-color: white;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: background-color 0.15s;
+}
+
+.ai-suggestion-item:hover {
+  background-color: #fef3c7;
+}
+
+.ai-suggestion-item p {
+  font-size: 14px;
+  color: #374151;
+  margin: 0;
+}
+</style>

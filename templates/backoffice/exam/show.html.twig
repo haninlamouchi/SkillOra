@@ -1,0 +1,483 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Examen — {{ formation.titre }}{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<style>
+:root { --sk-red:#8b0000; --sk-red-dark:#4a0000; --sk-red-light:#c0392b; --sk-ink:#180808; --sk-muted:#8a7070; --sk-border:rgba(139,0,0,0.09); }
+.sk-page { padding-top:70px; }
+.sk-hero { position:relative; background:linear-gradient(135deg,#3d0000 0%,#8b0000 48%,#c23030 100%); margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%); padding:50px 20px 42px; text-align:center; overflow:hidden; }
+.sk-hero h1 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(1.6rem,3.5vw,2.2rem); font-weight:800; color:#fff; margin:0 0 8px; }
+.sk-hero p { color:rgba(255,255,255,0.6); font-size:0.95rem; margin:0; }
+.sk-content { padding:32px 0 56px; }
+.sk-card { background:#fff; border-radius:18px; border:1.5px solid var(--sk-border); box-shadow:0 2px 10px rgba(0,0,0,0.04); overflow:hidden; margin-bottom:20px; }
+.sk-card-head { padding:16px 22px; border-bottom:1.5px solid var(--sk-border); display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.sk-card-head-title { font-family:'Bricolage Grotesque',sans-serif; font-size:0.95rem; font-weight:800; color:var(--sk-ink); margin:0; }
+.sk-card-body { padding:22px; }
+.sk-btn { display:inline-flex; align-items:center; gap:7px; padding:9px 18px; border-radius:10px; font-weight:700; font-family:'DM Sans',sans-serif; font-size:0.85rem; border:none; cursor:pointer; transition:all 0.25s; text-decoration:none; }
+.sk-btn-sm { padding:6px 13px; font-size:0.80rem; }
+.sk-btn-primary { background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); color:#fff; }
+.sk-btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(139,0,0,.3); color:#fff; text-decoration:none; }
+.sk-btn-ghost { background:#f3f4f6; color:#374151; border:1.5px solid #e5e7eb; }
+.sk-btn-ghost:hover { border-color:#9ca3af; color:#111; text-decoration:none; }
+.sk-btn-danger { background:transparent; color:#dc2626; border:1.5px solid #fca5a5; }
+.sk-btn-danger:hover { background:#dc2626; color:#fff; border-color:#dc2626; text-decoration:none; }
+.sk-btn-warn { background:transparent; color:#d97706; border:1.5px solid #fcd34d; }
+.sk-btn-warn:hover { background:#d97706; color:#fff; text-decoration:none; }
+.sk-info-row { display:grid; grid-template-columns:160px 1fr; gap:8px; padding:10px 0; border-bottom:1px solid var(--sk-border); font-family:'DM Sans',sans-serif; font-size:0.88rem; }
+.sk-info-row:last-child { border-bottom:none; }
+.sk-info-label { color:var(--sk-muted); font-weight:600; }
+.sk-input { width:100%; padding:10px 14px; border:1.5px solid #e5e7eb; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:0.88rem; background:#f9f9f9; outline:none; transition:border-color .2s; }
+.sk-input:focus { border-color:var(--sk-red); background:#fff; }
+.sk-flash { border-radius:12px; padding:12px 18px; margin-bottom:14px; font-family:'DM Sans',sans-serif; font-size:0.87rem; display:flex; align-items:center; gap:10px; }
+.sk-flash-success { background:#dcfce7; color:#15803d; border:1.5px solid #bbf7d0; }
+.sk-flash-danger { background:#fee2e2; color:#dc2626; border:1.5px solid #fecaca; }
+.sk-flash-warning { background:#fef9c3; color:#854d0e; border:1.5px solid #fde68a; }
+.q-card { background:#f9f9f9; border:1.5px solid var(--sk-border); border-radius:14px; padding:16px 18px; margin-bottom:12px; }
+.q-card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+.q-type-badge { display:inline-flex; align-items:center; padding:3px 9px; border-radius:50px; font-size:0.7rem; font-weight:700; font-family:'DM Sans',sans-serif; }
+.badge-mcq  { background:#eff6ff; color:#2563eb; }
+.badge-fill { background:#f0fdf4; color:#15803d; }
+.choice-list { list-style:none; padding:0; margin:6px 0 0; display:flex; flex-direction:column; gap:4px; }
+.choice-list li { display:flex; align-items:center; gap:6px; font-family:'DM Sans',sans-serif; font-size:0.82rem; color:var(--sk-ink); }
+.choice-list li.correct { color:#15803d; font-weight:700; }
+.choice-list li.correct::before { content:'✓'; }
+.choice-list li:not(.correct)::before { content:'○'; color:#9ca3af; }
+/* modal */
+.sk-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; display:none; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
+.sk-modal-overlay.open { display:flex; }
+.sk-modal { background:#fff; border-radius:20px; max-width:600px; width:94%; box-shadow:0 24px 64px rgba(0,0,0,0.18); overflow:hidden; max-height:90vh; overflow-y:auto; }
+.sk-modal-head { padding:20px 26px; border-bottom:1.5px solid var(--sk-border); display:flex; justify-content:space-between; align-items:center; }
+.sk-modal-head-title { font-family:'Bricolage Grotesque',sans-serif; font-size:1rem; font-weight:800; color:var(--sk-ink); margin:0; }
+.sk-modal-close { background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--sk-muted); }
+.sk-modal-body { padding:22px 26px; display:flex; flex-direction:column; gap:14px; }
+.sk-modal-footer { padding:14px 26px; border-top:1.5px solid var(--sk-border); display:flex; justify-content:flex-end; gap:10px; background:#f9f9f9; }
+.sk-modal-body label { font-family:'DM Sans',sans-serif; font-size:0.77rem; font-weight:700; color:#374151; text-transform:uppercase; letter-spacing:.07em; display:block; margin-bottom:4px; }
+.choice-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.choice-row input[type=text] { flex:1; padding:8px 12px; border:1.5px solid #e5e7eb; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.85rem; }
+.choice-row input[type=radio] { accent-color:#8b0000; width:16px; height:16px; cursor:pointer; }
+@keyframes sk-up { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.sk-card { animation:sk-up .35s ease both; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+  <div class="sk-hero">
+    <div class="sk-hero-inner">
+      <h1>🎓 Examen Final — {{ formation.titre }}</h1>
+      <p>Créez et gérez l'examen de certification de cette formation</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sk-content">
+
+      {% for type, messages in app.flashes %}
+        {% for msg in messages %}
+          <div class="sk-flash sk-flash-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }}">
+            {{ type == 'success' ? '✅' : (type == 'warning' ? '⚠️' : '❌') }} {{ msg }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      <a href="{{ path('app_formation_show', {id: formation.id}) }}" class="sk-btn sk-btn-ghost sk-btn-sm" style="margin-bottom:20px;">← Retour à la formation</a>
+
+      {# ──── NO EXAM YET ────────────────────────────── #}
+      {% if not exam %}
+        <div class="sk-card">
+          <div class="sk-card-head"><span class="sk-card-head-title">➕ Créer l'examen</span></div>
+          <div class="sk-card-body">
+            <form action="{{ path('resp_exam_create', {formationId: formation.id}) }}" method="post">
+              <input type="hidden" name="_token" value="{{ csrf_token('exam_create_' ~ formation.id) }}">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                <div>
+                  <label style="font-family:'DM Sans',sans-serif;font-size:0.77rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:5px;">Titre de l'examen</label>
+                  <input type="text" name="titre" value="Examen Final" class="sk-input" required>
+                </div>
+                <div>
+                  <label style="font-family:'DM Sans',sans-serif;font-size:0.77rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:5px;">Score minimum (%)</label>
+                  <input type="number" name="passing_score" value="70" min="1" max="100" class="sk-input">
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                <div>
+                  <label style="font-family:'DM Sans',sans-serif;font-size:0.77rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:5px;">Erreurs max avant arrêt</label>
+                  <input type="number" name="max_mistakes" value="3" min="1" max="20" class="sk-input">
+                </div>
+                <div>
+                  <label style="font-family:'DM Sans',sans-serif;font-size:0.77rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:5px;">Description (optionnel)</label>
+                  <input type="text" name="description" placeholder="Instructions pour les participants" class="sk-input">
+                </div>
+              </div>
+              <button type="submit" class="sk-btn sk-btn-primary">🎓 Créer l'examen</button>
+            </form>
+          </div>
+        </div>
+
+      {# ──── EXAM EXISTS ─────────────────────────────── #}
+      {% else %}
+        {# Settings card #}
+        <div class="sk-card">
+          <div class="sk-card-head">
+            <span class="sk-card-head-title">⚙️ Paramètres de l'examen</span>
+            <div style="display:flex;gap:8px;">
+              <button type="button" class="sk-btn sk-btn-warn sk-btn-sm" onclick="document.getElementById('modalSettings').classList.add('open')">✏️ Modifier</button>
+              <form action="{{ path('resp_exam_delete', {formationId: formation.id}) }}" method="post" onsubmit="return confirm('Supprimer cet examen et toutes les tentatives ?')">
+                <input type="hidden" name="_token" value="{{ csrf_token('exam_delete_' ~ formation.id) }}">
+                <button type="submit" class="sk-btn sk-btn-danger sk-btn-sm">🗑️ Supprimer</button>
+              </form>
+            </div>
+          </div>
+          <div class="sk-card-body">
+            <div class="sk-info-row"><span class="sk-info-label">Titre</span><span>{{ exam.titre }}</span></div>
+            <div class="sk-info-row"><span class="sk-info-label">Score de réussite</span><span>{{ exam.passingScore }}%</span></div>
+            <div class="sk-info-row"><span class="sk-info-label">Erreurs max</span><span>{{ exam.maxMistakes }}</span></div>
+            <div class="sk-info-row"><span class="sk-info-label">Questions</span><span>{{ exam.questions|length }}</span></div>
+            {% if exam.description %}<div class="sk-info-row"><span class="sk-info-label">Description</span><span>{{ exam.description }}</span></div>{% endif %}
+            <div class="sk-info-row"><span class="sk-info-label">Tentatives</span><span>{{ exam.attempts|length }}</span></div>
+          </div>
+        </div>
+
+        {# Questions #}
+        <div class="sk-card">
+          <div class="sk-card-head">
+            <span class="sk-card-head-title">❓ Questions ({{ exam.questions|length }})</span>
+            <button type="button" class="sk-btn sk-btn-primary sk-btn-sm" onclick="document.getElementById('modalQuestion').classList.add('open')">➕ Ajouter une question</button>
+          </div>
+          <div class="sk-card-body">
+            {% if exam.questions|length == 0 %}
+              <div style="text-align:center;padding:30px;color:var(--sk-muted);font-family:'DM Sans',sans-serif;">
+                <div style="font-size:3rem;opacity:.25;margin-bottom:10px;">❓</div>
+                <p>Aucune question. Ajoutez des questions pour finaliser l'examen.</p>
+              </div>
+            {% else %}
+              {% for q in exam.questions %}
+                <div class="q-card">
+                  <div class="q-card-head">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                      <span class="q-type-badge {% if q.type in ['mcq','word_pick','multi_mcq'] %}badge-mcq{% else %}badge-fill{% endif %}">
+                        {% if q.type == 'mcq' %}📋 QCM{% elseif q.type == 'word_pick' %}📝 Compléter{% elseif q.type == 'multi_mcq' %}☑️ Multi-réponses{% elseif q.type == 'drag_drop' %}🔀 Glisser-déposer{% else %}✍️ Réponse libre{% endif %}
+                      </span>
+                      <span style="font-family:'DM Sans',sans-serif;font-size:0.78rem;color:var(--sk-muted);">{{ q.points }} pt{{ q.points > 1 ? 's' : '' }}</span>
+                    </div>
+                    <form action="{{ path('resp_exam_question_delete', {formationId: formation.id, qid: q.id}) }}" method="post" onsubmit="return confirm('Supprimer cette question ?')">
+                      <input type="hidden" name="_token" value="{{ csrf_token('exam_q_del_' ~ q.id) }}">
+                      <button type="submit" class="sk-btn sk-btn-danger sk-btn-sm">🗑️</button>
+                    </form>
+                  </div>
+                  <p style="font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:600;margin:0 0 6px;color:var(--sk-ink);">{{ q.questionText }}</p>
+                  {% if q.type in ['mcq', 'word_pick'] %}
+                    <ul class="choice-list">
+                      {% for c in q.choices %}
+                        <li class="{{ c.correct ? 'correct' : '' }}">{{ c.choiceText }}</li>
+                      {% endfor %}
+                    </ul>
+                  {% elseif q.type == 'multi_mcq' %}
+                    <ul class="choice-list">
+                      {% for c in q.choices %}
+                        <li class="{{ c.correct ? 'correct' : '' }}">{{ c.correct ? '☑️' : '☐' }} {{ c.choiceText }}</li>
+                      {% endfor %}
+                    </ul>
+                  {% elseif q.type == 'drag_drop' %}
+                    <ol style="margin:6px 0 0;padding-left:18px;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--sk-ink);">
+                      {% set items = q.correctAnswer|json_decode %}
+                      {% if items %}
+                        {% for item in items %}
+                          <li>{{ item }}</li>
+                        {% endfor %}
+                      {% else %}
+                        {% for c in q.choices %}
+                          <li>{{ c.choiceText }}</li>
+                        {% endfor %}
+                      {% endif %}
+                    </ol>
+                  {% else %}
+                    <p style="font-family:'DM Sans',sans-serif;font-size:0.82rem;color:#15803d;margin:4px 0 0;">✓ Réponse attendue : <strong>{{ q.correctAnswer }}</strong></p>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            {% endif %}
+          </div>
+        </div>
+
+        {# Attempts #}
+        {% if exam.attempts|length > 0 %}
+        <div class="sk-card">
+          <div class="sk-card-head"><span class="sk-card-head-title">📊 Tentatives ({{ exam.attempts|length }})</span></div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-family:'DM Sans',sans-serif;font-size:0.85rem;">
+              <thead>
+                <tr style="border-bottom:1.5px solid var(--sk-border);">
+                  <th style="padding:10px 16px;text-align:left;color:var(--sk-muted);font-size:0.70rem;text-transform:uppercase;letter-spacing:.07em;">Participant</th>
+                  <th style="padding:10px 16px;text-align:center;">Score</th>
+                  <th style="padding:10px 16px;text-align:center;">Résultat</th>
+                  <th style="padding:10px 16px;text-align:center;">Erreurs</th>
+                  <th style="padding:10px 16px;text-align:right;">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for a in exam.attempts %}
+                <tr style="border-bottom:1px solid var(--sk-border);">
+                  <td style="padding:10px 16px;font-weight:700;">{{ a.user.fullName }}</td>
+                  <td style="padding:10px 16px;text-align:center;">{{ a.score }}/{{ a.totalPoints }}</td>
+                  <td style="padding:10px 16px;text-align:center;">
+                    {% if a.status == 'passed' %}
+                      <span style="background:#dcfce7;color:#15803d;padding:3px 10px;border-radius:50px;font-size:0.71rem;font-weight:700;">✓ Réussi ({{ a.percentage }}%)</span>
+                    {% elseif a.status == 'stopped' %}
+                      <span style="background:#fee2e2;color:#dc2626;padding:3px 10px;border-radius:50px;font-size:0.71rem;font-weight:700;">⛔ Arrêté</span>
+                    {% else %}
+                      <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:50px;font-size:0.71rem;font-weight:700;">✗ Échoué ({{ a.percentage }}%)</span>
+                    {% endif %}
+                  </td>
+                  <td style="padding:10px 16px;text-align:center;color:{{ a.mistakeCount >= exam.maxMistakes ? '#dc2626' : 'var(--sk-ink)' }};">{{ a.mistakeCount }}</td>
+                  <td style="padding:10px 16px;text-align:right;color:var(--sk-muted);font-size:0.82rem;">{{ a.startedAt|date('d/m/Y H:i') }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% endif %}
+
+      {% endif %}{# end if exam #}
+
+    </div>
+  </div>
+</div>
+
+{# ──── Modal: Edit settings ──── #}
+{% if exam %}
+<div class="sk-modal-overlay" id="modalSettings">
+  <div class="sk-modal">
+    <div class="sk-modal-head">
+      <span class="sk-modal-head-title">⚙️ Modifier l'examen</span>
+      <button class="sk-modal-close" onclick="document.getElementById('modalSettings').classList.remove('open')">✕</button>
+    </div>
+    <form action="{{ path('resp_exam_update', {formationId: formation.id}) }}" method="post">
+      <input type="hidden" name="_token" value="{{ csrf_token('exam_update_' ~ formation.id) }}">
+      <div class="sk-modal-body">
+        <div><label>Titre</label><input type="text" name="titre" value="{{ exam.titre }}" class="sk-input" required></div>
+        <div><label>Score de réussite (%)</label><input type="number" name="passing_score" value="{{ exam.passingScore }}" min="1" max="100" class="sk-input"></div>
+        <div><label>Erreurs max</label><input type="number" name="max_mistakes" value="{{ exam.maxMistakes }}" min="1" max="20" class="sk-input"></div>
+        <div><label>Description</label><textarea name="description" rows="2" class="sk-input" style="resize:vertical;">{{ exam.description }}</textarea></div>
+      </div>
+      <div class="sk-modal-footer">
+        <button type="button" class="sk-btn sk-btn-ghost" onclick="document.getElementById('modalSettings').classList.remove('open')">Annuler</button>
+        <button type="submit" class="sk-btn sk-btn-primary">💾 Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ──── Modal: Add question ──── #}
+<div class="sk-modal-overlay" id="modalQuestion">
+  <div class="sk-modal">
+    <div class="sk-modal-head">
+      <span class="sk-modal-head-title">➕ Ajouter une question</span>
+      <button class="sk-modal-close" onclick="document.getElementById('modalQuestion').classList.remove('open')">✕</button>
+    </div>
+    <form id="questionForm">
+      <div class="sk-modal-body">
+        <div>
+          <label>Type de question</label>
+          <select id="qtype" name="type" class="sk-input" onchange="toggleQuestionType()">
+            <option value="mcq">📋 QCM (une seule réponse)</option>
+            <option value="word_pick">📝 Compléter la phrase (____)</option>
+            <option value="multi_mcq">☑️ QCM multi-réponses</option>
+            <option value="fill">✍️ Réponse libre (texte)</option>
+            <option value="drag_drop">🔀 Glisser-déposer (remettre en ordre)</option>
+          </select>
+        </div>
+        <div>
+          <label>Texte de la question</label>
+          <textarea id="qtextarea" name="question_text" rows="2" class="sk-input" placeholder="Entrez votre question..." required></textarea>
+        </div>
+        <div>
+          <label>Points</label>
+          <input type="number" name="points" id="qpoints" value="1" min="1" max="10" class="sk-input" style="width:100px;">
+        </div>
+
+        {# MCQ choices #}
+        <div id="mcqSection">
+          <label>Choix de réponses <small style="font-weight:400;text-transform:none;">(sélectionnez le bouton radio pour la bonne réponse)</small></label>
+          <div id="choicesContainer">
+            <div class="choice-row">
+              <input type="radio" name="correct_radio" value="0" checked title="Bonne réponse">
+              <input type="text" name="choice_texts[]" placeholder="Choix A" required>
+              <button type="button" class="sk-btn sk-btn-danger sk-btn-sm" onclick="removeChoice(this)">✕</button>
+            </div>
+            <div class="choice-row">
+              <input type="radio" name="correct_radio" value="1" title="Bonne réponse">
+              <input type="text" name="choice_texts[]" placeholder="Choix B" required>
+              <button type="button" class="sk-btn sk-btn-danger sk-btn-sm" onclick="removeChoice(this)">✕</button>
+            </div>
+            <div class="choice-row">
+              <input type="radio" name="correct_radio" value="2" title="Bonne réponse">
+              <input type="text" name="choice_texts[]" placeholder="Choix C" required>
+              <button type="button" class="sk-btn sk-btn-danger sk-btn-sm" onclick="removeChoice(this)">✕</button>
+            </div>
+          </div>
+          <button type="button" class="sk-btn sk-btn-ghost sk-btn-sm" style="margin-top:8px" onclick="addChoice()">+ Ajouter un choix</button>
+        </div>
+
+        {# Word-pick hint shown when that type is selected #}
+        <div id="wordPickHint" style="display:none;">
+          <p style="font-family:'DM Sans',sans-serif;font-size:0.78rem;color:#2563eb;margin:0 0 6px;padding:8px 12px;background:#eff6ff;border-radius:8px;border:1px solid #bfdbfe;">💡 Incluez <strong>____</strong> (4 tirets bas) dans le texte de la question pour indiquer l'emplacement du blanc. Exemple : <em>La capitale de la France est ____.</em></p>
+        </div>
+
+        {# Fill answer #}
+        <div id="fillSection" style="display:none;">
+          <label>Réponse correcte attendue</label>
+          <input type="text" id="fillAnswer" placeholder="Réponse exacte..." class="sk-input">
+          <p style="font-family:'DM Sans',sans-serif;font-size:0.75rem;color:var(--sk-muted);margin-top:4px;">La comparaison est insensible à la casse.</p>
+        </div>
+
+        {# Drag-drop ordered items #}
+        <div id="dragDropSection" style="display:none;">
+          <label>Éléments dans le <strong>bon ordre</strong> <small style="font-weight:400;text-transform:none;">(les participants les verront mélangés)</small></label>
+          <div id="dragItemsContainer" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
+            <input type="text" name="drag_items[]" placeholder="Élément 1 (premier dans l'ordre)" class="sk-input">
+            <input type="text" name="drag_items[]" placeholder="Élément 2" class="sk-input">
+            <input type="text" name="drag_items[]" placeholder="Élément 3" class="sk-input">
+          </div>
+          <button type="button" class="sk-btn sk-btn-ghost sk-btn-sm" onclick="addDragItem()">+ Ajouter un élément</button>
+        </div>
+      </div>
+      <div class="sk-modal-footer">
+        <button type="button" class="sk-btn sk-btn-ghost" onclick="document.getElementById('modalQuestion').classList.remove('open')">Annuler</button>
+        <button type="button" class="sk-btn sk-btn-primary" onclick="submitQuestion()">➕ Ajouter</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<script>
+function toggleQuestionType() {
+  const t = document.getElementById('qtype').value;
+  document.getElementById('mcqSection').style.display      = (t === 'mcq' || t === 'multi_mcq' || t === 'word_pick') ? '' : 'none';
+  document.getElementById('fillSection').style.display     = t === 'fill'      ? '' : 'none';
+  document.getElementById('dragDropSection').style.display = t === 'drag_drop' ? '' : 'none';
+  document.getElementById('wordPickHint').style.display    = t === 'word_pick' ? '' : 'none';
+
+  if (t === 'fill' || t === 'drag_drop') {
+    document.querySelectorAll('#mcqSection input[type=text]').forEach(i => i.removeAttribute('required'));
+  } else {
+    document.querySelectorAll('#mcqSection input[type=text]').forEach(i => i.setAttribute('required', 'required'));
+  }
+
+  // Switch between radio (mcq/word_pick) and checkbox (multi_mcq)
+  if (t === 'multi_mcq') {
+    document.querySelectorAll('#choicesContainer input[type=radio]').forEach(r => {
+      r.type = 'checkbox';
+      r.name = 'correct_indices[]';
+    });
+    const sm = document.querySelector('#mcqSection label small');
+    if (sm) sm.textContent = '(cochez toutes les bonnes réponses)';
+  } else {
+    document.querySelectorAll('#choicesContainer input[type=checkbox]').forEach(c => {
+      c.type = 'radio';
+      c.name = 'correct_radio';
+    });
+    const sm = document.querySelector('#mcqSection label small');
+    if (sm) sm.textContent = t === 'word_pick'
+      ? '(sélectionnez le bon mot)'
+      : '(sélectionnez le bouton radio pour la bonne réponse)';
+  }
+}
+function addDragItem() {
+  const container = document.getElementById('dragItemsContainer');
+  const idx = container.children.length + 1;
+  const inp = document.createElement('input');
+  inp.type  = 'text';
+  inp.name  = 'drag_items[]';
+  inp.placeholder = `Élément ${idx}`;
+  inp.className = 'sk-input';
+  container.appendChild(inp);
+}
+let choiceIndex = 3;
+function addChoice() {
+  const isMulti = document.getElementById('qtype').value === 'multi_mcq';
+  const container = document.getElementById('choicesContainer');
+  const row = document.createElement('div');
+  row.className = 'choice-row';
+  row.innerHTML = isMulti
+    ? `<input type="checkbox" name="correct_indices[]" value="${choiceIndex}" title="Bonne réponse">
+       <input type="text" name="choice_texts[]" placeholder="Choix..." required>
+       <button type="button" class="sk-btn sk-btn-danger sk-btn-sm" onclick="removeChoice(this)">✕</button>`
+    : `<input type="radio" name="correct_radio" value="${choiceIndex}" title="Bonne réponse">
+       <input type="text" name="choice_texts[]" placeholder="Choix..." required>
+       <button type="button" class="sk-btn sk-btn-danger sk-btn-sm" onclick="removeChoice(this)">✕</button>`;
+  container.appendChild(row);
+  choiceIndex++;
+  reindexRadios();
+}
+function removeChoice(btn) {
+  const rows = document.querySelectorAll('#choicesContainer .choice-row');
+  if (rows.length <= 2) return alert('Minimum 2 choix requis.');
+  btn.closest('.choice-row').remove();
+  reindexRadios();
+}
+function reindexRadios() {
+  document.querySelectorAll('#choicesContainer .choice-row').forEach((row, i) => {
+    const inp = row.querySelector('input[type=radio], input[type=checkbox]');
+    if (inp) inp.value = i;
+  });
+}
+async function submitQuestion() {
+  const type   = document.getElementById('qtype').value;
+  const text   = document.getElementById('qtextarea').value.trim();
+  const points = parseInt(document.getElementById('qpoints').value) || 1;
+  if (!text) return alert('Veuillez saisir le texte de la question.');
+
+  const formData = new FormData();
+  formData.append('_token', '{{ csrf_token('exam_q_add_' ~ formation.id) }}');
+  formData.append('type', type);
+  formData.append('question_text', text);
+  formData.append('points', points);
+
+  if (type === 'fill') {
+    const fa = document.getElementById('fillAnswer').value.trim();
+    if (!fa) return alert('Veuillez saisir la réponse correcte.');
+    formData.append('correct_answer', fa);
+  } else if (type === 'drag_drop') {
+    const items = Array.from(document.querySelectorAll('#dragItemsContainer input[name="drag_items[]"]'))
+      .map(i => i.value.trim()).filter(v => v);
+    if (items.length < 2) return alert('Veuillez saisir au moins 2 éléments.');
+    items.forEach(it => formData.append('drag_items[]', it));
+  } else if (type === 'multi_mcq') {
+    const checkedBoxes = Array.from(document.querySelectorAll('input[name="correct_indices[]"]:checked'))
+      .map(c => parseInt(c.value));
+    if (!checkedBoxes.length) return alert('Cochez au moins une bonne réponse.');
+    checkedBoxes.forEach(idx => formData.append('correct_indices[]', idx));
+    const choiceInputs = document.querySelectorAll('input[name="choice_texts[]"]');
+    let valid = true;
+    choiceInputs.forEach(i => { if (!i.value.trim()) valid = false; });
+    if (!valid) return alert('Veuillez remplir tous les choix.');
+    choiceInputs.forEach(i => formData.append('choice_texts[]', i.value.trim()));
+  } else {
+    const checkedRadio = document.querySelector('input[name=correct_radio]:checked');
+    const correctIndex = checkedRadio ? parseInt(checkedRadio.value) : 0;
+    formData.append('correct_index', correctIndex);
+    const choiceInputs = document.querySelectorAll('input[name="choice_texts[]"]');
+    let valid = true;
+    choiceInputs.forEach(i => { if (!i.value.trim()) valid = false; });
+    if (!valid) return alert('Veuillez remplir tous les choix.');
+    choiceInputs.forEach(i => formData.append('choice_texts[]', i.value.trim()));
+  }
+
+  const resp = await fetch('{{ path('resp_exam_question_add', {formationId: formation.id}) }}', {
+    method: 'POST', body: formData
+  });
+  if (resp.ok) {
+    location.reload();
+  } else {
+    const err = await resp.json();
+    alert('Erreur: ' + (err.error || 'Inconnue'));
+  }
+}
+document.querySelectorAll('.sk-modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+</script>
+{% endblock %}

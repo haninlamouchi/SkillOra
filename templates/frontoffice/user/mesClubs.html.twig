@@ -1,0 +1,165 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Mes Clubs — SkillOra{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap');
+:root{--red:#c10609;--red-mid:#8b0507;--red-soft:rgba(193,6,9,0.07);--ink:#0d0d0d;--muted:#6b6b6b;--border:#e4e4e4;--bg:#f2f2f2;--white:#fff;--amber:#d97706;--green:#059669;--radius:16px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--ink);}
+.shell{min-height:100vh;padding:100px 0 80px;}
+.wrap{max-width:1200px;margin:0 auto;padding:0 28px;}
+
+/* Header */
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:32px;flex-wrap:wrap;animation:fadeUp 0.4s ease both;}
+.page-eyebrow{font-size:0.65rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.page-eyebrow::before{content:'';width:20px;height:2px;background:var(--red);}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;color:var(--ink);margin-bottom:4px;}
+.page-title em{font-style:normal;color:var(--red);}
+.page-sub{font-size:0.82rem;color:var(--muted);}
+.btn-voir-tous{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;padding:11px 22px;border-radius:10px;font-size:0.82rem;font-weight:700;text-decoration:none;transition:all 0.2s;white-space:nowrap;}
+.btn-voir-tous:hover{background:var(--red);color:#fff;text-decoration:none;transform:translateY(-1px);}
+
+/* Flash */
+.flash{padding:12px 16px;border-radius:10px;margin-bottom:14px;font-size:0.875rem;font-weight:600;display:flex;align-items:center;gap:10px;}
+.flash-success{background:#ecfdf5;border-left:4px solid #10b981;color:#065f46;}
+.flash-warning{background:#fffbeb;border-left:4px solid #f59e0b;color:#92400e;}
+.flash-danger{background:#fef2f2;border-left:4px solid var(--red);color:#7f1d1d;}
+
+/* Grid */
+.clubs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;animation:fadeUp 0.4s 0.08s ease both;}
+
+/* Card */
+.club-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,0.04);overflow:hidden;display:flex;flex-direction:column;transition:transform 0.25s,box-shadow 0.25s,border-color 0.25s;}
+.club-card:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(0,0,0,0.10);border-color:rgba(193,6,9,0.2);}
+.club-card::before{content:'';display:block;height:3px;background:linear-gradient(90deg,var(--red),var(--red-mid));flex-shrink:0;}
+
+/* Image */
+.club-img{height:110px;background:linear-gradient(135deg,#1a1a1a,#2d2d2d);display:flex;align-items:center;justify-content:center;font-size:2.6rem;position:relative;overflow:hidden;}
+.club-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.club-img::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,0.35));}
+
+/* Body */
+.club-body{padding:18px 20px 12px;flex:1;display:flex;flex-direction:column;gap:6px;}
+.club-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.club-desc{font-size:0.75rem;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1;}
+.club-meta{display:flex;align-items:center;gap:12px;margin-top:6px;flex-wrap:wrap;}
+.club-meta-item{font-size:0.68rem;color:var(--muted);display:flex;align-items:center;gap:4px;}
+.club-meta-item i{color:var(--red);font-size:0.65rem;}
+.club-meta-item a{color:var(--muted);text-decoration:underline;text-underline-offset:2px;}
+.club-meta-item a:hover{color:var(--red);}
+
+/* Badge membre */
+.membre-badge{display:inline-flex;align-items:center;gap:5px;font-size:0.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:#ecfdf5;color:var(--green);border:1px solid #a7f3d0;padding:3px 9px;border-radius:20px;margin-top:4px;width:fit-content;}
+
+/* Footer */
+.club-foot{padding:0 20px 18px;}
+.club-sep{height:1px;background:var(--border);margin-bottom:14px;}
+
+.btn-responsable{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:10px;background:transparent;color:var(--amber);border:1.5px solid #fde68a;border-radius:9px;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.2s;background:#fffbeb;}
+.btn-responsable:hover{background:var(--amber);color:#fff;border-color:var(--amber);transform:translateY(-1px);box-shadow:0 4px 16px rgba(217,119,6,0.25);}
+
+/* Empty */
+.empty-state{text-align:center;padding:72px 24px;background:var(--white);border-radius:var(--radius);border:1px solid var(--border);animation:fadeUp 0.4s ease both;}
+.empty-ico{font-size:3rem;margin-bottom:16px;opacity:0.35;}
+.empty-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--ink);margin-bottom:8px;}
+.empty-sub{font-size:0.875rem;color:var(--muted);margin-bottom:24px;}
+.btn-discover{display:inline-flex;align-items:center;gap:8px;background:var(--red);color:#fff;padding:12px 26px;border-radius:10px;font-size:0.875rem;font-weight:700;text-decoration:none;transition:all 0.2s;}
+.btn-discover:hover{background:var(--red-mid);color:#fff;text-decoration:none;transform:translateY(-2px);box-shadow:0 6px 20px rgba(193,6,9,0.28);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.club-card{animation:fadeUp 0.4s ease both;}
+.club-card:nth-child(1){animation-delay:0.06s;}.club-card:nth-child(2){animation-delay:0.12s;}.club-card:nth-child(3){animation-delay:0.18s;}
+.club-card:nth-child(4){animation-delay:0.24s;}.club-card:nth-child(5){animation-delay:0.30s;}.club-card:nth-child(6){animation-delay:0.36s;}
+@media(max-width:1024px){.clubs-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:640px){.clubs-grid{grid-template-columns:1fr;}.wrap{padding:0 16px;}.page-header{flex-direction:column;align-items:flex-start;}}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="shell"><div class="wrap">
+
+    {% for type, messages in app.flashes %}{% for msg in messages %}
+        <div class="flash flash-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }}">
+            {{ type == 'success' ? '✅' : (type == 'warning' ? '⚠️' : '❌') }} {{ msg }}
+        </div>
+    {% endfor %}{% endfor %}
+
+    <div class="page-header">
+        <div>
+            <div class="page-eyebrow">Communauté</div>
+            <h1 class="page-title">Mes <em>Clubs</em></h1>
+            <p class="page-sub">
+                {% if clubs|length > 0 %}
+                    Vous êtes membre de {{ clubs|length }} club{{ clubs|length > 1 ? 's' : '' }}.
+                {% else %}
+                    Vous n'avez pas encore rejoint de club.
+                {% endif %}
+            </p>
+        </div>
+        <a href="{{ path('user_club_index') }}" class="btn-voir-tous">
+            <i class="fas fa-th-large"></i> Tous les clubs
+        </a>
+    </div>
+
+    {% if clubs|length > 0 %}
+    <div class="clubs-grid">
+        {% for club in clubs %}
+        <div class="club-card">
+
+            <div class="club-img">
+                {% if club.logo %}
+                    <img src="{{ vich_uploader_asset(club, 'logoFile') }}" alt="{{ club.nom }}">
+                {% else %}
+                    🏛️
+                {% endif %}
+            </div>
+
+            <div class="club-body">
+                <div class="club-name">{{ club.nom }}</div>
+                {% if club.description %}
+                    <div class="club-desc">{{ club.description }}</div>
+                {% endif %}
+                <div class="club-meta">
+                    {% if club.dateCreation %}
+                        <span class="club-meta-item"><i class="fas fa-calendar"></i> {{ club.dateCreation|date('d/m/Y') }}</span>
+                    {% endif %}
+                    {% if club.siteWeb %}
+                        <span class="club-meta-item"><i class="fas fa-globe"></i> <a href="{{ club.siteWeb }}" target="_blank" rel="noopener">Site web</a></span>
+                    {% endif %}
+                </div>
+                <span class="membre-badge"><i class="fas fa-check-circle"></i> Membre</span>
+            </div>
+
+            <div class="club-foot">
+                <div class="club-sep"></div>
+                <form method="post"
+                      action="{{ path('user_club_responsable', {'id': club.id}) }}"
+                      onsubmit="return confirm('Envoyer une demande pour devenir responsable de ce club ?')">
+                    <input type="hidden" name="_token" value="{{ csrf_token('responsable' ~ club.id) }}">
+                    <button type="submit" class="btn-responsable">
+                        <i class="fas fa-user-tie"></i> Devenir responsable
+                    </button>
+                </form>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+        <div class="empty-ico">🏛️</div>
+        <div class="empty-title">Aucun club pour le moment</div>
+        <p class="empty-sub">Vous n'avez pas encore rejoint de club.<br>Découvrez les clubs disponibles et faites une demande d'adhésion.</p>
+        <a href="{{ path('user_club_index') }}" class="btn-discover">
+            <i class="fas fa-compass"></i> Découvrir les clubs
+        </a>
+    </div>
+
+    {% endif %}
+
+</div></div>
+{% endblock %}

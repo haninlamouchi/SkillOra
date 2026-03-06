@@ -1,0 +1,160 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Évaluer le Livrable{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<style>
+:root { --sk-red:#8b0000; }
+.sk-page { padding-top:90px; padding-bottom:60px; }
+.sk-eval-card { background:#fff; border-radius:18px; padding:32px; box-shadow:0 4px 20px rgba(0,0,0,0.08); margin-bottom:24px; }
+.sk-section-title { font-size:1.1rem; font-weight:700; color:var(--sk-red); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.sk-note-input { width:100px; }
+.sk-membre-card { background:#f9f9f9; padding:16px; border-radius:12px; margin-bottom:12px; }
+.sk-btn-primary { background:linear-gradient(135deg,#8b0000,#c0392b); color:#fff; padding:12px 32px; border-radius:10px; font-weight:700; border:none; cursor:pointer; }
+.sk-btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(139,0,0,0.3); }
+.sk-btn-danger { background:#dc2626; color:#fff; padding:12px 32px; border-radius:10px; font-weight:700; border:none; cursor:pointer; margin-left:12px; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page container">
+    <a href="{{ path('app_responsable_livrables') }}" style="color:#8b0000; text-decoration:none; font-weight:600;">← Retour aux livrables</a>
+    
+    <h1 style="font-size:2rem; font-weight:800; color:#2d3748; margin:24px 0;">
+        📊 Évaluer le Livrable
+    </h1>
+    
+    <div class="sk-eval-card">
+        <h2 style="font-size:1.3rem; font-weight:700; margin-bottom:8px;">{{ livrable.challenge.titre }}</h2>
+        <p style="color:#6b7280; margin-bottom:20px;">Groupe : {{ livrable.groupe.nomGroupe }}</p>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;">
+            {% if livrable.githubUrl %}
+                <a href="{{ livrable.githubUrl }}" target="_blank" style="color:#2563eb; font-weight:600;">🔗 Voir le repository GitHub</a>
+            {% endif %}
+            {% set hasRealFile = livrable.fichier and (livrable.fichier starts with 'github_') == false %}
+            {% if hasRealFile %}
+                <a href="{{ asset('uploads/' ~ livrable.fichier) }}" download style="color:#16a34a; font-weight:600;">📥 Télécharger le fichier</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {{ form_start(form) }}
+    
+    {# Grille d'évaluation #}
+    <div class="sk-eval-card">
+        <div class="sk-section-title">📊 Grille d'Évaluation</div>
+        
+        <div style="display:grid; gap:16px;">
+            <div style="display:grid; grid-template-columns:1fr 150px; gap:12px; align-items:center;">
+                <label>{{ form_label(form.noteCode) }}</label>
+                {{ form_widget(form.noteCode, {'attr': {'class': 'sk-note-input'}}) }}
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 150px; gap:12px; align-items:center;">
+                <label>{{ form_label(form.noteFonctionnalites) }}</label>
+                {{ form_widget(form.noteFonctionnalites, {'attr': {'class': 'sk-note-input'}}) }}
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 150px; gap:12px; align-items:center;">
+                <label>{{ form_label(form.noteDesign) }}</label>
+                {{ form_widget(form.noteDesign, {'attr': {'class': 'sk-note-input'}}) }}
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 150px; gap:12px; align-items:center;">
+                <label>{{ form_label(form.noteDocumentation) }}</label>
+                {{ form_widget(form.noteDocumentation, {'attr': {'class': 'sk-note-input'}}) }}
+            </div>
+        </div>
+        
+        <div style="margin-top:20px; padding:16px; background:#dcfce7; border-radius:12px;">
+            <strong>Note globale (calculée automatiquement) :</strong>
+            <span id="noteGlobale" style="font-size:1.5rem; font-weight:800; color:#15803d; margin-left:12px;">0/20</span>
+        </div>
+    </div>
+
+    {# Feedback structuré #}
+    <div class="sk-eval-card">
+        <div class="sk-section-title">💬 Feedback Détaillé</div>
+        
+        <div style="margin-bottom:16px;">
+            {{ form_label(form.pointsForts) }}
+            {{ form_widget(form.pointsForts) }}
+        </div>
+        
+        <div style="margin-bottom:16px;">
+            {{ form_label(form.pointsAmeliorer) }}
+            {{ form_widget(form.pointsAmeliorer) }}
+        </div>
+        
+        <div>
+            {{ form_label(form.suggestions) }}
+            {{ form_widget(form.suggestions) }}
+        </div>
+    </div>
+
+    {# Évaluations individuelles #}
+    <div class="sk-eval-card">
+        <div class="sk-section-title">👥 Évaluation Individuelle des Membres</div>
+        
+        {% for membreGroupe in membres %}
+            {% set user = membreGroupe.user %}
+            <div class="sk-membre-card">
+                <h4 style="margin:0 0 12px 0; font-weight:700;">{{ user.fullName }}</h4>
+                
+                <div style="display:grid; grid-template-columns:150px 1fr; gap:16px;">
+                    <div>
+                        <label>Note individuelle (/20)</label>
+                        <input type="number" 
+                               name="note_{{ user.id }}" 
+                               class="form-control" 
+                               min="0" 
+                               max="20" 
+                               step="0.5" 
+                               placeholder="0 - 20"
+                               style="width:100px;">
+                    </div>
+                    <div>
+                        <label>Commentaire individuel</label>
+                        <textarea name="commentaire_{{ user.id }}" 
+                                  class="form-control" 
+                                  rows="2" 
+                                  placeholder="Commentaire personnalisé pour cet étudiant..."></textarea>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div style="text-align:center; margin-top:32px;">
+        <button type="submit" class="sk-btn-primary">✅ Valider et Publier l'Évaluation</button>
+        <a href="{{ path('app_responsable_livrables') }}" class="sk-btn-danger" style="text-decoration:none;">❌ Annuler</a>
+    </div>
+
+    {{ form_end(form) }}
+</div>
+
+<script>
+// Calcul automatique de la note globale
+document.addEventListener('DOMContentLoaded', function() {
+    const noteInputs = document.querySelectorAll('.sk-note-input');
+    const noteGlobale = document.getElementById('noteGlobale');
+    
+    function calculateGlobalNote() {
+        let sum = 0;
+        let count = 0;
+        
+        noteInputs.forEach(input => {
+            const value = parseFloat(input.value);
+            if (!isNaN(value) && value >= 0) {
+                sum += value;
+                count++;
+            }
+        });
+        
+        const average = count > 0 ? (sum / count).toFixed(2) : 0;
+        noteGlobale.textContent = average + '/20';
+    }
+    
+    noteInputs.forEach(input => {
+        input.addEventListener('input', calculateGlobalNote);
+    });
+});
+</script>
+{% endblock %}

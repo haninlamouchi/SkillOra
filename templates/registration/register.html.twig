@@ -1,0 +1,284 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Inscription - Skillora{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body { padding-top: 0 !important; margin: 0; }
+        .register-section {
+            padding: 110px 0 60px 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .form-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 40px rgba(193, 6, 9, 0.15);
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+            border-top: 5px solid #c10609;
+        }
+        .form-label { font-weight: 600; color: #333; font-size: 14px; }
+        .form-control {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .form-control:focus {
+            border-color: #c62828;
+            box-shadow: 0 0 0 0.2rem rgba(198, 40, 40, 0.15);
+            outline: none;
+        }
+        .form-control.is-invalid { border-color: #dc3545; }
+        .btn-primary {
+            background-color: #c62828;
+            color: white;
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #b71c1c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(198, 40, 40, 0.3);
+        }
+        .form-group { margin-bottom: 1.5rem; }
+        .alert-danger {
+            background: #ffe6e6; border: 2px solid #dc3545; color: #dc3545;
+            padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;
+        }
+        .alert-success {
+            background: #e6ffed; border: 2px solid #28a745; color: #28a745;
+            padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;
+        }
+        .form-error {
+            color: #dc3545; font-size: 12px; margin-top: 6px;
+            display: flex; align-items: center; gap: 4px; font-weight: 500;
+        }
+        .form-error::before { content: "⚠️"; font-size: 12px; }
+        .vich-image input[type="file"] {
+            display: block; width: 100%; padding: 0.75rem 1rem;
+            font-size: 14px; border: 2px solid #ddd; border-radius: 8px;
+            background: white; cursor: pointer; box-sizing: border-box;
+        }
+        .link-primary { color: #c62828; font-weight: 600; text-decoration: none; }
+        .link-primary:hover { color: #b71c1c; text-decoration: underline; }
+        .required { color: #dc3545; margin-left: 3px; font-weight: bold; }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="register-section">
+    <div class="container">
+        <div class="form-container">
+
+            <div style="text-align:center; margin-bottom:2rem;">
+                <h1>📚 Inscription sur Skillora</h1>
+                <p style="color:#666; font-size:15px;">Rejoignez notre plateforme d'apprentissage et de réussite</p>
+            </div>
+
+            {% for flash in app.flashes('error') %}
+                <div class="alert-danger">❌ {{ flash }}</div>
+            {% endfor %}
+
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}}) }}
+
+                <div class="form-group">
+                    <label class="form-label">Nom <span class="required">*</span></label>
+                    {{ form_widget(form.nom, {'attr': {'class': 'form-control' ~ (form.nom.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': 'Entrez votre nom'}}) }}
+                    {% for error in form.nom.vars.errors %}
+                        <span class="form-error">{{ error.message }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Prénom <span class="required">*</span></label>
+                    {{ form_widget(form.prenom, {'attr': {'class': 'form-control' ~ (form.prenom.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': 'Entrez votre prénom'}}) }}
+                    {% for error in form.prenom.vars.errors %}
+                        <span class="form-error">{{ error.message }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Adresse Email <span class="required">*</span></label>
+                    {{ form_widget(form.email, {'attr': {'class': 'form-control' ~ (form.email.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': 'exemple@email.com', 'id': 'emailInput'}}) }}
+                    {% for error in form.email.vars.errors %}
+                        <span class="form-error">{{ error.message }}</span>
+                    {% endfor %}
+                    <div id="emailFeedback" style="font-size:13px; margin-top:6px; padding:6px 10px; border-radius:6px; display:none;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mot de passe <span class="required">*</span></label>
+                    {{ form_widget(form.password, {'attr': {'class': 'form-control' ~ (form.password.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': '••••••••'}}) }}
+                    {% for error in form.password.vars.errors %}
+                        <span class="form-error">{{ error.message }}</span>
+                    {% endfor %}
+                    <small style="color:#999; font-size:12px;">
+                        Doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Numéro de téléphone <span class="required">*</span></label>
+                    {{ form_widget(form.telephone, {'attr': {'class': 'form-control' ~ (form.telephone.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': '+216 XX XXX XXX'}}) }}
+                    {% for error in form.telephone.vars.errors %}
+                        <span class="form-error">{{ error.message }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Photo de profil <span class="required">*</span></label>
+                    <div class="vich-image">
+                        {{ form_widget(form.photoFile) }}
+                    </div>
+                    {% for error in form.photoFile.vars.errors %}
+                        <span class="form-error">{{ error.message }}</span>
+                    {% endfor %}
+                    <small style="color:#999; font-size:12px;">Formats acceptés : JPEG, PNG, GIF — Taille max : 2Mo</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Date de naissance <span class="required">*</span></label>
+                    {{ form_widget(form.dateNaissance, {'attr': {'class': 'form-control' ~ (form.dateNaissance.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                    {% for error in form.dateNaissance.vars.errors %}
+                        <span class="form-error">{{ error.message }}</span>
+                    {% endfor %}
+                </div>
+
+                <div style="border-top: 2px solid #eee; margin-top: 2rem; padding-top: 1.5rem;">
+                    <button type="submit" class="btn-primary">🚀 Créer mon compte</button>
+                </div>
+                {# Séparateur #}
+                <div style="display:flex; align-items:center; gap:10px; margin:20px 0;">
+                    <hr style="flex:1; border-color:#eee; border-top:2px solid #eee;">
+                    <span style="color:#999; font-size:13px; white-space:nowrap;">OU S'INSCRIRE AVEC</span>
+                    <hr style="flex:1; border-color:#eee; border-top:2px solid #eee;">
+                </div>
+
+                {# Bouton Google #}
+                <a href="{{ path('connect_google') }}" style="
+                    display:flex; align-items:center; justify-content:center; gap:12px;
+                    padding:12px 20px; border:2px solid #ddd; border-radius:8px;
+                    text-decoration:none; color:#333; font-weight:600; font-size:14px;
+                    background:white; transition:all 0.3s; width:100%;
+                " onmouseover="this.style.borderColor='#c10609'; this.style.background='#fff5f5'; this.style.color='#c10609'"
+                onmouseout="this.style.borderColor='#ddd'; this.style.background='white'; this.style.color='#333'">
+                    <svg width="20" height="20" viewBox="0 0 48 48">
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    </svg>
+                    Continuer avec Google
+                </a>
+
+
+            {{ form_end(form) }}
+
+            <div style="text-align:center; margin-top:1.5rem; color:#666; font-size:14px;">
+                Vous avez déjà un compte ?
+                <a href="{{ path('app_login') }}" class="link-primary">Connectez-vous ici</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const emailInput = document.getElementById('emailInput')
+                    || document.querySelector('input[type="email"]');
+    const feedbackDiv = document.getElementById('emailFeedback');
+
+    if (!emailInput || !feedbackDiv) return;
+
+    let timer;
+
+    emailInput.addEventListener('input', function () {
+        clearTimeout(timer);
+        const email = this.value.trim();
+
+        // Champ vide → reset
+        if (email.length === 0) {
+            feedbackDiv.style.display = 'none';
+            emailInput.style.borderColor = '';
+            return;
+        }
+
+        // Feedback immédiat dès la première frappe
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.style.background = '#f0f0f0';
+        feedbackDiv.style.color = '#666';
+        feedbackDiv.style.border = 'none';
+
+        // Tant que l'email n'a pas de @ → message de guidance
+        if (!email.includes('@')) {
+            feedbackDiv.innerHTML = '✏️ Continue typing your email...';
+            emailInput.style.borderColor = '#ddd';
+            return;
+        }
+
+        feedbackDiv.innerHTML = '⏳ Checking email...';
+
+        // Attend 500ms après la dernière frappe avant d'appeler l'API
+        timer = setTimeout(async () => {
+            try {
+                const response = await fetch(`/api/validate-email?email=${encodeURIComponent(email)}`);
+
+                if (!response.ok) throw new Error('Network error');
+
+                const data = await response.json();
+
+                if (!data.isValid) {
+                    showError('❌ ' + data.message);
+                } else if (data.isDisposable) {
+                    showError('🚫 ' + data.message);
+                } else if (!data.isDns) {
+                    showError('⚠️ ' + data.message);
+                } else {
+                    showSuccess('✅ Email is valid!');
+                }
+
+            } catch (e) {
+                feedbackDiv.style.display = 'none';
+                emailInput.style.borderColor = '';
+            }
+        }, 500);
+    });
+
+    function showError(msg) {
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.style.background = '#ffe6e6';
+        feedbackDiv.style.color = '#dc3545';
+        feedbackDiv.style.border = '1px solid #dc3545';
+        feedbackDiv.innerHTML = msg;
+        emailInput.style.borderColor = '#dc3545';
+    }
+
+    function showSuccess(msg) {
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.style.background = '#e6ffed';
+        feedbackDiv.style.color = '#28a745';
+        feedbackDiv.style.border = '1px solid #28a745';
+        feedbackDiv.innerHTML = msg;
+        emailInput.style.borderColor = '#28a745';
+    }
+});
+</script>
+{% endblock %}

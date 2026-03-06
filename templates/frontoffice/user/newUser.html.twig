@@ -1,0 +1,333 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Proposer un club — SkillOra{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700;900&display=swap');
+
+:root {
+    --red:      #c10609;
+    --red-mid:  #8b0507;
+    --red-soft: rgba(193,6,9,0.07);
+    --ink:      #0d0d0d;
+    --muted:    #6b6b6b;
+    --border:   #e4e4e4;
+    --bg:       #f2f2f2;
+    --white:    #ffffff;
+    --radius:   18px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--ink); }
+
+/* ── SHELL ── */
+.form-shell {
+    min-height: 100vh;
+    padding: 100px 0 80px;
+}
+.form-wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* ── HEADER ── */
+.form-header {
+    margin-bottom: 32px;
+    animation: fadeUp 0.4s ease both;
+}
+.form-eyebrow {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--red);
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 10px;
+}
+.form-eyebrow::before {
+    content: ''; display: inline-block;
+    width: 22px; height: 2px; background: var(--red);
+}
+.form-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 8px;
+}
+.form-title em { font-style: normal; color: var(--red); }
+.form-subtitle {
+    font-size: 0.875rem;
+    color: var(--muted);
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+/* ── CARD ── */
+.form-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--red);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    overflow: hidden;
+    animation: fadeUp 0.4s 0.1s ease both;
+}
+
+/* Section labels */
+.form-section {
+    padding: 28px 36px;
+    border-bottom: 1px solid var(--border);
+}
+.form-section:last-of-type { border-bottom: none; }
+
+.section-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+}
+.section-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── FORM FIELDS ── */
+.field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+.field-row.full { grid-template-columns: 1fr; }
+
+.field-group { display: flex; flex-direction: column; }
+
+.field-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 7px;
+}
+.field-label .req { color: var(--red); margin-left: 2px; }
+
+/* Override Symfony generated inputs */
+.field-group input[type="text"],
+.field-group input[type="url"],
+.field-group input[type="date"],
+.field-group input[type="email"],
+.field-group textarea,
+.field-group select {
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--ink);
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    width: 100%;
+    appearance: none;
+}
+.field-group input:focus,
+.field-group textarea:focus,
+.field-group select:focus {
+    outline: none;
+    border-color: var(--red);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(193,6,9,0.08);
+}
+.field-group textarea { resize: vertical; min-height: 100px; }
+
+/* File input */
+.field-group input[type="file"] {
+    padding: 10px 14px;
+    border: 1.5px dashed var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    font-size: 0.82rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    width: 100%;
+}
+.field-group input[type="file"]:hover {
+    border-color: var(--red);
+    background: var(--red-soft);
+}
+
+/* Errors */
+.field-errors {
+    font-size: 0.72rem;
+    color: var(--red);
+    margin-top: 5px;
+    font-weight: 600;
+}
+.field-hint {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+/* ── ACTIONS ── */
+.form-actions {
+    padding: 24px 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    flex-wrap: wrap;
+}
+
+.btn-submit {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: var(--red);
+    color: #fff;
+    padding: 13px 30px;
+    border-radius: 11px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+}
+.btn-submit:hover {
+    background: var(--red-mid);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(193,6,9,0.3);
+}
+
+.btn-back {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent;
+    color: var(--muted);
+    padding: 13px 22px;
+    border-radius: 11px;
+    border: 1.5px solid var(--border);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.btn-back:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+    text-decoration: none;
+}
+
+/* ── ANIMATION ── */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+    .field-row { grid-template-columns: 1fr; }
+    .form-section { padding: 22px 20px; }
+    .form-actions { padding: 20px; flex-direction: column; align-items: stretch; }
+    .btn-submit, .btn-back { justify-content: center; }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="form-shell">
+<div class="form-wrap">
+
+    {# Header #}
+    <div class="form-header">
+        <div class="form-eyebrow">Communauté</div>
+        <h1 class="form-title">Proposer un <em>nouveau club</em></h1>
+        <p class="form-subtitle">
+            Votre demande sera examinée par un administrateur. Une fois approuvée,<br>
+            vous deviendrez automatiquement responsable de ce club.
+        </p>
+    </div>
+
+    {# Card formulaire #}
+    {{ form_start(form, {
+        'attr': {
+            'enctype': 'multipart/form-data',
+            'novalidate': 'novalidate'
+        }
+    }) }}
+
+    <div class="form-card">
+
+        {# Section — Informations générales #}
+        <div class="form-section">
+            <div class="section-label">Informations générales</div>
+
+            <div class="field-row">
+                <div class="field-group">
+                    <label class="field-label">Nom du club <span class="req">*</span></label>
+                    {{ form_widget(form.nom, {'attr': {'placeholder': 'Ex: Club Informatique Esprit'}}) }}
+                    {{ form_errors(form.nom) }}
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Date de création</label>
+                    {{ form_widget(form.dateCreation) }}
+                    {{ form_errors(form.dateCreation) }}
+                </div>
+            </div>
+
+            <div class="field-row full">
+                <div class="field-group">
+                    <label class="field-label">Description</label>
+                    {{ form_widget(form.description, {'attr': {'placeholder': 'Décrivez les objectifs et activités de votre club...', 'rows': 4}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+            </div>
+
+            <div class="field-row">
+                <div class="field-group">
+                    <label class="field-label">Site web</label>
+                    {{ form_widget(form.siteWeb, {'attr': {'placeholder': 'https://...'}}) }}
+                    {{ form_errors(form.siteWeb) }}
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Logo du club</label>
+                    {{ form_widget(form.logoFile) }}
+                    <span class="field-hint">JPG, PNG ou GIF — max 2 Mo</span>
+                    {{ form_errors(form.logoFile) }}
+                </div>
+            </div>
+        </div>
+
+        {# Responsable auto-assigné — pas de champ visible #}
+
+        {# Actions #}
+        <div class="form-actions">
+            <a href="{{ path('user_club_index') }}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Retour aux clubs
+            </a>
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-paper-plane"></i> Envoyer la demande
+            </button>
+        </div>
+
+    </div>
+{# ✅ Empêche form_end de rendre le champ responsable automatiquement #}
+{% if form.responsable is defined %}
+    {{ form_widget(form.responsable, {'attr': {'style': 'display:none'}}) }}
+{% endif %}
+
+{{ form_end(form) }}
+    {{ form_end(form) }}
+
+</div>
+</div>
+{% endblock %}

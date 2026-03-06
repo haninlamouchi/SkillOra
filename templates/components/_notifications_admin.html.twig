@@ -1,0 +1,189 @@
+<li class="nav-item dropdown">
+    <a class="nav-link count-indicator" id="notificationAdminDropdown" href="#" data-bs-toggle="dropdown">
+        <i class="icon-bell"></i>
+        <span class="count" id="notif-total-count" style="display:none;">0</span>
+    </a>
+    <div class="dropdown-menu dropdown-menu-end navbar-dropdown preview-list pb-0" 
+         aria-labelledby="notificationAdminDropdown"
+         style="min-width:380px; max-height:400px; overflow-y:auto;">
+
+        <div class="dropdown-item py-3 border-bottom d-flex justify-content-between align-items-center">
+            <p class="mb-0 fw-medium">Notifications</p>
+            <span id="notif-total-count-text" style="
+                background:#c10609; color:white;
+                padding:2px 10px; border-radius:10px; font-size:12px; font-weight:600;
+            ">0 new</span>
+        </div>
+
+        {# Club notifications #}
+        <div id="notif-club-list"></div>
+
+        {# Séparateur #}
+        <div id="notif-separator" style="display:none; border-top:1px solid #eee; margin:4px 0;"></div>
+
+        {# Admin notifications #}
+        <div id="notif-admin-list"></div>
+
+    </div>
+</li>
+
+<script>
+let clubCount  = 0;
+let adminCount = 0;
+
+function updateTotalBadge() {
+    const total     = clubCount + adminCount;
+    const badge     = document.getElementById('notif-total-count');
+    const badgeText = document.getElementById('notif-total-count-text');
+
+    if (total > 0) {
+        badge.style.display = 'inline-block';
+        badge.textContent   = total;
+        badgeText.textContent = total + ' new';
+        badgeText.style.background = '#c10609';
+    } else {
+        badge.style.display = 'none';
+        badgeText.textContent = '0 new';
+        badgeText.style.background = '#999';
+    }
+
+    // ✅ Afficher "No new notifications" UNIQUEMENT si les deux chargements sont terminés
+    const clubList  = document.getElementById('notif-club-list');
+    const adminList = document.getElementById('notif-admin-list');
+
+    // ✅ Ne montrer le message vide QUE si les deux listes sont vraiment vides
+    if (total === 0 && clubList.innerHTML === '' && adminList.innerHTML === '') {
+        clubList.innerHTML = `
+            <div class="dropdown-item py-4 text-center text-muted">
+                <i class="mdi mdi-bell-off" style="font-size:2rem; opacity:0.3;"></i>
+                <p class="mt-2 mb-0 small">No new notifications</p>
+            </div>`;
+        document.getElementById('notif-separator').style.display = 'none';
+    }
+
+    // ✅ Si une liste a du contenu, effacer le message "No new notifications" de l'autre
+    if (total > 0 && clubList.innerHTML.includes('No new notifications')) {
+        clubList.innerHTML = '';
+    }
+}
+
+// ── Notifications Club (ta collègue) ──
+function loadNotificationsClub() {
+    fetch('/notifications/club/')
+        .then(res => res.json())
+        .then(data => {
+            clubCount = data.count || 0;
+            const list = document.getElementById('notif-club-list');
+
+            if (data.notifications && data.notifications.length > 0) {
+                list.innerHTML = `
+                    <div style="padding:8px 16px; font-size:11px; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:1px;">
+                        🏫 Club
+                    </div>
+                ` + data.notifications.map(n => `
+                    <a class="dropdown-item preview-item py-2"
+                       href="${n.lienRedirection}"
+                       onclick="markReadClub(${n.id})">
+                        <div class="preview-thumbnail">
+                            <i class="mdi mdi-bell m-auto text-primary"></i>
+                        </div>
+                        <div class="preview-item-content">
+                            <h6 class="preview-subject fw-normal text-dark mb-1" style="font-size:12px;">
+                                ${n.message}
+                            </h6>
+                            <p class="fw-light small-text mb-0" style="font-size:11px; color:#999;">
+                                ${n.createdAt}
+                            </p>
+                        </div>
+                    </a>
+                `).join('');
+            } else {
+                list.innerHTML = '';
+            }
+
+            updateSeparator();
+            updateTotalBadge();
+        })
+        .catch(err => {
+            console.error('Erreur notifications club:', err);
+            clubCount = 0;
+            updateTotalBadge();
+        });
+}
+
+function markReadClub(id) {
+    fetch('/notifications/club/' + id + '/read', {
+        method: 'POST',
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+    }).then(() => loadNotificationsClub());
+}
+
+// ── Notifications Admin (toi) ──
+function loadNotificationsAdmin() {
+    fetch('/admin/notifications/admin')
+        .then(res => res.json())
+        .then(data => {
+            adminCount = data.count || 0;
+            const list = document.getElementById('notif-admin-list');
+
+            if (data.notifications && data.notifications.length > 0) {
+                list.innerHTML = `
+                    <div style="padding:8px 16px; font-size:11px; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:1px;">
+                        👤 Users
+                    </div>
+                ` + data.notifications.map(n => `
+                    <a class="dropdown-item preview-item py-2"
+                       href="${n.lienRedirection}"
+                       onclick="markReadAdmin(${n.id})">
+                        <div class="preview-thumbnail">
+                            <i class="mdi ${n.type === 'new_user' ? 'mdi-account-plus' : 'mdi-account-edit'} m-auto"
+                               style="color:${n.type === 'new_user' ? '#28a745' : '#c10609'}; font-size:1.2rem;"></i>
+                        </div>
+                        <div class="preview-item-content">
+                            <h6 class="preview-subject fw-normal text-dark mb-1" style="font-size:12px;">
+                                ${n.message}
+                            </h6>
+                            <p class="fw-light small-text mb-0" style="font-size:11px; color:#999;">
+                                ${n.createdAt}
+                            </p>
+                        </div>
+                    </a>
+                `).join('');
+            } else {
+                list.innerHTML = '';
+            }
+
+            updateSeparator();
+            updateTotalBadge();
+        })
+        .catch(err => {
+            console.error('Erreur notifications admin:', err);
+            adminCount = 0;
+            updateTotalBadge();
+        });
+}
+
+function markReadAdmin(id) {
+    fetch('/admin/notifications/admin/' + id + '/read', {
+        method: 'POST',
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+    }).then(() => loadNotificationsAdmin());
+}
+
+function updateSeparator() {
+    const sep       = document.getElementById('notif-separator');
+    const clubList  = document.getElementById('notif-club-list');
+    const adminList = document.getElementById('notif-admin-list');
+    sep.style.display = (clubList.innerHTML && adminList.innerHTML) ? 'block' : 'none';
+}
+
+// ── Chargement initial ──
+loadNotificationsClub();
+loadNotificationsAdmin();
+
+// ── Rafraîchissement toutes les 30s ──
+setInterval(() => {
+    loadNotificationsClub();
+    loadNotificationsAdmin();
+}, 30000);
+</script>

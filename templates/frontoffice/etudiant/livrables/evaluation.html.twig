@@ -1,0 +1,182 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Mon Évaluation{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --sk-red:#8b0000; --sk-green:#15803d; }
+.sk-page { padding-top:90px; padding-bottom:60px; }
+.sk-eval-card { background:#fff; border-radius:18px; padding:32px; box-shadow:0 4px 20px rgba(0,0,0,0.08); margin-bottom:24px; }
+.sk-section-title { font-size:1.2rem; font-weight:700; color:var(--sk-red); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.sk-note-big { font-size:3rem; font-weight:900; color:var(--sk-green); text-align:center; margin:20px 0; }
+.sk-critere-row { display:grid; grid-template-columns:1fr 100px; gap:16px; padding:12px; background:#f9f9f9; border-radius:8px; margin-bottom:8px; align-items:center; }
+.sk-stars { color:#fbbf24; font-size:1.2rem; }
+.sk-feedback-box { background:#f0f9ff; padding:20px; border-radius:12px; border-left:4px solid #3b82f6; margin-bottom:16px; }
+.sk-membre-eval { background:#f9f9f9; padding:16px; border-radius:12px; margin-bottom:12px; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page container">
+    <a href="{{ path('app_etudiant_livrables') }}" style="color:#8b0000; text-decoration:none; font-weight:600;">← Retour aux livrables</a>
+    
+    <h1 style="font-size:2rem; font-weight:800; color:#2d3748; margin:24px 0;">
+        📊 Mon Évaluation
+    </h1>
+    
+    {# Ma note individuelle #}
+    {% set monEvaluation = null %}
+    {% for evaluation in livrable.evaluationsMembres %}
+      {% if evaluation.user.id == currentUser.id %}
+        {% set monEvaluation = evaluation %}
+      {% endif %}
+    {% endfor %}
+    
+    <div class="sk-eval-card">
+        <div style="text-align:center;">
+            <h2 style="font-size:1.5rem; font-weight:700; margin-bottom:8px;">{{ livrable.challenge.titre }}</h2>
+            <p style="color:#6b7280; margin-bottom:24px;">Groupe : {{ livrable.groupe.nomGroupe }}</p>
+            
+            <div style="background:linear-gradient(135deg, #dcfce7, #a7f3d0); padding:32px; border-radius:16px;">
+                <div style="font-size:0.9rem; color:#15803d; font-weight:600; text-transform:uppercase; letter-spacing:1px;">Ma Note</div>
+                <div class="sk-note-big">
+                    {% if monEvaluation %}
+                        {{ monEvaluation.noteIndividuelle }}/20
+                    {% else %}
+                        {{ livrable.noteGlobale }}/20
+                    {% endif %}
+                </div>
+                <div style="font-size:1.1rem; font-weight:700; color:#15803d;">
+                    {% set note = monEvaluation ? monEvaluation.noteIndividuelle : livrable.noteGlobale %}
+                    {% if note >= 16 %}
+                        ⭐⭐⭐⭐⭐ Excellent !
+                    {% elseif note >= 14 %}
+                        ⭐⭐⭐⭐ Très bien !
+                    {% elseif note >= 12 %}
+                        ⭐⭐⭐ Bien
+                    {% elseif note >= 10 %}
+                        ⭐⭐ Passable
+                    {% else %}
+                        ⭐ À améliorer
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Notes par critère #}
+    <div class="sk-eval-card">
+        <div class="sk-section-title">📊 Détail des Notes</div>
+        
+        <div class="sk-critere-row">
+            <div>
+                <strong>Qualité du code</strong>
+            </div>
+            <div style="text-align:right; font-weight:700; font-size:1.1rem;">
+                {{ livrable.noteCode }}/20
+            </div>
+        </div>
+        
+        <div class="sk-critere-row">
+            <div>
+                <strong>Fonctionnalités</strong>
+            </div>
+            <div style="text-align:right; font-weight:700; font-size:1.1rem;">
+                {{ livrable.noteFonctionnalites }}/20
+            </div>
+        </div>
+        
+        <div class="sk-critere-row">
+            <div>
+                <strong>Design / UX</strong>
+            </div>
+            <div style="text-align:right; font-weight:700; font-size:1.1rem;">
+                {{ livrable.noteDesign }}/20
+            </div>
+        </div>
+        
+        <div class="sk-critere-row">
+            <div>
+                <strong>Documentation</strong>
+            </div>
+            <div style="text-align:right; font-weight:700; font-size:1.1rem;">
+                {{ livrable.noteDocumentation }}/20
+            </div>
+        </div>
+        
+        <div style="margin-top:20px; padding:16px; background:#dcfce7; border-radius:12px; text-align:center;">
+            <strong>Note globale du groupe :</strong>
+            <span style="font-size:1.5rem; font-weight:800; color:#15803d; margin-left:12px;">
+                {{ livrable.noteGlobale }}/20
+            </span>
+        </div>
+    </div>
+
+    {# Feedback du responsable #}
+    {% if livrable.pointsForts or livrable.pointsAmeliorer or livrable.suggestions %}
+    <div class="sk-eval-card">
+        <div class="sk-section-title">💬 Feedback du Responsable</div>
+        
+        {% if livrable.pointsForts %}
+        <div style="margin-bottom:20px;">
+            <h4 style="color:#15803d; font-weight:700; margin-bottom:8px;">✅ Points Forts</h4>
+            <div style="background:#dcfce7; padding:16px; border-radius:8px; white-space:pre-line;">{{ livrable.pointsForts }}</div>
+        </div>
+        {% endif %}
+        
+        {% if livrable.pointsAmeliorer %}
+        <div style="margin-bottom:20px;">
+            <h4 style="color:#dc2626; font-weight:700; margin-bottom:8px;">❌ Points à Améliorer</h4>
+            <div style="background:#fee2e2; padding:16px; border-radius:8px; white-space:pre-line;">{{ livrable.pointsAmeliorer }}</div>
+        </div>
+        {% endif %}
+        
+        {% if livrable.suggestions %}
+        <div>
+            <h4 style="color:#3b82f6; font-weight:700; margin-bottom:8px;">💡 Suggestions</h4>
+            <div style="background:#dbeafe; padding:16px; border-radius:8px; white-space:pre-line;">{{ livrable.suggestions }}</div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {# Mon commentaire individuel #}
+    {% if monEvaluation and monEvaluation.commentaireIndividuel %}
+    <div class="sk-eval-card">
+        <div class="sk-section-title">💬 Commentaire Personnel</div>
+        <div class="sk-feedback-box" style="white-space:pre-line;">
+            {{ monEvaluation.commentaireIndividuel }}
+        </div>
+    </div>
+    {% endif %}
+
+    {# Notes de l'équipe #}
+    {% if livrable.evaluationsMembres|length > 0 %}
+    <div class="sk-eval-card">
+        <div class="sk-section-title">👥 Notes de l'Équipe</div>
+        
+        {% for evaluation in livrable.evaluationsMembres %}
+        <div class="sk-membre-eval">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <strong style="font-size:1.05rem;">{{ evaluation.user.fullName }}</strong>
+                    {% if evaluation.user.id == currentUser.id %}
+                        <span style="background:#fef9c3; padding:2px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; color:#854d0e; margin-left:8px;">Vous</span>
+                    {% endif %}
+                </div>
+                <div style="font-size:1.3rem; font-weight:800; color:#15803d;">
+                    {{ evaluation.noteIndividuelle }}/20
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div style="text-align:center; margin-top:32px;">
+        <a href="{{ path('app_etudiant_livrables') }}" class="btn btn-primary" style="padding:12px 32px;">
+            ← Retour à mes livrables
+        </a>
+    </div>
+</div>
+{% endblock %}

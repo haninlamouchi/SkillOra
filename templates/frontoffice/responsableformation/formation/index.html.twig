@@ -1,0 +1,415 @@
+﻿{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Mes Formations — SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --sk-red:#8b0000; --sk-red-dark:#4a0000; --sk-red-light:#c0392b; --sk-white:#fff; --sk-ink:#180808; --sk-muted:#8a7070; --sk-border:rgba(139,0,0,0.09); }
+.sk-page { padding-top:70px; }
+
+/* ── HERO ── */
+.sk-hero { position:relative; background:linear-gradient(135deg,#3d0000 0%,#8b0000 48%,#c23030 100%); margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%); padding:72px 20px 64px; text-align:center; overflow:hidden; isolation:isolate; }
+.sk-hero::before { content:''; position:absolute; inset:0; z-index:0; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E"); background-size:180px; opacity:0.5; }
+.sk-hero-ring-l,.sk-hero-ring-r { position:absolute; z-index:0; border-radius:50%; border:72px solid rgba(255,255,255,0.035); }
+.sk-hero-ring-l { width:520px; height:520px; top:-210px; left:-160px; }
+.sk-hero-ring-r { width:380px; height:380px; bottom:-160px; right:-100px; border-width:50px; }
+.sk-hero-inner { position:relative; z-index:1; max-width:640px; margin:0 auto; }
+.sk-hero h1 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(2rem,5vw,3rem); font-weight:800; letter-spacing:-0.03em; color:#fff; margin:0 0 12px; line-height:1.1; }
+.sk-hero p { font-family:'DM Sans',sans-serif; color:rgba(255,255,255,0.60); font-size:1rem; margin:0 auto 32px; max-width:440px; line-height:1.7; }
+.sk-search { display:flex; align-items:center; background:rgba(255,255,255,0.97); border-radius:100px; padding:5px 5px 5px 22px; max-width:520px; margin:0 auto; box-shadow:0 12px 40px rgba(0,0,0,0.22); gap:8px; }
+.sk-search input { flex:1; border:none; outline:none; font-family:'DM Sans',sans-serif; font-size:0.92rem; color:var(--sk-ink); background:transparent; min-width:0; }
+.sk-search input::placeholder { color:#bbb; }
+.sk-search button { width:40px; height:40px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(139,0,0,0.28); transition:transform 0.2s; }
+.sk-search button:hover { transform:scale(1.08); }
+.sk-search button svg { width:17px; height:17px; stroke:#fff; fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+
+/* ── CONTENT ── */
+.sk-content { padding:36px 0 56px; }
+
+/* ── STATS ── */
+.sk-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:28px; }
+.sk-stat { background:#fff; border-radius:16px; padding:18px 20px; display:flex; align-items:center; gap:14px; border:1.5px solid var(--sk-border); box-shadow:0 2px 10px rgba(0,0,0,0.04); transition:transform 0.2s,box-shadow 0.2s; animation:sk-up 0.4s ease both; }
+.sk-stat:hover { transform:translateY(-3px); box-shadow:0 10px 28px rgba(139,0,0,0.09); }
+.sk-stat-icon { width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+.sk-stat-icon.red   { background:rgba(139,0,0,0.08); color:var(--sk-red); }
+.sk-stat-icon.blue  { background:rgba(13,110,253,0.08); color:#0d6efd; }
+.sk-stat-icon.green { background:rgba(25,135,84,0.08); color:#198754; }
+.sk-stat-icon.amber { background:rgba(217,119,6,0.10); color:#d97706; }
+.sk-stat-value { font-family:'Bricolage Grotesque',sans-serif; font-size:1.7rem; font-weight:800; color:var(--sk-ink); line-height:1; }
+.sk-stat-label { font-family:'DM Sans',sans-serif; font-size:0.76rem; color:var(--sk-muted); font-weight:500; margin-top:2px; }
+
+/* ── TOOLBAR ── */
+.sk-toolbar { background:#fff; border-radius:14px; padding:16px 20px; border:1.5px solid var(--sk-border); box-shadow:0 2px 10px rgba(0,0,0,0.04); margin-bottom:22px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+.sk-toolbar-title { font-family:'Bricolage Grotesque',sans-serif; font-size:0.92rem; font-weight:800; color:var(--sk-ink); margin:0; }
+.sk-toolbar-right { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+.sk-field select { padding:8px 14px; border:1.5px solid #e5e7eb; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:0.85rem; color:var(--sk-ink); background:#f9f9f9; outline:none; transition:border-color 0.2s; }
+.sk-field select:focus { border-color:var(--sk-red); background:#fff; }
+
+/* ── LABEL ── */
+.sk-label { font-family:'DM Sans',sans-serif; font-size:0.68rem; font-weight:600; letter-spacing:0.13em; text-transform:uppercase; color:var(--sk-muted); display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+.sk-label::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--sk-border),transparent); }
+
+/* ── BUTTONS ── */
+.sk-btn { display:inline-flex; align-items:center; gap:7px; padding:9px 18px; border-radius:10px; font-weight:700; font-family:'DM Sans',sans-serif; font-size:0.85rem; border:none; cursor:pointer; transition:all 0.25s; text-decoration:none; }
+.sk-btn-primary { background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); color:#fff; }
+.sk-btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(139,0,0,0.3); color:#fff; text-decoration:none; }
+.sk-btn-new { background:linear-gradient(135deg,#15803d,#22c55e); color:#fff; }
+.sk-btn-new:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(34,197,94,0.3); color:#fff; text-decoration:none; }
+.sk-btn-ghost { background:#f3f4f6; color:#374151; border:1.5px solid #e5e7eb; }
+.sk-btn-ghost:hover { border-color:#9ca3af; color:#111; text-decoration:none; }
+.sk-btn-warn { background:transparent; color:#d97706; border:1.5px solid #fcd34d; }
+.sk-btn-warn:hover { background:#d97706; color:#fff; text-decoration:none; }
+.sk-btn-danger { background:transparent; color:#dc2626; border:1.5px solid #fca5a5; }
+.sk-btn-danger:hover { background:#dc2626; color:#fff; border-color:#dc2626; text-decoration:none; }
+.sk-btn-sm { padding:6px 12px; font-size:0.79rem; }
+.sk-btn-icon { width:34px; height:34px; padding:0; justify-content:center; border-radius:9px; }
+
+/* ── GRID ── */
+.sk-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
+
+/* ── FORMATION CARD ── */
+.sk-formation-card { background:#fff; border-radius:18px; overflow:hidden; border:1.5px solid var(--sk-border); box-shadow:0 2px 10px rgba(0,0,0,0.05); transition:transform 0.28s cubic-bezier(.22,.68,0,1.25),box-shadow 0.28s,border-color 0.22s; display:flex; flex-direction:column; animation:sk-up 0.4s ease both; }
+.sk-formation-card:hover { transform:translateY(-6px); box-shadow:0 18px 44px rgba(139,0,0,0.11); border-color:rgba(139,0,0,0.22); }
+.sk-formation-card.hidden { display:none !important; }
+
+.sk-card-img { width:100%; height:170px; object-fit:cover; display:block; }
+.sk-card-placeholder { width:100%; height:170px; background:linear-gradient(135deg,#fdf0f0,#f5dede); display:flex; align-items:center; justify-content:center; font-size:3rem; color:rgba(139,0,0,0.3); }
+
+.sk-card-body { padding:18px 20px; flex:1; display:flex; flex-direction:column; gap:10px; }
+
+.sk-card-badges { display:flex; gap:6px; flex-wrap:wrap; }
+.sk-badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:50px; font-size:0.69rem; font-weight:700; font-family:'DM Sans',sans-serif; }
+.sk-badge-active  { background:#dcfce7; color:#15803d; }
+.sk-badge-done    { background:#f3f4f6; color:#6b7280; }
+.sk-badge-club    { background:rgba(139,0,0,0.07); color:var(--sk-red); }
+
+.sk-card-title { font-family:'Bricolage Grotesque',sans-serif; font-size:0.97rem; font-weight:800; color:var(--sk-ink); margin:0; line-height:1.35; }
+.sk-card-title a { color:inherit; text-decoration:none; }
+.sk-card-title a:hover { color:var(--sk-red); }
+
+.sk-card-desc { font-family:'DM Sans',sans-serif; font-size:0.81rem; color:var(--sk-muted); line-height:1.55; margin:0; flex:1; }
+
+.sk-card-meta { display:flex; gap:6px; align-items:center; flex-wrap:wrap; padding-top:10px; border-top:1.5px solid var(--sk-border); }
+.sk-card-date { font-family:'DM Sans',sans-serif; font-size:0.76rem; color:#9ca3af; }
+.sk-mini-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:50px; font-size:0.69rem; font-weight:700; font-family:'DM Sans',sans-serif; }
+.sk-mini-badge-blue   { background:#eff6ff; color:#2563eb; }
+.sk-mini-badge-purple { background:#f5f3ff; color:#7c3aed; }
+.sk-mini-badge-amber  { background:#fffbeb; color:#d97706; }
+
+.sk-card-actions { display:flex; gap:6px; padding-top:4px; }
+
+/* ── EMPTY ── */
+.sk-empty { text-align:center; padding:60px 20px; background:#fff; border-radius:16px; border:1.5px dashed #f0dede; }
+.sk-empty-icon { font-size:3.5rem; margin-bottom:16px; opacity:0.4; }
+.sk-empty h3 { font-family:'Bricolage Grotesque',sans-serif; font-size:1.1rem; font-weight:700; color:var(--sk-ink); margin-bottom:8px; }
+.sk-empty p { font-family:'DM Sans',sans-serif; color:#6b6b6b; font-size:0.88rem; margin-bottom:20px; }
+
+/* ── RESULT INFO ── */
+.sk-result-info { display:flex; justify-content:space-between; font-family:'DM Sans',sans-serif; font-size:0.80rem; color:var(--sk-muted); margin-top:16px; }
+
+/* ── DELETE MODAL ── */
+.sk-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; display:none; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
+.sk-modal-overlay.open { display:flex; }
+.sk-modal { background:#fff; border-radius:20px; padding:32px; max-width:420px; width:90%; box-shadow:0 24px 64px rgba(0,0,0,0.18); animation:sk-up 0.3s ease; }
+.sk-modal h3 { font-family:'Bricolage Grotesque',sans-serif; font-size:1.1rem; font-weight:800; color:var(--sk-ink); margin:0 0 10px; }
+.sk-modal p { font-family:'DM Sans',sans-serif; font-size:0.88rem; color:var(--sk-muted); margin:0 0 20px; line-height:1.6; }
+.sk-modal-title-danger { color:#dc2626; font-weight:700; }
+.sk-modal-actions { display:flex; gap:10px; justify-content:flex-end; }
+
+/* ── FLASH ── */
+.sk-flash { border-radius:12px; padding:12px 18px; margin-bottom:16px; font-family:'DM Sans',sans-serif; font-size:0.87rem; display:flex; align-items:center; gap:10px; }
+.sk-flash-success { background:#dcfce7; color:#15803d; border:1.5px solid #bbf7d0; }
+.sk-flash-danger  { background:#fee2e2; color:#dc2626; border:1.5px solid #fecaca; }
+
+/* ── ANIMATIONS ── */
+@keyframes sk-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.sk-hero { animation:sk-up 0.5s cubic-bezier(.22,.68,0,1) both; }
+.sk-stat:nth-child(1){animation-delay:.05s} .sk-stat:nth-child(2){animation-delay:.10s} .sk-stat:nth-child(3){animation-delay:.15s} .sk-stat:nth-child(4){animation-delay:.20s}
+.sk-formation-card:nth-child(1){animation-delay:.08s} .sk-formation-card:nth-child(2){animation-delay:.14s} .sk-formation-card:nth-child(3){animation-delay:.20s} .sk-formation-card:nth-child(4){animation-delay:.26s} .sk-formation-card:nth-child(5){animation-delay:.32s} .sk-formation-card:nth-child(6){animation-delay:.38s}
+
+@media(max-width:900px){ .sk-stats{grid-template-columns:repeat(2,1fr);} }
+@media(max-width:560px){ .sk-stats{grid-template-columns:1fr 1fr;} .sk-hero{padding:56px 20px 48px;} }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+
+  <!-- HERO -->
+  <div class="sk-hero">
+    <div class="sk-hero-ring-l"></div>
+    <div class="sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <h1>📚 Mes Formations</h1>
+      <p>Gérez les parcours d'apprentissage de votre club</p>
+      <div class="sk-search">
+        <input type="text" id="searchFormation" placeholder="Rechercher une formation…">
+        <button type="button" aria-label="Rechercher">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sk-content">
+
+      <!-- Flash messages -->
+      {% for type, messages in app.flashes %}
+        {% for message in messages %}
+          <div class="sk-flash sk-flash-{{ type == 'success' ? 'success' : 'danger' }}">
+            {{ type == 'success' ? '✅' : '❌' }} {{ message }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      <!-- Stats -->
+      {% set totalParticipants = 0 %}
+      {% set totalVideos = 0 %}
+      {% set activeCount = 0 %}
+      {% set completedCount = 0 %}
+      {% for f in formations %}
+        {% set totalParticipants = totalParticipants + f.participations|length %}
+        {% set totalVideos = totalVideos + f.videos|length %}
+        {% if not f.terminee %}
+          {% set activeCount = activeCount + 1 %}
+        {% else %}
+          {% set completedCount = completedCount + 1 %}
+        {% endif %}
+      {% endfor %}
+
+
+      <!-- Toolbar -->
+      <div class="sk-toolbar">
+        <span class="sk-toolbar-title">📖 Liste des formations</span>
+        <div class="sk-toolbar-right">
+          <div class="sk-field">
+            <select id="filterStatus">
+              <option value="all">Tous statuts</option>
+              <option value="active">En cours</option>
+              <option value="completed">Terminée</option>
+            </select>
+          </div>
+          <a href="{{ path('responsable_formation_new') }}" class="sk-btn sk-btn-new">➕ Nouvelle formation</a>
+          <button onclick="openCalModal()" class="sk-btn sk-btn-ghost">📅 Calendrier</button>
+        </div>
+      </div>
+
+      {% if formations is empty %}
+        <div class="sk-empty">
+          <div class="sk-empty-icon">🎓</div>
+          <h3>Aucune formation pour l'instant</h3>
+          <p>Créez votre première formation pour votre club.</p>
+          <a href="{{ path('responsable_formation_new') }}" class="sk-btn sk-btn-new">➕ Créer une formation</a>
+        </div>
+      {% else %}
+        <div class="sk-label" id="resultLabel">{{ formations|length }} formation(s)</div>
+
+        <div class="sk-grid" id="formationsGrid">
+          {% for f in formations %}
+            {% set isActive = not f.terminee %}
+            <div class="sk-formation-card"
+                 data-status="{{ isActive ? 'active' : 'completed' }}"
+                 data-title="{{ f.titre|lower }}">
+
+              {% if f.image %}
+                <img class="sk-card-img" src="{{ f.image }}" alt="{{ f.titre }}">
+              {% else %}
+                <div class="sk-card-placeholder">🎓</div>
+              {% endif %}
+
+              <div class="sk-card-body">
+                <div class="sk-card-badges">
+                  {% if isActive %}
+                    <span class="sk-badge sk-badge-active">● Actif</span>
+                  {% else %}
+                    <span class="sk-badge sk-badge-done">Terminée</span>
+                  {% endif %}
+                  {% if f.club.nom %}
+                    <span class="sk-badge sk-badge-club">{{ f.club.nom }}</span>
+                  {% endif %}
+                </div>
+
+                <h3 class="sk-card-title">
+                  <a href="{{ path('responsable_formation_show', {id: f.id}) }}">{{ f.titre }}</a>
+                </h3>
+
+                <p class="sk-card-desc">
+                  {{ f.description|length > 90 ? f.description|slice(0,90) ~ '…' : (f.description ?? 'Aucune description.') }}
+                </p>
+
+                <div class="sk-card-meta">
+                  {% if f.dateDebut %}
+                    <span class="sk-card-date">📅 {{ f.dateDebut|date('d/m/Y') }}</span>
+                  {% endif %}
+                  <span class="sk-mini-badge sk-mini-badge-blue" title="Vidéos">🎬 {{ f.videos|length }}</span>
+                  <span class="sk-mini-badge sk-mini-badge-purple" title="Participants">👥 {{ f.participations|length }}</span>
+                  <span class="sk-mini-badge sk-mini-badge-amber" title="Quiz">❓ {{ f.quizzes|length }}</span>
+                </div>
+
+                <div class="sk-card-actions">
+                  <a href="{{ path('responsable_formation_show', {id: f.id}) }}" class="sk-btn sk-btn-ghost sk-btn-sm sk-btn-icon" title="Voir">👁️</a>
+                  <a href="{{ path('responsable_formation_edit', {id: f.id}) }}" class="sk-btn sk-btn-warn sk-btn-sm sk-btn-icon" title="Modifier">✏️</a>
+                  <button type="button" class="sk-btn sk-btn-danger sk-btn-sm sk-btn-icon sk-delete-btn"
+                    title="Supprimer"
+                    data-id="{{ f.id }}"
+                    data-title="{{ f.titre }}"
+                    data-url="{{ path('responsable_formation_delete', {id: f.id}) }}"
+                    data-token="{{ csrf_token('delete_formation' ~ f.id) }}">🗑️</button>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="sk-empty" id="emptySearch" style="display:none">
+          <div class="sk-empty-icon">🔍</div>
+          <h3>Aucun résultat</h3>
+          <p>Aucune formation ne correspond à vos critères.</p>
+        </div>
+
+        <div class="sk-result-info">
+          <span id="resultCount">{{ formations|length }} formation(s)</span>
+          <span>{{ activeCount }} active(s) · {{ completedCount }} terminée(s)</span>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="sk-modal-overlay" id="deleteModal">
+  <div class="sk-modal">
+    <h3>🗑️ Confirmer la suppression</h3>
+    <p>Vous allez supprimer la formation :<br>
+      <span class="sk-modal-title-danger" id="deleteModalTitle"></span><br><br>
+      Cette action est irréversible. Toutes les vidéos, quiz et participations seront supprimés.
+    </p>
+    <div class="sk-modal-actions">
+      <button type="button" class="sk-btn sk-btn-ghost" id="cancelDelete">Annuler</button>
+      <form id="deleteForm" method="post" style="margin:0">
+        <input type="hidden" name="_token" id="deleteCsrfToken">
+        <button type="submit" class="sk-btn sk-btn-danger">🗑️ Supprimer</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const searchInput  = document.getElementById('searchFormation');
+  const filterSelect = document.getElementById('filterStatus');
+  const items        = document.querySelectorAll('.sk-formation-card');
+  const resultCount  = document.getElementById('resultCount');
+  const resultLabel  = document.getElementById('resultLabel');
+  const emptySearch  = document.getElementById('emptySearch');
+  const grid         = document.getElementById('formationsGrid');
+
+  function applyFilters() {
+    const search = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const status = filterSelect ? filterSelect.value : 'all';
+    let visible = 0;
+    items.forEach(item => {
+      const matchSearch = !search || item.dataset.title.includes(search) || item.textContent.toLowerCase().includes(search);
+      const matchStatus = status === 'all' || item.dataset.status === status;
+      if (matchSearch && matchStatus) { item.classList.remove('hidden'); visible++; }
+      else { item.classList.add('hidden'); }
+    });
+    const txt = visible + ' formation' + (visible !== 1 ? 's' : '');
+    if (resultCount) resultCount.textContent = txt;
+    if (resultLabel) resultLabel.textContent = txt;
+    if (emptySearch) emptySearch.style.display = visible === 0 ? 'block' : 'none';
+    if (grid) grid.style.display = visible === 0 ? 'none' : '';
+  }
+
+  searchInput?.addEventListener('input', applyFilters);
+  filterSelect?.addEventListener('change', applyFilters);
+
+  // Delete modal
+  const overlay = document.getElementById('deleteModal');
+  document.querySelectorAll('.sk-delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('deleteModalTitle').textContent = btn.dataset.title;
+      document.getElementById('deleteForm').action = btn.dataset.url;
+      document.getElementById('deleteCsrfToken').value = btn.dataset.token;
+      overlay.classList.add('open');
+    });
+  });
+  document.getElementById('cancelDelete')?.addEventListener('click', () => overlay.classList.remove('open'));
+  overlay?.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+
+  // Auto-dismiss flashes
+  document.querySelectorAll('.sk-flash').forEach(el => {
+    setTimeout(() => el.style.opacity = '0', 4000);
+    setTimeout(() => el.remove(), 4500);
+  });
+});
+</script>
+
+{# ── Calendar modal ── #}
+<style>
+.cal-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1050;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:16px;}
+.cal-modal-overlay.open{display:flex;}
+.cal-modal-box{background:#fff;border-radius:24px;width:100%;max-width:1050px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.25);overflow:hidden;}
+.cal-modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;background:linear-gradient(135deg,#3d0000,#8b0000);color:#fff;flex-shrink:0;}
+.cal-modal-header h3{font-family:'Bricolage Grotesque',sans-serif;font-size:1.2rem;font-weight:800;margin:0;}
+.cal-modal-close{background:rgba(255,255,255,.18);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.cal-modal-close:hover{background:rgba(255,255,255,.35);}
+.cal-modal-body{padding:20px 24px 24px;overflow-y:auto;flex:1;}
+.fc .fc-toolbar-title{font-family:'Bricolage Grotesque',sans-serif;font-size:1.1rem;font-weight:800;color:#2d0000;}
+.fc .fc-button-primary{background:#8b0000!important;border-color:#8b0000!important;font-family:'DM Sans',sans-serif!important;font-weight:600!important;border-radius:8px!important;}
+.fc .fc-button-primary:hover{background:#4a0000!important;border-color:#4a0000!important;}
+.fc-event{border-radius:6px!important;font-family:'DM Sans',sans-serif!important;font-size:0.8rem!important;font-weight:600!important;border:none!important;cursor:pointer!important;}
+.fc .fc-daygrid-day.fc-day-today{background:rgba(139,0,0,.05)!important;}
+.fc .fc-col-header-cell-cushion{font-family:'DM Sans',sans-serif;font-weight:700;color:#5a0000;text-decoration:none;}
+.fc .fc-daygrid-day-number{font-family:'DM Sans',sans-serif;color:#2d0000;text-decoration:none;}
+</style>
+
+<div class="cal-modal-overlay" id="calModal">
+  <div class="cal-modal-box">
+    <div class="cal-modal-header">
+      <h3>📅 Calendrier — Mes Formations</h3>
+      <button class="cal-modal-close" onclick="closeCalModal()">✕</button>
+    </div>
+    <div class="cal-modal-body">
+      <div id="cal-modal-inner"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+let calInstance = null;
+function openCalModal() {
+  document.getElementById('calModal').classList.add('open');
+  if (!calInstance) {
+    calInstance = new FullCalendar.Calendar(document.getElementById('cal-modal-inner'), {
+      initialView: 'dayGridMonth',
+      locale: 'fr',
+      headerToolbar: { left:'prev,next today', center:'title', right:'dayGridMonth,listMonth' },
+      buttonText: { today:"Aujourd'hui", month:'Mois', list:'Liste' },
+      events: '{{ path('app_formation_calendar_events') }}',
+      eventDisplay: 'block',
+      dayMaxEvents: 3,
+      height: 'auto',
+      firstDay: 1,
+      eventClick: function(info) {
+        if (info.event.url) { info.jsEvent.preventDefault(); window.location.href = info.event.url; }
+      },
+    });
+    calInstance.render();
+  }
+  setTimeout(() => calInstance.updateSize(), 50);
+}
+function closeCalModal() {
+  document.getElementById('calModal').classList.remove('open');
+}
+document.getElementById('calModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCalModal();
+});
+</script>
+{% endblock %}

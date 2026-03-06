@@ -1,0 +1,111 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Niveaux — {{ formation.titre }} | SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--sk-red:#8b0000;--sk-red-dark:#4a0000;--sk-white:#fff;--sk-ink:#180808;--sk-muted:#8a7070;--sk-border:rgba(139,0,0,0.09);}
+.sk-page{padding-top:70px;}
+.sk-hero{position:relative;background:linear-gradient(135deg,#3d0000 0%,#8b0000 48%,#c23030 100%);margin-left:calc(-50vw + 50%);margin-right:calc(-50vw + 50%);padding:60px 20px 52px;text-align:center;overflow:hidden;isolation:isolate;}
+.sk-hero::before{content:'';position:absolute;inset:0;z-index:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");background-size:180px;opacity:0.5;}
+.sk-hero-inner{position:relative;z-index:1;}
+.sk-hero h1{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;color:#fff;margin:0 0 10px;}
+.sk-hero p{font-family:'DM Sans',sans-serif;color:rgba(255,255,255,0.60);font-size:0.97rem;margin:0;}
+.sk-hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px;font-family:'DM Sans',sans-serif;font-size:0.78rem;color:rgba(255,255,255,0.85);margin-bottom:14px;}
+.sk-content{padding:36px 0 56px;}
+.sk-back{display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:600;color:var(--sk-muted);text-decoration:none;margin-bottom:24px;}
+.sk-back:hover{color:var(--sk-red);text-decoration:none;}
+.sk-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:10px;font-weight:700;font-family:'DM Sans',sans-serif;font-size:0.88rem;border:none;cursor:pointer;transition:all 0.25s;text-decoration:none;}
+.sk-btn-primary{background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red));color:#fff;}
+.sk-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(139,0,0,0.3);color:#fff;text-decoration:none;}
+.sk-btn-ghost{background:#f3f4f6;color:#374151;border:1.5px solid #e5e7eb;}
+.sk-btn-ghost:hover{border-color:#9ca3af;color:#111;text-decoration:none;}
+.sk-btn-danger{background:#fee2e2;color:#dc2626;border:1.5px solid #fca5a5;}
+.sk-btn-danger:hover{background:#dc2626;color:#fff;text-decoration:none;}
+.sk-btn-sm{padding:7px 14px;font-size:0.80rem;}
+.sk-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:12px;}
+.sk-topbar-title{font-family:'Bricolage Grotesque',sans-serif;font-size:1.25rem;font-weight:800;color:var(--sk-ink);}
+.sk-level-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+.sk-level-card{background:#fff;border-radius:16px;border:1.5px solid var(--sk-border);padding:24px;display:flex;flex-direction:column;gap:14px;transition:border-color 0.2s,transform 0.2s;box-shadow:0 2px 12px rgba(0,0,0,0.04);}
+.sk-level-card:hover{border-color:rgba(139,0,0,0.25);transform:translateY(-2px);}
+.sk-level-badge{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red));color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.1rem;}
+.sk-level-title{font-family:'Bricolage Grotesque',sans-serif;font-size:1rem;font-weight:800;color:var(--sk-ink);margin:0;}
+.sk-level-desc{font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--sk-muted);line-height:1.5;margin:0;}
+.sk-level-meta{display:flex;gap:12px;font-family:'DM Sans',sans-serif;font-size:0.76rem;color:#9ca3af;}
+.sk-level-footer{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1.5px solid var(--sk-border);}
+.sk-empty{background:#fff;border-radius:16px;border:1.5px dashed var(--sk-border);padding:60px 20px;text-align:center;}
+.sk-empty .icon{font-size:2.5rem;margin-bottom:12px;}
+.sk-empty p{font-family:'DM Sans',sans-serif;color:var(--sk-muted);margin:0 0 18px;}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+  <div class="sk-hero">
+    <div class="sk-hero-inner">
+      <div class="sk-hero-badge">📚 {{ formation.titre }}</div>
+      <h1>🏆 Niveaux de la formation</h1>
+      <p>Organisez votre contenu en niveaux progressifs</p>
+    </div>
+  </div>
+
+  <div class="container" style="max-width:900px;">
+    <div class="sk-content">
+
+      <a href="{{ path('responsable_formation_show', {id: formation.id}) }}" class="sk-back">← Retour à la formation</a>
+
+      {% for type, msgs in app.flashes %}
+        {% for msg in msgs %}
+          <div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }} alert-dismissible fade show mb-4" role="alert">
+            {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      <div class="sk-topbar">
+        <span class="sk-topbar-title">📋 {{ levels|length }} niveau{{ levels|length > 1 ? 'x' : '' }}</span>
+        <a href="{{ path('app_level_new', {formationId: formation.id}) }}" class="sk-btn sk-btn-primary sk-btn-sm">➕ Nouveau niveau</a>
+      </div>
+
+      {% if levels|length > 0 %}
+        <div class="sk-level-grid">
+          {% for level in levels %}
+            <div class="sk-level-card">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <div class="sk-level-badge">{{ level.numero }}</div>
+                <div>
+                  <div class="sk-level-title">{{ level.titre }}</div>
+                  <div class="sk-level-meta">
+                    <span>🎯 {{ level.quizzes|length }} quiz{{ level.quizzes|length > 1 ? 'zes' : '' }}</span>
+                    {% if level.scoreRequired %}<span>⭐ Score requis : {{ level.scoreRequired }}</span>{% endif %}
+                  </div>
+                </div>
+              </div>
+              {% if level.description %}
+                <div class="sk-level-desc">{{ level.description|length > 100 ? level.description|slice(0,100) ~ '…' : level.description }}</div>
+              {% endif %}
+              <div class="sk-level-footer">
+                <a href="{{ path('app_level_show', {formationId: formation.id, id: level.id}) }}" class="sk-btn sk-btn-ghost sk-btn-sm">👁️ Voir les quiz</a>
+                <div style="display:flex;gap:6px;">
+                  <a href="{{ path('app_level_edit', {formationId: formation.id, id: level.id}) }}" class="sk-btn sk-btn-ghost sk-btn-sm">✏️</a>
+                  <form action="{{ path('app_level_delete', {formationId: formation.id, id: level.id}) }}" method="post" style="margin:0" onsubmit="return confirm('Supprimer ce niveau et tous ses quiz ?')">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_level' ~ level.id) }}">
+                    <button class="sk-btn sk-btn-danger sk-btn-sm">🗑️</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="sk-empty">
+          <div class="icon">🏆</div>
+          <p>Aucun niveau pour cette formation.</p>
+          <a href="{{ path('app_level_new', {formationId: formation.id}) }}" class="sk-btn sk-btn-primary sk-btn-sm">➕ Créer le premier niveau</a>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

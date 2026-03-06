@@ -1,0 +1,1440 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}{{ formation.titre }} | SkillOra{% endblock %}
+
+{% block stylesheets %}
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+<style>
+    .formation-hero {
+        background: linear-gradient(135deg, #5a0000 0%, #8b1a1a 50%, #a52a2a 100%);
+        padding: 80px 0 50px;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+    .formation-hero::before {
+        content: '';
+        position: absolute;
+        width: 500px; height: 500px;
+        top: -150px; right: -100px;
+        background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .formation-hero h1 { font-size: 2.2rem; font-weight: 700; }
+    .formation-hero .breadcrumb a { color: rgba(255,255,255,0.7); text-decoration: none; }
+    .formation-hero .breadcrumb-item.active { color: rgba(255,255,255,0.9); }
+    .formation-hero .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.5); }
+
+    .formation-content { padding: 50px 0 80px; background: #f5f5f7; }
+
+    .info-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    .info-card .card-header {
+        background: #fff;
+        border-bottom: 2px solid #f0f0f0;
+        font-weight: 700;
+        font-size: 1.1rem;
+        padding: 1.2rem 1.5rem;
+    }
+    .info-card .card-body { padding: 1.5rem; }
+
+    .sk-topbar-actions { display:flex; gap:8px; }
+
+    .sk-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:10px; font-weight:700; font-family:inherit; font-size:.85rem; border:none; cursor:pointer; transition:all .2s; text-decoration:none; }
+    .sk-btn-ghost { background:#f3f4f6; color:#374151; border:1.5px solid #e5e7eb; }
+    .sk-btn-ghost:hover { border-color:#9ca3af; color:#111; }
+    .sk-btn-sm { padding:7px 14px; font-size:.80rem; }
+    .filter-btn { cursor:pointer; }
+    .filter-btn.active { background:linear-gradient(135deg,#5a0000,#8b1a1a) !important; color:#fff !important; border-color:transparent !important; }
+
+    .detail-row { padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { font-weight: 600; color: #666; font-size: 0.9rem; }
+    .detail-value { color: #333; }
+
+    .sidebar-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        text-align: center;
+        overflow: hidden;
+    }
+    .sidebar-card img { width: 100%; max-height: 250px; object-fit: cover; }
+    .sidebar-card .img-placeholder {
+        height: 200px;
+        background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+        display: flex; align-items: center; justify-content: center;
+    }
+    .stat-item h3 { font-size: 1.8rem; font-weight: 700; color: #5a0000; margin-bottom: 0; }
+    .stat-item span { font-size: 0.85rem; color: #888; }
+
+    .btn-participate {
+        background: #5a0000; color: #fff; border: none;
+        border-radius: 10px; padding: 14px 0; font-size: 1.1rem;
+        font-weight: 700; width: 100%; transition: all 0.3s;
+    }
+    .btn-participate:hover {
+        background: #7a1a1a; color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(90,0,0,0.3);
+    }
+    .btn-participate:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-participated {
+        background: #28a745; color: #fff; border: none;
+        border-radius: 10px; padding: 14px 0; font-size: 1.1rem;
+        font-weight: 700; width: 100%;
+    }
+
+    .btn-quiz {
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+        color: #fff; border: none; border-radius: 10px;
+        padding: 14px 0; font-size: 1.1rem;
+        font-weight: 700; width: 100%; transition: all 0.3s;
+    }
+    .btn-quiz:hover {
+        background: linear-gradient(135deg, #0b5ed7, #084298);
+        color: #fff; transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(13,110,253,0.3);
+    }
+
+    .btn-fav-show {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        width: 100%; border: 2px solid #f9a8d4; border-radius: 10px;
+        background: #fff0f6; color: #be185d; font-weight: 700; font-size: 1rem;
+        padding: 10px 0; cursor: pointer; transition: all .25s;
+    }
+    .btn-fav-show:hover { background: #be185d; color: #fff; border-color: #be185d; }
+    .btn-fav-show.is-fav  { background: #be185d; color: #fff; border-color: #be185d; }
+    .btn-fav-show.is-fav:hover { background: #9d174d; border-color: #9d174d; }
+
+    .quiz-card {
+        border: none; border-radius: 12px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .quiz-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .quiz-icon {
+        width: 50px; height: 50px;
+        background: linear-gradient(135deg, #5a0000, #8b1a1a);
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-size: 1.3rem;
+    }
+
+    /* ── Video Section ── */
+    .video-card {
+        border: none; border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        transition: transform 0.2s, box-shadow 0.2s;
+        background: #fff;
+    }
+    .video-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .video-card video {
+        width: 100%;
+        max-height: 220px;
+        background: #000;
+        display: block;
+    }
+    .video-card .video-info {
+        padding: 14px 18px;
+    }
+    .video-card .video-info h6 {
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin-bottom: 4px;
+        color: #333;
+    }
+    .video-card .video-info p {
+        font-size: 0.82rem;
+        color: #888;
+        margin: 0;
+        line-height: 1.4;
+    }
+    .video-icon {
+        width: 50px; height: 50px;
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-size: 1.3rem;
+    }
+
+    /* ── Level Progression ── */
+    .levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 18px; }
+
+    .level-card {
+        border-radius: 16px; border: 2px solid #e5e9f0; background: #fff;
+        overflow: hidden; transition: transform .2s, box-shadow .2s, border-color .2s;
+        position: relative;
+    }
+    .level-card:not(.level-locked):hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,.10); border-color: #8b1a1a; }
+    .level-card.level-locked { opacity: .72; filter: grayscale(30%); cursor: not-allowed; }
+    .level-card.level-passed { border-color: #22c55e; }
+
+    .level-card-head {
+        padding: 18px 20px 14px;
+        background: linear-gradient(135deg, #5a0000, #8b1a1a);
+        display: flex; align-items: center; gap: 13px;
+    }
+    .level-card.level-locked .level-card-head { background: linear-gradient(135deg, #4b5563, #6b7280); }
+    .level-card.level-passed .level-card-head { background: linear-gradient(135deg, #15803d, #22c55e); }
+
+    .level-num {
+        width: 44px; height: 44px; border-radius: 12px;
+        background: rgba(255,255,255,.18); color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 1.1rem; flex-shrink: 0;
+    }
+    .level-head-info { flex: 1; overflow: hidden; }
+    .level-head-title { font-weight: 800; font-size: .95rem; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .level-head-sub { font-size: .73rem; color: rgba(255,255,255,.7); margin-top: 2px; }
+
+    .level-lock-icon { font-size: 1.3rem; }
+
+    .level-card-body { padding: 16px 20px 18px; }
+
+    .level-progress-bar { height: 6px; background: #f3f4f6; border-radius: 99px; margin-bottom: 12px; overflow: hidden; }
+    .level-progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #5a0000, #c23030); transition: width .5s ease; }
+    .level-card.level-passed .level-progress-fill { background: linear-gradient(90deg, #15803d, #22c55e); }
+
+    .level-meta { display: flex; gap: 12px; font-size: .78rem; color: #6b7280; margin-bottom: 14px; flex-wrap: wrap; }
+    .level-meta span { display: flex; align-items: center; gap: 4px; }
+
+    .level-score-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 4px 11px; border-radius: 50px;
+        font-size: .74rem; font-weight: 700; margin-bottom: 12px;
+    }
+    .badge-pass  { background: #dcfce7; color: #15803d; }
+    .badge-fail  { background: #fee2e2; color: #dc2626; }
+    .badge-none  { background: #f3f4f6; color: #6b7280; }
+
+    .level-required { font-size: .73rem; color: #9ca3af; margin-bottom: 10px; }
+
+    .level-locked-msg {
+        display: flex; align-items: center; gap: 8px;
+        background: #f9fafb; border: 1.5px solid #e5e7eb;
+        border-radius: 10px; padding: 10px 14px;
+        font-size: .80rem; color: #6b7280; font-weight: 600;
+    }
+
+    .btn-level { display: inline-flex; align-items: center; gap: 7px; padding: 9px 20px; border-radius: 10px; font-weight: 700; font-size: .85rem; border: none; cursor: pointer; text-decoration: none; transition: all .2s; width: 100%; justify-content: center; }
+    .btn-level-start { background: linear-gradient(135deg, #5a0000, #8b1a1a); color: #fff; }
+    .btn-level-start:hover { background: linear-gradient(135deg, #7a1a1a, #a52a2a); color: #fff; transform: translateY(-1px); text-decoration: none; }
+    .btn-level-retry { background: #fef3c7; color: #92400e; border: 1.5px solid #fcd34d; }
+    .btn-level-retry:hover { background: #d97706; color: #fff; border-color: #d97706; text-decoration: none; }
+    .btn-level-locked { background: #f3f4f6; color: #9ca3af; cursor: not-allowed; }
+
+    /* Per-quiz rows inside level card */
+    .level-quizzes { display: flex; flex-direction: column; gap: 8px; }
+    .level-quiz-row {
+        display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        background: #f9fafb; border: 1.5px solid #e5e7eb; border-radius: 10px;
+        padding: 10px 14px;
+    }
+    .level-quiz-info { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+    .level-quiz-icon { font-size: 1rem; flex-shrink: 0; }
+    .level-quiz-title { font-size: .84rem; font-weight: 600; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .level-quiz-score { font-size: .71rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; }
+    .btn-qmini {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 6px 14px; border-radius: 8px; font-size: .78rem; font-weight: 700;
+        border: none; text-decoration: none; white-space: nowrap; flex-shrink: 0;
+        transition: all .2s;
+    }
+    .btn-qmini:hover { transform: translateY(-1px); text-decoration: none; }
+    .btn-qmini-start { background: linear-gradient(135deg, #5a0000, #8b1a1a); color: #fff; }
+    .btn-qmini-start:hover { background: linear-gradient(135deg, #7a1a1a, #a52a2a); color: #fff; }
+    .btn-qmini-retry { background: #fef3c7; color: #92400e; border: 1.5px solid #fcd34d; }
+    .btn-qmini-retry:hover { background: #d97706; color: #fff; }
+    .btn-qmini-done  { background: #dcfce7; color: #15803d; border: 1.5px solid #86efac; }
+    .btn-qmini-done:hover  { background: #16a34a; color: #fff; }
+
+    /* ── Flashcard banner ── */
+    .fc-banner {
+        display: flex; align-items: center; gap: 14px;
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+        border-radius: 14px; padding: 18px 22px; margin-bottom: 18px;
+        box-shadow: 0 4px 18px rgba(49,46,129,.25);
+    }
+    .fc-banner-icon { font-size: 2.2rem; flex-shrink: 0; }
+    .fc-banner-text { flex: 1; }
+    .fc-banner-text h6 { margin: 0; font-size: 1rem; font-weight: 700; color: #fff; }
+    .fc-banner-text p  { margin: 0; font-size: .82rem; color: rgba(255,255,255,.65); }
+    .btn-tester {
+        display: inline-flex; align-items: center; gap: 7px;
+        background: #fff; color: #312e81;
+        border: none; border-radius: 10px; padding: 9px 18px;
+        font-weight: 700; font-size: .85rem; cursor: pointer;
+        white-space: nowrap; transition: all .2s; flex-shrink: 0;
+    }
+    .btn-tester:hover { background: #e0e7ff; transform: translateY(-1px); }
+
+    /* ── Flashcard modal ── */
+    .fc-overlay {
+        display: none; position: fixed; inset: 0; z-index: 9999;
+        background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+        align-items: center; justify-content: center;
+    }
+    .fc-overlay.open { display: flex; }
+    .fc-modal {
+        width: min(560px, 94vw); background: transparent;
+        position: relative; user-select: none;
+    }
+    .fc-topbar {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 14px;
+    }
+    .fc-counter {
+        color: #fff; font-size: .9rem; font-weight: 600;
+        background: rgba(255,255,255,.15); border-radius: 20px; padding: 4px 14px;
+    }
+    .fc-close {
+        background: rgba(255,255,255,.15); border: none; color: #fff;
+        border-radius: 50%; width: 34px; height: 34px; font-size: 1rem;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        transition: background .2s;
+    }
+    .fc-close:hover { background: rgba(255,255,255,.3); }
+    .fc-progress {
+        height: 4px; background: rgba(255,255,255,.2); border-radius: 2px; margin-bottom: 20px;
+    }
+    .fc-progress-fill {
+        height: 100%; background: #818cf8; border-radius: 2px; transition: width .3s;
+    }
+    .fc-scene {
+        perspective: 1200px; height: 280px;
+        margin-bottom: 20px;
+    }
+    .fc-card {
+        width: 100%; height: 100%;
+        transform-style: preserve-3d; transition: transform .5s cubic-bezier(.4,0,.2,1);
+        cursor: pointer; position: relative;
+    }
+    .fc-card.flipped { transform: rotateY(180deg); }
+    .fc-face {
+        position: absolute; inset: 0;
+        border-radius: 18px; padding: 32px 36px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        text-align: center; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+        box-shadow: 0 8px 40px rgba(0,0,0,.5);
+    }
+    .fc-front {
+        background: linear-gradient(135deg, #1e1b4b, #4338ca);
+        color: #fff;
+    }
+    .fc-back {
+        background: linear-gradient(135deg, #14532d, #16a34a);
+        color: #fff; transform: rotateY(180deg);
+    }
+    .fc-label {
+        font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+        opacity: .6; margin-bottom: 14px;
+    }
+    .fc-text {
+        font-size: 1.15rem; font-weight: 600; line-height: 1.6;
+    }
+    .fc-hint {
+        margin-top: 16px; font-size: .75rem; opacity: .5;
+        display: flex; align-items: center; gap: 5px;
+    }
+    .fc-actions {
+        display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .fc-nav {
+        background: rgba(255,255,255,.15); border: none; color: #fff;
+        border-radius: 10px; padding: 10px 22px; font-size: 1.1rem;
+        cursor: pointer; transition: background .2s;
+    }
+    .fc-nav:hover:not(:disabled) { background: rgba(255,255,255,.28); }
+    .fc-nav:disabled { opacity: .35; cursor: not-allowed; }
+    .fc-shuffle {
+        background: rgba(255,255,255,.1); border: 1.5px solid rgba(255,255,255,.2);
+        color: rgba(255,255,255,.75); border-radius: 10px; padding: 8px 16px;
+        font-size: .8rem; font-weight: 600; cursor: pointer; transition: all .2s;
+    }
+    .fc-shuffle:hover { background: rgba(255,255,255,.2); color: #fff; }
+    .fc-empty {
+        height: 280px; display: flex; flex-direction: column; align-items: center;
+        justify-content: center; color: rgba(255,255,255,.55); gap: 10px;
+    }
+    .fc-empty-icon { font-size: 3rem; opacity: .35; }
+
+    /* ── Chatbot ── */
+    #cb-bubble {
+        position: fixed; bottom: 28px; right: 28px; z-index: 9000;
+        width: 58px; height: 58px; border-radius: 50%;
+        background: linear-gradient(135deg, #5a0000, #a52a2a);
+        border: none; cursor: pointer;
+        box-shadow: 0 6px 24px rgba(90,0,0,.45);
+        display: flex; align-items: center; justify-content: center;
+        transition: transform .25s, box-shadow .25s;
+        color: #fff; font-size: 1.5rem;
+    }
+    #cb-bubble:hover { transform: scale(1.08); box-shadow: 0 10px 32px rgba(90,0,0,.55); }
+    #cb-bubble .cb-badge {
+        position: absolute; top: -3px; right: -3px;
+        background: #22c55e; color: #fff;
+        width: 18px; height: 18px; border-radius: 50%;
+        font-size: .62rem; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+        border: 2px solid #fff; display: none;
+    }
+    #cb-window {
+        position: fixed; bottom: 98px; right: 28px; z-index: 9001;
+        width: 360px; max-width: calc(100vw - 40px);
+        background: #fff; border-radius: 20px;
+        box-shadow: 0 12px 48px rgba(0,0,0,.22);
+        display: flex; flex-direction: column;
+        overflow: hidden; transform-origin: bottom right;
+        transition: opacity .22s, transform .22s;
+        opacity: 0; transform: scale(.85); pointer-events: none;
+        max-height: calc(100vh - 140px);
+    }
+    #cb-window.open { opacity: 1; transform: scale(1); pointer-events: all; }
+    #cb-header {
+        background: linear-gradient(135deg, #5a0000, #a52a2a);
+        padding: 14px 18px;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .cb-avatar {
+        width: 36px; height: 36px; border-radius: 50%;
+        background: rgba(255,255,255,.2);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem; flex-shrink: 0;
+    }
+    #cb-header-info { flex: 1; }
+    #cb-header-info strong { display: block; color: #fff; font-size: .9rem; font-weight: 700; }
+    #cb-header-info span { color: rgba(255,255,255,.65); font-size: .73rem; }
+    #cb-close-btn {
+        background: rgba(255,255,255,.15); border: none; color: #fff;
+        border-radius: 50%; width: 28px; height: 28px; font-size: .85rem;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        transition: background .2s; flex-shrink: 0;
+    }
+    #cb-close-btn:hover { background: rgba(255,255,255,.3); }
+    #cb-messages {
+        flex: 1; overflow-y: auto; padding: 16px 14px;
+        display: flex; flex-direction: column; gap: 10px;
+        background: #f7f8fc; min-height: 200px;
+    }
+    #cb-messages::-webkit-scrollbar { width: 4px; }
+    #cb-messages::-webkit-scrollbar-track { background: transparent; }
+    #cb-messages::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+    .cb-msg {
+        max-width: 82%; padding: 10px 14px; border-radius: 14px;
+        font-size: .84rem; line-height: 1.55; word-break: break-word;
+    }
+    .cb-msg-bot {
+        background: #fff; color: #1f2937;
+        border: 1.5px solid #e5e7eb; align-self: flex-start;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .cb-msg-user {
+        background: linear-gradient(135deg, #5a0000, #a52a2a);
+        color: #fff; align-self: flex-end;
+        border-bottom-right-radius: 4px;
+    }
+    .cb-typing {
+        display: flex; gap: 5px; align-items: center;
+        padding: 10px 14px; background: #fff;
+        border: 1.5px solid #e5e7eb; border-radius: 14px;
+        border-bottom-left-radius: 4px; align-self: flex-start;
+        box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .cb-dot {
+        width: 7px; height: 7px; border-radius: 50%;
+        background: #9ca3af; animation: cb-bounce .9s infinite;
+    }
+    .cb-dot:nth-child(2) { animation-delay: .15s; }
+    .cb-dot:nth-child(3) { animation-delay: .30s; }
+    @keyframes cb-bounce {
+        0%,60%,100% { transform: translateY(0); }
+        30% { transform: translateY(-5px); }
+    }
+    #cb-footer {
+        padding: 10px 12px; border-top: 1.5px solid #f0f0f0;
+        background: #fff; display: flex; gap: 8px; align-items: flex-end;
+    }
+    #cb-input {
+        flex: 1; border: 1.5px solid #e5e7eb; border-radius: 12px;
+        padding: 9px 13px; font-size: .84rem; font-family: inherit;
+        outline: none; resize: none; max-height: 100px; line-height: 1.4;
+        transition: border-color .18s;
+    }
+    #cb-input:focus { border-color: #8b1a1a; }
+    #cb-send {
+        background: linear-gradient(135deg, #5a0000, #a52a2a);
+        border: none; border-radius: 11px;
+        width: 38px; height: 38px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-size: .9rem; cursor: pointer;
+        transition: transform .18s, box-shadow .18s;
+    }
+    #cb-send:hover { transform: scale(1.07); box-shadow: 0 4px 12px rgba(90,0,0,.35); }
+    #cb-send:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    #cb-clear {
+        font-size: .71rem; color: #9ca3af; background: none; border: none;
+        cursor: pointer; padding: 2px 6px; border-radius: 6px;
+        align-self: center; transition: color .15s;
+    }
+    #cb-clear:hover { color: #ef4444; }
+    @media (max-width: 480px) {
+        #cb-window { width: calc(100vw - 24px); right: 12px; bottom: 88px; }
+        #cb-bubble { right: 16px; bottom: 20px; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+{# ═══════════════════════════════════════════
+    HERO
+═══════════════════════════════════════════ #}
+<section class="formation-hero">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ path('front_home') }}">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('front_formation_index') }}">Formations</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ formation.titre }}</li>
+            </ol>
+        </nav>
+        <h1>{{ formation.titre }}</h1>
+        <div class="d-flex gap-3 mt-3">
+            {% if formation.club %}
+                <span class="badge bg-light text-dark px-3 py-2 rounded-pill">{{ formation.club }}</span>
+            {% endif %}
+            {% if formation.dateDebut %}
+                <span class="badge bg-light text-dark px-3 py-2 rounded-pill">
+                    <i class="fa fa-calendar me-1"></i>{{ formation.dateDebut|date('d/m/Y') }}
+                    {% if formation.dateFin %} — {{ formation.dateFin|date('d/m/Y') }}{% endif %}
+                </span>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{# ═══════════════════════════════════════════
+    CONTENT
+═══════════════════════════════════════════ #}
+<section class="formation-content">
+    <div class="container">
+
+        {# Flash messages #}
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type }} alert-dismissible fade show mb-4" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="row g-4">
+            {# ── Main Content ── #}
+            <div class="col-lg-8">
+
+                {# Details Card #}
+                <div class="card info-card mb-4">
+                    <div class="card-header">
+                        <i class="fa fa-info-circle me-2" style="color: #5a0000"></i>À propos de cette formation
+                    </div>
+                    <div class="card-body">
+                        <p style="line-height: 1.8; color: #555">
+                            {{ formation.description ?? 'Aucune description disponible pour cette formation.' }}
+                        </p>
+
+                        <div class="row mt-4">
+                            <div class="col-sm-6">
+                                <div class="detail-row">
+                                    <div class="detail-label">Date de début</div>
+                                    <div class="detail-value">{{ formation.dateDebut ? formation.dateDebut|date('d F Y') : '—' }}</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="detail-row">
+                                    <div class="detail-label">Date de fin</div>
+                                    <div class="detail-value">{{ formation.dateFin ? formation.dateFin|date('d F Y') : '—' }}</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="detail-row">
+                                    <div class="detail-label">Club</div>
+                                    <div class="detail-value">{{ formation.club ?? '—' }}</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="detail-row">
+                                    <div class="detail-label">Ressources</div>
+                                    <div class="detail-value">
+                                        {% if formation.lienRessources %}
+                                            <a href="{{ formation.lienRessources }}" target="_blank" style="color: #5a0000">
+                                                <i class="fa fa-external-link me-1"></i>Accéder
+                                            </a>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+
+                <div class="sk-card2" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
+                    <div class="filter-btn sk-topbar-actions sk-btn sk-btn-ghost sk-btn-sm active" data-section="videos">Apprendre</div>
+                    <div class="filter-btn sk-topbar-actions sk-btn sk-btn-ghost sk-btn-sm" data-section="quiz">Pratiquer</div>
+                    <div class="filter-btn sk-topbar-actions sk-btn sk-btn-ghost sk-btn-sm" data-section="Progress">Progress</div>
+                    {% if formation.exam and formation.exam.questions|length > 0 %}
+                    <div class="filter-btn sk-topbar-actions sk-btn sk-btn-ghost sk-btn-sm" data-section="evaluer">🎓 Évaluer</div>
+                    {% endif %}
+                </div>
+
+                {# ── APPRENDRE: Videos Section ── #}
+                <div id="section-videos">
+
+                {# ── Flashcard banner ── #}
+                {% set flashcards = formation.flashcards %}
+                {% if flashcards|length > 0 %}
+                <div class="fc-banner">
+                    <div class="fc-banner-icon">🃏</div>
+                    <div class="fc-banner-text">
+                        <h6>Fiches mémo</h6>
+                        <p>{{ flashcards|length }} fiche{{ flashcards|length > 1 ? 's' : '' }} disponible{{ flashcards|length > 1 ? 's' : '' }} — testez votre mémoire !</p>
+                    </div>
+                    <button class="btn-tester" id="btnOpenFlashcards">
+                        <i class="fa fa-bolt"></i> Tester
+                    </button>
+                </div>
+                {% endif %}
+
+                {% if formation.videos|length > 0 %}
+                <div class="card info-card mb-4">
+                    <div class="card-header">
+                        <i class="fa fa-play-circle me-2" style="color: #e74c3c"></i>Vidéos de la formation ({{ formation.videos|length }})
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% for video in formation.videos %}
+                            <div class="col-md-6">
+                                <div class="video-card">
+                                    <video controls preload="metadata" poster="">
+                                        <source src="{{ asset(video.videoPath) }}" type="video/mp4">
+                                        Votre navigateur ne supporte pas la lecture vidéo.
+                                    </video>
+                                    <div class="video-info">
+                                        <h6><i class="fa fa-play-circle me-1" style="color: #e74c3c"></i>{{ video.titre }}</h6>
+                                        {% if video.description %}
+                                            <p>{{ video.description|length > 100 ? video.description|slice(0, 100) ~ '…' : video.description }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="card info-card mb-4">
+                    <div class="card-body text-center py-5" style="color:#aaa;">
+                        <i class="fa fa-film" style="font-size:2.5rem;margin-bottom:12px;display:block;opacity:.3;"></i>
+                        Aucune vidéo disponible pour cette formation.
+                    </div>
+                </div>
+                {% endif %}
+                </div>
+
+                {# ── PRATIQUER: Levels Progression ── #}
+                <div id="section-quiz" style="display:none;">
+                <div class="card info-card mb-4">
+                    <div class="card-header">
+                        <i class="fa fa-trophy me-2" style="color:#5a0000"></i>
+                        Niveaux ({{ sortedLevels|length }})
+                        <span style="margin-left:8px;font-size:.78rem;color:#888;font-weight:400;">
+                            — Complétez chaque niveau pour débloquer le suivant
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        {% if sortedLevels|length > 0 %}
+                        <div class="levels-grid">
+                            {% for level in sortedLevels %}
+                                {% set prog    = levelProgress[level.id] ?? {unlocked: true, passed: false, bestPct: null, required: 0} %}
+                                {% set unlocked = prog.unlocked %}
+                                {% set passed   = prog.passed %}
+                                {% set bestPct  = prog.bestPct %}
+                                {% set required = prog.required %}
+                                {% set quizList = level.quizzes %}
+
+                                <div class="level-card {{ not unlocked ? 'level-locked' : (passed ? 'level-passed' : '') }}">
+                                    <div class="level-card-head">
+                                        <div class="level-num">{{ level.numero }}</div>
+                                        <div class="level-head-info">
+                                            <div class="level-head-title">{{ level.titre }}</div>
+                                            <div class="level-head-sub">
+                                                {{ quizList|length }} quiz{{ quizList|length > 1 ? 'zes' : '' }}
+                                                {% if required %} · Requis : {{ required }}%{% endif %}
+                                            </div>
+                                        </div>
+                                        {% if not unlocked %}
+                                            <span class="level-lock-icon">🔒</span>
+                                        {% elseif passed %}
+                                            <span class="level-lock-icon">✅</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="level-card-body">
+                                        {# Progress bar #}
+                                        {% if bestPct is not null %}
+                                            <div class="level-progress-bar">
+                                                <div class="level-progress-fill" style="width:{{ bestPct }}%"></div>
+                                            </div>
+                                        {% endif %}
+
+                                        {# Score badge #}
+                                        {% if bestPct is not null %}
+                                            <div class="level-score-badge {{ passed ? 'badge-pass' : 'badge-fail' }}">
+                                                {{ passed ? '✅' : '❌' }} Meilleur score : {{ bestPct }}%
+                                            </div>
+                                        {% else %}
+                                            <div class="level-score-badge badge-none">⬜ Pas encore tenté</div>
+                                        {% endif %}
+
+                                        {# Quizzes meta #}
+                                        <div class="level-meta">
+                                            <span><i class="fa fa-list-ol"></i> {{ quizList|length }} quiz{{ quizList|length > 1 ? 'zes' : '' }}</span>
+                                            {% for quiz in quizList %}
+                                                {% if quiz.duree %}<span><i class="fa fa-clock-o"></i> {{ quiz.duree }} min</span>{% endif %}
+                                            {% endfor %}
+                                            {% if required %}
+                                                <span><i class="fa fa-star"></i> Réussir {{ required }}% pour avancer</span>
+                                            {% endif %}
+                                        </div>
+
+                                        {# Single level action button #}
+                                        {% if not unlocked %}
+                                            <div class="level-locked-msg">
+                                                🔒 Terminez le niveau précédent pour débloquer ce niveau.
+                                            </div>
+                                        {% elseif quizList|length > 0 %}
+                                            {# Find target quiz: first undone, or first if all done #}
+                                            {% set targetQuiz = null %}
+                                            {% set doneCnt = 0 %}
+                                            {% for quiz in quizList %}
+                                                {% set qp = quizProgress[quiz.id] ?? {done: false} %}
+                                                {% if qp.done %}{% set doneCnt = doneCnt + 1 %}{% endif %}
+                                                {% if not qp.done and targetQuiz is null %}{% set targetQuiz = quiz %}{% endif %}
+                                            {% endfor %}
+                                            {% if targetQuiz is null %}{% set targetQuiz = quizList|first %}{% endif %}
+                                            {% set allDone = (doneCnt == quizList|length) %}
+                                            <a href="{{ path('front_quiz_start', {formationId: formation.id, id: targetQuiz.id}) }}"
+                                               class="btn-level {{ passed ? 'btn-level-retry' : 'btn-level-start' }}">
+                                                {% if passed %}
+                                                    🔄 Recommencer le niveau
+                                                {% elseif doneCnt > 0 %}
+                                                    <i class="fa fa-bolt"></i> Continuer
+                                                    <span style="font-size:.78rem;opacity:.75;margin-left:4px;">({{ doneCnt }}/{{ quizList|length }})</span>
+                                                {% else %}
+                                                    <i class="fa fa-bolt"></i> Commencer le niveau
+                                                {% endif %}
+                                            </a>
+                                        {% else %}
+                                            <div class="level-locked-msg">Aucun quiz disponible pour ce niveau.</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                            <div class="text-center py-5" style="color:#aaa;">
+                                <i class="fa fa-trophy" style="font-size:2.5rem;margin-bottom:12px;display:block;opacity:.3;"></i>
+                                Aucun niveau disponible pour cette formation.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                </div>
+
+                {# ── PROGRESS ── #}
+                <div id="section-Progress" style="display:none;">
+
+                {% if app.user %}
+
+                {# ── Compute summary stats ── #}
+                {% set totalLevels   = sortedLevels|length %}
+                {% set passedLevels  = 0 %}
+                {% set totalQuizzes  = 0 %}
+                {% set doneQuizzes   = 0 %}
+                {% set sumPct        = 0 %}
+                {% set attemptedCnt  = 0 %}
+
+                {% for level in sortedLevels %}
+                    {% set lp = levelProgress[level.id] ?? {passed:false} %}
+                    {% if lp.passed %}{% set passedLevels = passedLevels + 1 %}{% endif %}
+                    {% for quiz in level.quizzes %}
+                        {% set totalQuizzes = totalQuizzes + 1 %}
+                        {% set qp = quizProgress[quiz.id] ?? {done:false,pct:null} %}
+                        {% if qp.done %}
+                            {% set doneQuizzes  = doneQuizzes + 1 %}
+                            {% set sumPct       = sumPct + qp.pct %}
+                            {% set attemptedCnt = attemptedCnt + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+
+                {% set avgScore = attemptedCnt > 0 ? (sumPct / attemptedCnt)|round : 0 %}
+                {% set overallPct = totalQuizzes > 0 ? ((doneQuizzes / totalQuizzes) * 100)|round : 0 %}
+
+                {# ── Stat cards ── #}
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;margin-bottom:20px;">
+                    <div style="background:#fff;border-radius:14px;border:1.5px solid #f0f0f0;padding:16px 14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.05);">
+                        <div style="font-size:1.8rem;font-weight:800;color:#5a0000;line-height:1;">{{ passedLevels }}/{{ totalLevels }}</div>
+                        <div style="font-size:.75rem;color:#888;margin-top:4px;">Niveaux réussis</div>
+                    </div>
+                    <div style="background:#fff;border-radius:14px;border:1.5px solid #f0f0f0;padding:16px 14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.05);">
+                        <div style="font-size:1.8rem;font-weight:800;color:#2563eb;line-height:1;">{{ doneQuizzes }}/{{ totalQuizzes }}</div>
+                        <div style="font-size:.75rem;color:#888;margin-top:4px;">Quiz complétés</div>
+                    </div>
+                    <div style="background:#fff;border-radius:14px;border:1.5px solid #f0f0f0;padding:16px 14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.05);">
+                        <div style="font-size:1.8rem;font-weight:800;color:{{ avgScore >= 50 ? '#15803d' : '#dc2626' }};line-height:1;">{{ avgScore }}%</div>
+                        <div style="font-size:.75rem;color:#888;margin-top:4px;">Score moyen</div>
+                    </div>
+                    <div style="background:#fff;border-radius:14px;border:1.5px solid #f0f0f0;padding:16px 14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.05);">
+                        <div style="font-size:1.8rem;font-weight:800;color:#7c3aed;line-height:1;">{{ overallPct }}%</div>
+                        <div style="font-size:.75rem;color:#888;margin-top:4px;">Progression globale</div>
+                    </div>
+                </div>
+
+                {# ── Overall progress bar ── #}
+                <div style="background:#fff;border-radius:14px;border:1.5px solid #f0f0f0;padding:18px 20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.05);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <span style="font-weight:700;font-size:.88rem;color:#374151;">Progression globale de la formation</span>
+                        <span style="font-weight:800;font-size:.9rem;color:#5a0000;">{{ overallPct }}%</span>
+                    </div>
+                    <div style="height:10px;background:#f3f4f6;border-radius:99px;overflow:hidden;">
+                        <div style="height:100%;width:{{ overallPct }}%;border-radius:99px;background:linear-gradient(90deg,#5a0000,#c23030);transition:width .6s ease;"></div>
+                    </div>
+                </div>
+
+                {# ── Charts row ── #}
+                {% if attemptedCnt > 0 %}
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                    <div style="background:#fff;border-radius:14px;border:1.5px solid #f0f0f0;padding:18px 14px;box-shadow:0 2px 8px rgba(0,0,0,.05);">
+                        <div style="font-weight:700;font-size:.85rem;color:#374151;margin-bottom:10px;">📊 Statut des niveaux</div>
+                        <div id="prog-donut" style="height:200px;"></div>
+                    </div>
+                    <div style="background:#fff;border-radius:14px;border:1.5px solid #f0f0f0;padding:18px 14px;box-shadow:0 2px 8px rgba(0,0,0,.05);">
+                        <div style="font-weight:700;font-size:.85rem;color:#374151;margin-bottom:10px;">📈 Score par niveau</div>
+                        <div id="prog-bar" style="height:200px;"></div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# ── Detailed level table ── #}
+                <div class="card info-card mb-4">
+                    <div class="card-header">
+                        <i class="fa fa-list me-2" style="color:#5a0000"></i>Détail par niveau
+                    </div>
+                    <div class="card-body" style="padding:0;">
+                        {% for level in sortedLevels %}
+                            {% set lp = levelProgress[level.id] ?? {unlocked:false,passed:false,bestPct:null} %}
+                            <div style="padding:14px 20px;border-bottom:1px solid #f5f5f5;">
+                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:{% if level.quizzes|length > 0 %}10{% else %}0{% endif %}px;">
+                                    <div style="width:32px;height:32px;border-radius:9px;background:{{ lp.passed ? 'linear-gradient(135deg,#15803d,#22c55e)' : (lp.unlocked ? 'linear-gradient(135deg,#5a0000,#8b1a1a)' : 'linear-gradient(135deg,#4b5563,#6b7280)') }};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;flex-shrink:0;">{{ level.numero }}</div>
+                                    <div style="flex:1;min-width:0;">
+                                        <div style="font-weight:700;font-size:.88rem;color:#374151;">{{ level.titre }}</div>
+                                        <div style="font-size:.73rem;color:#9ca3af;">{{ level.quizzes|length }} quiz{{ level.quizzes|length > 1 ? 'zes' : '' }}</div>
+                                    </div>
+                                    <div>
+                                        {% if lp.passed %}
+                                            <span style="background:#dcfce7;color:#15803d;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;">✅ Réussi ({{ lp.bestPct }}%)</span>
+                                        {% elseif not lp.unlocked %}
+                                            <span style="background:#f3f4f6;color:#9ca3af;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;">🔒 Verrouillé</span>
+                                        {% elseif lp.bestPct is not null %}
+                                            <span style="background:#fee2e2;color:#dc2626;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;">❌ {{ lp.bestPct }}% — En cours</span>
+                                        {% else %}
+                                            <span style="background:#f3f4f6;color:#6b7280;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;">⬜ Non commencé</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                {% if level.quizzes|length > 0 %}
+                                <div style="margin-left:42px;display:flex;flex-direction:column;gap:6px;">
+                                    {% for quiz in level.quizzes %}
+                                        {% set qp = quizProgress[quiz.id] ?? {done:false,pct:null,passed:false} %}
+                                        <div style="display:flex;align-items:center;gap:10px;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:9px;padding:8px 12px;">
+                                            <span style="font-size:.78rem;">{{ qp.done ? (qp.passed ? '✅' : '❌') : '⬜' }}</span>
+                                            <span style="flex:1;font-size:.82rem;font-weight:600;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ quiz.titre }}</span>
+                                            {% if qp.done %}
+                                                <div style="height:6px;width:80px;background:#f3f4f6;border-radius:99px;overflow:hidden;">
+                                                    <div style="height:100%;width:{{ qp.pct }}%;border-radius:99px;background:{{ qp.passed ? 'linear-gradient(90deg,#15803d,#22c55e)' : 'linear-gradient(90deg,#dc2626,#f87171)' }};"></div>
+                                                </div>
+                                                <span style="font-size:.72rem;font-weight:700;color:{{ qp.passed ? '#15803d' : '#dc2626' }};min-width:34px;text-align:right;">{{ qp.pct }}%</span>
+                                            {% else %}
+                                                <span style="font-size:.72rem;color:#9ca3af;">—</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# ── Google Charts data ── #}
+                {% if attemptedCnt > 0 %}
+                {% set inProgressLevels = 0 %}
+                {% set notStartedLevels = 0 %}
+                {% set lockedLevels     = 0 %}
+                {% for level in sortedLevels %}
+                    {% set lp = levelProgress[level.id] ?? {unlocked:false,passed:false,bestPct:null} %}
+                    {% if not lp.unlocked %}
+                        {% set lockedLevels = lockedLevels + 1 %}
+                    {% elseif lp.passed %}
+                        {# already counted in passedLevels #}
+                    {% elseif lp.bestPct is not null %}
+                        {% set inProgressLevels = inProgressLevels + 1 %}
+                    {% else %}
+                        {% set notStartedLevels = notStartedLevels + 1 %}
+                    {% endif %}
+                {% endfor %}
+                <script type="application/json" id="prog-data">{
+                    "donut": [
+                        ["Statut", "Niveaux"],
+                        ["Réussis", {{ passedLevels }}],
+                        ["En cours", {{ inProgressLevels }}],
+                        ["Non commencés", {{ notStartedLevels }}],
+                        ["Verrouillés", {{ lockedLevels }}]
+                    ],
+                    "bar": [
+                        ["Niveau", "Score (%)", {"role": "style"}, {"role": "annotation"}]
+                        {% for level in sortedLevels %}
+                            {% set lp = levelProgress[level.id] ?? {bestPct:null,passed:false} %}
+                            {% if lp.bestPct is not null %}
+                            ,["Niv.{{ level.numero }}", {{ lp.bestPct }}, "{{ lp.passed ? 'color:#15803d' : 'color:#dc2626' }}", "{{ lp.bestPct }}%"]
+                            {% endif %}
+                        {% endfor %}
+                    ]
+                }</script>
+                {% endif %}
+
+                {% else %}
+                <div class="card info-card mb-4">
+                    <div class="card-body text-center py-5" style="color:#aaa;">
+                        <i class="fa fa-lock" style="font-size:2.5rem;margin-bottom:14px;display:block;opacity:.25;"></i>
+                        <p style="margin:0;font-size:.95rem;">Connectez-vous pour voir votre progression.</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                </div>
+
+                {# ── ÉVALUER : Examen final ── #}
+                {% if formation.exam and formation.exam.questions|length > 0 %}
+                <div id="section-evaluer" style="display:none;">
+                    <div class="card info-card mb-4" style="border-radius:16px;overflow:hidden;">
+                        <div class="card-header" style="background:linear-gradient(135deg,#1e3a5f,#2563eb);color:#fff;padding:16px 20px;font-weight:700;font-family:'Bricolage Grotesque',sans-serif;">
+                            🎓 {{ formation.exam.titre }}
+                        </div>
+                        <div class="card-body text-center py-4">
+                            <p style="margin:0 0 8px;color:#555;font-size:.92rem;">{{ formation.exam.questions|length }} question{{ formation.exam.questions|length > 1 ? 's' : '' }}</p>
+                            <p style="margin:0 0 16px;color:#888;font-size:.82rem;">Score minimum : {{ formation.exam.passingScore }}% &middot; Max {{ formation.exam.maxMistakes }} erreurs</p>
+                            <a href="{{ path('front_exam_intro', {formationId: formation.id}) }}" class="btn" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;border-radius:10px;padding:10px 24px;font-weight:700;font-family:'DM Sans',sans-serif;">🚀 Passer l'examen</a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            {# ── Sidebar ── #}
+            <div class="col-lg-4">
+                {# Image + Stats #}
+                <div class="card sidebar-card mb-4">
+                    {% if formation.image %}
+                        <img src="{{ formation.image }}" alt="{{ formation.titre }}">
+                    {% else %}
+                        <div class="img-placeholder">
+                            <i class="fa fa-graduation-cap" style="font-size: 3rem; color: #ccc"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="d-flex justify-content-around py-3">
+                            <div class="stat-item">
+                                <h3>{{ formation.participations|length }}</h3>
+                                <span>Participants</span>
+                            </div>
+                            <div class="stat-item">
+                                <h3>{{ sortedLevels|length }}</h3>
+                                <span>Niveaux</span>
+                            </div>
+                            <div class="stat-item">
+                                <h3>{{ formation.videos|length }}</h3>
+                                <span>Vidéos</span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        {# Participate Button #}
+                        {% if app.user %}
+                            {% if hasParticipated %}
+                                <button class="btn btn-participated mb-3" disabled>
+                                    <i class="fa fa-check me-2"></i>Déjà inscrit
+                                    {% if formation.isPaid %}
+                                        &nbsp;<span style="background:#16a34a;color:#fff;font-size:.72rem;padding:2px 8px;border-radius:20px;font-weight:700;vertical-align:middle;">💳 Payé</span>
+                                    {% endif %}
+                                </button>
+                            {% elseif formation.isPaid %}
+                                {# Paid formation — trigger payment modal #}
+                                <button type="button" class="btn btn-participate mb-3"
+                                        data-bs-toggle="modal" data-bs-target="#paymentModal">
+                                    <i class="fa fa-credit-card me-2"></i>Participer
+                                </button>
+                            {% else %}
+                                <form action="{{ path('front_formation_participate', {id: formation.id}) }}" method="post">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('participate' ~ formation.id) }}">
+                                    <button type="submit" class="btn btn-participate mb-3">
+                                        <i class="fa fa-user-plus me-2"></i>Participer
+                                    </button>
+                                </form>
+                            {% endif %}
+
+
+                            {# ❤️ Favorite button #}
+                            {% set isFav = formation.id in favoritesIds %}
+                            <form method="post" action="{{ path('front_formation_toggle_favorite', {id: formation.id}) }}" class="mt-2">
+                                <input type="hidden" name="_token" value="{{ csrf_token('fav' ~ formation.id) }}">
+                                <button type="submit" class="btn-fav-show {{ isFav ? 'is-fav' : '' }}">
+                                    {{ isFav ? '❤️ Retirer des favoris' : '🤍 Ajouter aux favoris' }}
+                                </button>
+                            </form>
+
+
+                        {% else %}
+                            <a href="#" class="btn btn-participate mb-3" onclick="alert('Veuillez vous connecter pour participer.'); return false;">
+                                <i class="fa fa-sign-in me-2"></i>Connectez-vous pour participer
+                            </a>
+                        {% endif %}
+
+                        {# Back link #}
+                        <a href="{{ path('front_formation_index') }}" class="btn btn-outline-secondary w-100 mt-2" style="border-radius: 10px">
+                            <i class="fa fa-arrow-left me-2"></i>Retour aux formations
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{# ── Payment Modal (paid formations) ── #}
+{% if formation.isPaid %}
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:18px;border:none;overflow:hidden;">
+            {# Modal header #}
+            <div class="modal-header" style="background:linear-gradient(135deg,#5a0000,#a52a2a);border:none;padding:24px 28px 20px;">
+                <div>
+                    <h5 class="modal-title fw-bold text-white mb-1" id="paymentModalLabel">
+                        <i class="fa fa-lock me-2"></i>Formation payante
+                    </h5>
+                    <p class="text-white mb-0" style="opacity:.85;font-size:.88rem;">
+                        Accédez à <strong>{{ formation.titre }}</strong> en complétant votre paiement
+                    </p>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            {# Modal body #}
+            <div class="modal-body" style="padding:28px;">
+                {# Price info #}
+                <div style="background:#fff9f0;border:1.5px solid #f5c842;border-radius:12px;padding:16px 20px;margin-bottom:22px;display:flex;align-items:center;gap:14px;">
+                    <span style="font-size:2rem;">💰</span>
+                    <div>
+                        <div class="fw-bold" style="font-size:1.1rem;color:#92400e;">
+                            {% if formation.prix %}
+                                {{ formation.prix|number_format(2, '.', ' ') }} TND
+                            {% else %}
+                                Payante
+                            {% endif %}
+                        </div>
+                        <div style="font-size:.8rem;color:#b45309;">Paiement sécurisé via Stripe</div>
+                    </div>
+                </div>
+
+                {# What you get #}
+                <ul style="list-style:none;padding:0;margin:0 0 22px;font-size:.9rem;color:#374151;">
+                    <li class="mb-2"><i class="fa fa-check-circle me-2" style="color:#22c55e;"></i>Accès illimité au contenu</li>
+                    <li class="mb-2"><i class="fa fa-check-circle me-2" style="color:#22c55e;"></i>Certificat de réussite</li>
+                    <li class="mb-2"><i class="fa fa-check-circle me-2" style="color:#22c55e;"></i>Quiz et exercices pratiques</li>
+                </ul>
+
+                {# Stripe CTA #}
+                <a href="{{ path('app_pay', {formationId: formation.id}) }}"
+                   class="btn btn-success w-100 py-2 fw-bold"
+                   style="border-radius:10px;font-size:1rem;letter-spacing:.3px;background:#635bff;border-color:#635bff;">
+                    <svg width="18" height-="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:8px;margin-top:-2px;">
+                        <rect width="24" height="24" rx="4" fill="white" fill-opacity="0.2"/>
+                        <path d="M11.5 8c-1.38 0-2.5.672-2.5 2.25 0 2.917 4 2.25 4 4.5 0 .832-.75 1.25-1.75 1.25-1.125 0-2-.583-2-.583l-.5 1.333S9.75 17.5 11.5 17.5c1.5 0 3-.75 3-2.5 0-2.833-4-2.5-4-4.333 0-.667.5-1.167 1.5-1.167.875 0 1.5.417 1.5.417L14 8.583S13.125 8 11.5 8Z" fill="white"/>
+                    </svg>
+                    Payer avec Stripe
+                </a>
+                <p class="text-center text-muted mt-2 mb-0" style="font-size:.76rem;">
+                    🔒 Paiement 100 % sécurisé · Données chiffrées SSL
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{# ── Flashcard modal ── #}
+{% set flashcards = formation.flashcards %}
+<div class="fc-overlay" id="fcOverlay">
+    <div class="fc-modal">
+        <div class="fc-topbar">
+            <span class="fc-counter" id="fcCounter">1 / {{ flashcards|length }}</span>
+            <button class="fc-shuffle" id="fcShuffle"><i class="fa fa-random"></i> Mélanger</button>
+            <button class="fc-close" id="fcClose" title="Fermer">✕</button>
+        </div>
+        <div class="fc-progress"><div class="fc-progress-fill" id="fcProgressFill"></div></div>
+
+        {% if flashcards|length > 0 %}
+        <div class="fc-scene">
+            <div class="fc-card" id="fcCard">
+                <div class="fc-face fc-front">
+                    <div class="fc-label">❓ Question</div>
+                    <div class="fc-text" id="fcQuestion">{{ flashcards|first.question }}</div>
+                    <div class="fc-hint"><i class="fa fa-hand-pointer-o"></i> Cliquez pour voir la réponse</div>
+                </div>
+                <div class="fc-face fc-back">
+                    <div class="fc-label">✅ Réponse</div>
+                    <div class="fc-text" id="fcAnswer">{{ flashcards|first.answer }}</div>
+                    <div class="fc-hint"><i class="fa fa-hand-pointer-o"></i> Cliquez pour retourner</div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="fc-empty">
+            <div class="fc-empty-icon">🃏</div>
+            <p>Aucune fiche mémo disponible pour cette formation.</p>
+        </div>
+        {% endif %}
+
+        <div class="fc-actions">
+            <button class="fc-nav" id="fcPrev" title="Précédent (←)">&#8592;</button>
+            <span style="color:rgba(255,255,255,.5);font-size:.78rem;">Espace = retourner &nbsp;·&nbsp; ← → = naviguer</span>
+            <button class="fc-nav" id="fcNext" title="Suivant (→)">&#8594;</button>
+        </div>
+    </div>
+</div>
+
+{# ── Floating Chatbot ── #}
+<button id="cb-bubble" title="Assistant IA" aria-label="Ouvrir le chatbot">
+    🤖
+    <span class="cb-badge" id="cb-badge">1</span>
+</button>
+
+<div id="cb-window" role="dialog" aria-label="Assistant IA">
+    <div id="cb-header">
+        <div class="cb-avatar">🤖</div>
+        <div id="cb-header-info">
+            <strong>Assistant SkillOra</strong>
+            <span>Posez vos questions sur cette formation</span>
+        </div>
+        <button id="cb-close-btn" title="Fermer">✕</button>
+    </div>
+
+    <div id="cb-messages">
+        <div class="cb-msg cb-msg-bot">
+            Bonjour ! 👋 Je suis votre assistant pour la formation <strong>{{ formation.titre }}</strong>. Comment puis-je vous aider ?
+        </div>
+    </div>
+
+    <div id="cb-footer">
+        <textarea id="cb-input" rows="1" placeholder="Votre question…" maxlength="800"></textarea>
+        <button id="cb-send" title="Envoyer">➤</button>
+        <button id="cb-clear" title="Effacer la conversation">🗑</button>
+    </div>
+</div>
+
+{# Flashcard data as JSON #}
+<script id="fcData" type="application/json">[
+    {% for fc in flashcards %}
+    {"q": {{ fc.question|json_encode|raw }}, "a": {{ fc.answer|json_encode|raw }}}{{ not loop.last ? ',' : '' }}
+    {% endfor %}
+]</script>
+
+{% endblock %}
+
+{% block javascripts %}{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tabs = document.querySelectorAll('.filter-btn[data-section]');
+    const sectionIds = { videos: 'section-videos', quiz: 'section-quiz', Progress: 'section-Progress', evaluer: 'section-evaluer' };
+
+    tabs.forEach(btn => {
+        btn.addEventListener('click', function () {
+            tabs.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const target = this.dataset.section;
+            Object.entries(sectionIds).forEach(([key, id]) => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = (key === target) ? '' : 'none';
+            });
+        });
+    });
+
+    /* ── Flashcard logic ── */
+    const rawData = document.getElementById('fcData');
+    if (!rawData) return;
+    let CARDS = JSON.parse(rawData.textContent || '[]');
+    if (!CARDS.length) return;
+
+    const overlay    = document.getElementById('fcOverlay');
+    const card       = document.getElementById('fcCard');
+    const qEl        = document.getElementById('fcQuestion');
+    const aEl        = document.getElementById('fcAnswer');
+    const counter    = document.getElementById('fcCounter');
+    const progressFill = document.getElementById('fcProgressFill');
+    const btnPrev    = document.getElementById('fcPrev');
+    const btnNext    = document.getElementById('fcNext');
+    const btnClose   = document.getElementById('fcClose');
+    const btnShuffle = document.getElementById('fcShuffle');
+    const btnOpen    = document.getElementById('btnOpenFlashcards');
+
+    let idx = 0;
+
+    function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+    }
+
+    function render() {
+        const c = CARDS[idx];
+        qEl.textContent = c.q;
+        aEl.textContent = c.a;
+        card.classList.remove('flipped');
+        counter.textContent = (idx + 1) + ' / ' + CARDS.length;
+        progressFill.style.width = ((idx + 1) / CARDS.length * 100) + '%';
+        btnPrev.disabled = idx === 0;
+        btnNext.disabled = idx === CARDS.length - 1;
+    }
+
+    function open() {
+        idx = 0; render();
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function close() {
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    if (btnOpen) btnOpen.addEventListener('click', open);
+    btnClose.addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+
+    card.addEventListener('click', function () { card.classList.toggle('flipped'); });
+    btnPrev.addEventListener('click', function () { if (idx > 0) { idx--; render(); } });
+    btnNext.addEventListener('click', function () { if (idx < CARDS.length - 1) { idx++; render(); } });
+    btnShuffle.addEventListener('click', function () {
+        shuffle(CARDS); idx = 0; render();
+        btnShuffle.textContent = '✓ Mélangé !';
+        setTimeout(function () { btnShuffle.innerHTML = '<i class="fa fa-random"></i> Mélanger'; }, 1200);
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (!overlay.classList.contains('open')) return;
+        if (e.key === 'ArrowLeft'  && idx > 0)               { idx--; render(); }
+        if (e.key === 'ArrowRight' && idx < CARDS.length - 1) { idx++; render(); }
+        if (e.key === ' ' || e.key === 'Enter')  { card.classList.toggle('flipped'); e.preventDefault(); }
+        if (e.key === 'Escape') close();
+    });
+});
+</script>
+<script>
+const formationId = {{ formation.id }};
+</script>
+
+<script>
+/* ── Google Charts: Ma Progression ── */
+(function () {
+    const raw = document.getElementById('prog-data');
+    if (!raw) return;
+
+    const data = JSON.parse(raw.textContent);
+
+    google.charts.load('current', { packages: ['corechart'] });
+    google.charts.setOnLoadCallback(function () {
+
+        /* Donut */
+        const donutEl = document.getElementById('prog-donut');
+        if (donutEl) {
+            const dt = google.visualization.arrayToDataTable(data.donut);
+            new google.visualization.PieChart(donutEl).draw(dt, {
+                pieHole: 0.48,
+                legend: { position: 'bottom', textStyle: { fontSize: 11 } },
+                colors: ['#15803d', '#f59e0b', '#9ca3af', '#6b7280'],
+                chartArea: { width: '90%', height: '72%' },
+                tooltip: { showColorCode: true },
+                backgroundColor: 'transparent',
+            });
+        }
+
+        /* Bar */
+        const barEl = document.getElementById('prog-bar');
+        if (barEl && data.bar.length > 1) {
+            const dt = google.visualization.arrayToDataTable(data.bar);
+            new google.visualization.ColumnChart(barEl).draw(dt, {
+                legend: { position: 'none' },
+                vAxis: { minValue: 0, maxValue: 100, gridlines: { count: 5 },
+                         textStyle: { fontSize: 10 } },
+                hAxis: { textStyle: { fontSize: 10 } },
+                chartArea: { width: '80%', height: '70%' },
+                backgroundColor: 'transparent',
+                bar: { groupWidth: '55%' },
+                annotations: { alwaysOutside: false, textStyle: { fontSize: 10, bold: true, color: '#374151' } },
+            });
+        }
+    });
+})();
+</script>
+
+<script>
+(function () {
+    /* ── Chatbot ── */
+    const CHAT_URL = {{ path('front_formation_chatbot', {id: formation.id})|json_encode|raw }};
+    const bubble   = document.getElementById('cb-bubble');
+    const win      = document.getElementById('cb-window');
+    const msgs     = document.getElementById('cb-messages');
+    const input    = document.getElementById('cb-input');
+    const sendBtn  = document.getElementById('cb-send');
+    const closeBtn = document.getElementById('cb-close-btn');
+    const clearBtn = document.getElementById('cb-clear');
+    const badge    = document.getElementById('cb-badge');
+
+    let isOpen    = false;
+    let isBusy    = false;
+    let unreadCnt = 0;
+
+    /* ── helpers ── */
+    function scrollBottom() {
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function appendMsg(text, role) {
+        const d = document.createElement('div');
+        d.className = 'cb-msg cb-msg-' + role;
+        d.innerHTML = text.replace(/\n/g, '<br>');
+        msgs.appendChild(d);
+        scrollBottom();
+        return d;
+    }
+
+    function showTyping() {
+        const t = document.createElement('div');
+        t.className = 'cb-typing'; t.id = 'cb-typing';
+        t.innerHTML = '<div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div>';
+        msgs.appendChild(t);
+        scrollBottom();
+    }
+
+    function hideTyping() {
+        const t = document.getElementById('cb-typing');
+        if (t) t.remove();
+    }
+
+    function setBusy(state) {
+        isBusy = state;
+        sendBtn.disabled = state;
+        input.disabled   = state;
+    }
+
+    /* ── open / close ── */
+    function openChat() {
+        isOpen = true;
+        win.classList.add('open');
+        bubble.style.transform = 'scale(0.92)';
+        unreadCnt = 0;
+        badge.style.display = 'none';
+        input.focus();
+        scrollBottom();
+    }
+
+    function closeChat() {
+        isOpen = false;
+        win.classList.remove('open');
+        bubble.style.transform = '';
+    }
+
+    bubble.addEventListener('click', function () { isOpen ? closeChat() : openChat(); });
+    closeBtn.addEventListener('click', closeChat);
+
+    clearBtn.addEventListener('click', function () {
+        msgs.innerHTML = '';
+        appendMsg('Conversation effacée. Comment puis-je vous aider ?', 'bot');
+    });
+
+    /* ── auto-grow textarea ── */
+    input.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+    });
+
+    /* ── send on Enter (Shift+Enter = newline) ── */
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+    sendBtn.addEventListener('click', sendMessage);
+
+    /* ── send ── */
+    function sendMessage() {
+        const text = input.value.trim();
+        if (!text || isBusy) return;
+
+        appendMsg(text, 'user');
+        input.value = '';
+        input.style.height = 'auto';
+        setBusy(true);
+        showTyping();
+
+        fetch(CHAT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text })
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            hideTyping();
+            if (data.error) {
+                appendMsg('❌ ' + data.error, 'bot');
+            } else {
+                appendMsg(data.reply, 'bot');
+                if (!isOpen) {
+                    unreadCnt++;
+                    badge.textContent = unreadCnt;
+                    badge.style.display = 'flex';
+                }
+            }
+        })
+        .catch(function () {
+            hideTyping();
+            appendMsg('❌ Une erreur réseau est survenue. Veuillez réessayer.', 'bot');
+        })
+        .finally(function () { setBusy(false); });
+    }
+})();
+</script>
+{% endblock %}

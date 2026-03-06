@@ -1,0 +1,649 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Dashboard Forum — SkillOra{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+    :root {
+        --ink:     #0d0d0d;
+        --cream:   #f2f2f2;
+        --red:     #c10609;
+        --red-mid: #8b0507;
+        --red-dim: rgba(193,6,9,0.07);
+        --gold:    #ffffff;
+        --muted:   #6b6b6b;
+        --card-bg: #ffffff;
+        --radius:  18px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { background: var(--cream); font-family: 'DM Sans', sans-serif; color: var(--ink); }
+
+    /* ─── PAGE SHELL ─── */
+    .db-shell {
+        min-height: 100vh;
+        padding: 100px 0 80px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .db-shell::before {
+        content: '';
+        position: fixed; inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+        pointer-events: none; z-index: 0; opacity: 0.4;
+    }
+
+    .db-wrap {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 0 32px;
+        position: relative; z-index: 1;
+    }
+
+    /* ─── HERO BANNER ─── */
+    .hero-banner {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        background: var(--ink);
+        border-radius: 28px;
+        padding: 44px 52px;
+        margin-bottom: 32px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-banner::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+        background: var(--red);
+    }
+
+    .hero-banner::after {
+        content: 'F';
+        position: absolute;
+        right: -20px; bottom: -40px;
+        font-family: 'Playfair Display', serif;
+        font-size: 260px;
+        font-weight: 900;
+        color: rgba(255,255,255,0.03);
+        line-height: 1;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    .hero-left { position: relative; z-index: 1; }
+
+    .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.6);
+        margin-bottom: 16px;
+    }
+
+    .hero-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--gold);
+        line-height: 1.1;
+        margin-bottom: 12px;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+        color: rgba(255,255,255,0.7);
+        font-weight: 400;
+    }
+
+    /* ─── KPI CARDS ─── */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 20px;
+        margin-bottom: 32px;
+    }
+
+    .kpi-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 28px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        transition: all 0.3s ease;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: var(--red);
+    }
+
+    .kpi-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 12px;
+    }
+
+    .kpi-value {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: var(--ink);
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+
+    .kpi-subtext {
+        font-size: 0.85rem;
+        color: var(--muted);
+    }
+
+    /* ─── CHART SECTION ─── */
+    .chart-section {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 32px;
+        margin-bottom: 32px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+
+    .chart-header {
+        margin-bottom: 24px;
+    }
+
+    .chart-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 8px;
+    }
+
+    .chart-subtitle {
+        font-size: 0.9rem;
+        color: var(--muted);
+    }
+
+    .chart-container {
+        min-height: 300px;
+        width: 100%;
+    }
+
+    /* ─── GRID FOR CHARTS ─── */
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    @media(max-width: 768px) {
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ─── TABLE SECTION ─── */
+    .table-section {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 32px;
+        margin-bottom: 32px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+
+    .table-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 20px;
+    }
+
+    .stats-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .stats-table thead {
+        background: var(--red-dim);
+    }
+
+    .stats-table th {
+        padding: 14px 16px;
+        text-align: left;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: var(--red-mid);
+    }
+
+    .stats-table td {
+        padding: 16px;
+        border-bottom: 1px solid #e5e5e5;
+        font-size: 0.95rem;
+        color: var(--ink);
+    }
+
+    .stats-table tbody tr:hover {
+        background: var(--red-dim);
+    }
+
+    .pub-link {
+        color: var(--red);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .pub-link:hover {
+        color: var(--red-mid);
+        text-decoration: underline;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: var(--red-dim);
+        color: var(--red);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="db-shell">
+    <div class="db-wrap">
+        <!-- HERO BANNER -->
+        <div class="hero-banner">
+            <div class="hero-left">
+                <div class="hero-eyebrow">
+                    📊 Responsable Club
+                </div>
+                <h1 class="hero-title">Dashboard Forum</h1>
+                <p class="hero-subtitle">Statistiques détaillées des publications et commentaires</p>
+            </div>
+        </div>
+
+        <!-- KPI CARDS -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Total Publications</div>
+                <div class="kpi-value">{{ totalPublications }}</div>
+                <div class="kpi-subtext">{{ recentPublications }} cette semaine</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Total Commentaires</div>
+                <div class="kpi-value">{{ totalCommentaires }}</div>
+                <div class="kpi-subtext">{{ recentCommentaires }} cette semaine</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Moyenne Commentaires</div>
+                <div class="kpi-value">{{ avgCommentsPerPub }}</div>
+                <div class="kpi-subtext">par publication</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">En Attente</div>
+                <div class="kpi-value">{{ pubsByStatus[0].count }}</div>
+                <div class="kpi-subtext">publications à modérer</div>
+            </div>
+        </div>
+
+        <!-- CHARTS GRID -->
+        <div class="charts-grid">
+            <!-- PUBLICATIONS PAR JOUR -->
+            <div class="chart-section">
+                <div class="chart-header">
+                    <h2 class="chart-title">Publications</h2>
+                    <p class="chart-subtitle">Activité des 30 derniers jours</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="pubsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- COMMENTAIRES PAR JOUR -->
+            <div class="chart-section">
+                <div class="chart-header">
+                    <h2 class="chart-title">Commentaires</h2>
+                    <p class="chart-subtitle">Activité des 30 derniers jours</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="commentsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- PIE CHARTS GRID -->
+        <div class="charts-grid">
+            <!-- PUBLICATIONS PAR STATUT -->
+            <div class="chart-section">
+                <div class="chart-header">
+                    <h2 class="chart-title">Publications par Statut</h2>
+                    <p class="chart-subtitle">Répartition actuelle</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+
+            <!-- PUBLICATIONS PAR TYPE -->
+            <div class="chart-section">
+                <div class="chart-header">
+                    <h2 class="chart-title">Publications par Type</h2>
+                    <p class="chart-subtitle">Répartition par format</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="typeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOP PUBLICATIONS TABLE -->
+        <div class="table-section">
+            <h2 class="table-title">🏆 Top 5 Publications les Plus Commentées</h2>
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Date</th>
+                        <th>Commentaires</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pub in topPublications %}
+                    <tr>
+                        <td>{{ pub.titre }}</td>
+                        <td>{{ pub.datePublication|date('d/m/Y') }}</td>
+                        <td><span class="badge">{{ pub.commentCount }}</span></td>
+                        <td>
+                            <a href="{{ path('app_responsable_club_publication_show', {id: pub.id}) }}" class="pub-link">
+                                Voir →
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align:center; color: var(--muted);">
+                            Aucune publication pour le moment
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    // ════════════════════════════════════════════
+    // 1. PUBLICATIONS PAR DATE (Line Chart)
+    // ════════════════════════════════════════════
+    const pubsData = {{ pubsByDate|json_encode|raw }};
+    
+    // Préparer les données pour Chart.js
+    const pubsLabels = pubsData.map(item => {
+        const date = new Date(item.pubDate);
+        return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+    });
+    const pubsValues = pubsData.map(item => parseInt(item.total));
+
+    const pubsChartCtx = document.getElementById('pubsChart').getContext('2d');
+    new Chart(pubsChartCtx, {
+        type: 'line',
+        data: {
+            labels: pubsLabels,
+            datasets: [{
+                label: 'Publications',
+                data: pubsValues,
+                borderColor: '#c10609',
+                backgroundColor: 'rgba(193, 6, 9, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: '#c10609',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: '#0d0d0d',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    padding: 12,
+                    cornerRadius: 8
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0,
+                        color: '#6b6b6b'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#6b6b6b',
+                        maxRotation: 45,
+                        minRotation: 45
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // ════════════════════════════════════════════
+    // 2. COMMENTAIRES PAR DATE (Line Chart)
+    // ════════════════════════════════════════════
+    const commentsData = {{ commentsByDate|json_encode|raw }};
+    
+    const commentsLabels = commentsData.map(item => {
+        const date = new Date(item.comDate);
+        return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+    });
+    const commentsValues = commentsData.map(item => parseInt(item.total));
+
+    const commentsChartCtx = document.getElementById('commentsChart').getContext('2d');
+    new Chart(commentsChartCtx, {
+        type: 'line',
+        data: {
+            labels: commentsLabels,
+            datasets: [{
+                label: 'Commentaires',
+                data: commentsValues,
+                borderColor: '#8b0507',
+                backgroundColor: 'rgba(139, 5, 7, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: '#8b0507',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: '#0d0d0d',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    padding: 12,
+                    cornerRadius: 8
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0,
+                        color: '#6b6b6b'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#6b6b6b',
+                        maxRotation: 45,
+                        minRotation: 45
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // ════════════════════════════════════════════
+    // 3. PUBLICATIONS PAR STATUT (Pie Chart)
+    // ════════════════════════════════════════════
+    const statusData = {{ pubsByStatus|json_encode|raw }};
+    const statusLabels = statusData.map(item => item.label);
+    const statusValues = statusData.map(item => item.count);
+
+    const statusChartCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusChartCtx, {
+        type: 'doughnut',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusValues,
+                backgroundColor: [
+                    'rgba(255, 193, 7, 0.8)',
+                    'rgba(76, 175, 80, 0.8)'
+                ],
+                borderColor: '#ffffff',
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        font: {
+                            size: 13,
+                            family: "'DM Sans', sans-serif"
+                        },
+                        color: '#0d0d0d'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#0d0d0d',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    padding: 12,
+                    cornerRadius: 8
+                }
+            }
+        }
+    });
+
+    // ════════════════════════════════════════════
+    // 4. PUBLICATIONS PAR TYPE (Pie Chart)
+    // ════════════════════════════════════════════
+    const typeData = {{ pubsByType|json_encode|raw }};
+    const typeLabels = typeData.map(item => item.label);
+    const typeValues = typeData.map(item => item.count);
+
+    const typeChartCtx = document.getElementById('typeChart').getContext('2d');
+    new Chart(typeChartCtx, {
+        type: 'doughnut',
+        data: {
+            labels: typeLabels,
+            datasets: [{
+                data: typeValues,
+                backgroundColor: [
+                    'rgba(193, 6, 9, 0.8)',
+                    'rgba(139, 5, 7, 0.8)',
+                    'rgba(100, 3, 5, 0.8)'
+                ],
+                borderColor: '#ffffff',
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        font: {
+                            size: 13,
+                            family: "'DM Sans', sans-serif"
+                        },
+                        color: '#0d0d0d'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#0d0d0d',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    padding: 12,
+                    cornerRadius: 8
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

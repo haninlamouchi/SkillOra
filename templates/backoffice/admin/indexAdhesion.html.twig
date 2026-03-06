@@ -1,0 +1,141 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}Demandes d'adhésion | Admin{% endblock %}
+
+{% block stylesheets %}
+<style>
+.no-avatar {
+    width:40px; height:40px; border-radius:50%;
+    background:linear-gradient(135deg,#c10609,#8b0507);
+    color:#fff; font-weight:800; font-size:0.82rem;
+    display:flex; align-items:center; justify-content:center;
+}
+.table tbody tr { cursor:default; transition:background 0.15s; }
+.table tbody tr:hover { background:rgba(193,6,9,0.04) !important; }
+.count-badge { background:#c10609; color:#fff; padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:800; }
+
+.badge-attente { background:#fff3cd; color:#856404; padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:700; }
+.badge-accepte { background:#d1e7dd; color:#0f5132; padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:700; }
+.badge-refuse  { background:#f8d7da; color:#842029; padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:700; }
+
+/* Pagination */
+.pagination { justify-content:center; gap:4px; }
+.pagination .page-link {
+    border-radius:8px !important;
+    border:1.5px solid #e4e4e4;
+    color:#c10609;
+    font-size:0.82rem;
+    font-weight:600;
+    padding:6px 12px;
+    transition:all 0.2s;
+}
+.pagination .page-link:hover { background:#c10609; color:#fff; border-color:#c10609; }
+.pagination .page-item.active .page-link { background:#c10609; border-color:#c10609; color:#fff; }
+.pagination .page-item.disabled .page-link { color:#bbb; pointer-events:none; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12 grid-margin">
+        <div class="card" style="border-radius:12px; border-top:3px solid #c10609;">
+            <div class="card-body">
+
+                {# Flash messages #}
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                    <h4 class="card-title mb-0">
+                        <i class="mdi mdi-account-switch me-2" style="color:#c10609;"></i>
+                        Demandes de Responsable
+                        <span class="count-badge ms-2">{{ dem|length }}</span>
+                    </h4>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead style="background:#fafafa;">
+                            <tr>
+                                <th>#</th>
+                                <th>Utilisateur</th>
+                                <th>Club</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th style="width:160px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for demande in dem %}
+                        <tr>
+                            <td class="text-muted small">{{ demande.id }}</td>
+
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="no-avatar">
+                                        {{ demande.user ? demande.user.prenom|slice(0,1)|upper ~ demande.user.nom|slice(0,1)|upper : '?' }}
+                                    </div>
+                                    <span class="fw-semibold">
+                                        {{ demande.user ? demande.user.prenom ~ ' ' ~ demande.user.nom : 'Aucun' }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td><span class="fw-semibold">{{ demande.club ? demande.club.nom : 'Aucun' }}</span></td>
+
+                            <td class="text-muted small">
+                                {{ demande.dateInscription ? demande.dateInscription|date('d/m/Y') : '—' }}
+                            </td>
+
+                            <td>
+                                <span class="badge-{{ demande.statut.value == 'en_attente' ? 'attente' : (demande.statut.value == 'accepte' ? 'accepte' : 'refuse') }}">
+                                    {{ demande.statut.value == 'en_attente' ? '⏳ En attente' : (demande.statut.value == 'accepte' ? '✅ Accepté' : '❌ Refusé') }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <form method="post"
+                                      action="{{ path('admin_adhesion_accepter', {'id': demande.id}) }}"
+                                      style="display:inline"
+                                      onsubmit="return confirm('Accepter cette demande ?')">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-success me-1"
+                                            title="Accepter">
+                                        <i class="mdi mdi-check"></i>
+                                    </button>
+                                </form>
+
+                                <form method="post"
+                                      action="{{ path('admin_adhesion_refuser', {'id': demande.id}) }}"
+                                      style="display:inline"
+                                      onsubmit="return confirm('Refuser cette demande ?')">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger"
+                                            title="Refuser">
+                                        <i class="mdi mdi-close"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-5">
+                                <i class="mdi mdi-account-off" style="font-size:2rem;opacity:0.3;"></i>
+                                <p class="mt-2 mb-0">Aucune demande d'adhésion en attente.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

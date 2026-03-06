@@ -1,0 +1,410 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Explorez notre forum | SkillOra{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .skillora-hero {
+        background: linear-gradient(135deg, #5a0000 0%, #8b1a1a 50%, #a52a2a 100%);
+        padding: 100px 0 70px; color: #fff; position: relative; overflow: hidden;
+    }
+    .skillora-hero::before {
+        content: ''; position: absolute; top: -50%; right: -20%;
+        width: 600px; height: 600px;
+        background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .skillora-hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.5px; }
+    .skillora-hero p  { font-size: 1.15rem; opacity: 0.85; max-width: 600px; margin: 0 auto; }
+
+    .hero-search { max-width: 600px; margin: 0 auto; position: relative; }
+    .hero-search .form-control {
+        border-radius: 50px; padding: 16px 50px 16px 28px; border: none;
+        font-size: 1.05rem; box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    }
+    .hero-search .form-control:focus {
+        box-shadow: 0 8px 30px rgba(0,0,0,0.25), 0 0 0 3px rgba(255,255,255,0.3);
+    }
+    .hero-search .search-icon {
+        position: absolute; right: 20px; top: 50%;
+        transform: translateY(-50%); color: #5a0000; font-size: 1.2rem;
+    }
+    .hero-stats { display: flex; justify-content: center; gap: 40px; margin-top: 30px; }
+    .hero-stat { text-align: center; }
+    .hero-stat .value { font-size: 1.8rem; font-weight: 800; display: block; }
+    .hero-stat .label { font-size: 0.85rem; opacity: 0.7; }
+
+    .filter-bar {
+        background: #fff; border-radius: 16px; padding: 18px 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-top: -35px;
+        position: relative; z-index: 10; border: 1px solid #f0e6e6;
+    }
+    .filter-select-wrap { display: flex; align-items: center; gap: 8px; }
+    .filter-select-wrap label {
+        font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.5px; color: #888; white-space: nowrap; margin: 0;
+        display: flex; align-items: center; gap: 5px;
+    }
+    .filter-select-wrap label i { color: #5a0000; font-size: 0.7rem; }
+    .filter-divider { width: 1px; height: 28px; background: #e0e0e0; margin: 0 4px; flex-shrink: 0; }
+    .result-count { font-size: 0.9rem; color: #555; font-weight: 600; display: inline-block; white-space: nowrap; }
+    .result-count strong { color: #5a0000; font-size: 1.05rem; }
+    .sort-select {
+        border: 2px solid #e0e0e0; border-radius: 50px; padding: 7px 30px 7px 14px;
+        font-size: 0.82rem; font-weight: 600; color: #444; cursor: pointer;
+        background: #fafafa; appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235a0000' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 10px center;
+        transition: border-color 0.2s, background 0.2s; min-width: 130px;
+    }
+    .sort-select:focus, .sort-select:hover {
+        border-color: #5a0000; background-color: #fff; outline: none;
+        box-shadow: 0 0 0 3px rgba(90,0,0,0.08);
+    }
+    .btn-reset-filter {
+        display: inline-flex; align-items: center; gap: 5px; padding: 7px 16px;
+        border-radius: 50px; border: 2px solid #e0e0e0; background: none;
+        font-size: 0.8rem; font-weight: 600; color: #888; cursor: pointer;
+        transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-reset-filter:hover { border-color: #5a0000; color: #5a0000; background: #fef2f2; }
+
+    .section-forum { padding: 40px 0 80px; background: #f0f2f5; min-height: 60vh; }
+    .feed-container { max-width: 680px; margin: 0 auto; }
+
+    .post-card-item {
+        border: none; border-radius: 12px; overflow: hidden;
+        transition: box-shadow 0.3s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        background: #fff; margin-bottom: 16px; display: flex; flex-direction: column;
+    }
+    .post-card-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+
+    /* IMAGE */
+    .post-card-item .card-img-top {
+        width: 100%; height: 220px; object-fit: cover; display: block;
+    }
+    /* VIDEO */
+    .post-card-video {
+        width: 100%; max-height: 220px; display: block; background: #000;
+    }
+
+    .post-card-item .card-body { padding: 16px; flex-grow: 1; display: flex; flex-direction: column; }
+
+    .post-header-info {
+        display: flex; align-items: center; gap: 12px;
+        margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb;
+    }
+    .post-avatar {
+        width: 40px; height: 40px; border-radius: 50%;
+        background: linear-gradient(135deg, #5a0000, #8b0000);
+        color: #fff; display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 0.8rem; flex-shrink: 0;
+    }
+    .post-user-info { flex: 1; }
+    .post-user-name { font-weight: 700; font-size: 0.92rem; color: #000; margin: 0; display: flex; align-items: center; gap: 8px; }
+    .post-user-meta { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #65676b; margin-top: 2px; }
+
+    .post-card-item .card-title { font-weight: 700; font-size: 1rem; color: #000; margin: 0 0 8px; line-height: 1.4; }
+    .post-card-item .card-text  { color: #50586b; font-size: 0.9rem; line-height: 1.5; flex-grow: 1; max-height: 150px; overflow: hidden; margin-bottom: 12px; }
+
+    .badge-type {
+        display: inline-flex; align-items: center; gap: 4px;
+        background: #fef2f2; color: #5a0000; font-size: 0.72rem;
+        padding: 4px 12px; border-radius: 4px; margin-bottom: 8px; font-weight: 600;
+    }
+    .badge-role { display: inline-block; font-size: 0.65rem; padding: 3px 10px; border-radius: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 6px; }
+    .badge-role-etudiant         { background: #d4edda; color: #155724; }
+    .badge-role-responsable-club { background: #e7d4f5; color: #5a0000; }
+    .badge-role-responsable      { background: #e7d4f5; color: #5a0000; }
+    .badge-role-admin            { background: #fef3c7; color: #856404; }
+
+    .posts-footer {
+        padding-top: 12px; border-top: 1px solid #e5e7eb;
+        display: flex; justify-content: space-between; align-items: center;
+        font-size: 0.8rem; color: #65676b;
+    }
+    .posts-comments { display: flex; align-items: center; gap: 4px; }
+
+    .btn-view-details {
+        background: linear-gradient(135deg, #5a0000 0%, #8b0000 100%);
+        color: #fff; border: none; border-radius: 6px; padding: 8px 16px;
+        font-weight: 600; font-size: 0.85rem; transition: all 0.3s;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-view-details:hover { box-shadow: 0 4px 12px rgba(90,0,0,0.3); transform: translateY(-1px); color: #fff; text-decoration: none; }
+
+    .empty-state { text-align: center; padding: 80px 20px; }
+    .empty-state i { font-size: 4rem; color: #ccc; }
+
+    .card-fade { opacity: 0; transform: translateY(20px); animation: cardIn 0.4s ease forwards; }
+    @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
+    .hidden-card { display: none !important; }
+
+    @media (max-width: 768px) {
+        .skillora-hero h1 { font-size: 2rem; }
+        .hero-stats { gap: 20px; }
+        .filter-bar { margin-top: -25px; padding: 14px 16px; flex-wrap: wrap; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+{# ══ HERO ══ #}
+<section class="skillora-hero">
+    <div class="container text-center">
+        <h1 class="mb-3">Explorez notre forum</h1>
+        <p class="mb-4">Partagez vos idées, explorez des discussions et connectez-vous avec la communauté SkillOra</p>
+
+        <div class="hero-search">
+            <input type="text" class="form-control" id="liveSearch"
+                   placeholder="Rechercher par titre, contenu, auteur..." autocomplete="off">
+            <i class="fa fa-search search-icon"></i>
+        </div>
+
+        {% set totalComments = 0 %}
+        {% for pub in publications %}
+            {% set totalComments = totalComments + pub.commentaires|length %}
+        {% endfor %}
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <span class="value">{{ publications|length }}</span>
+                <span class="label">Publications</span>
+            </div>
+            <div class="hero-stat">
+                <span class="value">{{ totalComments }}</span>
+                <span class="label">Commentaires</span>
+            </div>
+            <div class="hero-stat">
+                {% set totalUsers = [] %}
+                {% for pub in publications %}
+                    {% if pub.user.id not in totalUsers %}
+                        {% set totalUsers = totalUsers|merge([pub.user.id]) %}
+                    {% endif %}
+                {% endfor %}
+                <span class="value">{{ totalUsers|length }}</span>
+                <span class="label">Contributeurs</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ══ FILTRES ══ #}
+<div class="container">
+    <div class="filter-bar">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div class="filter-select-wrap">
+                <label for="typeSelect"><i class="fa fa-layer-group"></i> Type</label>
+                <select class="sort-select" id="typeSelect">
+                    <option value="all">Tous</option>
+                    <option value="texte">Texte</option>
+                    <option value="image">Image</option>
+                    <option value="video">Vidéo</option>
+                </select>
+            </div>
+            <div class="filter-divider"></div>
+            <div class="filter-select-wrap">
+                <label for="roleSelect"><i class="fa fa-user-tag"></i> Rôle</label>
+                <select class="sort-select" id="roleSelect">
+                    <option value="">Tous</option>
+                    <option value="etudiant">Étudiants</option>
+                    <option value="responsable_club">Responsables</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="filter-divider"></div>
+            <div class="filter-select-wrap">
+                <label for="sortSelect"><i class="fa fa-sort"></i> Trier</label>
+                <select class="sort-select" id="sortSelect">
+                    <option value="recent">Plus récentes</option>
+                    <option value="oldest">Plus anciennes</option>
+                    <option value="popular">Plus commentés</option>
+                </select>
+            </div>
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <span class="result-count" id="resultCount">
+                    <strong>{{ publications|length }}</strong> publication{{ publications|length != 1 ? 's' : '' }}
+                </span>
+                <button class="btn-reset-filter" id="resetFiltersBtn">
+                    <i class="fa fa-times"></i> Réinitialiser
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ══ FEED ══ #}
+<section class="section-forum">
+    <div class="feed-container">
+
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div style="max-width:680px;margin:0 auto 16px;padding:16px;background:#fff;border-radius:12px;
+                     border-left:4px solid #{{ type == 'success' ? '27ae60' : type == 'error' ? 'e74c3c' : 'f39c12' }};
+                     box-shadow:0 1px 3px rgba(0,0,0,0.1);" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div id="forumsGrid">
+            {% for publication in publications %}
+                <div class="post-item card-fade"
+                     data-title="{{ publication.titre|lower }}"
+                     data-content="{{ (publication.contenu ?? '')|lower }}"
+                     data-author="{{ (publication.user.prenom ~ ' ' ~ publication.user.nom)|lower }}"
+                     data-type="{{ publication.typecontenu.value|lower }}"
+                     data-role="{{ publication.user.role|lower }}"
+                     data-date="{{ publication.datePublication ? publication.datePublication|date('Y-m-d H:i') : '0000-00-00' }}"
+                     data-comments="{{ publication.commentaires|length }}"
+                     style="animation-delay: {{ loop.index0 * 0.06 }}s">
+                    <div class="post-card-item">
+
+                        {# ── MEDIA (image réelle ou vidéo réelle) ── #}
+                        {% if publication.fichier %}
+                            {% set ext = publication.fichier|split('.')|last|lower %}
+                            {% if ext in ['jpg','jpeg','png','gif','webp'] %}
+                                <img src="{{ asset('uploads/publications/' ~ publication.fichier) }}"
+                                     class="card-img-top" alt="{{ publication.titre }}" loading="lazy">
+                            {% elseif ext in ['mp4','webm','ogg'] %}
+                                <video class="post-card-video" controls preload="metadata">
+                                    <source src="{{ asset('uploads/publications/' ~ publication.fichier) }}"
+                                            type="video/{{ ext }}">
+                                </video>
+                            {% endif %}
+                        {% endif %}
+
+                        <div class="card-body">
+                            <div class="post-header-info">
+                                <div class="post-avatar">
+                                    {{ publication.user.prenom|slice(0,1)|upper }}{{ publication.user.nom|slice(0,1)|upper }}
+                                </div>
+                                <div class="post-user-info">
+                                    <p class="post-user-name">
+                                        {{ publication.user.prenom }} {{ publication.user.nom }}
+                                        <span class="badge-role badge-role-{{ publication.user.role|replace({'_': '-'}) }}">
+                                            {{ publication.user.role|replace({'_': ' '})|title }}
+                                        </span>
+                                    </p>
+                                    <div class="post-user-meta">
+                                        <i class="fa fa-clock"></i>
+                                        {{ publication.datePublication|date('d/m/Y H:i') }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <span class="badge-type">
+                                {% if publication.typecontenu.value == 'image' %}<i class="fa fa-image"></i>
+                                {% elseif publication.typecontenu.value == 'video' %}<i class="fa fa-video"></i>
+                                {% else %}<i class="fa fa-align-left"></i>{% endif %}
+                                {{ publication.typecontenu.label }}
+                            </span>
+
+                            <h5 class="card-title">{{ publication.titre }}</h5>
+
+                            <p class="card-text">
+                                {{ publication.contenu|length > 280 ? publication.contenu|slice(0, 280) ~ '…' : publication.contenu }}
+                            </p>
+
+                            <div class="posts-footer">
+                                <span class="posts-comments">
+                                    <i class="fa fa-comment"></i>
+                                    {{ publication.commentaires|length }} commentaire{{ publication.commentaires|length != 1 ? 's' : '' }}
+                                </span>
+                                <a href="{{ path('app_forum_show', {'id': publication.id}) }}{% if navUser %}?u={{ navUser.id }}{% endif %}"
+                                   class="btn btn-view-details">
+                                    Lire la suite <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="empty-state" id="emptyState" style="display:none;">
+            <i class="fa fa-search d-block"></i>
+            <h4 class="mt-3 text-muted">Aucune publication trouvée</h4>
+            <p class="text-muted">Essayez d'autres mots-clés ou modifiez vos filtres.</p>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('liveSearch');
+    const sortSelect  = document.getElementById('sortSelect');
+    const typeSelect  = document.getElementById('typeSelect');
+    const roleSelect  = document.getElementById('roleSelect');
+    const items       = document.querySelectorAll('.post-item');
+    const grid        = document.getElementById('forumsGrid');
+    const countEl     = document.getElementById('resultCount');
+    const emptyState  = document.getElementById('emptyState');
+    const resetBtn    = document.getElementById('resetFiltersBtn');
+
+    function applyFilters() {
+        const query = searchInput.value.toLowerCase().trim();
+        const tF    = typeSelect.value;
+        const rF    = roleSelect.value;
+        let visible = 0;
+
+        items.forEach(item => {
+            const matchSearch = !query
+                || item.dataset.title.includes(query)
+                || item.dataset.content.includes(query)
+                || item.dataset.author.includes(query);
+            const matchType = tF === 'all' || item.dataset.type === tF;
+            const matchRole = !rF || item.dataset.role === rF;
+
+            if (matchSearch && matchType && matchRole) {
+                item.classList.remove('hidden-card');
+                visible++;
+            } else {
+                item.classList.add('hidden-card');
+            }
+        });
+
+        countEl.innerHTML = '<strong>' + visible + '</strong> publication' + (visible !== 1 ? 's' : '');
+        emptyState.style.display = visible === 0 ? 'block' : 'none';
+        grid.style.display       = visible === 0 ? 'none'  : '';
+    }
+
+    function applySort() {
+        const val    = sortSelect.value;
+        const sorted = Array.from(items);
+        sorted.sort(function (a, b) {
+            if (val === 'recent')  return b.dataset.date.localeCompare(a.dataset.date);
+            if (val === 'oldest')  return a.dataset.date.localeCompare(b.dataset.date);
+            if (val === 'popular') return parseInt(b.dataset.comments) - parseInt(a.dataset.comments);
+            return 0;
+        });
+        sorted.forEach(item => grid.appendChild(item));
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func(...args), wait);
+        };
+    }
+
+    searchInput.addEventListener('input', debounce(applyFilters, 200));
+    typeSelect.addEventListener('change', applyFilters);
+    roleSelect.addEventListener('change', applyFilters);
+    sortSelect.addEventListener('change', applySort);
+
+    resetBtn.addEventListener('click', function () {
+        searchInput.value = '';
+        typeSelect.value  = 'all';
+        roleSelect.value  = '';
+        sortSelect.value  = 'recent';
+        applyFilters();
+    });
+});
+</script>
+{% endblock %}

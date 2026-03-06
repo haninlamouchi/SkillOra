@@ -1,0 +1,202 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Générer un Challenge avec l'IA{% endblock %}
+
+{% block body %}
+<div class="container" style="padding-top: 90px; padding-bottom: 60px;">
+    <div style="max-width: 900px; margin: 0 auto;">
+        
+        <a href="{{ path('app_responsable_challenges') }}" style="color: #e53e3e; text-decoration: none; margin-bottom: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+            ← Retour aux challenges
+        </a>
+
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <h1 style="font-size: 2.5rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem;">
+                🤖 Générer un Challenge avec l'IA
+            </h1>
+            <p style="color: #718096; font-size: 1.1rem;">
+                Laissez l'intelligence artificielle vous aider à créer un challenge complet
+            </p>
+        </div>
+
+        {% if not generatedData %}
+            {# FORMULAIRE DE GÉNÉRATION #}
+            <div style="background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                <h2 style="font-size: 1.3rem; font-weight: 700; color: #2d3748; margin-bottom: 1.5rem;">
+                    📋 Paramètres du Challenge
+                </h2>
+
+                {{ form_start(form) }}
+                
+                <div style="display: grid; gap: 1.5rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            {{ form_label(form.categorie) }}
+                            {{ form_widget(form.categorie) }}
+                            {{ form_errors(form.categorie) }}
+                        </div>
+                        <div>
+                            {{ form_label(form.niveau) }}
+                            {{ form_widget(form.niveau) }}
+                            {{ form_errors(form.niveau) }}
+                        </div>
+                    </div>
+
+                    <div>
+                        {{ form_label(form.technologies) }}
+                        {{ form_widget(form.technologies) }}
+                        {{ form_help(form.technologies) }}
+                        {{ form_errors(form.technologies) }}
+                    </div>
+
+                    <div>
+                        {{ form_label(form.duree) }}
+                        {{ form_widget(form.duree) }}
+                        {{ form_errors(form.duree) }}
+                    </div>
+
+                    <div>
+                        {{ form_label(form.theme) }}
+                        {{ form_widget(form.theme) }}
+                        {{ form_help(form.theme) }}
+                        {{ form_errors(form.theme) }}
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; text-align: center;">
+                    <button type="submit" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;">
+                        🤖 Générer avec l'IA
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+
+        {% else %}
+            {# PRÉVISUALISATION #}
+            <div style="background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                <div style="background: #dcfce7; padding: 1rem; border-radius: 12px; margin-bottom: 2rem; border-left: 4px solid #16a34a;">
+                    <strong>✅ Challenge généré avec succès !</strong>
+                    <p style="margin: 0.5rem 0 0 0; color: #15803d;">
+                        Vous pouvez modifier les champs ci-dessous avant de créer le challenge.
+                    </p>
+                </div>
+
+                <form method="post" action="{{ path('app_responsable_challenge_create_from_ai') }}" enctype="multipart/form-data">
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">📋 Titre</label>
+                        <input type="text" name="titre" value="{{ generatedData.titre }}" class="form-control" required>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">📝 Description</label>
+                        <textarea name="description" rows="6" class="form-control" required>{{ generatedData.description }}</textarea>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+    <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">📸 Image du Challenge (Optionnel)</label>
+    <div style="border: 2px dashed #e2e8f0; border-radius: 12px; padding: 2rem; text-align: center; background: #f7fafc;">
+        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🖼️</div>
+        <input type="file" 
+                name="image" 
+                id="image-upload"
+                accept="image/jpeg,image/png,image/jpg,image/webp"
+                class="form-control"
+                style="margin-top: 1rem;">
+        <p style="color: #a0aec0; font-size: 0.85rem; margin-top: 0.5rem;">
+            JPG, PNG ou WEBP (max 5 MB)
+        </p>
+        <div id="image-preview" style="margin-top: 1rem;"></div>
+    </div>
+</div>
+
+{# ✅ Script APRÈS la div #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('image-upload');
+    const imagePreview = document.getElementById('image-preview');
+    
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imagePreview.innerHTML = `
+                        <img src="${event.target.result}" 
+                             style="max-width: 100%; max-height: 300px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                        <p style="text-align: center; margin-top: 0.5rem; color: #16a34a; font-weight: 600;">
+                            ✅ Image sélectionnée : ${file.name}
+                        </p>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.innerHTML = '';
+            }
+        });
+    }
+});
+</script>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">📄 Cahier des Charges</label>
+                        <div style="background: #f7fafc; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem;">
+                            <strong>Objectifs :</strong>
+                            <ul>
+                                {% for obj in generatedData.objectifs %}
+                                    <li>{{ obj }}</li>
+                                {% endfor %}
+                            </ul>
+                            
+                            <strong>Fonctionnalités :</strong>
+                            <ul>
+                                {% for fonc in generatedData.fonctionnalites %}
+                                    <li>{{ fonc }}</li>
+                                {% endfor %}
+                            </ul>
+                            
+                            <strong>Livrables :</strong>
+                            <ul>
+                                {% for liv in generatedData.livrables %}
+                                    <li>{{ liv }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <textarea name="cahier_charges" rows="8" class="form-control">{{ generatedData|json_encode }}</textarea>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                        <div>
+                            <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">📅 Date de début</label>
+                            <input type="date" name="dateDebut" value="{{ 'now'|date('Y-m-d') }}" class="form-control" required>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">📅 Date de fin</label>
+                            <input type="date" name="dateFin" value="{{ '+2 weeks'|date('Y-m-d') }}" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="btn btn-success" style="padding: 1rem 2rem;">
+                            ✅ Créer le Challenge
+                        </button>
+                        <a href="{{ path('app_responsable_challenge_generate_ai') }}" class="btn btn-secondary" style="padding: 1rem 2rem;">
+                            🔄 Régénérer
+                        </a>
+                    </div>
+                </form>
+            </div>
+        {% endif %}
+
+        {% if error %}
+            <div style="background: #fee2e2; padding: 1rem; border-radius: 12px; margin-top: 1rem; border-left: 4px solid #dc2626;">
+                <strong>❌ Erreur :</strong> {{ error }}
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

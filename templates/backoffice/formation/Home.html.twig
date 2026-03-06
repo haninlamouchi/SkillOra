@@ -1,0 +1,500 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Formation Management | SkillOra{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+<style>
+    :root {
+        --sk-primary: #131212;
+        --sk-primary-dark: #040404;
+        --sk-primary-light: #1e1d1d;
+    }
+
+    /* ── Page header ── */
+    .page-header { margin-bottom: 1.5rem; }
+    .page-header h3 { font-size: 1.5rem; font-weight: 700; color: #bf0000; }
+
+    /* ── Main card ── */
+    .fm-card { border: none; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .fm-card .card-body { padding: 0; }
+
+    /* ── Table ── */
+    .fm-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .875rem; }
+    .fm-table thead th {
+        background: linear-gradient(135deg, var(--sk-primary), var(--sk-primary-light));
+        color: #fff; font-weight: 600; padding: .85rem 1rem; white-space: nowrap;
+        border: none; text-transform: uppercase; font-size: .75rem; letter-spacing: .5px;
+    }
+    .fm-table thead th:first-child { border-radius: 12px 0 0 0; }
+    .fm-table thead th:last-child  { border-radius: 0 12px 0 0; }
+    .fm-table tbody tr { transition: background .15s; }
+    .fm-table tbody tr:hover { background: #fdf2f2; }
+    .fm-table tbody td {
+        padding: .75rem 1rem; vertical-align: middle;
+        border-bottom: 1px solid #f0f0f0; color: #333;
+    }
+    .fm-table tbody tr:last-child td { border-bottom: none; }
+
+    /* ── Badges ── */
+    .badge-termine  { background: #f8d7da; color: #721c24; font-weight: 600; padding: .3em .7em; border-radius: 20px; font-size: .78rem; }
+    .badge-en-cours { background: #d4edda; color: #155724; font-weight: 600; padding: .3em .7em; border-radius: 20px; font-size: .78rem; }
+    .badge-a-venir  { background: #fff3cd; color: #856404; font-weight: 600; padding: .3em .7em; border-radius: 20px; font-size: .78rem; }
+    .badge-club     { background: #e8f4fd; color: #0c5460; font-weight: 600; padding: .3em .65em; border-radius: 20px; font-size: .78rem; }
+    .badge-count { background: #bf0000; color: #fff; font-weight: 600; padding: .3em .65em; border-radius: 20px; font-size: .78rem; }
+
+    /* ── Action buttons ── */
+    .btn-action {
+        width: 34px; height: 34px; border-radius: 8px;
+        display: inline-flex; align-items: center; justify-content: center;
+        border: none; font-size: .9rem; transition: transform .15s, box-shadow .15s; cursor: pointer;
+        text-decoration: none;
+    }
+    .btn-action:hover { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,.15); }
+    .btn-view   { background: var(--sk-primary); color: #fff; }
+    .btn-view:hover   { background: var(--sk-primary-dark); color: #fff; }
+    .btn-del    { background: #dc3545; color: #fff; }
+    .btn-del:hover { background: #b02a37; }
+
+    /* ── Empty state ── */
+    .empty-state { text-align: center; padding: 4rem 2rem; color: #999; }
+    .empty-state i { font-size: 3rem; margin-bottom: 1rem; color: #ddd; display:block; }
+
+    /* ── Toolbar ── */
+    .fm-toolbar { display:flex; align-items:flex-end; gap:1rem; margin-bottom:1.2rem; flex-wrap:wrap; }
+    .fm-toolbar .search-box { flex:1; min-width:220px; position:relative; }
+    .fm-toolbar .search-box input[type="text"] {
+        width:100%; border:2px solid #eee; border-radius:10px; padding:.6rem 2.6rem .6rem 2.5rem;
+        font-size:.88rem; transition:border-color .2s; background:#fff;
+    }
+    .fm-toolbar .search-box input[type="text"]:focus { border-color:#bf0000; box-shadow:0 0 0 3px rgba(191,0,0,.08); outline:none; }
+    .fm-toolbar .search-box .icon-mag { position:absolute; left:.85rem; top:50%; transform:translateY(-50%); color:#aaa; font-size:1rem; pointer-events:none; }
+    .fm-toolbar .search-box .clear-btn { position:absolute; right:.6rem; top:50%; transform:translateY(-50%); background:none; border:none; color:#bbb; font-size:1.1rem; cursor:pointer; display:none; padding:0; line-height:1; }
+    .fm-toolbar .search-box .clear-btn.visible { display:block; }
+    .fm-toolbar .search-box .clear-btn:hover { color:#bf0000; }
+    .fm-toolbar .filter-group { display:flex; flex-direction:column; gap:.2rem; min-width:150px; }
+    .fm-toolbar .filter-group label { font-size:.75rem; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:.5px; margin:0; }
+    .fm-toolbar .filter-group select,
+    .fm-toolbar .filter-group input[type="date"] { border:2px solid #eee; border-radius:8px; padding:.45rem .8rem; font-size:.85rem; background:#fff; cursor:pointer; transition:border-color .2s; color:#333; }
+    .fm-toolbar .filter-group select:focus,
+    .fm-toolbar .filter-group input[type="date"]:focus { border-color:#bf0000; outline:none; }
+    .fm-toolbar .reset-btn { background:#f5f5f5; color:#555; border:2px solid #eee; border-radius:8px; padding:.45rem .9rem; font-size:.84rem; font-weight:600; text-decoration:none; transition:background .15s; white-space:nowrap; align-self:flex-end; }
+    .fm-toolbar .reset-btn:hover { background:#eee; color:#333; }
+
+    /* ── Search results info ── */
+    .search-results-info { font-size:.82rem; color:#888; margin-bottom:.8rem; }
+    .search-results-info strong { color:#bf0000; }
+    .search-results-info a { color:#bf0000; text-decoration:none; font-weight:600; }
+    .search-results-info a:hover { text-decoration:underline; }
+
+    /* ── Confirm overlay ── */
+    .confirm-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:99999; align-items:center; justify-content:center; }
+    .confirm-overlay.active { display:flex; }
+    .confirm-box { background:#fff; border-radius:14px; padding:2rem 2.5rem; text-align:center; box-shadow:0 12px 40px rgba(0,0,0,.25); max-width:380px; width:90%; }
+    .confirm-box i { font-size:2.5rem; color:#dc3545; margin-bottom:.8rem; }
+    .confirm-box h5 { font-weight:700; margin-bottom:.5rem; }
+    .confirm-box p { color:#666; font-size:.9rem; margin-bottom:1.5rem; }
+    .confirm-box .btn-cancel { background:#f0f0f0; color:#333; border:none; padding:.5rem 1.5rem; border-radius:8px; font-weight:600; margin-right:.5rem; cursor:pointer; }
+    .confirm-box .btn-confirm-del { background:#dc3545; color:#fff; border:none; padding:.5rem 1.5rem; border-radius:8px; font-weight:600; cursor:pointer; }
+    .confirm-box .btn-confirm-del:hover { background:#b02a37; }
+
+    /* ── Pagination ── */
+    .fm-pagination { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding:12px 16px; border-top:1.5px solid #f0f0f0; }
+    .fpag-info { font-size:.82rem; color:#888; }
+    .fpag-info strong { color:#bf0000; }
+    .fpag-controls { display:flex; align-items:center; gap:4px; }
+    .fpag-btn { padding:.35rem .85rem; border-radius:7px; font-size:.82rem; font-weight:600; background:#f5f5f5; color:#333; text-decoration:none; cursor:pointer; border:none; transition:background .15s; }
+    .fpag-btn:hover:not(.fpag-disabled) { background:#bf0000; color:#fff; }
+    .fpag-disabled { opacity:.4; pointer-events:none; }
+    .fpag-num { width:30px; height:30px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center; font-size:.82rem; font-weight:600; color:#555; cursor:pointer; border:none; background:transparent; transition:background .15s; }
+    .fpag-num:hover { background:#f5f5f5; }
+    .fpag-active { background:#bf0000 !important; color:#fff !important; }
+
+    /* ── Description preview ── */
+    .desc-preview { max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#aaa; font-size:.76rem; margin-top:2px; }
+
+    /* ── Calendar overlay ── */
+    .cal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:99999; align-items:center; justify-content:center; padding:1rem; }
+    .cal-overlay.active { display:flex; }
+    .cal-box { background:#fff; border-radius:20px; box-shadow:0 16px 50px rgba(0,0,0,.3); width:820px; max-width:98vw; overflow:hidden; }
+    .cal-header { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.5rem; background:linear-gradient(135deg, #5a0000 0%, #8b1a1a 50%, #a52a2a 100%); color:#fff; }
+    .cal-header h5 { margin:0; font-size:1rem; font-weight:700; }
+    .cal-close { background:none; border:none; color:#fff; font-size:1.6rem; cursor:pointer; line-height:1; opacity:.8; padding:0; }
+    .cal-close:hover { opacity:1; }
+    .cal-body { padding:1.2rem 1.4rem 1.4rem; }
+    .cal-legend { display:flex; align-items:center; gap:8px; font-size:.8rem; color:#5a3030; margin-top:14px; padding-top:14px; border-top:1px solid rgba(139,0,0,.08); }
+    .cal-legend-color { width:14px; height:14px; border-radius:4px; background:#bf0000; display:inline-block; }
+    /* FullCalendar admin overrides */
+    .cal-body .fc-toolbar-title { font-size:1.1rem; font-weight:800; color:#2d0000; }
+    .cal-body .fc-button-primary { background:var(--sk-primary) !important; border-color:var(--sk-primary) !important; font-weight:600 !important; border-radius:7px !important; font-size:.8rem !important; padding:.3rem .7rem !important; }
+    .cal-body .fc-button-primary:hover { background:#bf0000 !important; border-color:#bf0000 !important; }
+    .cal-body .fc-button-primary:not(:disabled):active,
+    .cal-body .fc-button-primary:not(:disabled).fc-button-active { background:#bf0000 !important; border-color:#bf0000 !important; }
+    .cal-body .fc-daygrid-day.fc-day-today { background:rgba(191,0,0,.06) !important; }
+    .cal-body .fc-col-header-cell-cushion { font-weight:700; color:#5a0000; text-decoration:none; font-size:.76rem; }
+    .cal-body .fc-daygrid-day-number { color:#2d0000; text-decoration:none; font-size:.8rem; }
+    .cal-body .fc-event { border-radius:5px !important; font-size:.75rem !important; font-weight:600 !important; cursor:pointer !important; border:none !important; }
+    .cal-body .fc-daygrid-event-dot { border-color:#bf0000 !important; }
+    .fc-admin-tooltip { position:fixed; background:#2d0000; color:#fff; padding:7px 12px; border-radius:9px; font-size:.8rem; pointer-events:none; z-index:999999; white-space:nowrap; box-shadow:0 4px 20px rgba(0,0,0,.25); transition:opacity .15s; opacity:0; }
+    .fc-admin-tooltip.visible { opacity:1; }
+    /* Calendar trigger button */
+    .cal-btn { display:flex; align-items:center; gap:.4rem; background:var(--sk-primary); color:#fff; border:none; border-radius:8px; padding:.45rem .9rem; font-size:.85rem; font-weight:600; cursor:pointer; transition:background .15s; white-space:nowrap; align-self:flex-end; text-decoration:none; }
+    .cal-btn:hover { background:#bf0000; color:#fff; }
+
+    @media (max-width: 768px) {
+        .fm-table thead { display:none; }
+        .fm-table tbody tr { display:block; margin-bottom:1rem; border:1px solid #eee; border-radius:10px; padding:.75rem; }
+        .fm-table tbody td { display:flex; justify-content:space-between; align-items:center; padding:.4rem .5rem; border-bottom:1px solid #f8f8f8; }
+        .fm-table tbody td::before { content:attr(data-label); font-weight:600; color:var(--sk-primary); margin-right:1rem; font-size:.78rem; text-transform:uppercase; }
+        .fm-toolbar { flex-direction:column; align-items:stretch; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+{# ── Page header ── #}
+<div class="page-header">
+    <h3>
+        <i class="mdi mdi-book-multiple-outline"></i>
+        Formation Management
+        <span class="badge-count">{{ formations|length }}</span>
+    </h3>
+</div>
+
+{# Flash messages #}
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ label == 'success' ? 'success' : (label == 'danger' ? 'danger' : 'info') }} alert-dismissible fade show" role="alert">
+            <i class="mdi mdi-{{ label == 'success' ? 'check-circle' : 'alert-circle' }} me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+
+{# ══════════════════════════════════════════════════════════
+   FILTERS
+══════════════════════════════════════════════════════════ #}
+<div class="card card-rounded border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title mb-3"><i class="mdi mdi-filter-variant me-2 text-primary"></i>Filtrer les formations</h5>
+        <form method="GET" action="{{ path('admin_dashboard') }}" class="row g-2 align-items-end" id="filter-form">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Recherche</label>
+                <input type="text" name="keyword" class="form-control form-control-sm"
+                       placeholder="Titre ou description..." value="{{ filters.keyword }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Club</label>
+                <select name="club_id" class="form-select form-select-sm">
+                    <option value="">Tous les clubs</option>
+                    {% for club in clubs %}
+                        <option value="{{ club.id }}" {{ filters.club_id == club.id ? 'selected' }}>{{ club.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Du</label>
+                <input type="date" name="date_from" class="form-control form-control-sm" value="{{ filters.date_from }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Au</label>
+                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ filters.date_to }}">
+            </div>
+            <div class="col-md-1 d-flex gap-1">
+                <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="mdi mdi-magnify"></i>
+                </button>
+                
+                <a href="{{ path('admin_dashboard') }}" class="btn btn-outline-secondary btn-sm w-100" title="Réinitialiser">
+                    <i class="mdi mdi-refresh"></i>
+                </a>
+            </div>
+            <div style="align-self:flex-end;padding-bottom:2px">
+                <button type="button" class="cal-btn" onclick="openCalendar()" title="Calendrier des formations">
+                    <i class="mdi mdi-calendar-month"></i> Calendrier
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{# ══════════════════════════════════════════════════════════
+   CALENDAR OVERLAY
+══════════════════════════════════════════════════════════ #}
+<div class="cal-overlay" id="calOverlay">
+  <div class="cal-box">
+    <div class="cal-header">
+      <h5><i class="mdi mdi-calendar-month"></i> Calendrier des formations</h5>
+      <button class="cal-close" onclick="closeCalendar()">&times;</button>
+    </div>
+    <div class="cal-body">
+      <div id="adminCalendar"></div>
+      <div class="cal-legend">
+        <span class="cal-legend-color"></span>
+        Formation — Cliquez sur un événement pour voir les détails.
+      </div>
+    </div>
+  </div>
+</div>
+<div id="fc-admin-tooltip" class="fc-admin-tooltip"></div>
+
+{# ── Table card ── #}
+<div class="card fm-card">
+    <div class="card-body">
+
+        {% if formations is empty %}
+            <div class="empty-state">
+                <i class="mdi mdi-book-open-page-variant"></i>
+                <h5>Aucune formation trouvée</h5>
+                <p>{% if filters.keyword %}Aucun résultat pour « {{ filters.keyword }} ».{% else %}Il n'y a aucune formation pour le moment.{% endif %}</p>
+            </div>
+        {% else %}
+        <div class="table-responsive">
+            <table class="fm-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Titre</th>
+                        <th>Club</th>
+                        <th>Responsable</th>
+                        <th>Date début</th>
+                        <th>Date fin</th>
+                        <th style="text-align:center">Participants</th>
+                        <th style="text-align:center">Statut</th>
+                        <th style="text-align:center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="fm-table-body">
+                    {% set today = "now"|date("Y-m-d") %}
+                    {% for f in formations %}
+                    <tr class="fm-row" data-idx="{{ loop.index0 }}">
+                        <td data-label="ID" style="color:#aaa">{{ loop.index }}</td>
+                        <td data-label="Titre">
+                            <strong style="font-size:.88rem">{{ f.titre }}</strong>
+                            {% if f.description %}
+                                <div class="desc-preview" title="{{ f.description }}">{{ f.description }}</div>
+                            {% endif %}
+                        </td>
+                        <td data-label="Club">
+                            {% if f.club %}
+                                <span class="badge-club">{{ f.club.nom }}</span>
+                            {% else %}
+                                <span style="color:#bbb">—</span>
+                            {% endif %}
+                        </td>
+                        <td data-label="Responsable">
+                            {% if f.club and f.club.responsable %}
+                                {{ f.club.responsable.fullName }}
+                            {% else %}
+                                <span style="color:#bbb">—</span>
+                            {% endif %}
+                        </td>
+                        <td data-label="Date début">
+                            {% if f.dateDebut %}{{ f.dateDebut|date('d/m/Y') }}{% else %}<span style="color:#bbb">—</span>{% endif %}
+                        </td>
+                        <td data-label="Date fin">
+                            {% if f.dateFin %}{{ f.dateFin|date('d/m/Y') }}{% else %}<span style="color:#bbb">—</span>{% endif %}
+                        </td>
+                        <td data-label="Participants" style="text-align:center">
+                            <strong>{{ f.participations|length }}</strong>
+                        </td>
+                        <td data-label="Statut" style="text-align:center">
+                            {% if f.dateFin and f.dateFin|date('Y-m-d') < today %}
+                                <span class="badge-termine">Terminée</span>
+                            {% elseif f.dateDebut and f.dateDebut|date('Y-m-d') <= today %}
+                                <span class="badge-en-cours">En cours</span>
+                            {% else %}
+                                <span class="badge-a-venir">À venir</span>
+                            {% endif %}
+                        </td>
+                        <td data-label="Actions" style="text-align:center; white-space:nowrap;">
+                            <a href="{{ path('admin_formation_show', {id: f.id}) }}"
+                               class="btn-action btn-view" title="Voir">
+                                <i class="mdi mdi-eye-outline"></i>
+                            </a>
+                            <button type="button" class="btn-action btn-del" title="Supprimer"
+                                    onclick="confirmDelete({{ f.id }}, '{{ f.titre|e('js') }}')">
+                                <i class="mdi mdi-trash-can-outline"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% set totalF = formations|length %}
+        {% if totalF > 10 %}
+        <div class="fm-pagination">
+            <div class="fpag-info" id="fm-pag-info">
+                Affichage <strong>1–10</strong> sur <strong>{{ totalF }}</strong>
+            </div>
+            <div class="fpag-controls">
+                <button type="button" id="fm-prev" class="fpag-btn fpag-disabled">← Précédent</button>
+                {% for p in 1..((totalF - 1) // 10 + 1) %}
+                    <button type="button" class="fm-pag-num fpag-num {{ p == 1 ? 'fpag-active' : '' }}" data-page="{{ p }}">{{ p }}</button>
+                {% endfor %}
+                <button type="button" id="fm-next" class="fpag-btn">Suivant →</button>
+            </div>
+        </div>
+        {% endif %}
+
+        {% endif %}
+    </div>
+</div>
+
+{# ── Delete confirm overlay ── #}
+<div class="confirm-overlay" id="deleteOverlay">
+    <div class="confirm-box">
+        <i class="mdi mdi-alert-circle-outline"></i>
+        <h5>Confirmer la suppression</h5>
+        <p id="deleteText">Voulez-vous vraiment supprimer cette formation ?</p>
+        <button class="btn-cancel" onclick="closeDelete()">Annuler</button>
+        <form id="deleteForm" method="POST" style="display:inline;">
+            <input type="hidden" name="_token" id="deleteToken" value="">
+            <button type="submit" class="btn-confirm-del">Supprimer</button>
+        </form>
+    </div>
+</div>
+
+{% for f in formations %}
+<span id="del-meta-{{ f.id }}"
+      data-action="{{ path('admin_formation_delete', {id: f.id}) }}"
+      data-token="{{ csrf_token('delete' ~ f.id) }}"
+      style="display:none;"></span>
+{% endfor %}
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+/* ── Auto-submit filters ── */
+(function () {
+  var form = document.getElementById('filter-form');
+  if (!form) return;
+  var timer;
+  function submit() { form.submit(); }
+  function debounced() { clearTimeout(timer); timer = setTimeout(submit, 400); }
+  form.querySelectorAll('select').forEach(function(el){ el.addEventListener('change', submit); });
+  form.querySelectorAll('input[type="text"],input[type="search"],input[type="date"]').forEach(function(el){ el.addEventListener('input', debounced); });
+})();
+
+/* ── Delete overlay ── */
+function confirmDelete(id, title) {
+    var meta = document.getElementById('del-meta-' + id);
+    document.getElementById('deleteText').textContent = 'Voulez-vous vraiment supprimer « ' + title + ' » ?';
+    document.getElementById('deleteForm').action = meta.dataset.action;
+    document.getElementById('deleteToken').value  = meta.dataset.token;
+    document.getElementById('deleteOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+function closeDelete() {
+    document.getElementById('deleteOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+}
+document.getElementById('deleteOverlay').addEventListener('click', function(e){ if(e.target===this) closeDelete(); });
+
+/* ── Client-side pagination ── */
+(function () {
+    var PER_PAGE = 10;
+    var rows = Array.from(document.querySelectorAll('#fm-table-body .fm-row'));
+    if (!rows.length) return;
+    var total = rows.length, pageCount = Math.ceil(total / PER_PAGE), cur = 1;
+    function showPage(p) {
+        cur = p;
+        var s = (p-1)*PER_PAGE, e = s+PER_PAGE;
+        rows.forEach(function(tr,i){ tr.style.display=(i>=s&&i<e)?'':'none'; });
+        var info=document.getElementById('fm-pag-info');
+        if(info) info.innerHTML='Affichage <strong>'+(s+1)+'–'+Math.min(e,total)+'</strong> sur <strong>'+total+'</strong>';
+        var prev=document.getElementById('fm-prev'), next=document.getElementById('fm-next');
+        if(prev) prev.classList.toggle('fpag-disabled',p<=1);
+        if(next) next.classList.toggle('fpag-disabled',p>=pageCount);
+        document.querySelectorAll('.fm-pag-num').forEach(function(b){ b.classList.toggle('fpag-active',+b.dataset.page===p); });
+    }
+    showPage(1);
+    var prev=document.getElementById('fm-prev'), next=document.getElementById('fm-next');
+    if(prev) prev.addEventListener('click',function(){ if(cur>1) showPage(cur-1); });
+    if(next) next.addEventListener('click',function(){ if(cur<pageCount) showPage(cur+1); });
+    document.querySelectorAll('.fm-pag-num').forEach(function(b){ b.addEventListener('click',function(){ showPage(+b.dataset.page); }); });
+})();
+
+/* ── Calendar (FullCalendar) ── */
+var CAL_FC_EVENTS = [
+{% for f in formations %}
+{% if f.dateDebut %}
+  {
+    title: {{ f.titre|json_encode|raw }},
+    start: {{ f.dateDebut|date('Y-m-d')|json_encode|raw }},
+    {% if f.dateFin %}end: {{ f.dateFin|date('Y-m-d')|json_encode|raw }},{% endif %}
+    color: '#bf0000',
+    extendedProps: {
+      club: {{ (f.club ? f.club.nom : '')|json_encode|raw }},
+      {% if f.dateFin %}fin: {{ f.dateFin|date('d/m/Y')|json_encode|raw }},{% endif %}
+      debut: {{ f.dateDebut|date('d/m/Y')|json_encode|raw }}
+    },
+    url: {{ path('admin_formation_show', {id: f.id})|json_encode|raw }}
+  }{% if not loop.last %},{% endif %}
+{% endif %}
+{% endfor %}
+];
+
+var adminCal = null;
+
+function openCalendar() {
+  document.getElementById('calOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  if (!adminCal) {
+    var tooltip = document.getElementById('fc-admin-tooltip');
+    adminCal = new FullCalendar.Calendar(document.getElementById('adminCalendar'), {
+      initialView: 'dayGridMonth',
+      locale: 'fr',
+      headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,listMonth' },
+      buttonText: { today: "Aujourd'hui", month: 'Mois', list: 'Liste' },
+      events: CAL_FC_EVENTS,
+      eventDisplay: 'block',
+      dayMaxEvents: 3,
+      height: 'auto',
+      firstDay: 1,
+      eventDidMount: function(info) {
+        info.el.addEventListener('mouseenter', function(e) {
+          var d = info.event.extendedProps;
+          var s = d.debut || info.event.startStr;
+          var fin = d.fin ? ' → ' + d.fin : '';
+          tooltip.innerHTML = '<strong>' + info.event.title + '</strong><br>📅 ' + s + fin + (d.club ? '<br>🏢 ' + d.club : '');
+          tooltip.classList.add('visible');
+        });
+        info.el.addEventListener('mousemove', function(e) {
+          tooltip.style.left = (e.clientX + 14) + 'px';
+          tooltip.style.top  = (e.clientY - 10) + 'px';
+        });
+        info.el.addEventListener('mouseleave', function() {
+          tooltip.classList.remove('visible');
+        });
+      },
+      eventClick: function(info) {
+        if (info.event.url) {
+          info.jsEvent.preventDefault();
+          window.location.href = info.event.url;
+        }
+      }
+    });
+    adminCal.render();
+  } else {
+    adminCal.updateSize();
+  }
+}
+
+function closeCalendar() {
+  document.getElementById('calOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+  document.getElementById('fc-admin-tooltip').classList.remove('visible');
+}
+document.getElementById('calOverlay').addEventListener('click', function(e){ if(e.target===this) closeCalendar(); });
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeCalendar(); });
+</script>
+{% endblock %}

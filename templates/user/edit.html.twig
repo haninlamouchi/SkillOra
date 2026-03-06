@@ -1,0 +1,128 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Modifier Utilisateur - Skillora{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body { padding-top: 0 !important; margin: 0; }
+
+        .user-form-section {
+            padding: 110px 0 60px 0; min-height: 100vh;
+            background: linear-gradient(135deg, #f1eaea 0%, #e5dada 100%); margin: 0;
+        }
+        .form-container {
+            background: white; border-radius: 15px;
+            box-shadow: 0 0 40px rgba(193, 6, 9, 0.15);
+            padding: 40px; max-width: 800px; margin: 0 auto; border-top: 5px solid #c10609;
+        }
+        .page-header { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #c10609; text-align: center; }
+        .page-header h1 { font-size: 32px; font-weight: 700; color: #c10609; margin-bottom: 10px; }
+        .page-header p { color: #b4b4b6; margin: 0; }
+        .form-group { margin-bottom: 25px; }
+        .form-group label { font-weight: 600; color: #000; margin-bottom: 8px; display: block; }
+        .form-control {
+            border-radius: 8px; border: 2px solid #b4b4b6;
+            padding: 12px 15px; font-size: 14px; transition: all 0.3s; width: 100%; background-color: #f1eaea;
+        }
+        .form-control:focus {
+            border-color: #c10609; box-shadow: 0 0 0 0.2rem rgba(193, 6, 9, 0.25);
+            outline: none; background-color: white;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #c10609 0%, #8b0507 100%);
+            border: none; padding: 12px 30px; font-size: 16px; font-weight: 600;
+            border-radius: 8px; transition: all 0.3s; cursor: pointer; color: white;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #8b0507 0%, #6a0405 100%);
+            transform: translateY(-2px); box-shadow: 0 5px 20px rgba(193, 6, 9, 0.4);
+        }
+        .btn-secondary {
+            background-color: #b4b4b6; color: #000; padding: 12px 30px; border-radius: 8px;
+            text-decoration: none; display: inline-block; font-size: 16px;
+            font-weight: 600; transition: all 0.3s; border: none; cursor: pointer;
+        }
+        .btn-secondary:hover {
+            background-color: #9a9a9c; color: #000; transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(180,180,182,0.3); text-decoration: none;
+        }
+        .form-actions {
+            margin-top: 40px; padding-top: 30px; border-top: 2px solid #b4b4b6;
+            display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;
+        }
+        .required-field::after { content: " *"; color: #c10609; }
+        .form-help { font-size: 12px; color: #b4b4b6; margin-top: 5px; display: block; }
+
+        .toast-success {
+            position: fixed; bottom: 30px; right: 30px;
+            background: #1e7e34; color: #fff;
+            padding: 14px 22px; border-radius: 10px;
+            font-size: 15px; font-weight: 500;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+            display: flex; align-items: center; gap: 10px;
+            z-index: 99999; opacity: 0; transform: translateY(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .toast-success.show { opacity: 1; transform: translateY(0); }
+        .toast-progress {
+            position: absolute; bottom: 0; left: 0;
+            height: 3px; background: rgba(255,255,255,0.5);
+            border-radius: 0 0 10px 10px; width: 100%;
+            animation: shrink 2.5s linear forwards;
+        }
+        @keyframes shrink { from { width: 100%; } to { width: 0%; } }
+
+        @media (max-width: 768px) {
+            .form-actions { flex-direction: column; }
+            .btn-primary, .btn-secondary { width: 100%; }
+            .toast-success { right: 15px; left: 15px; bottom: 20px; }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+{% set successMessages = app.flashes('success') %}
+
+{% if successMessages|length > 0 %}
+    {# ✅ Succès : afficher le toast PUIS rediriger #}
+    <div class="toast-success" id="toast">
+        ✅ {{ successMessages|last }}
+        <div class="toast-progress"></div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var toast = document.getElementById('toast');
+            setTimeout(function () { toast.classList.add('show'); }, 100);
+            setTimeout(function () {
+                window.location.href = '{{ path('front_home') }}';
+            }, 2600);
+        });
+    </script>
+{% endif %}
+
+{% for message in app.flashes('error') %}
+    <div style="position:fixed;top:80px;right:20px;background:#c10609;color:white;padding:12px 20px;border-radius:8px;z-index:9999;font-size:14px;">
+        ❌ {{ message }}
+    </div>
+{% endfor %}
+
+<div class="user-form-section">
+    <div class="container">
+        <div class="form-container">
+            <div class="page-header">
+                <h1>✏️ Modifier le profil utilisateur</h1>
+                <p>Mettre à jour les informations utilisateur</p>
+            </div>
+
+            {{ include('user/_form.html.twig', {'button_label': '💾 Mettre à jour le profil'}) }}
+
+            <div class="form-actions">
+                <a href="{{ path('front_home') }}" class="btn-secondary">← Retour</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

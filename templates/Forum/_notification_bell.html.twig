@@ -1,0 +1,510 @@
+{# templates/components/_notification_bell.html.twig #}
+
+{% if _user is defined and _user %}
+<div class="notif-wrapper" id="notifWrapper">
+
+    {# ── Bouton cloche ── #}
+    <button class="notif-bell-btn" id="notifBell" onclick="toggleNotifPanel()" type="button">
+        <i class="fas fa-bell"></i>
+        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+    </button>
+
+    {# ── Panel dropdown ── #}
+    <div class="notif-panel" id="notifPanel">
+
+        <div class="notif-panel-header">
+            <span class="notif-panel-title">
+                <i class="fas fa-bell"></i> Notifications
+            </span>
+            <button class="notif-mark-all" onclick="marquerToutLu()" type="button">
+                <i class="fas fa-check-double"></i> Tout lire
+            </button>
+        </div>
+
+        {# ── Section Notifications Générales ── #}
+        <div class="notif-section">
+            <div class="notif-section-title">
+                <i class="fas fa-comments"></i> Notifications Générales
+            </div>
+            <div class="notif-list" id="notifList">
+                <div class="notif-empty">
+                    <i class="far fa-bell-slash"></i>
+                    <p>Aucune notification</p>
+                </div>
+            </div>
+        </div>
+
+        {% if _user.role == 'responsable_club' %}
+        {# ── Section Notifications Club (uniquement pour responsable) ── #}
+        <div class="notif-section">
+            <div class="notif-section-title">
+                <i class="fas fa-users"></i> Notifications Club
+            </div>
+            <div class="notif-list" id="notifClubList">
+                <div class="notif-empty">
+                    <i class="far fa-bell-slash"></i>
+                    <p>Aucune notification</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="notif-panel-footer">
+            <span id="notifCount">0 non lue(s)</span>
+        </div>
+    </div>
+</div>
+
+<style>
+.notif-icon--validation {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+.notif-icon--nouvelle_publication {
+    background: #fef3c7;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+.notif-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-left: 6px;
+}
+
+.notif-bell-btn {
+    position: relative;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    color: #fff;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.25s ease;
+    outline: none; flex-shrink: 0;
+}
+.notif-bell-btn:hover {
+    background: rgba(255,255,255,0.28);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.notif-badge {
+    position: absolute; top: -5px; right: -5px;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    background: #e74c3c; color: #fff;
+    border-radius: 50px; font-size: 0.58rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #8b0000;
+    animation: badgePop 0.3s cubic-bezier(0.68,-0.55,0.265,1.55);
+}
+@keyframes badgePop { from { transform: scale(0); } to { transform: scale(1); } }
+
+.notif-panel {
+    position: absolute;
+    top: calc(100% + 16px); right: -8px;
+    width: 310px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 16px 50px rgba(90,0,0,0.18), 0 2px 10px rgba(0,0,0,0.06);
+    border: 1px solid rgba(139,0,0,0.08);
+    z-index: 9999; overflow: hidden;
+    display: none;
+    animation: panelIn 0.2s ease;
+}
+@keyframes panelIn {
+    from { opacity: 0; transform: translateY(6px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.notif-panel::before {
+    content: ''; position: absolute; top: -6px; right: 16px;
+    width: 12px; height: 12px; background: #5a0000;
+    transform: rotate(45deg); border-radius: 2px; z-index: 1;
+}
+
+.notif-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 15px 11px;
+    background: linear-gradient(135deg, #5a0000 0%, #8b1a1a 100%);
+    position: relative; z-index: 2;
+}
+.notif-panel-title {
+    color: #fff; font-size: 0.82rem; font-weight: 700;
+    display: flex; align-items: center; gap: 7px;
+}
+.notif-mark-all {
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.28);
+    color: rgba(255,255,255,0.9);
+    font-size: 0.68rem; font-weight: 600;
+    padding: 4px 9px; border-radius: 20px; cursor: pointer;
+    display: flex; align-items: center; gap: 4px; transition: all 0.2s;
+}
+.notif-mark-all:hover { background: rgba(255,255,255,0.25); }
+
+.notif-list { max-height: 300px; overflow-y: auto; }
+.notif-list::-webkit-scrollbar { width: 3px; }
+.notif-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+/* ── Item cliquable ── */
+.notif-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 12px 14px;
+    border-bottom: 1px solid #f8f8f8;
+    background: #fff9f9;
+    border-left: 3px solid #e74c3c;
+    transition: background 0.15s, border-left-color 0.15s;
+    text-decoration: none !important;
+    cursor: pointer;
+}
+.notif-item:hover {
+    background: #fff0f0;
+    border-left-color: #8b0000;
+    text-decoration: none !important;
+}
+.notif-item:last-child { border-bottom: none; }
+
+.notif-icon {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 0.7rem; margin-top: 2px;
+}
+.notif-icon--commentaire { background: #fef2f2; color: #e74c3c; border: 1px solid #fecaca; }
+.notif-icon--reponse     { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+
+.notif-content { flex: 1; min-width: 0; }
+.notif-msg {
+    margin: 0 0 5px;
+    font-size: 0.78rem; color: #2c2c2c; line-height: 1.45;
+    word-break: break-word;
+}
+
+/* Badge rôle expéditeur */
+.notif-role-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 0.62rem; font-weight: 700;
+    padding: 2px 7px; border-radius: 10px;
+    margin-bottom: 4px;
+}
+.notif-role--responsable_club {
+    background: #fef2f2; color: #8b0000;
+    border: 1px solid #fecaca;
+}
+.notif-role--etudiant {
+    background: #eff6ff; color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+.notif-role--membre {
+    background: #f0fdf4; color: #059669;
+    border: 1px solid #bbf7d0;
+}
+
+.notif-time {
+    font-size: 0.68rem; color: #bbb;
+    display: flex; align-items: center; gap: 4px;
+}
+
+.notif-arrow {
+    color: #ddd; font-size: 0.65rem; margin-top: 6px; flex-shrink: 0;
+    transition: color 0.2s;
+}
+.notif-item:hover .notif-arrow { color: #8b0000; }
+
+.notif-empty {
+    text-align: center; padding: 34px 20px; color: #ccc;
+}
+.notif-empty i { font-size: 1.6rem; margin-bottom: 8px; display: block; color: #e5e7eb; }
+.notif-empty p { margin: 0; font-size: 0.82rem; color: #bbb; }
+
+.notif-panel-footer {
+    padding: 7px 14px; background: #fafafa;
+    border-top: 1px solid #f0f0f0;
+    font-size: 0.7rem; color: #bbb; text-align: center;
+}
+
+/* ── Sections dans le panel ── */
+.notif-section {
+    border-bottom: 1px solid #f0f0f0;
+}
+.notif-section:last-of-type {
+    border-bottom: none;
+}
+.notif-section-title {
+    padding: 10px 15px;
+    background: #fafafa;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.notif-section-title i {
+    font-size: 0.7rem;
+}
+
+/* ── Icône club ── */
+.notif-icon--club {
+    background: #fef2f2;
+    color: #8b0000;
+    border: 1px solid #fecaca;
+}
+</style>
+
+<script>
+let notifCountGeneral = 0;
+let notifCountClub = 0;
+
+function toggleNotifPanel() {
+    const panel = document.getElementById('notifPanel');
+    const isOpen = panel.style.display === 'block';
+    panel.style.display = isOpen ? 'none' : 'block';
+}
+
+document.addEventListener('click', function(e) {
+    const wrapper = document.getElementById('notifWrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+        document.getElementById('notifPanel').style.display = 'none';
+    }
+});
+
+// ── Chargement notifications générales ──
+function loadNotificationsGeneral() {
+    fetch('/notifications/non-lues?u={{ _user.id }}')
+        .then(res => res.json())
+        .then(data => {
+            const notifs = data.notifications || [];
+            notifCountGeneral = notifs.length;
+            const list = document.getElementById('notifList');
+
+            if (notifs.length === 0) {
+                list.innerHTML = `
+                    <div class="notif-empty">
+                        <i class="far fa-bell-slash"></i>
+                        <p>Aucune notification</p>
+                    </div>`;
+            } else {
+                list.innerHTML = notifs.map(n => {
+                    let iconClass = 'comment';
+                    if (n.type === 'reponse') iconClass = 'reply';
+                    else if (n.type === 'validation') iconClass = 'check-circle';
+                    else if (n.type === 'nouvelle_publication') iconClass = 'file-alt';
+
+                    let roleBadge = '';
+                    if (n.roleExpediteur) {
+                        const iconRole = n.roleExpediteur === 'responsable_club' ? 'shield-alt' : 
+                                       n.roleExpediteur === 'membre' ? 'user' : 'user-graduate';
+                        const labelRole = n.roleExpediteur === 'responsable_club' ? 'Responsable Club' :
+                                        n.roleExpediteur === 'membre' ? 'Membre' : 'Étudiant';
+                        roleBadge = `<span class="notif-role-badge notif-role--${n.roleExpediteur}">
+                            <i class="fas fa-${iconRole}"></i> ${labelRole}
+                        </span>`;
+                    }
+
+                    return `
+                        <a href="${n.lienRedirection || '#'}"
+                           class="notif-item"
+                           onclick="marquerUnLu(${n.id})">
+                            <div class="notif-icon notif-icon--${n.type}">
+                                <i class="fas fa-${iconClass}"></i>
+                            </div>
+                            <div class="notif-content">
+                                <p class="notif-msg">${n.message}</p>
+                                ${roleBadge}
+                                <span class="notif-time">
+                                    <i class="far fa-clock"></i> ${n.createdAt}
+                                </span>
+                            </div>
+                            <i class="fas fa-chevron-right notif-arrow"></i>
+                        </a>`;
+                }).join('');
+            }
+
+            updateBadgeAndFooter();
+        })
+        .catch(err => console.error('Erreur notifications générales:', err));
+}
+
+{% if _user.role == 'responsable_club' %}
+// ── Chargement notifications club (pour responsable uniquement) ──
+function loadNotificationsClub() {
+    fetch('/notifications/club/')
+        .then(res => res.json())
+        .then(data => {
+            const notifs = data.notifications || [];
+            notifCountClub = notifs.length;
+            const list = document.getElementById('notifClubList');
+
+            if (notifs.length === 0) {
+                list.innerHTML = `
+                    <div class="notif-empty">
+                        <i class="far fa-bell-slash"></i>
+                        <p>Aucune notification</p>
+                    </div>`;
+            } else {
+                list.innerHTML = notifs.map(n => `
+                    <a href="${n.lienRedirection}"
+                       class="notif-item"
+                       onclick="marquerUnLuClub(${n.id})">
+                        <div class="notif-icon notif-icon--club">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="notif-content">
+                            <p class="notif-msg">${n.message}</p>
+                            <span class="notif-role-badge notif-role--etudiant">
+                                <i class="fas fa-user-graduate"></i> Étudiant
+                            </span>
+                            <span class="notif-time">
+                                <i class="far fa-clock"></i> ${n.createdAt}
+                            </span>
+                        </div>
+                        <i class="fas fa-chevron-right notif-arrow"></i>
+                    </a>
+                `).join('');
+            }
+
+            updateBadgeAndFooter();
+        })
+        .catch(err => console.error('Erreur notifications club:', err));
+}
+{% endif %}
+
+// ── Mise à jour du badge et du footer ──
+function updateBadgeAndFooter() {
+    const totalCount = notifCountGeneral + notifCountClub;
+    const badge = document.getElementById('notifBadge');
+    const footer = document.getElementById('notifCount');
+
+    if (totalCount > 0) {
+        badge.style.display = 'flex';
+        badge.textContent = totalCount > 9 ? '9+' : totalCount;
+    } else {
+        badge.style.display = 'none';
+    }
+
+    if (footer) {
+        footer.textContent = totalCount + ' non lue(s)';
+    }
+}
+
+// ── Marquer tout comme lu ──
+function marquerToutLu() {
+    // Marquer les notifications générales
+    fetch('/notifications/lire?u={{ _user.id }}', { method: 'POST' });
+
+    {% if _user.role == 'responsable_club' %}
+    // Marquer les notifications club
+    const clubNotifs = document.querySelectorAll('#notifClubList .notif-item');
+    clubNotifs.forEach(item => {
+        const onclick = item.getAttribute('onclick');
+        const id = onclick.match(/\d+/)?.[0];
+        if (id) {
+            fetch('/notifications/club/' + id + '/read', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+        }
+    });
+    {% endif %}
+
+    setTimeout(() => {
+        loadNotificationsGeneral();
+        {% if _user.role == 'responsable_club' %}
+        loadNotificationsClub();
+        {% endif %}
+    }, 500);
+}
+
+// ── Marquer une notification générale comme lue ──
+function marquerUnLu(notifId) {
+    fetch('/notifications/lire?u={{ _user.id }}', { method: 'POST' });
+}
+
+{% if _user.role == 'responsable_club' %}
+// ── Marquer une notification club comme lue ──
+window.marquerUnLuClub = function(id) {
+    fetch('/notifications/club/' + id + '/read', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    }).then(() => loadNotificationsClub());
+}
+{% endif %}
+
+// ── Chargement initial et rafraîchissement automatique ──
+loadNotificationsGeneral();
+{% if _user.role == 'responsable_club' %}
+loadNotificationsClub();
+setInterval(loadNotificationsClub, 30000);
+{% endif %}
+setInterval(loadNotificationsGeneral, 30000);
+
+// ── Mercure temps réel pour notifications générales ──
+(function() {
+    try {
+        const mercureUrl = new URL('http://localhost:3000/.well-known/mercure');
+        mercureUrl.searchParams.append('topic', '/notifications/user/{{ _user.id }}');
+
+        const es = new EventSource(mercureUrl);
+
+        es.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const list = document.getElementById('notifList');
+
+            // Enlever l'état vide
+            const empty = list.querySelector('.notif-empty');
+            if (empty) empty.remove();
+
+            // Badge rôle
+            let roleBadgeHtml = '';
+            if (data.roleExpediteur) {
+                const isResp = data.roleExpediteur === 'responsable_club';
+                const isMembre = data.roleExpediteur === 'membre';
+                roleBadgeHtml =
+                    '<span class="notif-role-badge notif-role--' + data.roleExpediteur + '">' +
+                    (isResp
+                        ? '<i class="fas fa-shield-alt"></i> Responsable Club'
+                        : isMembre 
+                            ? '<i class="fas fa-user"></i> Membre'
+                            : '<i class="fas fa-user-graduate"></i> Étudiant') +
+                    '</span>';
+            }
+
+            // Créer item cliquable
+            const item = document.createElement('a');
+            item.href = data.lien || '#';
+            item.className = 'notif-item';
+            item.setAttribute('onclick', 'marquerUnLu(' + data.id + ')');
+            
+            // Icône selon type
+            let iconClass = 'comment';
+            if (data.type === 'reponse') iconClass = 'reply';
+            else if (data.type === 'validation') iconClass = 'check-circle';
+            else if (data.type === 'nouvelle_publication') iconClass = 'file-alt';
+            
+            item.innerHTML =
+                '<div class="notif-icon notif-icon--' + data.type + '">' +
+                    '<i class="fas fa-' + iconClass + '"></i>' +
+                '</div>' +
+                '<div class="notif-content">' +
+                    '<p class="notif-msg">' + data.message + '</p>' +
+                    roleBadgeHtml +
+                    '<span class="notif-time"><i class="far fa-clock"></i> ' + data.createdAt + '</span>' +
+                '</div>' +
+                '<i class="fas fa-chevron-right notif-arrow"></i>';
+            list.prepend(item);
+
+            // Incrémenter le compteur
+            notifCountGeneral++;
+            updateBadgeAndFooter();
+        };
+
+        es.onerror = function() { /* silencieux si Mercure est off */ };
+    } catch(e) {}
+})();
+</script>
+{% endif %}

@@ -1,0 +1,153 @@
+<nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-top flex-row">
+  <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
+    <div class="me-3">
+      <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-bs-toggle="minimize">
+        <span class="icon-menu"></span>
+      </button>
+    </div>
+    <div>
+      <h1 class="website-name" style="color: #6c0303; font-weight: bold; font-size: 1.5rem;">SkillOra</h1>
+      <a class="navbar-brand brand-logo-mini" href="{{ path('admin_dashboard') }}">
+        <img src="{{ asset('assets/backoffice/images/logo-mini.svg') }}" alt="logo" />
+      </a>
+    </div>
+  </div>
+  
+  <div class="navbar-menu-wrapper d-flex align-items-top">
+    <ul class="navbar-nav">
+      <li class="nav-item fw-semibold d-none d-lg-block ms-0">
+        <h1 class="welcome-text">Good Morning</h1>
+      </li>
+    </ul>
+
+    <ul class="navbar-nav ms-auto">
+
+      <li class="nav-item d-none d-lg-block">
+        <div id="datepicker-popup" class="input-group date datepicker navbar-date-picker">
+          <span class="input-group-addon input-group-prepend border-right">
+            <span class="icon-calendar input-group-text calendar-icon"></span>
+          </span>
+          <input type="text" class="form-control">
+        </div>
+      </li>
+
+      <li class="nav-item">
+        <form class="search-form" id="adminSearchForm" action="#" onsubmit="return handleAdminSearch(event)">
+          <i class="icon-search"></i>
+          <input type="search" id="adminSearchInput" class="form-control" placeholder="Rechercher..." title="Rechercher">
+        </form>
+      </li>
+      {{ include('components/_notifications_admin.html.twig') }}
+      
+      {# ===== DROPDOWN PROFIL STABILISÉ ===== #}
+      <li class="nav-item dropdown d-none d-lg-block user-dropdown" id="profileDropdownWrapper">
+        <a class="nav-link count-indicator" id="UserDropdown" href="#" 
+           data-bs-toggle="dropdown" 
+           aria-expanded="false"
+           data-bs-auto-close="outside">
+          <img class="img-xs rounded-circle" 
+               src="{{ asset('uploads/photos/' ~ app.user.photo) }}" 
+               alt="Profile image">
+        </a>
+        <div class="dropdown-menu dropdown-menu-end navbar-dropdown" 
+             aria-labelledby="UserDropdown"
+             id="profileDropdownMenu">
+          <div class="dropdown-header text-center">
+            <img class="img-xs rounded-circle" 
+                 src="{{ asset('uploads/photos/' ~ app.user.photo) }}" 
+                 alt="Profile image">
+            <p class="mb-1 mt-3 fw-semibold">{{ app.user.prenom }} {{ app.user.nom }}</p>
+            <p class="fw-light text-muted mb-0">{{ app.user.email }}</p>
+          </div>
+          <a class="dropdown-item" href="{{ path('app_user_show_backoffice', {id: app.user.id}) }}">
+            <i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> My Profile
+          </a>
+          <a class="dropdown-item" href="{{ path('app_user_edit_backoffice', {id: app.user.id}) }}">
+            <i class="mdi mdi-pencil text-primary me-2"></i> Edit Profil
+          </a>
+          <a class="dropdown-item" href="{{ path('app_logout') }}">
+            <i class="dropdown-item-icon mdi mdi-power text-primary me-2"></i> Log Out
+          </a>
+        </div>
+      </li>
+
+    </ul>
+
+    <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-bs-toggle="offcanvas">
+      <span class="mdi mdi-menu"></span>
+    </button>
+  </div>
+
+  {# ===== STYLES POUR STABILISER LE DROPDOWN ===== #}
+  <style>
+    #profileDropdownWrapper .dropdown-menu {
+      margin-top: 0 !important;
+      z-index: 9999 !important;
+      display: block;
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease, visibility 0.15s ease;
+    }
+
+    #profileDropdownWrapper .dropdown-menu.show {
+      visibility: visible;
+      opacity: 1;
+      pointer-events: all;
+    }
+  </style>
+
+  {# ===== SCRIPTS ===== #}
+  <script>
+    // --- Fix dropdown profil instable ---
+    (function () {
+      var wrapper = document.getElementById('profileDropdownWrapper');
+      var toggle  = document.getElementById('UserDropdown');
+      var menu    = document.getElementById('profileDropdownMenu');
+
+      if (!wrapper || !toggle || !menu) return;
+
+      // Empêche la fermeture quand la souris passe dans le menu
+      menu.addEventListener('click', function (e) {
+        e.stopPropagation();
+      });
+
+      // Ré-ouvre si Bootstrap ferme trop vite
+      toggle.addEventListener('shown.bs.dropdown', function () {
+        menu.classList.add('show');
+      });
+
+      toggle.addEventListener('hidden.bs.dropdown', function () {
+        menu.classList.remove('show');
+      });
+    })();
+
+    // --- Recherche admin ---
+    function handleAdminSearch(e) {
+      e.preventDefault();
+      var q    = document.getElementById('adminSearchInput').value.trim();
+      var path = window.location.pathname;
+      var target = '';
+      if (path.indexOf('/admin/forum/commentaires') !== -1) {
+        target = '{{ path("admin_forum_commentaires") }}';
+      } else if (path.indexOf('/admin/forum') !== -1) {
+        target = '{{ path("admin_forum_publications") }}';
+      } else {
+        target = '{{ path("admin_forum_publications") }}';
+      }
+      window.location.href = target + '?q=' + encodeURIComponent(q);
+      return false;
+    }
+
+    // --- Restaure la valeur de recherche dans l'input ---
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var q = params.get('q');
+      if (q) {
+        var input = document.getElementById('adminSearchInput');
+        if (input) input.value = q;
+      }
+    })();
+  </script>
+
+</nav>

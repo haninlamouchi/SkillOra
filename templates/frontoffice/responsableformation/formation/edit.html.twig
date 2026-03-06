@@ -1,0 +1,290 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Modifier Formation | Skillora{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+    --sk-red:#8b0000;
+    --sk-red-dark:#4a0000;
+    --sk-red-light:#c0392b;
+    --sk-white:#fff;
+    --sk-ink:#180808;
+    --sk-muted:#8a7070;
+    --sk-border:rgba(139,0,0,0.09);
+}
+.sk-page { padding-top:70px; }
+
+/* HERO */
+.sk-hero {
+    position:relative;
+    background:linear-gradient(135deg,#3d0000 0%,#8b0000 48%,#c23030 100%);
+    margin-left:calc(-50vw + 50%);
+    margin-right:calc(-50vw + 50%);
+    padding:60px 20px 52px;
+    text-align:center;
+    overflow:hidden;
+    isolation:isolate;
+}
+.sk-hero::before {
+    content:'';
+    position:absolute;
+    inset:0;
+    z-index:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+    background-size:180px;
+    opacity:0.5;
+}
+.sk-hero-inner { position:relative; z-index:1; }
+.sk-hero h1 {
+    font-family:'Bricolage Grotesque',sans-serif;
+    font-size:clamp(1.8rem,4vw,2.6rem);
+    font-weight:800;
+    color:#fff;
+    margin:0 0 10px;
+}
+.sk-hero p {
+    font-family:'DM Sans',sans-serif;
+    color:rgba(255,255,255,0.60);
+    font-size:0.97rem;
+    margin:0;
+}
+
+/* BREADCRUMB */
+.sk-breadcrumb { 
+    display:flex; 
+    align-items:center; 
+    gap:6px; 
+    font-family:'DM Sans',sans-serif; 
+    font-size:0.82rem; 
+    color:rgba(255,255,255,0.55); 
+    justify-content:center; 
+    margin-bottom:16px; 
+    flex-wrap:wrap;
+}
+.sk-breadcrumb a { color:rgba(255,255,255,0.75); text-decoration:none; transition:color 0.2s; }
+.sk-breadcrumb a:hover { color:#fff; }
+.sk-breadcrumb span { color:rgba(255,255,255,0.35); }
+
+/* BUTTONS */
+.sk-btn {
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:9px 18px;
+    border-radius:10px;
+    font-weight:700;
+    font-family:'DM Sans',sans-serif;
+    font-size:0.85rem;
+    border:none;
+    cursor:pointer;
+    transition:all 0.25s;
+    text-decoration:none;
+}
+.sk-btn-primary {
+    background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light));
+    color:#fff;
+}
+.sk-btn-primary:hover {
+    transform:translateY(-1px);
+    box-shadow:0 6px 20px rgba(139,0,0,0.3);
+    color:#fff;
+}
+.sk-btn-outline {
+    background:transparent;
+    color:var(--sk-red);
+    border:1.5px solid var(--sk-border);
+}
+.sk-btn-outline:hover {
+    background:rgba(139,0,0,0.05);
+    color:var(--sk-red-dark);
+}
+
+/* CARD */
+.sk-card {
+    background:#fff;
+    border-radius:18px;
+    border:1.5px solid var(--sk-border);
+    box-shadow:0 2px 10px rgba(0,0,0,0.04);
+    overflow:hidden;
+    margin-bottom:20px;
+}
+.sk-card-body { padding:2rem; }
+
+/* FORM */
+.sk-form-label {
+    font-family:'DM Sans',sans-serif;
+    font-size:0.82rem;
+    font-weight:600;
+    color:var(--sk-muted);
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    margin-bottom:6px;
+}
+.sk-form-control {
+    border-radius:10px;
+    border:1.5px solid var(--sk-border);
+    font-family:'DM Sans',sans-serif;
+    font-size:0.93rem;
+    padding:10px 14px;
+    transition:border-color 0.2s, box-shadow 0.2s;
+}
+.sk-form-control:focus {
+    border-color:var(--sk-red);
+    box-shadow:0 0 0 3px rgba(139,0,0,0.10);
+    outline:none;
+}
+
+/* IMAGE PREVIEW */
+.sk-img-preview {
+    border-radius:12px;
+    border:1.5px solid var(--sk-border);
+    max-height:150px;
+    object-fit:cover;
+}
+.sk-preview-label {
+    font-family:'DM Sans',sans-serif;
+    font-size:0.78rem;
+    color:var(--sk-muted);
+    margin-bottom:6px;
+    display:block;
+}
+
+/* DIVIDER */
+.sk-divider { border:none; border-top:1.5px solid var(--sk-border); margin:1.5rem 0; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+
+    {# ── HERO ── #}
+    <div class="sk-hero">
+        <div class="sk-hero-inner">
+            <nav class="sk-breadcrumb">
+                <a href="{{ path('responsable_dashboard') }}">Dashboard</a>
+                <span>›</span>
+                <a href="{{ path('responsable_formation_index') }}">Formations</a>
+                <span>›</span>
+                <a href="{{ path('responsable_formation_show', {id: formation.id}) }}">{{ formation.titre }}</a>
+                <span>›</span>
+                <span style="color:rgba(255,255,255,0.9)">Modifier</span>
+            </nav>
+            <h1>✏️ Modifier la formation</h1>
+            <p>{{ formation.titre }}</p>
+        </div>
+    </div>
+
+    {# ── FORM CARD ── #}
+    <div class="container" style="max-width:820px; margin-top:40px; padding-bottom:60px;">
+        <div class="sk-card">
+            <div class="sk-card-body">
+                {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        {{ form_row(form.titre) }}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_row(form.description) }}
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form_row(form.dateDebut) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.dateFin) }}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form_row(form.imageFile) }}
+                        {% if formation.image %}
+                            <div class="mt-2">
+                                <span class="sk-preview-label">Image actuelle :</span>
+                                <img src="{{ formation.image }}"
+                                     alt="{{ formation.titre }}"
+                                     class="sk-img-preview">
+                            </div>
+                        {% endif %}
+                        <div id="imagePreview" class="mt-2" style="display:none">
+                            <span class="sk-preview-label">Nouvelle image :</span>
+                            <img src="" alt="Preview" class="sk-img-preview">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.lienRessources) }}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form_row(form.isPaid) }}
+                    </div>
+                    <div class="col-md-6" id="prixWrapper">
+                        {{ form_row(form.prix) }}
+                    </div>
+                </div>
+
+                <hr class="sk-divider">
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{{ path('responsable_formation_show', {id: formation.id}) }}"
+                       class="sk-btn sk-btn-outline">
+                        <i class="bi bi-arrow-left"></i> Retour
+                    </a>
+                    <button type="submit" class="sk-btn sk-btn-primary">
+                        <i class="bi bi-check-lg"></i> Enregistrer les modifications
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const fileInput = document.querySelector('input[type="file"]');
+    const preview = document.getElementById('imagePreview');
+    const img = preview ? preview.querySelector('img') : null;
+    if (fileInput && preview && img) {
+        fileInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+    }
+
+    // Paid toggle
+    const sel = document.querySelector('select[id$="is_paid"]');
+    const wrap = document.getElementById('prixWrapper');
+    if (sel && wrap) {
+        function syncPrix() {
+            const isPaid = sel.value === '1' || sel.value === 'true';
+            wrap.style.display = isPaid ? '' : 'none';
+        }
+        sel.addEventListener('change', syncPrix);
+        syncPrix();
+    }
+});
+</script>
+{% endblock %}

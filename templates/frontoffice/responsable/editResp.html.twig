@@ -1,0 +1,147 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Modifier {{ club.nom }} — SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --sk-red:#8b0000; --sk-red-dark:#4a0000; --sk-red-light:#c0392b; --sk-ink:#180808; --sk-muted:#8a7070; --sk-border:rgba(139,0,0,0.09); }
+.sk-page { padding-top:70px; }
+.sk-hero { position:relative; background:linear-gradient(135deg,#3d0000 0%,#8b0000 48%,#c23030 100%); margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%); padding:60px 20px 52px; text-align:center; overflow:hidden; isolation:isolate; }
+.sk-hero::before { content:''; position:absolute; inset:0; z-index:0; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E"); background-size:180px; opacity:0.5; }
+.sk-hero-ring-l,.sk-hero-ring-r { position:absolute; z-index:0; border-radius:50%; border:72px solid rgba(255,255,255,0.035); }
+.sk-hero-ring-l { width:520px; height:520px; top:-210px; left:-160px; }
+.sk-hero-ring-r { width:380px; height:380px; bottom:-160px; right:-100px; border-width:50px; }
+.sk-hero-inner { position:relative; z-index:1; }
+.sk-hero h1 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(1.8rem,4vw,2.6rem); font-weight:800; letter-spacing:-0.03em; color:#fff; margin:0 0 8px; line-height:1.1; }
+.sk-hero p { font-family:'DM Sans',sans-serif; color:rgba(255,255,255,0.60); font-size:0.97rem; margin:0; }
+
+.sk-content { padding:36px 0 56px; }
+.sk-back { display:inline-flex; align-items:center; gap:6px; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:600; color:var(--sk-muted); text-decoration:none; margin-bottom:24px; transition:color 0.2s; }
+.sk-back:hover { color:var(--sk-red); text-decoration:none; }
+
+.sk-form-card { background:#fff; border-radius:20px; border:1.5px solid var(--sk-border); box-shadow:0 4px 20px rgba(0,0,0,0.06); overflow:hidden; animation:sk-up 0.45s 0.1s ease both; }
+
+.sk-form-section { padding:26px 32px; border-bottom:1.5px solid var(--sk-border); }
+.sk-form-section:last-of-type { border-bottom:none; }
+.sk-section-title { font-family:'DM Sans',sans-serif; font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--sk-muted); margin-bottom:18px; display:flex; align-items:center; gap:10px; }
+.sk-section-title::after { content:''; flex:1; height:1px; background:var(--sk-border); }
+
+.sk-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+
+.sk-form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+.sk-form-group:last-child { margin-bottom:0; }
+.sk-form-group label { font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:700; color:#374151; text-transform:uppercase; letter-spacing:0.07em; }
+
+.sk-form-card input[type="text"],
+.sk-form-card input[type="url"],
+.sk-form-card input[type="date"],
+.sk-form-card textarea,
+.sk-form-card select {
+  padding:10px 14px; border:1.5px solid #e5e7eb; border-radius:10px;
+  font-family:'DM Sans',sans-serif; font-size:0.9rem; color:var(--sk-ink);
+  background:#f9f9f9; outline:none; width:100%; transition:border-color 0.2s,background 0.2s;
+}
+.sk-form-card input:focus,
+.sk-form-card textarea:focus,
+.sk-form-card select:focus { border-color:var(--sk-red); background:#fff; box-shadow:0 0 0 3px rgba(139,0,0,0.07); }
+.sk-form-card textarea { resize:vertical; min-height:90px; }
+
+.sk-upload-zone { border:2px dashed #e2e8f0; border-radius:10px; padding:16px; background:#f9fafb; transition:border-color 0.2s; }
+.sk-upload-zone:hover { border-color:var(--sk-red); }
+.sk-upload-zone input[type="file"] { font-family:'DM Sans',sans-serif; font-size:0.84rem; cursor:pointer; width:100%; }
+.sk-upload-zone input[type="file"]::-webkit-file-upload-button { background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); color:#fff; padding:6px 14px; border:none; border-radius:6px; cursor:pointer; font-weight:600; margin-right:10px; }
+.sk-hint { font-family:'DM Sans',sans-serif; font-size:0.73rem; color:var(--sk-muted); margin-top:4px; }
+
+.sk-form-actions { padding:22px 32px; display:flex; align-items:center; justify-content:space-between; gap:12px; background:#f9f9f9; flex-wrap:wrap; }
+
+.sk-btn { display:inline-flex; align-items:center; gap:7px; padding:11px 24px; border-radius:10px; font-weight:700; font-family:'DM Sans',sans-serif; font-size:0.88rem; border:none; cursor:pointer; transition:all 0.25s; text-decoration:none; }
+.sk-btn-success { background:linear-gradient(135deg,#15803d,#22c55e); color:#fff; }
+.sk-btn-success:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(34,197,94,0.3); color:#fff; text-decoration:none; }
+.sk-btn-ghost { background:#f3f4f6; color:#374151; border:1.5px solid #e5e7eb; }
+.sk-btn-ghost:hover { border-color:#9ca3af; color:#111; text-decoration:none; }
+
+@keyframes sk-up { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+.sk-hero { animation:sk-up 0.5s cubic-bezier(.22,.68,0,1) both; }
+@media(max-width:680px){
+  .sk-grid-2 { grid-template-columns:1fr; }
+  .sk-form-section { padding:20px 18px; }
+  .sk-form-actions { flex-direction:column; align-items:stretch; }
+  .sk-btn { justify-content:center; }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+  <div class="sk-hero">
+    <div class="sk-hero-ring-l"></div>
+    <div class="sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <h1>✏️ Modifier le club</h1>
+      <p>{{ club.nom }}</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sk-content">
+      <a href="{{ path('club_show', {'id': club.id}) }}" class="sk-back">← Retour au club</a>
+
+      {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
+
+      <div class="sk-form-card">
+
+        <div class="sk-form-section">
+          <div class="sk-section-title">Informations générales</div>
+
+          <div class="sk-grid-2">
+            <div class="sk-form-group">
+              <label>Nom du club *</label>
+              {{ form_widget(form.nom, {'attr': {'placeholder': 'Nom du club'}}) }}
+              {{ form_errors(form.nom) }}
+            </div>
+            <div class="sk-form-group">
+              <label>Date de création</label>
+              {{ form_widget(form.dateCreation) }}
+              {{ form_errors(form.dateCreation) }}
+            </div>
+          </div>
+
+          <div class="sk-form-group">
+            <label>Description</label>
+            {{ form_widget(form.description, {'attr': {'placeholder': 'Décrivez votre club…', 'rows': 3}}) }}
+            {{ form_errors(form.description) }}
+          </div>
+
+          <div class="sk-grid-2">
+            <div class="sk-form-group">
+              <label>Site web</label>
+              {{ form_widget(form.siteWeb, {'attr': {'placeholder': 'https://…'}}) }}
+              {{ form_errors(form.siteWeb) }}
+            </div>
+            <div class="sk-form-group">
+              <label>Logo</label>
+              <div class="sk-upload-zone">
+                {{ form_widget(form.logoFile) }}
+              </div>
+              {% if club.logo %}
+                <div class="sk-hint">Logo actuel : {{ club.logo }}</div>
+              {% endif %}
+              {{ form_errors(form.logoFile) }}
+            </div>
+          </div>
+        </div>
+
+        <div class="sk-form-actions">
+          <a href="{{ path('club_show', {'id': club.id}) }}" class="sk-btn sk-btn-ghost">❌ Annuler</a>
+          <button type="submit" class="sk-btn sk-btn-success">✅ Enregistrer les modifications</button>
+        </div>
+
+      </div>
+
+      {{- form_rest(form) -}}
+      {{ form_end(form) }}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

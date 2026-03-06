@@ -1,0 +1,15 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Demande d'adhésion — {{ club.nom }}{% endblock %}
+
+{% block body %}
+<div class="container sk-page">
+    <h2>Demande d'adhésion au club : {{ club.nom }}</h2>
+    <div class="mt-4 mb-4">
+        {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <button type="submit" class="btn btn-primary">Envoyer la demande</button>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

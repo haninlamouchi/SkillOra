@@ -1,0 +1,301 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}{{ quiz.titre }} — SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --sk-red:#8b0000; --sk-red-dark:#4a0000; --sk-red-light:#c0392b; --sk-white:#fff; --sk-ink:#180808; --sk-muted:#8a7070; --sk-border:rgba(139,0,0,0.09); }
+.sk-page { padding-top:70px; }
+
+/* HERO */
+.sk-hero { position:relative; background:linear-gradient(135deg,#3d0000 0%,#8b0000 48%,#c23030 100%); margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%); padding:60px 20px 52px; text-align:center; overflow:hidden; isolation:isolate; }
+.sk-hero::before { content:''; position:absolute; inset:0; z-index:0; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E"); background-size:180px; opacity:0.5; }
+.sk-hero-ring-l,.sk-hero-ring-r { position:absolute; z-index:0; border-radius:50%; border:72px solid rgba(255,255,255,0.035); }
+.sk-hero-ring-l { width:520px; height:520px; top:-210px; left:-160px; }
+.sk-hero-ring-r { width:380px; height:380px; bottom:-160px; right:-100px; border-width:50px; }
+.sk-hero-inner { position:relative; z-index:1; }
+.sk-hero h1 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(1.8rem,4vw,2.6rem); font-weight:800; letter-spacing:-0.03em; color:#fff; margin:0 0 10px; line-height:1.1; }
+.sk-hero p { font-family:'DM Sans',sans-serif; color:rgba(255,255,255,0.60); font-size:0.97rem; margin:0; }
+.sk-hero-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:4px 12px; font-family:'DM Sans',sans-serif; font-size:0.78rem; color:rgba(255,255,255,0.85); margin-bottom:14px; }
+.sk-hero-actions { display:flex; justify-content:center; gap:10px; margin-top:20px; flex-wrap:wrap; }
+
+/* BUTTONS */
+.sk-btn { display:inline-flex; align-items:center; gap:7px; padding:9px 20px; border-radius:10px; font-weight:700; font-family:'DM Sans',sans-serif; font-size:0.85rem; border:none; cursor:pointer; transition:all 0.25s; text-decoration:none; }
+.sk-btn-white { background:#fff; color:var(--sk-red-dark); }
+.sk-btn-white:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,0.15); color:var(--sk-red-dark); text-decoration:none; }
+.sk-btn-ghost-white { background:rgba(255,255,255,0.12); color:#fff; border:1.5px solid rgba(255,255,255,0.3); }
+.sk-btn-ghost-white:hover { background:rgba(255,255,255,0.2); color:#fff; text-decoration:none; }
+.sk-btn-primary { background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); color:#fff; }
+.sk-btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(139,0,0,0.3); color:#fff; text-decoration:none; }
+.sk-btn-ghost { background:#f3f4f6; color:#374151; border:1.5px solid #e5e7eb; }
+.sk-btn-ghost:hover { border-color:#9ca3af; color:#111; text-decoration:none; }
+.sk-btn-danger { background:linear-gradient(135deg,#7f1d1d,#dc2626); color:#fff; }
+.sk-btn-danger:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(220,38,38,0.3); color:#fff; }
+.sk-btn-sm { padding:6px 14px; font-size:0.78rem; }
+
+/* CONTENT */
+.sk-content { padding:36px 0 56px; }
+.sk-back { display:inline-flex; align-items:center; gap:6px; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:600; color:var(--sk-muted); text-decoration:none; margin-bottom:24px; transition:color 0.2s; }
+.sk-back:hover { color:var(--sk-red); text-decoration:none; }
+
+/* CARDS */
+.sk-card { background:#fff; border-radius:18px; border:1.5px solid var(--sk-border); box-shadow:0 2px 12px rgba(0,0,0,0.05); overflow:hidden; margin-bottom:24px; }
+.sk-card-header { padding:18px 24px; border-bottom:1.5px solid var(--sk-border); display:flex; justify-content:space-between; align-items:center; }
+.sk-card-header h5 { font-family:'Bricolage Grotesque',sans-serif; font-size:0.95rem; font-weight:700; color:var(--sk-ink); margin:0; }
+.sk-card-body { padding:24px; }
+
+/* STAT CARDS */
+.sk-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:16px; margin-bottom:24px; }
+.sk-stat { background:#fff; border-radius:16px; border:1.5px solid var(--sk-border); padding:20px; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+.sk-stat-icon { width:52px; height:52px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:10px; }
+.sk-stat-value { font-family:'Bricolage Grotesque',sans-serif; font-size:1.6rem; font-weight:800; color:var(--sk-ink); line-height:1; margin-bottom:4px; }
+.sk-stat-label { font-family:'DM Sans',sans-serif; font-size:0.78rem; color:var(--sk-muted); }
+
+/* DETAIL ROWS */
+.sk-detail-row { display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--sk-border); font-family:'DM Sans',sans-serif; }
+.sk-detail-row:last-child { border-bottom:none; }
+.sk-detail-label { font-size:0.82rem; color:var(--sk-muted); width:180px; flex-shrink:0; padding-top:2px; }
+.sk-detail-value { font-size:0.9rem; color:var(--sk-ink); font-weight:500; }
+
+/* QUESTION CARDS */
+.sk-question { border:1.5px solid var(--sk-border); border-radius:14px; margin-bottom:16px; overflow:hidden; }
+.sk-question-header { background:#fafafa; padding:14px 18px; display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--sk-border); gap:12px; }
+.sk-question-num { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); color:#fff; font-family:'Bricolage Grotesque',sans-serif; font-size:0.75rem; font-weight:800; flex-shrink:0; }
+.sk-question-text { font-family:'DM Sans',sans-serif; font-size:0.92rem; font-weight:600; color:var(--sk-ink); flex:1; }
+.sk-question-pts { font-family:'DM Sans',sans-serif; font-size:0.75rem; font-weight:700; color:var(--sk-muted); background:#f0f0f0; border-radius:8px; padding:3px 10px; white-space:nowrap; }
+
+.sk-option { display:flex; align-items:center; gap:12px; padding:11px 18px; border-bottom:1px solid var(--sk-border); font-family:'DM Sans',sans-serif; font-size:0.88rem; color:var(--sk-ink); transition:background 0.15s; }
+.sk-option:last-child { border-bottom:none; }
+.sk-option.correct { background:rgba(34,197,94,0.07); color:#15803d; font-weight:600; }
+.sk-option-letter { width:26px; height:26px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; background:#f0f0f0; color:#666; flex-shrink:0; }
+.sk-option.correct .sk-option-letter { background:#22c55e; color:#fff; }
+
+/* EMPTY STATE */
+.sk-empty { text-align:center; padding:52px 20px; }
+.sk-empty-icon { font-size:2.8rem; opacity:0.2; display:block; margin-bottom:12px; }
+.sk-empty p { font-family:'DM Sans',sans-serif; color:var(--sk-muted); font-size:0.9rem; margin-bottom:16px; }
+
+/* TABLE */
+.sk-table { width:100%; border-collapse:collapse; font-family:'DM Sans',sans-serif; }
+.sk-table th { font-size:0.75rem; font-weight:700; color:var(--sk-muted); text-transform:uppercase; letter-spacing:0.05em; padding:12px 16px; background:#fafafa; border-bottom:1.5px solid var(--sk-border); }
+.sk-table td { padding:14px 16px; border-bottom:1px solid var(--sk-border); font-size:0.88rem; color:var(--sk-ink); vertical-align:middle; }
+.sk-table tr:last-child td { border-bottom:none; }
+.sk-table tr:hover td { background:rgba(139,0,0,0.02); }
+.sk-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#5a0000,#8b1a1a); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; flex-shrink:0; }
+
+/* FLASH */
+.sk-flash { border-radius:12px; padding:12px 18px; font-family:'DM Sans',sans-serif; font-size:0.88rem; margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+.sk-flash-success { background:rgba(34,197,94,0.1); border:1.5px solid rgba(34,197,94,0.3); color:#15803d; }
+.sk-flash-danger  { background:rgba(220,38,38,0.08); border:1.5px solid rgba(220,38,38,0.2); color:#dc2626; }
+.sk-flash-warning { background:rgba(234,179,8,0.1); border:1.5px solid rgba(234,179,8,0.3); color:#854d0e; }
+
+/* BADGE */
+.sk-badge { display:inline-flex; align-items:center; padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:700; font-family:'DM Sans',sans-serif; }
+.sk-badge-success { background:rgba(34,197,94,0.12); color:#15803d; }
+.sk-badge-warning { background:rgba(234,179,8,0.12); color:#854d0e; }
+.sk-badge-danger  { background:rgba(220,38,38,0.10); color:#dc2626; }
+
+@keyframes sk-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.sk-hero { animation:sk-up 0.5s cubic-bezier(.22,.68,0,1) both; }
+.sk-card { animation:sk-up 0.45s 0.1s ease both; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+
+  {# ── HERO ── #}
+  <div class="sk-hero">
+    <div class="sk-hero-ring-l"></div>
+    <div class="sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <div class="sk-hero-badge">📚 {{ formation.titre }}</div>
+      <h1>🧩 {{ quiz.titre }}</h1>
+      <p>{{ quiz.questions|length }} question{{ quiz.questions|length != 1 ? 's' : '' }} · {{ quiz.duree ? quiz.duree ~ ' min' : 'Durée libre' }}</p>
+      <div class="sk-hero-actions">
+        <a href="{{ path('app_quiz_edit', {formationId: formation.id, id: quiz.id}) }}" class="sk-btn sk-btn-white">
+          ✏️ Modifier le quiz
+        </a>
+        <a href="{{ path('responsable_formation_show', {id: formation.id}) }}" class="sk-btn sk-btn-ghost-white">
+          ← Retour à la formation
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="max-width:960px;">
+    <div class="sk-content">
+
+      {# Flash messages #}
+      {% for type, messages in app.flashes %}
+        {% for message in messages %}
+          <div class="sk-flash sk-flash-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }}">
+            {{ type == 'success' ? '✅' : (type == 'warning' ? '⚠️' : '❌') }} {{ message }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      {# ── STATS ── #}
+      {% set totalPoints = 0 %}
+      {% for q in quiz.questions %}{% set totalPoints = totalPoints + (q.points ?? 1) %}{% endfor %}
+
+      <div class="sk-stats">
+        <div class="sk-stat">
+          <div class="sk-stat-icon" style="background:rgba(139,0,0,0.08);">🧩</div>
+          <div class="sk-stat-value">{{ quiz.questions|length }}</div>
+          <div class="sk-stat-label">Questions</div>
+        </div>
+        <div class="sk-stat">
+          <div class="sk-stat-icon" style="background:rgba(59,130,246,0.08);">⏱️</div>
+          <div class="sk-stat-value">{{ quiz.duree ?? '∞' }}</div>
+          <div class="sk-stat-label">Minutes</div>
+        </div>
+        <div class="sk-stat">
+          <div class="sk-stat-icon" style="background:rgba(34,197,94,0.08);">🏆</div>
+          <div class="sk-stat-value">{{ totalPoints }}</div>
+          <div class="sk-stat-label">Points total</div>
+        </div>
+        <div class="sk-stat">
+          <div class="sk-stat-icon" style="background:rgba(234,179,8,0.08);">👥</div>
+          <div class="sk-stat-value">{{ quizResults|length }}</div>
+          <div class="sk-stat-label">Participants</div>
+        </div>
+      </div>
+
+      {# ── DETAILS ── #}
+      <div class="sk-card">
+        <div class="sk-card-header">
+          <h5>📋 Détails du Quiz</h5>
+        </div>
+        <div class="sk-card-body">
+          <div class="sk-detail-row">
+            <span class="sk-detail-label">Description</span>
+            <span class="sk-detail-value">{{ quiz.description ?? '—' }}</span>
+          </div>
+          <div class="sk-detail-row">
+            <span class="sk-detail-label">Durée</span>
+            <span class="sk-detail-value">{{ quiz.duree ? quiz.duree ~ ' minutes' : '—' }}</span>
+          </div>
+          <div class="sk-detail-row">
+            <span class="sk-detail-label">Nombre de questions</span>
+            <span class="sk-detail-value">{{ quiz.questions|length }}</span>
+          </div>
+          <div class="sk-detail-row">
+            <span class="sk-detail-label">Total des points</span>
+            <span class="sk-detail-value">{{ totalPoints }} points</span>
+          </div>
+        </div>
+      </div>
+
+      {# ── QUESTIONS ── #}
+      <div class="sk-card">
+        <div class="sk-card-header">
+          <h5>❓ Questions ({{ quiz.questions|length }})</h5>
+          <a href="{{ path('app_question_new', {formationId: formation.id, quizId: quiz.id}) }}" class="sk-btn sk-btn-primary sk-btn-sm">
+            + Ajouter une question
+          </a>
+        </div>
+        <div class="sk-card-body">
+          {% if quiz.questions|length > 0 %}
+            {% set letters = ['A','B','C','D','E','F'] %}
+            {% for question in quiz.questions %}
+            <div class="sk-question">
+              <div class="sk-question-header">
+                <div class="d-flex align-items-center gap-10" style="gap:10px;flex:1;">
+                  <span class="sk-question-num">{{ loop.index }}</span>
+                  <span class="sk-question-text">{{ question.contenu }}</span>
+                </div>
+                <span class="sk-question-pts">{{ question.points ?? 1 }} pt{{ (question.points ?? 1) > 1 ? 's' : '' }}</span>
+                <div style="display:flex;gap:6px;margin-left:10px;">
+                  <a href="{{ path('app_question_edit', {formationId: formation.id, quizId: quiz.id, id: question.id}) }}"
+                     class="sk-btn sk-btn-ghost sk-btn-sm">✏️</a>
+                  <form action="{{ path('app_question_delete', {formationId: formation.id, quizId: quiz.id, id: question.id}) }}"
+                        method="post" style="display:inline"
+                        onsubmit="return confirm('Supprimer cette question ?')">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_question' ~ question.id) }}">
+                    <button type="submit" class="sk-btn sk-btn-danger sk-btn-sm">🗑️</button>
+                  </form>
+                </div>
+              </div>
+              {% for option in question.optionQuestions %}
+              <div class="sk-option {{ option.estCorrect ? 'correct' : '' }}">
+                <span class="sk-option-letter">{{ letters[loop.index0] ?? loop.index }}</span>
+                <span>{{ option.contenu }}</span>
+                {% if option.estCorrect %}<span style="margin-left:auto;font-size:0.85rem;">✅</span>{% endif %}
+              </div>
+              {% endfor %}
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="sk-empty">
+              <span class="sk-empty-icon">🧩</span>
+              <p>Aucune question dans ce quiz.</p>
+              <a href="{{ path('app_question_new', {formationId: formation.id, quizId: quiz.id}) }}" class="sk-btn sk-btn-primary">
+                + Ajouter la première question
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {# ── PARTICIPANTS & SCORES ── #}
+      <div class="sk-card">
+        <div class="sk-card-header">
+          <h5>👥 Participants & Scores ({{ quizResults|length }})</h5>
+        </div>
+        {% if quizResults|length > 0 %}
+        <div style="overflow-x:auto;">
+          <table class="sk-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Participant</th>
+                <th style="text-align:center;">Score</th>
+                <th style="text-align:center;">Résultat</th>
+                <th style="text-align:right;">Date de passage</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for res in quizResults %}
+              <tr>
+                <td style="color:var(--sk-muted);font-size:0.82rem;">{{ loop.index }}</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="sk-avatar">{{ res.user.fullName|first|upper }}</div>
+                    <div>
+                      <div style="font-weight:600;">{{ res.user.fullName }}</div>
+                      <div style="font-size:0.78rem;color:var(--sk-muted);">{{ res.user.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="text-align:center;font-weight:700;font-size:1rem;">{{ res.score }} / {{ res.totalPoints }}</td>
+                <td style="text-align:center;">
+                  {% set pct = res.percentage %}
+                  {% if pct >= 70 %}
+                    <span class="sk-badge sk-badge-success">{{ pct }}% ✓</span>
+                  {% elseif pct >= 50 %}
+                    <span class="sk-badge sk-badge-warning">{{ pct }}%</span>
+                  {% else %}
+                    <span class="sk-badge sk-badge-danger">{{ pct }}%</span>
+                  {% endif %}
+                </td>
+                <td style="text-align:right;font-size:0.82rem;color:var(--sk-muted);">
+                  {{ res.datePassage|date('d/m/Y à H:i') }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+          <div class="sk-empty">
+            <span class="sk-empty-icon">👥</span>
+            <p>Aucun participant n'a encore passé ce quiz.</p>
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

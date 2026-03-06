@@ -1,0 +1,139 @@
+{# templates/components/_notification_responsable.html.twig #}
+
+{% if _user is defined and _user and _user.role == 'responsable_club' %}
+<div class="notif-wrapper" id="notifClubWrapper">
+
+    {# ── Bouton cloche ── #}
+    <button class="notif-bell-btn" id="notifClubBell" onclick="toggleNotifClubPanel()" type="button">
+        <i class="fas fa-users"></i>
+        <span class="notif-badge" id="notifClubBadge" style="display:none;">0</span>
+    </button>
+
+    {# ── Panel dropdown ── #}
+    <div class="notif-panel" id="notifClubPanel">
+
+        <div class="notif-panel-header">
+            <span class="notif-panel-title">
+                <i class="fas fa-users"></i> Notifications Club
+            </span>
+            <button class="notif-mark-all" onclick="marquerToutLuClub()" type="button">
+                <i class="fas fa-check-double"></i> Tout lire
+            </button>
+        </div>
+
+        <div class="notif-list" id="notifClubList">
+            <div class="notif-empty" id="notifClubEmpty">
+                <i class="far fa-bell-slash"></i>
+                <p>Aucune notification</p>
+            </div>
+        </div>
+
+        <div class="notif-panel-footer">
+            <span id="notifClubCount">0 non lue(s)</span>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleNotifClubPanel() {
+    const panel = document.getElementById('notifClubPanel');
+    const isOpen = panel.style.display === 'block';
+    panel.style.display = isOpen ? 'none' : 'block';
+}
+
+document.addEventListener('click', function(e) {
+    const wrapper = document.getElementById('notifClubWrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+        document.getElementById('notifClubPanel').style.display = 'none';
+    }
+});
+
+function loadClubNotifications() {
+    fetch('/notifications/club/')
+        .then(res => res.json())
+        .then(data => {
+            const count  = data.count;
+            const notifs = data.notifications;
+            const badge  = document.getElementById('notifClubBadge');
+            const list   = document.getElementById('notifClubList');
+            const footer = document.getElementById('notifClubCount');
+
+            // Badge
+            if (count > 0) {
+                badge.style.display = 'flex';
+                badge.textContent   = count > 9 ? '9+' : count;
+            } else {
+                badge.style.display = 'none';
+            }
+
+            // Footer
+            if (footer) footer.textContent = count + ' non lue(s)';
+
+            // Liste
+            if (notifs.length === 0) {
+                list.innerHTML = `
+                    <div class="notif-empty">
+                        <i class="far fa-bell-slash"></i>
+                        <p>Aucune notification</p>
+                    </div>`;
+            } else {
+                list.innerHTML = notifs.map(n => `
+                    <a href="${n.lienRedirection}"
+                       class="notif-item"
+                       onclick="marquerUnLuClub(${n.id})">
+                        <div class="notif-icon notif-icon--club">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="notif-content">
+                            <p class="notif-msg">${n.message}</p>
+                            <span class="notif-role-badge notif-role--etudiant">
+                                <i class="fas fa-user-graduate"></i> Étudiant
+                            </span>
+                            <span class="notif-time">
+                                <i class="far fa-clock"></i> ${n.createdAt}
+                            </span>
+                        </div>
+                        <i class="fas fa-chevron-right notif-arrow"></i>
+                    </a>
+                `).join('');
+            }
+        })
+        .catch(err => console.error('Erreur notifications club:', err));
+}
+
+function marquerToutLuClub() {
+    const notifs = document.querySelectorAll('#notifClubList .notif-item');
+    notifs.forEach(item => {
+        const onclick = item.getAttribute('onclick');
+        const id = onclick.match(/\d+/)?.[0];
+        if (id) {
+            fetch('/notifications/club/' + id + '/read', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+        }
+    });
+    setTimeout(() => loadClubNotifications(), 500);
+}
+
+window.marquerUnLuClub = function(id) {
+    fetch('/notifications/club/' + id + '/read', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    }).then(() => loadClubNotifications());
+}
+
+// Charger au démarrage et toutes les 30s
+loadClubNotifications();
+setInterval(loadClubNotifications, 30000);
+</script>
+
+<style>
+.notif-icon--club {
+    background: #fef2f2;
+    color: #8b0000;
+    border: 1px solid #fecaca;
+}
+</style>
+
+{% endif %}

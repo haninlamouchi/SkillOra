@@ -1,0 +1,317 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Recommandations — SkillOra{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700;900&display=swap');
+
+:root {
+    --red:      #c10609;
+    --red-mid:  #8b0507;
+    --red-soft: rgba(193,6,9,0.07);
+    --ink:      #0d0d0d;
+    --muted:    #6b6b6b;
+    --border:   rgba(0,0,0,0.08);
+    --bg:       #f2f2f2;
+    --white:    #ffffff;
+    --radius:   18px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--ink); }
+
+.shell { min-height: 100vh; padding: 100px 0 80px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+
+/* Header */
+.page-eyebrow {
+    font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--red); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+}
+.page-eyebrow::before {
+    content: ''; display: inline-block;
+    width: 24px; height: 2px; background: var(--red);
+}
+.page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 700; color: var(--ink); line-height: 1.1;
+}
+.page-title em { font-style: normal; color: var(--red); }
+.page-sub { font-size: 0.875rem; color: var(--muted); margin-top: 8px; }
+
+/* Formulaire */
+.search-box {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 32px;
+    margin: 36px 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+.search-box label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 10px;
+    display: block;
+}
+.search-input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    background: #f8f8f8;
+    transition: border-color 0.2s;
+    resize: none;
+}
+.search-input:focus {
+    outline: none;
+    border-color: var(--red);
+    background: var(--white);
+}
+.btn-search {
+    margin-top: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--red);
+    color: #fff;
+    padding: 13px 28px;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-search:hover {
+    background: var(--red-mid);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(193,6,9,0.28);
+}
+.btn-search:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Loading */
+.loading {
+    display: none;
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+}
+.loading-spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Section résultats */
+.results-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.results-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+.results-badge {
+    background: var(--red);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+/* Cards */
+.clubs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+.club-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s, box-shadow 0.25s;
+    animation: fadeUp 0.4s ease both;
+}
+.club-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.10);
+}
+.club-card::before {
+    content: ''; display: block;
+    height: 3px; background: var(--red); flex-shrink: 0;
+}
+.club-card-img {
+    height: 120px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem; position: relative; overflow: hidden;
+}
+.club-card-img img {
+    width: 100%; height: 100%;
+    object-fit: cover; position: absolute; inset: 0;
+}
+.club-card-img-emoji { position: relative; z-index: 1; }
+.club-card-body {
+    padding: 18px 20px 12px;
+    flex: 1; display: flex; flex-direction: column; gap: 6px;
+}
+.club-card-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; font-weight: 700; color: var(--ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.club-card-desc {
+    font-size: 0.78rem; color: var(--muted);
+    line-height: 1.5; flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.club-card-footer { padding: 0 20px 18px; }
+.club-card-sep { height: 1px; background: var(--border); margin-bottom: 12px; }
+.btn-rejoindre {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 10px;
+    background: var(--red); color: #fff;
+    border: none; border-radius: 10px;
+    font-size: 0.82rem; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+}
+.btn-rejoindre:hover {
+    background: var(--red-mid);
+    transform: translateY(-1px);
+}
+
+/* Rang IA */
+.rank-badge {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: var(--red);
+    color: #fff;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 800;
+    z-index: 2;
+}
+
+/* Empty */
+.empty-state {
+    text-align: center; padding: 60px 20px;
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+.empty-state-ico { font-size: 3rem; margin-bottom: 16px; display: block; opacity: 0.5; }
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.club-card:nth-child(1) { animation-delay: 0.08s; }
+.club-card:nth-child(2) { animation-delay: 0.14s; }
+.club-card:nth-child(3) { animation-delay: 0.20s; }
+
+@media (max-width: 1024px) { .clubs-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) {
+    .clubs-grid { grid-template-columns: 1fr; }
+    .wrap { padding: 0 16px; }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="shell">
+<div class="wrap">
+
+
+    <div style="animation: fadeUp 0.5s ease both;">
+        <div class="page-eyebrow">Intelligence Artificielle</div>
+        <h1 class="page-title">Clubs <em>Recommandés</em></h1>
+        <p class="page-sub">Décrivez vos intérêts et laissez l'IA trouver les clubs qui vous correspondent.</p>
+    </div>
+
+
+    <div class="search-box">
+        <form method="post">
+            <label for="interets">🤖 Décrivez vos intérêts, passions ou ce que vous cherchez :</label>
+            <textarea id="interets" name="interets" class="search-input" rows="3"
+                placeholder="Ex: j'aime la programmation, les maths, la robotique...">{{ app.request.request.get('interets') }}</textarea>
+            <button type="submit" class="btn-search">
+                <i class="fas fa-magic"></i> Trouver mes clubs
+            </button>
+        </form>
+    </div>
+
+    {% if recommandes is not empty %}
+    <div class="results-header">
+        <h2 class="results-title">Clubs recommandés pour vous</h2>
+        <span class="results-badge">{{ recommandes|length }} club{{ recommandes|length > 1 ? 's' : '' }}</span>
+    </div>
+
+    <div class="clubs-grid">
+        {% for index, club in recommandes %}
+        <div class="club-card">
+            <div class="club-card-img" style="position:relative;">
+                <span class="rank-badge">{{ index + 1 }}</span>
+                <span class="club-card-img-emoji">🏛️</span>
+            </div>
+
+            <div class="club-card-body">
+                <p class="club-card-name">{{ club.nom }}</p>
+                <p class="club-card-desc">{{ club.description }}</p>
+            </div>
+
+            <div class="club-card-footer">
+                <div class="club-card-sep"></div>
+                <form method="post" action="{{ path('user_club_adhesion', {id: club.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('adhesion' ~ club.id) }}">
+                    <button type="submit" class="btn-rejoindre">
+                        <i class="fas fa-plus-circle"></i> Rejoindre ce club
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% elseif app.request.isMethod('POST') %}
+    <div class="empty-state">
+        <span class="empty-state-ico">🤖</span>
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;">Aucun club trouvé</h3>
+        <p style="color:var(--muted);font-size:0.875rem;margin-top:8px;">Essayez avec d'autres mots-clés.</p>
+    </div>
+    {% endif %}
+
+</div>
+</div>
+
+
+{% endblock %}

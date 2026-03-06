@@ -1,0 +1,211 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Adhésions — {{ club.nom }} | SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --sk-red:#8b0000; --sk-red-dark:#4a0000; --sk-red-light:#c0392b; --sk-ink:#180808; --sk-muted:#8a7070; --sk-border:rgba(139,0,0,0.09); }
+.sk-page { padding-top:70px; }
+.sk-hero { position:relative; background:linear-gradient(135deg,#3d0000 0%,#8b0000 48%,#c23030 100%); margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%); padding:60px 20px 52px; text-align:center; overflow:hidden; isolation:isolate; }
+.sk-hero::before { content:''; position:absolute; inset:0; z-index:0; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E"); background-size:180px; opacity:0.5; }
+.sk-hero-ring-l,.sk-hero-ring-r { position:absolute; z-index:0; border-radius:50%; border:72px solid rgba(255,255,255,0.035); }
+.sk-hero-ring-l { width:520px; height:520px; top:-210px; left:-160px; }
+.sk-hero-ring-r { width:380px; height:380px; bottom:-160px; right:-100px; border-width:50px; }
+.sk-hero-inner { position:relative; z-index:1; }
+.sk-hero h1 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(1.8rem,4vw,2.6rem); font-weight:800; letter-spacing:-0.03em; color:#fff; margin:0 0 8px; line-height:1.1; }
+.sk-hero p { font-family:'DM Sans',sans-serif; color:rgba(255,255,255,0.60); font-size:0.97rem; margin:0; }
+.sk-content { padding:36px 0 56px; }
+.sk-back { display:inline-flex; align-items:center; gap:6px; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:600; color:var(--sk-muted); text-decoration:none; margin-bottom:24px; transition:color 0.2s; }
+.sk-back:hover { color:var(--sk-red); text-decoration:none; }
+.sk-club-strip { background:#fff; border-radius:14px; border:1.5px solid var(--sk-border); border-left:4px solid var(--sk-red); padding:16px 22px; margin-bottom:24px; display:flex; align-items:center; gap:16px; box-shadow:0 2px 8px rgba(0,0,0,0.04); animation:sk-up 0.4s 0.05s ease both; }
+.sk-strip-logo { width:46px; height:46px; border-radius:10px; background:#f3f4f6; border:1.5px solid var(--sk-border); display:flex; align-items:center; justify-content:center; font-size:1.3rem; overflow:hidden; flex-shrink:0; }
+.sk-strip-logo img { width:100%; height:100%; object-fit:cover; }
+.sk-strip-name { font-family:'Bricolage Grotesque',sans-serif; font-size:0.97rem; font-weight:800; color:var(--sk-ink); }
+.sk-strip-sub { font-family:'DM Sans',sans-serif; font-size:0.75rem; color:var(--sk-muted); margin-top:2px; }
+.sk-strip-stats { margin-left:auto; display:flex; gap:24px; }
+.sk-strip-stat { text-align:center; }
+.sk-strip-stat-val { font-family:'Bricolage Grotesque',sans-serif; font-size:1.4rem; font-weight:800; color:var(--sk-ink); display:block; line-height:1; }
+.sk-strip-stat-lbl { font-family:'DM Sans',sans-serif; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--sk-muted); }
+.sk-section-head { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.sk-section-lbl { font-family:'DM Sans',sans-serif; font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--sk-muted); white-space:nowrap; }
+.sk-section-line { flex:1; height:1px; background:var(--sk-border); }
+.sk-section-count { font-family:'DM Sans',sans-serif; font-size:0.68rem; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+.sk-count-amber { background:#fef9c3; color:#854d0e; border:1px solid #fde047; }
+.sk-count-green { background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; }
+.sk-demande { background:#fff; border-radius:14px; border:1.5px solid var(--sk-border); box-shadow:0 1px 6px rgba(0,0,0,0.04); display:flex; align-items:center; gap:14px; padding:14px 18px; margin-bottom:10px; transition:box-shadow 0.2s,transform 0.2s; animation:sk-up 0.35s ease both; }
+.sk-demande:hover { box-shadow:0 8px 24px rgba(139,0,0,0.08); transform:translateY(-1px); }
+.sk-demande.pending { border-left:3px solid #d97706; }
+.sk-demande.accepted { border-left:3px solid #15803d; }
+.sk-av { width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Bricolage Grotesque',sans-serif; font-size:0.85rem; font-weight:800; flex-shrink:0; overflow:hidden; }
+.sk-av img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.sk-card-name { font-family:'Bricolage Grotesque',sans-serif; font-size:0.9rem; font-weight:700; color:var(--sk-ink); margin-bottom:2px; }
+.sk-card-email { font-family:'DM Sans',sans-serif; font-size:0.75rem; color:var(--sk-muted); }
+.sk-card-date { font-family:'DM Sans',sans-serif; font-size:0.70rem; color:#9ca3af; margin-top:2px; }
+.sk-card-actions { display:flex; gap:8px; flex-shrink:0; margin-left:auto; }
+.sk-btn-accept { display:inline-flex; align-items:center; gap:6px; background:#dcfce7; color:#15803d; border:1.5px solid #bbf7d0; border-radius:8px; padding:8px 14px; font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+.sk-btn-accept:hover { background:#15803d; color:#fff; border-color:#15803d; }
+.sk-btn-refuse { display:inline-flex; align-items:center; gap:6px; background:transparent; color:var(--sk-red); border:1.5px solid rgba(139,0,0,0.25); border-radius:8px; padding:8px 14px; font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+.sk-btn-refuse:hover { background:var(--sk-red); color:#fff; border-color:var(--sk-red); }
+.sk-empty { text-align:center; padding:36px 20px; background:#fff; border-radius:12px; border:1.5px dashed var(--sk-border); }
+.sk-empty-icon { font-size:2.5rem; opacity:0.3; margin-bottom:10px; }
+.sk-empty p { font-family:'DM Sans',sans-serif; font-size:0.85rem; color:var(--sk-muted); }
+.sk-flash { border-radius:12px; padding:12px 18px; margin-bottom:14px; font-family:'DM Sans',sans-serif; font-size:0.87rem; display:flex; align-items:center; gap:10px; }
+.sk-flash-success { background:#dcfce7; color:#15803d; border:1.5px solid #bbf7d0; }
+.sk-flash-warning { background:#fefce8; color:#854d0e; border:1.5px solid #fde047; }
+.sk-flash-danger  { background:#fee2e2; color:#dc2626; border:1.5px solid #fecaca; }
+.sk-mb { margin-bottom:28px; }
+@keyframes sk-up { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.sk-hero { animation:sk-up 0.5s cubic-bezier(.22,.68,0,1) both; }
+@media(max-width:640px){ .sk-strip-stats{display:none;} .sk-card-actions{flex-direction:column;} }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+  <div class="sk-hero">
+    <div class="sk-hero-ring-l"></div>
+    <div class="sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <h1>📋 Demandes d'adhésion</h1>
+      <p>Acceptez ou refusez les membres souhaitant rejoindre votre club</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sk-content">
+      <a href="{{ path('club_show', {'id': club.id}) }}" class="sk-back">← Mon club</a>
+
+      {# Flash messages #}
+      {% for type, messages in app.flashes %}
+        {% for msg in messages %}
+          <div class="sk-flash sk-flash-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }}">
+            {{ type == 'success' ? '✅' : (type == 'warning' ? '⚠️' : '❌') }} {{ msg }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      {# Club strip #}
+      <div class="sk-club-strip">
+        <div class="sk-strip-logo">
+          {% if club.logo %}<img src="{{ vich_uploader_asset(club, 'logoFile') }}" alt="">{% else %}🏛️{% endif %}
+        </div>
+        <div>
+          <div class="sk-strip-name">{{ club.nom }}</div>
+          <div class="sk-strip-sub">{{ club.siteWeb ?? 'Pas de site web' }}</div>
+        </div>
+        <div class="sk-strip-stats">
+          <div class="sk-strip-stat">
+            <span class="sk-strip-stat-val">{{ (demandesMembre|length) + (demandesAdhesion|length) }}</span>
+            <span class="sk-strip-stat-lbl">En attente</span>
+          </div>
+          <div class="sk-strip-stat">
+            <span class="sk-strip-stat-val">{{ club.membres|length }}</span>
+            <span class="sk-strip-stat-lbl">Membres</span>
+          </div>
+        </div>
+      </div>
+
+      {# ── DemandeAdhesion (nouvelles) ── #}
+      <div class="sk-mb">
+        <div class="sk-section-head">
+          <span class="sk-section-lbl">En attente</span>
+          <div class="sk-section-line"></div>
+          <span class="sk-section-count sk-count-amber">{{ (demandesMembre|length) + (demandesAdhesion|length) }}</span>
+        </div>
+
+        {% if demandesAdhesion is empty and demandesMembre is empty %}
+          <div class="sk-empty">
+            <div class="sk-empty-icon">📭</div>
+            <p>Aucune demande en attente.</p>
+          </div>
+        {% endif %}
+
+        {# ✅ DemandeAdhesion → route adhesion-adhesion #}
+        {% for d in demandesAdhesion %}
+          <div class="sk-demande pending" style="animation-delay:{{ loop.index * 0.05 }}s">
+            <div class="sk-av">
+              {% if d.user.photo is defined and d.user.photo %}
+                <img src="{{ asset('uploads/photos/' ~ d.user.photo) }}" alt="">
+              {% else %}
+                {{ d.user.prenom|slice(0,1)|upper }}{{ d.user.nom|slice(0,1)|upper }}
+              {% endif %}
+            </div>
+            <div style="flex:1">
+              <div class="sk-card-name">{{ d.user.prenom }} {{ d.user.nom }}</div>
+              <div class="sk-card-email">{{ d.user.email }}</div>
+              <div class="sk-card-date">📅 {{ d.dateInscription|date('d/m/Y') }}</div>
+            </div>
+            <div class="sk-card-actions">
+              <form method="post" action="{{ path('responsable_adhesion_adhesion_accepter', {'id': d.id}) }}" style="margin:0">
+                <input type="hidden" name="_token" value="{{ csrf_token('accept' ~ d.id) }}">
+                <button type="submit" class="sk-btn-accept">✅ Accepter</button>
+              </form>
+              <form method="post" action="{{ path('responsable_adhesion_adhesion_refuser', {'id': d.id}) }}" style="margin:0" onsubmit="return confirm('Refuser cette demande ?')">
+                <input type="hidden" name="_token" value="{{ csrf_token('refuse' ~ d.id) }}">
+                <button type="submit" class="sk-btn-refuse">❌ Refuser</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+
+        {# ✅ DemandeMembre (anciennes) → route adhesion #}
+        {% for d in demandesMembre %}
+          <div class="sk-demande pending" style="animation-delay:{{ loop.index * 0.05 }}s">
+            <div class="sk-av">
+              {% if d.user.photo is defined and d.user.photo %}
+                <img src="{{ asset('uploads/photos/' ~ d.user.photo) }}" alt="">
+              {% else %}
+                {{ d.user.prenom|slice(0,1)|upper }}{{ d.user.nom|slice(0,1)|upper }}
+              {% endif %}
+            </div>
+            <div style="flex:1">
+              <div class="sk-card-name">{{ d.user.prenom }} {{ d.user.nom }}</div>
+              <div class="sk-card-email">{{ d.user.email }}</div>
+              <div class="sk-card-date">📅 {{ d.dateInscription|date('d/m/Y') }}</div>
+            </div>
+            <div class="sk-card-actions">
+              <form method="post" action="{{ path('responsable_adhesion_accepter', {'id': d.id}) }}" style="margin:0">
+                <input type="hidden" name="_token" value="{{ csrf_token('accept' ~ d.id) }}">
+                <button type="submit" class="sk-btn-accept">✅ Accepter</button>
+              </form>
+              <form method="post" action="{{ path('responsable_adhesion_refuser', {'id': d.id}) }}" style="margin:0" onsubmit="return confirm('Refuser cette demande ?')">
+                <input type="hidden" name="_token" value="{{ csrf_token('refuse' ~ d.id) }}">
+                <button type="submit" class="sk-btn-refuse">❌ Refuser</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+
+      </div>
+
+      {# Membres actuels #}
+      {% if club.membres|length > 0 %}
+        <div class="sk-mb">
+          <div class="sk-section-head">
+            <span class="sk-section-lbl">Membres actuels</span>
+            <div class="sk-section-line"></div>
+            <span class="sk-section-count sk-count-green">{{ club.membres|length }}</span>
+          </div>
+          {% for membre in club.membres %}
+            <div class="sk-demande accepted">
+              <div class="sk-av">
+                {% if membre.photo is defined and membre.photo %}
+                  <img src="{{ asset('uploads/photos/' ~ membre.photo) }}" alt="">
+                {% else %}
+                  {{ membre.prenom|slice(0,1)|upper }}{{ membre.nom|slice(0,1)|upper }}
+                {% endif %}
+              </div>
+              <div>
+                <div class="sk-card-name">{{ membre.prenom }} {{ membre.nom }}</div>
+                <div class="sk-card-email">{{ membre.email }}</div>
+                <div class="sk-card-date">✅ Membre</div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

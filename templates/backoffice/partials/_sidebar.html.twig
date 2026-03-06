@@ -1,0 +1,260 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+.sidebar {
+  background:#fff !important;
+  border-right:1.5px solid rgba(139,0,0,0.09) !important;
+  min-height:100vh;
+}
+
+/* ── Cache le titre SkillOra dupliqué du base template ── */
+.sidebar .sidebar-brand,
+.sidebar .brand-logo,
+.sidebar .navbar-brand { display:none !important; }
+
+/* ── Brand ── */
+.sk-brand {
+  display:flex; align-items:center; gap:9px;
+  padding:14px 14px 12px; text-decoration:none;
+  border-bottom:1.5px solid rgba(139,0,0,0.08);
+  margin-bottom:4px;
+}
+.sk-brand-icon {
+  width:30px; height:30px; border-radius:8px; flex-shrink:0;
+  background:linear-gradient(135deg,#4a0000,#c0392b);
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.9rem; box-shadow:0 3px 10px rgba(139,0,0,0.25);
+}
+.sk-brand-name {
+  font-family:'Syne',sans-serif; font-size:0.88rem; font-weight:800;
+  color:#180808; letter-spacing:-0.02em; line-height:1; display:block;
+}
+.sk-brand-sub {
+  font-family:'DM Sans',sans-serif; font-size:0.55rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.14em; color:#c0a0a0;
+  display:block; margin-top:2px;
+}
+
+/* ── Category ── */
+.sk-cat {
+  font-family:'DM Sans',sans-serif; font-size:0.56rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.14em; color:#d4b0b0;
+  padding:12px 16px 4px; display:block;
+}
+
+/* ── Nav Link ── */
+.sidebar .nav .nav-item .nav-link {
+  display:flex !important; align-items:center !important; gap:8px !important;
+  padding:7px 10px !important; border-radius:9px !important;
+  margin:1px 8px !important; transition:all 0.2s !important;
+  text-decoration:none !important; background:transparent !important;
+}
+.sidebar .nav .nav-item .nav-link:hover { background:rgba(139,0,0,0.05) !important; }
+.sidebar .nav .nav-item .nav-link.active { background:rgba(139,0,0,0.08) !important; }
+
+/* ── Icon ── */
+.sk-ico {
+  width:26px; height:26px; border-radius:7px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.82rem; transition:all 0.2s;
+  background:rgba(139,0,0,0.07); color:#8b0000;
+}
+.sidebar .nav .nav-item .nav-link:hover .sk-ico,
+.sidebar .nav .nav-item .nav-link.active .sk-ico {
+  background:linear-gradient(135deg,#4a0000,#c0392b);
+  color:#fff; box-shadow:0 3px 8px rgba(139,0,0,0.25);
+}
+
+/* ── Title ── */
+.sk-title {
+  font-family:'DM Sans',sans-serif; font-size:0.80rem; font-weight:600;
+  color:#4b3030; flex:1; line-height:1; transition:color 0.2s;
+}
+.sidebar .nav .nav-item .nav-link:hover .sk-title,
+.sidebar .nav .nav-item .nav-link.active .sk-title { color:#8b0000; }
+
+/* ── Arrow ── */
+.sk-arrow {
+  font-size:0.70rem; color:#d4b0b0; line-height:1;
+  transition:transform 0.25s, color 0.2s;
+}
+.sidebar .nav .nav-item .nav-link[aria-expanded="true"] .sk-arrow {
+  transform:rotate(90deg); color:#8b0000;
+}
+
+/* ── Sub-menu ── */
+.sidebar .sub-menu { padding:1px 0 4px 12px !important; }
+.sidebar .sub-menu .nav-item .nav-link {
+  padding:6px 10px !important; margin:1px 6px !important;
+  border-radius:7px !important; gap:8px !important;
+}
+.sk-dot {
+  width:5px; height:5px; border-radius:50%;
+  background:rgba(139,0,0,0.20); flex-shrink:0;
+  transition:background 0.2s, transform 0.2s;
+}
+.sidebar .sub-menu .nav-item .nav-link:hover .sk-dot,
+.sidebar .sub-menu .nav-item .nav-link.active .sk-dot {
+  background:#8b0000; transform:scale(1.4);
+}
+.sk-sub {
+  font-family:'DM Sans',sans-serif; font-size:0.77rem; font-weight:600;
+  color:#7a5555; transition:color 0.2s;
+}
+.sidebar .sub-menu .nav-item .nav-link:hover .sk-sub,
+.sidebar .sub-menu .nav-item .nav-link.active .sk-sub { color:#8b0000; }
+
+/* ── Divider ── */
+.sk-divider { height:1px; background:rgba(139,0,0,0.08); margin:6px 14px 8px; }
+</style>
+
+{% set route = app.request.attributes.get('_route') %}
+
+<nav class="sidebar sidebar-offcanvas" id="sidebar">
+  <ul class="nav" style="padding:0 0 20px;">
+
+    {# ── Brand ── #}
+    <li class="nav-item">
+      <a href="{{ path('app_admin_dashboard') }}" class="sk-brand">
+        <div class="sk-brand-icon">🎓</div>
+        <div>
+          <span class="sk-brand-name">SkillOra</span>
+          <span class="sk-brand-sub">Admin Panel</span>
+        </div>
+      </a>
+    </li>
+
+    {# ── Dashboard ── #}
+    <li class="nav-item" style="margin-top:4px">
+      <a class="nav-link {{ route == 'app_admin_dashboard' ? 'active' : '' }}"
+         href="{{ path('app_admin_dashboard') }}">
+        <div class="sk-ico"><i class="mdi mdi-grid-large"></i></div>
+        <span class="sk-title">Dashboard</span>
+      </a>
+    </li>
+
+    {# ── Category ── #}
+    <li class="nav-item"><span class="sk-cat">Management</span></li>
+
+    {# ── Users ── #}
+    <li class="nav-item">
+      <a class="nav-link {{ route == 'app_user_index' ? 'active' : '' }}"
+         href="{{ path('app_user_index') }}">
+        <div class="sk-ico"><i class="mdi mdi-account-multiple"></i></div>
+        <span class="sk-title">User Management</span>
+      </a>
+    </li>
+
+    {# ── Formations ── #}
+    <li class="nav-item">
+      <a class="nav-link {{ route == 'admin_dashboard' ? 'active' : '' }}"
+         href="{{ path('admin_dashboard') }}">
+        <div class="sk-ico"><i class="mdi mdi-book-open-page-variant"></i></div>
+        <span class="sk-title">Formation Management</span>
+      </a>
+    </li>
+
+    <li class="nav-item"><div class="sk-divider"></div></li>
+
+    {# ── Forum ── #}
+    {% set forumOpen = route starts with 'admin_forum' %}
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#forum-menu"
+         aria-expanded="{{ forumOpen ? 'true' : 'false' }}" aria-controls="forum-menu">
+        <div class="sk-ico"><i class="mdi mdi-forum-outline"></i></div>
+        <span class="sk-title">Forum Management</span>
+        <span class="sk-arrow">›</span>
+      </a>
+      <div class="collapse {{ forumOpen ? 'show' : '' }}" id="forum-menu">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link {{ route == 'admin_forum_publications' ? 'active' : '' }}"
+               href="{{ path('admin_forum_publications') }}">
+              <span class="sk-dot"></span><span class="sk-sub">Publications</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {{ route == 'admin_forum_commentaires' ? 'active' : '' }}"
+               href="{{ path('admin_forum_commentaires') }}">
+              <span class="sk-dot"></span><span class="sk-sub">Comments</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </li>
+
+{# ── Challenges ── #}
+    {% set challengeOpen = route == 'admin_challenges' or route == 'admin_participations' or route == 'admin_livrables' or route == 'app_admin_evaluations' or route == 'app_admin_evaluation_detail' %}
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#challenges-menu"
+         aria-expanded="{{ challengeOpen ? 'true' : 'false' }}" aria-controls="challenges-menu">
+        <div class="sk-ico"><i class="mdi mdi-trophy-outline"></i></div>
+        <span class="sk-title">Challenges Management</span>
+        <span class="sk-arrow">›</span>
+      </a>
+      <div class="collapse {{ challengeOpen ? 'show' : '' }}" id="challenges-menu">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link {{ route == 'admin_challenges' ? 'active' : '' }}"
+               href="{{ path('admin_challenges') }}">
+              <span class="sk-dot"></span><span class="sk-sub">Challenges</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {{ route == 'admin_participations' ? 'active' : '' }}"
+               href="{{ path('admin_participations') }}">
+              <span class="sk-dot"></span><span class="sk-sub">Participations</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {{ route == 'admin_livrables' ? 'active' : '' }}"
+               href="{{ path('admin_livrables') }}">
+              <span class="sk-dot"></span><span class="sk-sub">Livrables</span>
+            </a>
+          </li>
+          <!-- ✅ NOUVEAU : Évaluations -->
+          <li class="nav-item">
+            <a class="nav-link {{ route == 'app_admin_evaluations' or route == 'app_admin_evaluation_detail' ? 'active' : '' }}"
+                 href="{{ path('app_admin_evaluations') }}">
+                 <span class="sk-dot"></span><span class="sk-sub">Évaluations</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </li>
+
+    {# ── Clubs ── #}
+    {% set clubOpen = route starts with 'admin_club' or route starts with 'admin_adhesion' %}
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#club-menu"
+         aria-expanded="{{ clubOpen ? 'true' : 'false' }}" aria-controls="club-menu">
+        <div class="sk-ico"><i class="mdi mdi-account-group"></i></div>
+        <span class="sk-title">Club Management</span>
+        <span class="sk-arrow">›</span>
+      </a>
+      <div class="collapse {{ clubOpen ? 'show' : '' }}" id="club-menu">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link {{ route == 'admin_club_index' ? 'active' : '' }}"
+               href="{{ path('admin_club_index') }}">
+              <span class="sk-dot"></span><span class="sk-sub">Club List</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {{ route == 'admin_club_demandes' ? 'active' : '' }}"
+               href="{{ path('admin_club_demandes') }}">
+              <span class="sk-dot"></span><span class="sk-sub">Creation Requests</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {{ route == 'admin_adhesion_index' ? 'active' : '' }}"
+               href="{{ path('admin_adhesion_index') }}">
+              <span class="sk-dot"></span><span class="sk-sub">Membership Requests</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </li>
+
+  </ul>
+</nav>

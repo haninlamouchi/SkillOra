@@ -1,0 +1,505 @@
+<form method="post" class="login-form" novalidate>
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error.messageKey|trans(error.messageData, 'security') }}
+        </div>
+    {% endif %}
+
+    {% if app.user %}
+        <div class="alert alert-info">
+            Vous êtes connecté en tant que {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Se déconnecter</a>
+        </div>
+    {% endif %}
+
+    <div class="form-group">
+        <label for="inputEmail" class="form-label">Email</label>
+        <span class="required">*</span>
+        <input type="email" 
+               value="{{ last_username }}" 
+               name="_username" 
+               id="inputEmail" 
+               class="form-control" 
+               autocomplete="email" 
+               required 
+               autofocus
+               placeholder="exemple@email.com">
+    </div>
+
+    <div class="form-group">
+        <label for="inputPassword" class="form-label">Mot de passe</label>
+        <span class="required">*</span>
+        <input type="password" 
+               name="_password" 
+               id="inputPassword" 
+               class="form-control" 
+               autocomplete="current-password" 
+               required
+               placeholder="••••••••">
+               <div style="text-align:right; margin-top:6px;">
+                <a href="{{ path('app_forgot_password') }}" style="font-size:13px; color:#c62828; text-decoration:none;">
+                    🔑 Mot de passe oublié ?
+                </a>
+    </div>
+
+    </div>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+            🔐 Se connecter
+        </button>
+    </div>
+    {# Séparateur #}
+    <div style="display:flex; align-items:center; gap:10px; margin:20px 0;">
+        <hr style="flex:1; border-top:2px solid #eee;">
+        <span style="color:#999; font-size:13px; white-space:nowrap;">OU</span>
+        <hr style="flex:1; border-top:2px solid #eee;">
+    </div>
+
+    {# Bouton Google #}
+    <a href="{{ path('connect_google') }}" style="
+        display:flex; align-items:center; justify-content:center; gap:12px;
+        padding:12px 20px; border:2px solid #ddd; border-radius:8px;
+        text-decoration:none; color:#333; font-weight:600; font-size:14px;
+        background:white; transition:all 0.3s; width:100%; box-sizing:border-box;
+    " onmouseover="this.style.borderColor='#c10609'; this.style.background='#fff5f5'; this.style.color='#c10609'"
+    onmouseout="this.style.borderColor='#ddd'; this.style.background='white'; this.style.color='#333'">
+        <svg width="20" height="20" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        Continuer avec Google
+    </a>
+    {# Bouton Face Recognition #}
+<div style="margin-top:10px;">
+    <button type="button" id="btnFaceLogin" onclick="return false;" style="
+        display:flex; align-items:center; justify-content:center; gap:12px;
+        padding:12px 20px; border:2px solid #ddd; border-radius:8px;
+        color:#333; font-weight:600; font-size:14px; background:white;
+        transition:all 0.3s; width:100%; cursor:pointer; box-sizing:border-box;
+    " onmouseover="this.style.borderColor='#c10609'; this.style.background='#fff5f5'"
+       onmouseout="this.style.borderColor='#ddd'; this.style.background='white'">
+        🤖 Connexion par reconnaissance faciale
+    </button>
+</div>
+
+{# Modal #}
+<div id="faceModal" style="
+    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.85); z-index:9999;
+    align-items:center; justify-content:center;
+">
+    <div style="background:white; border-radius:15px; padding:30px; max-width:480px; width:90%; text-align:center;">
+        <h3 style="margin-bottom:5px; color:#333;">🤖 Reconnaissance faciale</h3>
+        <p style="color:#999; font-size:13px; margin-bottom:20px;">Propulsé par IA Python</p>
+
+        {# Step 1 : Email #}
+        <div id="stepEmail">
+            <input type="email" id="faceEmail" placeholder="Entrez votre email" style="
+                width:100%; padding:12px; border:2px solid #ddd; border-radius:8px;
+                font-size:14px; margin-bottom:15px; box-sizing:border-box;
+            ">
+            <button onclick="startFace(event)" style="
+                background:#c10609; color:white; border:none; padding:12px;
+                border-radius:8px; cursor:pointer; font-weight:600; width:100%; font-size:14px;
+            ">🔍 Trouver mon compte</button>
+        </div>
+
+        {# Step 2 : Camera #}
+        <div id="stepCamera" style="display:none;">
+            <p id="faceStatus" style="color:#666; margin-bottom:10px; font-weight:600;"></p>
+            <video id="faceVideo" autoplay muted playsinline style="
+                width:100%; border-radius:10px; border:3px solid #eee; max-height:280px;
+            "></video>
+            <canvas id="faceCanvas" style="display:none;"></canvas>
+
+            <div id="faceProgress" style="margin-top:15px;">
+                <div style="background:#eee; border-radius:10px; height:6px; overflow:hidden;">
+                    <div id="faceBar" style="
+                        background:linear-gradient(90deg, #c10609, #ff4444);
+                        height:6px; width:0%; transition:width 0.3s; border-radius:10px;
+                    "></div>
+                </div>
+                <p id="faceBarText" style="font-size:12px; color:#999; margin-top:5px;"></p>
+            </div>
+        </div>
+
+        {# Message #}
+        <div id="faceMsg" style="display:none; margin-top:15px; padding:10px; border-radius:8px;"></div>
+
+        <button onclick="closeFace()" style="
+            margin-top:15px; background:#f5f5f5; border:none; padding:10px 25px;
+            border-radius:8px; cursor:pointer; color:#666; font-size:13px;
+        ">✕ Fermer</button>
+    </div>
+</div>
+
+<script>
+let stream = null;
+let scanning = false;
+let currentUserId = null;
+
+document.getElementById('btnFaceLogin').onclick = () => {
+    document.getElementById('faceModal').style.display = 'flex';
+};
+
+async function startFace() {
+    if (event) event.preventDefault();
+    const email = document.getElementById('faceEmail').value.trim();
+    if (!email) { showMsg('❌ Veuillez entrer votre email', 'error'); return; }
+
+    showMsg('🔍 Recherche du compte...', 'info');
+
+    try {
+        const res = await fetch('/api/face-login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email})
+        });
+        const data = await res.json();
+        
+        console.log('face-login response:', data); // ← debug
+
+        if (!data.success) { 
+            showMsg('❌ ' + data.message, 'error'); 
+            return; 
+        }
+
+        // ← Sauvegarde l'userId AVANT d'ouvrir la caméra
+        currentUserId = data.userId;
+        console.log('userId saved:', currentUserId); // ← debug
+
+        hideMsg();
+
+        document.getElementById('stepEmail').style.display = 'none';
+        document.getElementById('stepCamera').style.display = 'block';
+        document.getElementById('faceStatus').textContent = '👋 Bonjour ' + data.name + ' ! Regardez la caméra...';
+
+        stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user'}});
+        document.getElementById('faceVideo').srcObject = stream;
+        
+        // Attend que la vidéo soit prête
+        setTimeout(() => {
+        console.log('Starting capture, userId:', currentUserId);
+        captureAndCompare();
+    }, 3000);
+
+    } catch(e) {
+        console.error('startFace error:', e);
+        showMsg('❌ Erreur : ' + e.message, 'error');
+    }
+}
+
+async function captureAndCompare() {
+    console.log('=== captureAndCompare START, userId:', currentUserId); // ← AJOUTE
+    
+    const video = document.getElementById('faceVideo');
+    const canvas = document.getElementById('faceCanvas');
+    let attempts = 0;
+    const max = 10;
+
+    const interval = setInterval(async () => {
+        if (scanning) return;
+        scanning = true;
+        attempts++;
+
+        console.log('Attempt:', attempts, 'userId:', currentUserId); // ← AJOUTE
+
+        document.getElementById('faceBar').style.width = (attempts/max*100) + '%';
+        document.getElementById('faceBarText').textContent = `Analyse en cours... ${attempts}/${max}`;
+        document.getElementById('faceStatus').textContent = '🔍 Scan de votre visage...';
+
+        if (video.videoWidth === 0) {
+            console.log('Video not ready');
+            scanning = false;
+            return;
+        }
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const imageBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
+        console.log('Sending to API, userId:', currentUserId, 'imageSize:', imageBase64.length);
+
+        try {
+            const res = await fetch('/api/face-compare', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    userId: currentUserId,
+                    captured_image: imageBase64
+                })
+            });
+            const data = await res.json();
+            console.log('Response:', data);
+
+            if (data.success && data.match) {
+                clearInterval(interval);
+                stopCamera();
+                showMsg('✅ Bienvenue ! Redirection...', 'success');
+                setTimeout(() => window.location.href = data.redirect, 1500);
+                return;
+            }
+
+        } catch(e) {
+            console.error('Error:', e);
+        }
+
+        if (attempts >= max) {
+            clearInterval(interval);
+            stopCamera();
+            showMsg('❌ Visage non reconnu. Veuillez réessayer.', 'error');
+            document.getElementById('stepEmail').style.display = 'block';
+            document.getElementById('stepCamera').style.display = 'none';
+        }
+
+        scanning = false;
+    }, 800);
+}
+
+function stopCamera() {
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+}
+
+function closeFace() {
+    stopCamera();
+    document.getElementById('faceModal').style.display = 'none';
+    document.getElementById('stepEmail').style.display = 'block';
+    document.getElementById('stepCamera').style.display = 'none';
+    document.getElementById('faceEmail').value = '';
+    document.getElementById('faceBar').style.width = '0%';
+    hideMsg();
+    scanning = false;
+    currentUserId = null;
+}
+
+function showMsg(msg, type) {
+    const el = document.getElementById('faceMsg');
+    el.style.display = 'block';
+    el.textContent = msg;
+    if (type === 'error') { el.style.background = '#ffe6e6'; el.style.color = '#dc3545'; }
+    else if (type === 'success') { el.style.background = '#e6ffed'; el.style.color = '#28a745'; }
+    else { el.style.background = '#f0f0f0'; el.style.color = '#666'; }
+}
+
+function hideMsg() { document.getElementById('faceMsg').style.display = 'none'; }
+</script>
+    <div class="form-footer">
+        <p>Vous n'avez pas encore de compte ? <a href="{{ path('app_register') }}" class="link-primary">Inscrivez-vous ici</a></p>
+    </div>
+    
+</form>
+
+<style>
+    /* Container du formulaire */
+    .login-form {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    /* Groupes de formulaire */
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    /* Labels */
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+        font-size: 14px;
+    }
+
+    /* Astérisque rouge pour les champs obligatoires */
+    .required {
+        color: #dc3545;
+        margin-left: 3px;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    /* Champs de formulaire */
+    .form-control {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: #c62828;
+        box-shadow: 0 0 0 0.2rem rgba(198, 40, 40, 0.15);
+        outline: none;
+    }
+
+    /* Checkbox personnalisée */
+    .custom-control {
+        position: relative;
+        display: block;
+        padding-left: 1.5rem;
+    }
+
+    .custom-control-input {
+        position: absolute;
+        left: 0;
+        z-index: -1;
+        width: 1rem;
+        height: 1.25rem;
+        opacity: 0;
+    }
+
+    .custom-control-label {
+        position: relative;
+        margin-bottom: 0;
+        vertical-align: top;
+        cursor: pointer;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .custom-control-label::before {
+        position: absolute;
+        top: 0.25rem;
+        left: -1.5rem;
+        display: block;
+        width: 1rem;
+        height: 1rem;
+        pointer-events: none;
+        content: "";
+        background-color: #fff;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .custom-control-input:checked ~ .custom-control-label::before {
+        background-color: #c62828;
+        border-color: #c62828;
+    }
+
+    .custom-control-label::after {
+        position: absolute;
+        top: 0.25rem;
+        left: -1.5rem;
+        display: block;
+        width: 1rem;
+        height: 1rem;
+        content: "";
+        background: no-repeat 50% / 50% 50%;
+    }
+
+    .custom-control-input:checked ~ .custom-control-label::after {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z'/%3e%3c/svg%3e");
+    }
+
+    /* Actions du formulaire */
+    .form-actions {
+        border-top: 2px solid #eee;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* Boutons */
+    .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 15px;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        width: 100%;
+    }
+
+    .btn-primary {
+        background-color: #c62828;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #b71c1c;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(198, 40, 40, 0.3);
+    }
+
+    /* Pied du formulaire */
+    .form-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #eee;
+    }
+
+    .form-footer p {
+        margin: 0.5rem 0;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .link-primary {
+        color: #c62828;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .link-primary:hover {
+        color: #b71c1c;
+        text-decoration: underline;
+    }
+
+    .link-secondary {
+        color: #666;
+        text-decoration: none;
+        font-size: 13px;
+    }
+
+    .link-secondary:hover {
+        color: #c62828;
+        text-decoration: underline;
+    }
+
+    /* Alerts */
+    .alert {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .alert-danger {
+        background-color: #ffe6e6;
+        border: 2px solid #dc3545;
+        color: #dc3545;
+        border-left: 4px solid #dc3545;
+    }
+
+    .alert-info {
+        background-color: #e7f3ff;
+        border: 2px solid #0066cc;
+        color: #0066cc;
+        border-left: 4px solid #0066cc;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .login-form {
+            padding: 0;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>

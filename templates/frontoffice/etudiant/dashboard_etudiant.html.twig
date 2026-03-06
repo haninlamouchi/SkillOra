@@ -1,0 +1,308 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Mon Espace — SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sk-red:#8b0000; --sk-red-dark:#4a0000; --sk-red-light:#c0392b;
+  --sk-ink:#180808; --sk-muted:#8a7070; --sk-border:rgba(139,0,0,0.09);
+  --sk-bg:#f7f4f4;
+}
+* { box-sizing:border-box; }
+.sk-page { padding-top:70px; font-family:'DM Sans',sans-serif; }
+
+/* ── HERO ── */
+.sk-hero {
+  position:relative; overflow:hidden; isolation:isolate;
+  background:linear-gradient(135deg,#2a0000 0%,#6b0000 45%,#8b0000 70%,#c0392b 100%);
+  margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%);
+  padding:52px 20px 48px; text-align:center;
+}
+.sk-hero::before {
+  content:''; position:absolute; inset:0; z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  background-size:180px; opacity:0.5;
+}
+.sk-hero-ring { position:absolute; z-index:0; border-radius:50%; border:60px solid rgba(255,255,255,0.035); }
+.sk-hero-ring-l { width:520px; height:520px; top:-210px; left:-160px; }
+.sk-hero-ring-r { width:380px; height:380px; bottom:-160px; right:-100px; border-width:44px; }
+.sk-hero-inner { position:relative; z-index:1; }
+
+.sk-hero-avatar {
+  width:72px; height:72px; border-radius:50%;
+  background:rgba(255,255,255,0.15); border:2.5px solid rgba(255,255,255,0.30);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Syne',sans-serif; font-size:1.6rem; font-weight:800; color:#fff;
+  margin:0 auto 14px; backdrop-filter:blur(4px);
+}
+.sk-hero h1 {
+  font-family:'Syne',sans-serif; font-size:clamp(1.5rem,3.5vw,2.2rem);
+  font-weight:800; color:#fff; letter-spacing:-0.03em; margin:0 0 6px; line-height:1.1;
+}
+.sk-hero-sub { font-family:'DM Sans',sans-serif; color:rgba(255,255,255,0.60); font-size:0.88rem; margin:0 0 20px; }
+
+.sk-hero-badges { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+.sk-hero-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.20);
+  padding:5px 14px; border-radius:50px;
+  font-family:'DM Sans',sans-serif; font-size:0.75rem; font-weight:600; color:rgba(255,255,255,0.88);
+}
+.sk-hero-badge .dot { width:6px; height:6px; border-radius:50%; background:#4ade80; flex-shrink:0; }
+
+/* ── CONTENT ── */
+.sk-content { padding:36px 0 60px; }
+
+/* ── PROFILE CARD ── */
+.sk-profile-card {
+  background:#fff; border-radius:18px; border:1.5px solid var(--sk-border);
+  box-shadow:0 2px 12px rgba(0,0,0,0.04); overflow:hidden; margin-bottom:24px;
+  animation:sk-up 0.5s ease both;
+}
+.sk-profile-head {
+  background:linear-gradient(135deg,#fdf0f0,#f5dede);
+  padding:20px 24px; display:flex; align-items:center; gap:16px;
+  border-bottom:1.5px solid var(--sk-border);
+}
+.sk-profile-icon {
+  width:52px; height:52px; border-radius:14px; flex-shrink:0;
+  background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light));
+  display:flex; align-items:center; justify-content:center; font-size:1.4rem;
+  box-shadow:0 4px 14px rgba(139,0,0,0.25);
+}
+.sk-profile-name { font-family:'Syne',sans-serif; font-size:1.05rem; font-weight:800; color:var(--sk-ink); margin:0 0 2px; }
+.sk-profile-email { font-family:'DM Sans',sans-serif; font-size:0.80rem; color:var(--sk-muted); margin:0; }
+.sk-profile-body { padding:20px 24px; display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
+.sk-profile-row { display:flex; flex-direction:column; gap:2px; }
+.sk-profile-label { font-family:'DM Sans',sans-serif; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--sk-muted); }
+.sk-profile-value { font-family:'DM Sans',sans-serif; font-size:0.88rem; font-weight:600; color:var(--sk-ink); }
+.sk-badge-role {
+  display:inline-flex; align-items:center; padding:3px 10px; border-radius:50px;
+  font-family:'DM Sans',sans-serif; font-size:0.70rem; font-weight:700;
+  background:rgba(139,0,0,0.09); color:var(--sk-red);
+}
+
+/* ── SECTION CARDS ── */
+.sk-card {
+  background:#fff; border-radius:18px; border:1.5px solid var(--sk-border);
+  box-shadow:0 2px 12px rgba(0,0,0,0.04); overflow:hidden; margin-bottom:20px;
+  animation:sk-up 0.5s ease both;
+}
+.sk-card:nth-child(2){ animation-delay:.08s }
+.sk-card:nth-child(3){ animation-delay:.16s }
+.sk-card:nth-child(4){ animation-delay:.24s }
+
+.sk-card-head {
+  padding:16px 22px; border-bottom:1.5px solid var(--sk-border);
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+}
+.sk-card-head-left { display:flex; align-items:center; gap:10px; }
+.sk-card-head-icon {
+  width:32px; height:32px; border-radius:9px; flex-shrink:0;
+  background:rgba(139,0,0,0.08); color:var(--sk-red);
+  display:flex; align-items:center; justify-content:center; font-size:0.9rem;
+}
+.sk-card-head-title { font-family:'Syne',sans-serif; font-size:0.92rem; font-weight:800; color:var(--sk-ink); margin:0; }
+.sk-count-badge {
+  background:rgba(139,0,0,0.09); color:var(--sk-red);
+  font-family:'DM Sans',sans-serif; font-size:0.70rem; font-weight:700;
+  padding:3px 10px; border-radius:50px;
+}
+
+/* ── LIST ITEMS ── */
+.sk-list { list-style:none; padding:0; margin:0; }
+.sk-list-item {
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+  padding:14px 22px; border-bottom:1px solid var(--sk-border);
+  transition:background 0.15s;
+}
+.sk-list-item:last-child { border-bottom:none; }
+.sk-list-item:hover { background:#fdf8f8; }
+
+.sk-club-name { font-family:'DM Sans',sans-serif; font-size:0.88rem; font-weight:600; color:var(--sk-ink); }
+.sk-club-meta { font-family:'DM Sans',sans-serif; font-size:0.74rem; color:var(--sk-muted); margin-top:2px; }
+
+/* ── STATUS BADGES ── */
+.sk-status {
+  display:inline-flex; align-items:center; gap:5px;
+  font-family:'DM Sans',sans-serif; font-size:0.72rem; font-weight:700;
+  padding:4px 11px; border-radius:50px; white-space:nowrap;
+}
+.sk-status::before { content:''; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.sk-status.en_attente { background:#fef9c3; color:#854d0e; }
+.sk-status.en_attente::before { background:#d97706; }
+.sk-status.accepte { background:#dcfce7; color:#15803d; }
+.sk-status.accepte::before { background:#16a34a; }
+.sk-status.refuse { background:#fee2e2; color:#dc2626; }
+.sk-status.refuse::before { background:#dc2626; }
+
+/* ── EMPTY STATE ── */
+.sk-empty {
+  text-align:center; padding:36px 20px;
+}
+.sk-empty-icon { font-size:2.5rem; opacity:0.25; margin-bottom:10px; }
+.sk-empty-text { font-family:'DM Sans',sans-serif; font-size:0.85rem; color:var(--sk-muted); margin:0; }
+
+/* ── BUTTONS ── */
+.sk-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 16px; border-radius:9px;
+  font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:700;
+  border:none; cursor:pointer; transition:all 0.22s; text-decoration:none;
+}
+.sk-btn-primary { background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); color:#fff; }
+.sk-btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(139,0,0,0.28); color:#fff; text-decoration:none; }
+.sk-btn-ghost { background:#f3f4f6; color:#374151; border:1.5px solid #e5e7eb; }
+.sk-btn-ghost:hover { border-color:#9ca3af; color:#111; text-decoration:none; }
+
+/* ── QUICK ACTIONS ── */
+.sk-actions-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; padding:20px 22px; }
+.sk-action-card {
+  background:#f9f9f9; border-radius:12px; border:1.5px solid var(--sk-border);
+  padding:16px; text-decoration:none; transition:all 0.22s;
+  display:flex; flex-direction:column; gap:10px;
+}
+.sk-action-card:hover { border-color:rgba(139,0,0,0.25); transform:translateY(-3px); box-shadow:0 10px 28px rgba(139,0,0,0.10); text-decoration:none; }
+.sk-action-icon { font-size:1.4rem; }
+.sk-action-title { font-family:'Syne',sans-serif; font-size:0.85rem; font-weight:800; color:var(--sk-ink); margin:0; }
+.sk-action-desc { font-family:'DM Sans',sans-serif; font-size:0.74rem; color:var(--sk-muted); margin:0; }
+.sk-action-arrow { font-family:'DM Sans',sans-serif; font-size:0.72rem; font-weight:700; color:var(--sk-red); }
+
+@keyframes sk-up { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+
+@media(max-width:640px) {
+  .sk-hero { padding:44px 20px 40px; }
+  .sk-list-item { flex-direction:column; align-items:flex-start; gap:8px; }
+  .sk-profile-body { grid-template-columns:1fr; }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+
+  {# ── HERO ── #}
+  <div class="sk-hero">
+    <div class="sk-hero-ring sk-hero-ring-l"></div>
+    <div class="sk-hero-ring sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <div class="sk-hero-avatar">
+        {{ user.prenom|first|upper }}{{ user.nom|first|upper }}
+      </div>
+      <h1>Bonjour, {{ user.prenom }} 👋</h1>
+      <p class="sk-hero-sub">Bienvenue sur votre espace SkillOra</p>
+      <div class="sk-hero-badges">
+        <span class="sk-hero-badge"><span class="dot"></span> Étudiant actif</span>
+        <span class="sk-hero-badge">🏛️ {{ clubsAcceptes|length }} club{{ clubsAcceptes|length > 1 ? 's' : '' }} rejoint{{ clubsAcceptes|length > 1 ? 's' : '' }}</span>
+        <span class="sk-hero-badge">📋 {{ demandesAdhesion|length }} demande{{ demandesAdhesion|length > 1 ? 's' : '' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sk-content">
+
+      {# ── PROFILE ── #}
+      <div class="sk-profile-card">
+        <div class="sk-profile-head">
+          <div class="sk-profile-icon">👤</div>
+          <div>
+            <div class="sk-profile-name">{{ user.prenom }} {{ user.nom }}</div>
+            <div class="sk-profile-email">{{ user.email }}</div>
+          </div>
+        </div>
+        <div class="sk-profile-body">
+          <div class="sk-profile-row">
+            <span class="sk-profile-label">Nom complet</span>
+            <span class="sk-profile-value">{{ user.nom }} {{ user.prenom }}</span>
+          </div>
+          <div class="sk-profile-row">
+            <span class="sk-profile-label">Email</span>
+            <span class="sk-profile-value">{{ user.email }}</span>
+          </div>
+          <div class="sk-profile-row">
+            <span class="sk-profile-label">Statut</span>
+            <span class="sk-profile-value"><span class="sk-badge-role">🎓 Étudiant</span></span>
+          </div>
+          {% if user.telephone is defined and user.telephone %}
+          <div class="sk-profile-row">
+            <span class="sk-profile-label">Téléphone</span>
+            <span class="sk-profile-value">{{ user.telephone }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {# ── DEMANDES D'ADHÉSION ── #}
+      <div class="sk-card">
+        <div class="sk-card-head">
+          <div class="sk-card-head-left">
+            <div class="sk-card-head-icon">📋</div>
+            <span class="sk-card-head-title">Mes demandes d'adhésion</span>
+          </div>
+          <span class="sk-count-badge">{{ demandesAdhesion|length }}</span>
+        </div>
+        <ul class="sk-list">
+          {% for demande in demandesAdhesion %}
+          <li class="sk-list-item">
+            <div>
+              <div class="sk-club-name">🏛️ {{ demande.club.nom }}</div>
+              {% if demande.club.dateCreation is defined and demande.club.dateCreation %}
+                <div class="sk-club-meta">Créé le {{ demande.club.dateCreation|date('d/m/Y') }}</div>
+              {% endif %}
+            </div>
+            <span class="sk-status {{ demande.statut.value }}">
+              {% if demande.statut.value == 'en_attente' %}⏳ En attente
+              {% elseif demande.statut.value == 'accepte' %}✅ Accepté
+              {% else %}❌ Refusé{% endif %}
+            </span>
+          </li>
+          {% else %}
+          <li>
+            <div class="sk-empty">
+              <div class="sk-empty-icon">📋</div>
+              <p class="sk-empty-text">Aucune demande d'adhésion pour le moment.</p>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      {# ── CLUBS ACCEPTÉS ── #}
+      <div class="sk-card">
+        <div class="sk-card-head">
+          <div class="sk-card-head-left">
+            <div class="sk-card-head-icon">🏛️</div>
+            <span class="sk-card-head-title">Clubs acceptés</span>
+          </div>
+          <span class="sk-count-badge">{{ clubsAcceptes|length }}</span>
+        </div>
+        <ul class="sk-list">
+          {% for club in clubsAcceptes %}
+          <li class="sk-list-item">
+            <div>
+              <div class="sk-club-name">{{ club.nom }}</div>
+              {% if club.description is defined and club.description %}
+                <div class="sk-club-meta">{{ club.description|length > 60 ? club.description|slice(0,60) ~ '…' : club.description }}</div>
+              {% endif %}
+            </div>
+            <a href="{{ path('app_membre_dashboard') }}" class="sk-btn sk-btn-primary">
+              Accéder →
+            </a>
+          </li>
+          {% else %}
+          <li>
+            <div class="sk-empty">
+              <div class="sk-empty-icon">🏛️</div>
+              <p class="sk-empty-text">Vous n'avez rejoint aucun club pour le moment.</p>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

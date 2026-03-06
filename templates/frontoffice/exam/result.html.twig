@@ -1,0 +1,143 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Résultat — {{ exam.titre }}{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<style>
+:root { --sk-red:#8b0000; --sk-ink:#180808; --sk-muted:#8a7070; --sk-border:rgba(139,0,0,0.09); }
+.sk-page { padding-top:70px; background:#f1f5f9; min-height:100vh; }
+.result-hero { padding:52px 20px 44px; text-align:center; }
+.result-hero .result-icon { font-size:5rem; display:block; margin-bottom:12px; }
+.result-hero h1 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(1.6rem,4vw,2.4rem); font-weight:800; margin-bottom:8px; }
+.result-hero p { font-family:'DM Sans',sans-serif; font-size:0.97rem; color:var(--sk-muted); margin:0; }
+.passed-hero h1 { color:#15803d; }
+.failed-hero h1 { color:#dc2626; }
+.stopped-hero h1 { color:#d97706; }
+.sk-content { padding:28px 0 56px; max-width:760px; margin:0 auto; padding-left:20px; padding-right:20px; }
+.score-card { background:#fff; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,.07); padding:28px 32px; margin-bottom:24px; display:flex; justify-content:space-around; align-items:center; gap:20px; flex-wrap:wrap; }
+.score-stat { text-align:center; }
+.score-stat-val { font-family:'Bricolage Grotesque',sans-serif; font-size:2rem; font-weight:800; color:var(--sk-ink); }
+.score-stat-lbl { font-family:'DM Sans',sans-serif; font-size:0.75rem; color:var(--sk-muted); margin-top:4px; }
+.cert-banner { background:linear-gradient(135deg,#15803d,#22c55e); color:#fff; border-radius:16px; padding:20px 24px; margin-bottom:24px; display:flex; align-items:center; gap:16px; font-family:'DM Sans',sans-serif; }
+.cert-banner .icon { font-size:2.5rem; }
+.cert-banner h3 { font-family:'Bricolage Grotesque',sans-serif; font-size:1.1rem; font-weight:800; margin:0 0 4px; }
+.cert-banner p { margin:0; font-size:0.88rem; opacity:.85; }
+.q-review { background:#fff; border-radius:16px; border:1.5px solid var(--sk-border); padding:18px 22px; margin-bottom:12px; }
+.q-review-head { display:flex; align-items:flex-start; gap:10px; margin-bottom:8px; }
+.correct-icon { color:#15803d; font-weight:800; font-size:1rem; flex-shrink:0; }
+.wrong-icon   { color:#dc2626; font-weight:800; font-size:1rem; flex-shrink:0; }
+.q-review-text { font-family:'Bricolage Grotesque',sans-serif; font-size:0.92rem; font-weight:700; color:var(--sk-ink); }
+.q-review-body { font-family:'DM Sans',sans-serif; font-size:0.85rem; color:var(--sk-muted); }
+.q-review-body .given { color:#dc2626; }
+.q-review-body .correct { color:#15803d; font-weight:600; }
+.sk-btn { display:inline-flex; align-items:center; gap:7px; padding:11px 22px; border-radius:12px; font-weight:700; font-family:'DM Sans',sans-serif; font-size:0.92rem; border:none; cursor:pointer; transition:all .25s; text-decoration:none; }
+.sk-btn-primary { background:linear-gradient(135deg,#8b0000,#c0392b); color:#fff; }
+.sk-btn-primary:hover { transform:translateY(-1px); color:#fff; text-decoration:none; }
+.sk-btn-ghost { background:#f3f4f6; color:#374151; border:1.5px solid #e5e7eb; }
+.sk-btn-ghost:hover { color:#111; text-decoration:none; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+  <div class="result-hero {{ attempt.status == 'passed' ? 'passed-hero' : (attempt.status == 'stopped' ? 'stopped-hero' : 'failed-hero') }}">
+    <div class="container">
+      {% if attempt.status == 'passed' %}
+        <span class="result-icon">🏆</span>
+        <h1>Félicitations !</h1>
+        <p>Vous avez réussi l'examen de certification.</p>
+      {% elseif attempt.status == 'stopped' %}
+        <span class="result-icon">⛔</span>
+        <h1>Examen arrêté</h1>
+        <p>Vous avez dépassé le nombre d'erreurs autorisé.</p>
+      {% else %}
+        <span class="result-icon">😔</span>
+        <h1>Examen non réussi</h1>
+        <p>Score insuffisant. Vous pouvez réessayer.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sk-content">
+
+      {# Score overview #}
+      <div class="score-card">
+        <div class="score-stat">
+          <div class="score-stat-val">{{ percentage }}%</div>
+          <div class="score-stat-lbl">Score obtenu</div>
+        </div>
+        <div class="score-stat">
+          <div class="score-stat-val">{{ attempt.score }}/{{ attempt.totalPoints }}</div>
+          <div class="score-stat-lbl">Points</div>
+        </div>
+        <div class="score-stat">
+          <div class="score-stat-val" style="color:{{ attempt.mistakeCount >= exam.maxMistakes ? '#dc2626' : 'var(--sk-ink)' }}">{{ attempt.mistakeCount }}/{{ exam.maxMistakes }}</div>
+          <div class="score-stat-lbl">Erreurs</div>
+        </div>
+        <div class="score-stat">
+          <div class="score-stat-val">{{ exam.passingScore }}%</div>
+          <div class="score-stat-lbl">Score requis</div>
+        </div>
+      </div>
+
+      {# Certification badge #}
+      {% if attempt.status == 'passed' %}
+        <div class="cert-banner">
+          <span class="icon">🎓</span>
+          <div>
+            <h3>Certification obtenue — {{ formation.titre }}</h3>
+            <p>Examen réussi le {{ attempt.completedAt|date('d/m/Y à H:i') }} avec {{ percentage }}%.</p>
+          </div>
+        </div>
+      {% endif %}
+
+      {# Question detail #}
+      <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-size:1rem;font-weight:800;margin:0 0 14px;color:var(--sk-ink);">📋 Détail des réponses</h3>
+
+      {% for d in details %}
+        <div class="q-review">
+          <div class="q-review-head">
+            <span class="{{ d.isCorrect ? 'correct-icon' : 'wrong-icon' }}">{{ d.isCorrect ? '✓' : '✗' }}</span>
+            <span class="q-review-text">{{ d.question }}</span>
+          </div>
+          <div class="q-review-body">
+            {% if not d.isCorrect %}
+              <div>Votre réponse : <span class="given">
+                {% if d.type in ['mcq', 'word_pick'] and d.given is not null %}
+                  {% for c in d.choices %}{% if c.id == d.given %}{{ c.choiceText }}{% endif %}{% endfor %}
+                {% elseif d.type == 'multi_mcq' and d.given is iterable %}
+                  {% set givenTexts = [] %}
+                  {% for c in d.choices %}{% if c.id in d.given %}{% set givenTexts = givenTexts|merge([c.choiceText]) %}{% endif %}{% endfor %}
+                  {{ givenTexts|join(', ') ?: 'Aucune réponse' }}
+                {% elseif d.type == 'drag_drop' and d.given is iterable %}
+                  {{ d.given|join(' → ') }}
+                {% else %}
+                  {{ d.given ?? 'Aucune réponse' }}
+                {% endif %}
+              </span></div>
+            {% endif %}
+            <div>Bonne réponse : <span class="correct">{{ d.correct }}</span></div>
+            <div style="margin-top:4px;color:#9ca3af;">{{ d.points }} point{{ d.points > 1 ? 's' : '' }}</div>
+          </div>
+        </div>
+      {% endfor %}
+
+      <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;align-items:center;">
+        {% if percentage >= 60 %}
+          <a href="{{ path('front_exam_certificate', {formationId: formation.id, attemptId: attempt.id}) }}"
+             class="sk-btn"
+             style="background:linear-gradient(135deg,#b8860b,#d4a017);color:#fff;box-shadow:0 4px 14px rgba(184,134,11,.3);">
+            🏅 Obtenir mon certificat
+          </a>
+        {% endif %}
+        <form action="{{ path('front_exam_start', {formationId: formation.id}) }}" method="post">
+          <input type="hidden" name="_token" value="{{ csrf_token('exam_start_' ~ formation.id) }}">
+          <button type="submit" class="sk-btn sk-btn-primary">🔄 Recommencer</button>
+        </form>
+        <a href="{{ path('front_formation_show', {id: formation.id}) }}" class="sk-btn sk-btn-ghost">← Retour à la formation</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

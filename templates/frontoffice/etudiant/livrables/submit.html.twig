@@ -1,0 +1,121 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Soumettre un livrable — SkillOra{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --sk-red:#8b0000; --sk-red-dark:#4a0000; --sk-red-light:#c0392b; --sk-white:#fff; --sk-ink:#180808; --sk-muted:#8a7070; --sk-border:rgba(139,0,0,0.09); }
+.sk-page { padding-top:70px; }
+.sk-hero { position:relative; background:linear-gradient(135deg,#3d0000 0%,#8b0000 48%,#c23030 100%); margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%); padding:60px 20px 52px; text-align:center; overflow:hidden; isolation:isolate; }
+.sk-hero::before { content:''; position:absolute; inset:0; z-index:0; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E"); background-size:180px; opacity:0.5; }
+.sk-hero-ring-l,.sk-hero-ring-r { position:absolute; z-index:0; border-radius:50%; border:72px solid rgba(255,255,255,0.035); }
+.sk-hero-ring-l { width:520px; height:520px; top:-210px; left:-160px; }
+.sk-hero-ring-r { width:380px; height:380px; bottom:-160px; right:-100px; border-width:50px; }
+.sk-hero-inner { position:relative; z-index:1; }
+.sk-hero h1 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(1.8rem,4vw,2.6rem); font-weight:800; letter-spacing:-0.03em; color:#fff; margin:0 0 10px; line-height:1.1; }
+.sk-hero p { font-family:'DM Sans',sans-serif; color:rgba(255,255,255,0.60); font-size:0.97rem; margin:0; }
+.sk-content { padding:36px 0 56px; }
+.sk-back { display:inline-flex; align-items:center; gap:6px; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:600; color:var(--sk-muted); text-decoration:none; margin-bottom:24px; transition:color 0.2s; }
+.sk-back:hover { color:var(--sk-red); text-decoration:none; }
+.sk-form-card { background:#fff; border-radius:20px; padding:32px 36px; border:1.5px solid var(--sk-border); box-shadow:0 4px 20px rgba(0,0,0,0.06); animation:sk-up 0.45s 0.1s ease both; display:grid; gap:20px; }
+.sk-info-box { background:#f9f9f9; border-radius:14px; padding:18px 22px; display:grid; gap:10px; border:1.5px solid var(--sk-border); }
+.sk-info-box-title { font-family:'Bricolage Grotesque',sans-serif; font-size:0.92rem; font-weight:800; color:var(--sk-ink); margin:0 0 4px; }
+.sk-info-row { display:flex; gap:8px; font-family:'DM Sans',sans-serif; font-size:0.87rem; color:var(--sk-ink); }
+.sk-info-row strong { color:var(--sk-muted); min-width:120px; }
+.sk-alert { border-radius:12px; padding:14px 18px; font-family:'DM Sans',sans-serif; font-size:0.87rem; line-height:1.6; }
+.sk-alert-blue { background:#eff6ff; border-left:4px solid #3b82f6; color:#1e40af; }
+.sk-alert-yellow { background:#fefce8; border-left:4px solid #fbbf24; color:#854d0e; }
+.sk-alert strong { display:block; margin-bottom:6px; font-size:0.92rem; }
+.sk-alert ul { margin:6px 0 0 18px; padding:0; }
+.sk-divider-or { display:flex; align-items:center; gap:16px; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:700; color:var(--sk-muted); }
+.sk-divider-or::before,.sk-divider-or::after { content:''; flex:1; height:1px; background:var(--sk-border); }
+.sk-form-group { display:flex; flex-direction:column; gap:6px; }
+.sk-form-group label { font-family:'DM Sans',sans-serif; font-size:0.79rem; font-weight:700; color:#374151; text-transform:uppercase; letter-spacing:0.07em; }
+.sk-form-group input[type="url"] { padding:10px 14px; border:1.5px solid #e5e7eb; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:0.9rem; color:var(--sk-ink); background:#f9f9f9; outline:none; transition:border-color 0.2s; }
+.sk-form-group input[type="url"]:focus { border-color:var(--sk-red); background:#fff; box-shadow:0 0 0 3px rgba(139,0,0,0.07); }
+.sk-form-group small { font-family:'DM Sans',sans-serif; font-size:0.78rem; color:var(--sk-muted); }
+.sk-upload-zone { border:2px dashed #e2e8f0; border-radius:12px; padding:24px; text-align:center; background:#f9fafb; transition:border-color 0.2s; }
+.sk-upload-zone:hover { border-color:var(--sk-red); }
+.sk-upload-icon { font-size:2.5rem; margin-bottom:10px; }
+.sk-upload-zone p { font-family:'DM Sans',sans-serif; color:#9ca3af; font-size:0.82rem; margin:8px 0 0; }
+.sk-form-actions { display:flex; gap:12px; padding-top:20px; border-top:1.5px solid var(--sk-border); }
+.sk-btn { display:inline-flex; align-items:center; gap:7px; padding:11px 24px; border-radius:10px; font-weight:700; font-family:'DM Sans',sans-serif; font-size:0.88rem; border:none; cursor:pointer; transition:all 0.25s; text-decoration:none; }
+.sk-btn-success { background:linear-gradient(135deg,#15803d,#22c55e); color:#fff; }
+.sk-btn-success:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(34,197,94,0.3); color:#fff; text-decoration:none; }
+.sk-btn-ghost { background:#f3f4f6; color:#374151; border:1.5px solid #e5e7eb; }
+.sk-btn-ghost:hover { border-color:#9ca3af; color:#111; text-decoration:none; }
+input[type="file"] { padding:0.5rem; border:1px solid #e2e8f0; border-radius:8px; background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.87rem; }
+input[type="file"]::-webkit-file-upload-button { background:linear-gradient(135deg,var(--sk-red-dark),var(--sk-red-light)); color:#fff; padding:6px 14px; border:none; border-radius:6px; cursor:pointer; font-weight:600; margin-right:10px; }
+@keyframes sk-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.sk-hero { animation:sk-up 0.5s cubic-bezier(.22,.68,0,1) both; }
+@media(max-width:680px){ .sk-form-card{padding:24px 20px;} }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sk-page">
+  <div class="sk-hero">
+    <div class="sk-hero-ring-l"></div>
+    <div class="sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <h1>📤 Soumettre un Livrable</h1>
+      <p>{{ participation.challenge.titre }}</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sk-content">
+      <a href="{{ path('app_etudiant_participations') }}" class="sk-back">← Retour aux participations</a>
+
+      <form method="post" enctype="multipart/form-data">
+        <div class="sk-form-card">
+
+          <div class="sk-info-box">
+            <div class="sk-info-box-title">📋 Informations</div>
+            <div class="sk-info-row"><strong>👥 Groupe :</strong> {{ participation.groupe.nomGroupe }}</div>
+            <div class="sk-info-row"><strong>⏳ Date limite :</strong> {{ participation.challenge.dateFin|date('d/m/Y') }}</div>
+            <div class="sk-info-row"><strong>📅 Participation :</strong> {{ participation.dateParticipation|date('d/m/Y à H:i') }}</div>
+          </div>
+
+          <div class="sk-alert sk-alert-blue">
+            <strong>💡 Nouveau : GitHub recommandé</strong>
+            Vous pouvez soumettre un lien GitHub au lieu d'un fichier ZIP. C'est plus professionnel et permet une meilleure évaluation du travail d'équipe.
+          </div>
+
+          <div class="sk-alert sk-alert-yellow">
+            <strong>⚠️ Important</strong>
+            <ul>
+              <li>Soumettez SOIT un lien GitHub SOIT un fichier ZIP</li>
+              <li>Formats acceptés : ZIP, PDF, RAR (max 10 MB)</li>
+              <li>Une seule soumission par groupe</li>
+            </ul>
+          </div>
+
+          <div class="sk-form-group">
+            <label>🔗 Lien GitHub du Projet (Recommandé)</label>
+            <input type="url" name="githubUrl" placeholder="https://github.com/votre-groupe/nom-du-projet">
+            <small>Exemple : https://github.com/groupe3/challenge-mobile-app</small>
+          </div>
+
+          <div class="sk-divider-or">— OU —</div>
+
+          <div class="sk-form-group">
+            <label>📁 Fichier ZIP (Alternative)</label>
+            <div class="sk-upload-zone">
+              <div class="sk-upload-icon">📁</div>
+              <input type="file" name="fichier" accept=".zip,.pdf,.rar">
+              <p>ZIP, PDF, RAR — max 10 MB</p>
+            </div>
+          </div>
+
+          <div class="sk-form-actions">
+            <button type="submit" class="sk-btn sk-btn-success">✅ Soumettre le livrable</button>
+            <a href="{{ path('app_etudiant_participations') }}" class="sk-btn sk-btn-ghost">❌ Annuler</a>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
