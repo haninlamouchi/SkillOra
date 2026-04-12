@@ -21,7 +21,6 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--ink); }
 
-/* ── SHELL ── */
 .form-shell {
     min-height: 100vh;
     padding: 100px 0 80px;
@@ -32,7 +31,6 @@ body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--i
     padding: 0 24px;
 }
 
-/* ── HEADER ── */
 .form-header {
     margin-bottom: 32px;
     animation: fadeUp 0.4s ease both;
@@ -66,7 +64,6 @@ body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--i
     line-height: 1.6;
 }
 
-/* ── CARD ── */
 .form-card {
     background: var(--white);
     border-radius: var(--radius);
@@ -77,7 +74,6 @@ body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--i
     animation: fadeUp 0.4s 0.1s ease both;
 }
 
-/* Section labels */
 .form-section {
     padding: 28px 36px;
     border-bottom: 1px solid var(--border);
@@ -97,7 +93,6 @@ body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--i
     content: ''; flex: 1; height: 1px; background: var(--border);
 }
 
-/* ── FORM FIELDS ── */
 .field-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -105,7 +100,6 @@ body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--i
     margin-bottom: 18px;
 }
 .field-row.full { grid-template-columns: 1fr; }
-
 .field-group { display: flex; flex-direction: column; }
 
 .field-label {
@@ -118,7 +112,6 @@ body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--i
 }
 .field-label .req { color: var(--red); margin-left: 2px; }
 
-/* Override Symfony generated inputs */
 .field-group input[type="text"],
 .field-group input[type="url"],
 .field-group input[type="date"],
@@ -146,7 +139,6 @@ body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--i
 }
 .field-group textarea { resize: vertical; min-height: 100px; }
 
-/* File input */
 .field-group input[type="file"] {
     padding: 10px 14px;
     border: 1.5px dashed var(--border);
@@ -163,7 +155,6 @@ body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--i
     background: var(--red-soft);
 }
 
-/* Errors */
 .field-errors {
     font-size: 0.72rem;
     color: var(--red);
@@ -176,7 +167,6 @@ body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--i
     margin-top: 4px;
 }
 
-/* ── ACTIONS ── */
 .form-actions {
     padding: 24px 36px;
     display: flex;
@@ -227,13 +217,11 @@ body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--i
     text-decoration: none;
 }
 
-/* ── ANIMATION ── */
 @keyframes fadeUp {
     from { opacity: 0; transform: translateY(18px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── RESPONSIVE ── */
 @media (max-width: 640px) {
     .field-row { grid-template-columns: 1fr; }
     .form-section { padding: 22px 20px; }
@@ -257,7 +245,6 @@ body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--i
         </p>
     </div>
 
-    {# Card formulaire #}
     {{ form_start(form, {
         'attr': {
             'enctype': 'multipart/form-data',
@@ -267,7 +254,7 @@ body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--i
 
     <div class="form-card">
 
-        {# Section — Informations générales #}
+        {# ── Section 1 : Informations générales ── #}
         <div class="form-section">
             <div class="section-label">Informations générales</div>
 
@@ -307,9 +294,29 @@ body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--i
             </div>
         </div>
 
-        {# Responsable auto-assigné — pas de champ visible #}
+        {# ── Section 2 : Profil du responsable ── #}
+        <div class="form-section">
+            <div class="section-label">Profil du responsable</div>
 
-        {# Actions #}
+            <div class="field-row full">
+                <div class="field-group">
+                    <label class="field-label">CV <span class="req">*</span></label>
+                    {{ form_widget(form.cvFile) }}
+                    <span class="field-hint">PDF uniquement — max 5 Mo</span>
+                    {{ form_errors(form.cvFile) }}
+                </div>
+            </div>
+
+            <div class="field-row full">
+                <div class="field-group">
+                    <label class="field-label">Profil LinkedIn</label>
+                    {{ form_widget(form.linkedin, {'attr': {'placeholder': 'https://linkedin.com/in/votre-profil'}}) }}
+                    {{ form_errors(form.linkedin) }}
+                </div>
+            </div>
+        </div>
+
+        {# ── Actions ── #}
         <div class="form-actions">
             <a href="{{ path('user_club_index') }}" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Retour aux clubs
@@ -320,12 +327,12 @@ body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--i
         </div>
 
     </div>
-{# ✅ Empêche form_end de rendre le champ responsable automatiquement #}
-{% if form.responsable is defined %}
-    {{ form_widget(form.responsable, {'attr': {'style': 'display:none'}}) }}
-{% endif %}
 
-{{ form_end(form) }}
+    {# Champ responsable caché — rendu avant form_end pour éviter l'auto-render #}
+    {% if form.responsable is defined %}
+        {{ form_widget(form.responsable, {'attr': {'style': 'display:none'}}) }}
+    {% endif %}
+
     {{ form_end(form) }}
 
 </div>

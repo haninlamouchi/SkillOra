@@ -3,449 +3,485 @@
 
 {% block stylesheets %}
 {{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700;900&display=swap');
 
 :root {
-    --red:      #c10609;
-    --red-mid:  #8b0507;
-    --red-soft: rgba(193,6,9,0.07);
-    --ink:      #0d0d0d;
-    --muted:    #6b6b6b;
-    --border:   rgba(0,0,0,0.08);
-    --bg:       #f2f2f2;
-    --white:    #ffffff;
-    --radius:   18px;
+  --sk-red:       #8b0000;
+  --sk-red-dark:  #4a0000;
+  --sk-red-light: #c0392b;
+  --sk-white:     #ffffff;
+  --sk-ink:       #180808;
+  --sk-muted:     #8a7070;
+  --sk-border:    rgba(139,0,0,0.09);
+  --sk-bg:        #f5f2f2;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--ink); }
+body { background: var(--sk-bg); font-family: 'DM Sans', sans-serif; color: var(--sk-ink); }
 
-.clubs-shell {
-    min-height: 100vh;
-    padding: 100px 0 80px;
-}
-.clubs-wrap {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 0 32px;
-}
+.sk-page { padding-top: 70px; }
 
-.page-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 36px;
-    flex-wrap: wrap;
-    animation: fadeUp 0.5s ease both;
+/* ══ HERO ══ */
+.sk-hero {
+  position: relative;
+  background: linear-gradient(135deg, #3d0000 0%, #8b0000 48%, #c23030 100%);
+  margin-left:  calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  padding: 72px 20px 90px;
+  text-align: center;
+  overflow: hidden;
+  isolation: isolate;
+  animation: sk-up 0.5s cubic-bezier(.22,.68,0,1) both;
 }
-.page-eyebrow {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--red);
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.sk-hero::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+  background-size: 180px; opacity: 0.5;
 }
-.page-eyebrow::before {
-    content: '';
-    display: inline-block;
-    width: 24px; height: 2px;
-    background: var(--red);
+.sk-hero-ring-l, .sk-hero-ring-r {
+  position: absolute; z-index: 0; border-radius: 50%;
+  border: 72px solid rgba(255,255,255,0.035);
 }
-.page-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-    font-weight: 700;
-    color: var(--ink);
-    line-height: 1.1;
+.sk-hero-ring-l { width: 520px; height: 520px; top: -210px; left: -160px; }
+.sk-hero-ring-r { width: 380px; height: 380px; bottom: -160px; right: -100px; border-width: 50px; }
+.sk-hero-inner  { position: relative; z-index: 1; max-width: 620px; margin: 0 auto; }
+
+.sk-hero h1 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  font-weight: 800; letter-spacing: -0.03em;
+  color: #fff; margin: 0 0 14px; line-height: 1.1;
 }
-.page-title em { font-style: normal; color: var(--red); }
-.page-sub {
-    font-size: 0.875rem;
-    color: var(--muted);
-    margin-top: 8px;
-    font-weight: 400;
+.sk-hero p {
+  font-family: 'DM Sans', sans-serif;
+  color: rgba(255,255,255,0.60);
+  font-size: 1rem; line-height: 1.7;
+  margin: 0 auto 32px; max-width: 460px;
 }
 
-.btn-creer {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    background: var(--ink);
-    color: #fff;
-    padding: 13px 26px;
-    border-radius: 12px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
-    border: 2px solid var(--ink);
-    white-space: nowrap;
+/* Search */
+.sk-hero-search-wrap {
+  max-width: 520px; margin: 0 auto 32px; position: relative;
 }
-.btn-creer:hover {
-    background: var(--red);
-    border-color: var(--red);
-    color: #fff;
-    text-decoration: none;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(193,6,9,0.28);
+.sk-hero-search-input {
+  width: 100%; padding: 16px 56px 16px 24px;
+  border-radius: 40px; border: none;
+  font-size: 0.95rem; font-family: 'DM Sans', sans-serif;
+  color: var(--sk-ink); outline: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+  transition: box-shadow 0.2s;
 }
-.btn-creer-ico {
-    width: 22px; height: 22px;
-    background: rgba(255,255,255,0.15);
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.85rem;
+.sk-hero-search-input:focus {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.28), 0 0 0 3px rgba(255,255,255,0.3);
+}
+.sk-hero-search-input::placeholder { color: #aaa; }
+.sk-hero-search-btn {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  background: var(--sk-red); border: none; border-radius: 50%;
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 0.9rem; cursor: pointer; transition: background 0.2s;
+}
+.sk-hero-search-btn:hover { background: var(--sk-red-dark); }
+
+/* Stats */
+.sk-hero-stats { display: flex; justify-content: center; gap: 40px; }
+.sk-hero-stat  { text-align: center; }
+.sk-hero-stat .val {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.8rem; font-weight: 800; color: #fff; display: block; line-height: 1;
+}
+.sk-hero-stat .lbl { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 4px; }
+
+/* ══ CONTENT ══ */
+.sk-content { padding: 0 0 56px; }
+.sk-inner   { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+
+/* ══ FILTER BAR ══ */
+.sk-filter-bar {
+  background: var(--sk-white);
+  border-radius: 16px;
+  padding: 16px 22px;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.09);
+  margin-top: -28px; position: relative; z-index: 10;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  margin-bottom: 36px;
+  animation: sk-up 0.4s 0.1s ease both;
+}
+.sk-filter-left  { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sk-filter-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.sk-filter-label {
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--sk-muted);
+  display: flex; align-items: center; gap: 6px;
+}
+.sk-filter-label i { color: var(--sk-red); }
+
+.sk-active-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(139,0,0,0.07); color: var(--sk-red);
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 0.72rem; font-weight: 700;
+}
+.sk-result-count {
+  font-size: 0.82rem; font-weight: 700; color: var(--sk-ink); white-space: nowrap;
+}
+.sk-result-count span { color: var(--sk-red); }
+
+.sk-btn-reset {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: transparent; color: var(--sk-muted);
+  padding: 7px 14px; border-radius: 20px;
+  border: 1.5px solid var(--sk-border);
+  font-size: 0.78rem; font-weight: 600;
+  text-decoration: none; transition: all 0.2s; white-space: nowrap;
+}
+.sk-btn-reset:hover { border-color: var(--sk-ink); color: var(--sk-ink); text-decoration: none; }
+
+.sk-btn-propose {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--sk-red); color: #fff;
+  padding: 9px 18px; border-radius: 10px; border: none;
+  font-size: 0.82rem; font-weight: 600;
+  text-decoration: none; transition: all 0.2s; white-space: nowrap;
+}
+.sk-btn-propose:hover {
+  background: var(--sk-red-dark); color: #fff; text-decoration: none;
+  transform: translateY(-1px); box-shadow: 0 6px 20px rgba(139,0,0,0.3);
 }
 
-.flash-zone { margin-bottom: 24px; }
-.flash-msg {
-    padding: 13px 18px;
-    border-radius: 12px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 8px;
+/* ══ SECTION LABEL ══ */
+.sk-label {
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--sk-muted);
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 18px;
+  animation: sk-up 0.4s 0.18s ease both;
 }
-.flash-success { background: #ecfdf5; border-left: 4px solid #10b981; color: #065f46; }
-.flash-warning { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
-.flash-danger  { background: #fef2f2; border-left: 4px solid var(--red); color: #7f1d1d; }
-
-.clubs-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    animation: fadeUp 0.5s 0.1s ease both;
+.sk-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--sk-border), transparent);
 }
 
-.club-card {
-    background: var(--white);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+/* ══ FLASH ══ */
+.sk-flash { margin-bottom: 20px; }
+.sk-flash-msg {
+  padding: 13px 18px; border-radius: 12px;
+  font-size: 0.875rem; font-weight: 600;
+  display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
 }
-.club-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.10);
-    border-color: rgba(193,6,9,0.25);
-}
-.club-card-img {
-    height: 130px;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 3rem;
-    position: relative;
-    overflow: hidden;
-}
-.club-card-img::after {
-    content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.4));
-}
-.club-card-img img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    position: absolute; inset: 0;
-}
-.club-card-img-emoji {
-    position: relative; z-index: 1;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
-}
-.club-card::before {
-    content: '';
-    display: block;
-    height: 3px;
-    background: var(--red);
-    flex-shrink: 0;
-}
-.club-card-body {
-    padding: 20px 22px 14px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-.club-card-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--ink);
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.club-card-desc {
-    font-size: 0.8rem;
-    color: var(--muted);
-    line-height: 1.55;
-    flex: 1;
-    margin: 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-.club-card-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 4px;
-}
-.club-meta-tag {
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: var(--muted);
-    display: flex; align-items: center; gap: 4px;
-}
-.club-meta-tag i { color: var(--red); font-size: 0.65rem; }
-.club-card-footer {
-    padding: 0 22px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-.club-card-sep {
-    height: 1px;
-    background: var(--border);
-    margin-bottom: 4px;
-}
-.btn-rejoindre {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; padding: 11px;
-    background: var(--red);
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.3px;
-}
-.btn-rejoindre:hover {
-    background: var(--red-mid);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(193,6,9,0.3);
-}
-.btn-site {
-    display: flex; align-items: center; justify-content: center; gap: 7px;
-    width: 100%; padding: 9px;
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
-}
-.btn-site:hover {
-    border-color: var(--ink);
-    color: var(--ink);
-    text-decoration: none;
+.sk-flash-success { background:#ecfdf5; border-left:4px solid #10b981; color:#065f46; }
+.sk-flash-warning { background:#fffbeb; border-left:4px solid #f59e0b; color:#92400e; }
+.sk-flash-danger  { background:#fef2f2; border-left:4px solid var(--sk-red); color:#7f1d1d; }
+
+/* ══ GRID ══ */
+.sk-clubs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
 }
 
-.empty-state {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 80px 20px;
-    background: var(--white);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
+/* ══ CLUB CARD ══ */
+.sk-club-card {
+  position: relative;
+  background: var(--sk-white);
+  border-radius: 16px;
+  border: 1.5px solid var(--sk-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  overflow: hidden; display: flex; flex-direction: column;
+  transition: transform 0.28s cubic-bezier(.22,.68,0,1.25), box-shadow 0.28s, border-color 0.22s;
+  animation: sk-up 0.4s ease both;
 }
-.empty-state-ico {
-    font-size: 3.5rem;
-    margin-bottom: 20px;
-    display: block;
-    opacity: 0.5;
+.sk-club-card::before {
+  content: ''; display: block; height: 3px;
+  background: var(--sk-red);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.28s ease; flex-shrink: 0;
 }
-.empty-state h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--ink);
-    margin-bottom: 8px;
+.sk-club-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 44px rgba(139,0,0,0.11), 0 4px 12px rgba(0,0,0,0.05);
+  border-color: rgba(139,0,0,0.22);
 }
-.empty-state p { font-size: 0.875rem; color: var(--muted); }
+.sk-club-card:hover::before { transform: scaleX(1); }
 
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
+.sk-club-img {
+  height: 130px;
+  background: linear-gradient(135deg, #1a0000 0%, #3d0000 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; position: relative; overflow: hidden; flex-shrink: 0;
 }
-.club-card { animation: fadeUp 0.4s ease both; }
-.club-card:nth-child(1) { animation-delay: 0.08s; }
-.club-card:nth-child(2) { animation-delay: 0.14s; }
-.club-card:nth-child(3) { animation-delay: 0.20s; }
-.club-card:nth-child(4) { animation-delay: 0.26s; }
-.club-card:nth-child(5) { animation-delay: 0.32s; }
-.club-card:nth-child(6) { animation-delay: 0.38s; }
+.sk-club-img::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.4));
+}
+.sk-club-img img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+.sk-club-img-emoji { position: relative; z-index: 1; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)); }
 
-@media (max-width: 1024px) { .clubs-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 640px) {
-    .clubs-grid { grid-template-columns: 1fr; }
-    .clubs-wrap { padding: 0 16px; }
-    .page-header { flex-direction: column; align-items: flex-start; }
+.sk-club-body {
+  padding: 20px 22px 14px; flex: 1;
+  display: flex; flex-direction: column; gap: 8px;
 }
+.sk-club-name {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.05rem; font-weight: 700; color: var(--sk-ink);
+  margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em;
+}
+.sk-club-desc {
+  font-size: 0.8rem; color: var(--sk-muted);
+  line-height: 1.55; flex: 1; margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.sk-club-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.sk-club-meta-tag {
+  font-size: 0.68rem; font-weight: 600; color: var(--sk-muted);
+  display: flex; align-items: center; gap: 4px;
+}
+.sk-club-meta-tag i { color: var(--sk-red); font-size: 0.65rem; }
 
-{# ✅ Style Pagination personnalisé #}
-.pagination-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 40px;
-    gap: 12px;
+.sk-club-footer { padding: 0 22px 20px; display: flex; flex-direction: column; gap: 8px; }
+.sk-club-sep    { height: 1px; background: var(--sk-border); margin-bottom: 4px; }
+
+.sk-btn-join {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 11px;
+  background: var(--sk-red); color: #fff;
+  border: none; border-radius: 10px;
+  font-size: 0.82rem; font-weight: 700;
+  cursor: pointer; transition: all 0.2s; letter-spacing: 0.3px;
 }
-.pagination {
-    display: flex;
-    gap: 6px;
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.sk-btn-join:hover {
+  background: var(--sk-red-dark); transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(139,0,0,0.3);
 }
+.sk-btn-site {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  width: 100%; padding: 9px;
+  background: transparent; color: var(--sk-muted);
+  border: 1px solid var(--sk-border); border-radius: 10px;
+  font-size: 0.78rem; font-weight: 600;
+  text-decoration: none; transition: all 0.2s;
+}
+.sk-btn-site:hover { border-color: var(--sk-ink); color: var(--sk-ink); text-decoration: none; }
+
+/* ══ EMPTY STATE ══ */
+.sk-empty {
+  grid-column: 1 / -1; text-align: center;
+  padding: 80px 20px; background: var(--sk-white);
+  border-radius: 16px; border: 1.5px solid var(--sk-border);
+}
+.sk-empty-ico { font-size: 3.5rem; margin-bottom: 20px; display: block; opacity: 0.45; }
+.sk-empty h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.3rem; font-weight: 700; color: var(--sk-ink); margin-bottom: 8px;
+}
+.sk-empty p { font-size: 0.875rem; color: var(--sk-muted); }
+
+/* ══ PAGINATION ══ */
+.sk-pagination-wrapper {
+  display: flex; flex-direction: column; align-items: center; margin-top: 40px; gap: 12px;
+}
+.pagination { display: flex; gap: 6px; list-style: none; padding: 0; margin: 0; }
 .pagination li a,
 .pagination li span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px; height: 40px;
-    border-radius: 10px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
-    border: 1px solid var(--border);
-    color: var(--ink);
-    background: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 10px;
+  font-size: 0.85rem; font-weight: 600;
+  text-decoration: none; transition: all 0.2s;
+  border: 1.5px solid var(--sk-border); color: var(--sk-ink); background: var(--sk-white);
 }
-.pagination li a:hover {
-    background: var(--red-soft);
-    border-color: var(--red);
-    color: var(--red);
+.pagination li a:hover { background: rgba(139,0,0,0.07); border-color: var(--sk-red); color: var(--sk-red); }
+.pagination li.active span { background: var(--sk-red); border-color: var(--sk-red); color: #fff; font-weight: 700; }
+.pagination li.disabled span { opacity: 0.4; cursor: not-allowed; }
+.sk-pagination-info { font-size: 0.78rem; color: var(--sk-muted); font-weight: 500; }
+
+/* ══ ANIMATIONS ══ */
+@keyframes sk-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-.pagination li.active span {
-    background: var(--red);
-    border-color: var(--red);
-    color: #fff;
-    font-weight: 700;
-}
-.pagination li.disabled span {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-.pagination-info {
-    font-size: 0.78rem;
-    color: var(--muted);
-    font-weight: 500;
+.sk-club-card:nth-child(1) { animation-delay:.20s }
+.sk-club-card:nth-child(2) { animation-delay:.28s }
+.sk-club-card:nth-child(3) { animation-delay:.36s }
+.sk-club-card:nth-child(4) { animation-delay:.44s }
+.sk-club-card:nth-child(5) { animation-delay:.50s }
+.sk-club-card:nth-child(6) { animation-delay:.56s }
+
+/* ══ RESPONSIVE ══ */
+@media (max-width: 1024px) { .sk-clubs-grid { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 640px) {
+  .sk-clubs-grid { grid-template-columns: 1fr; }
+  .sk-inner { padding: 0 16px; }
+  .sk-filter-bar { flex-direction: column; align-items: stretch; }
+  .sk-filter-right { justify-content: space-between; }
 }
 </style>
 {% endblock %}
 
 {% block body %}
-<div class="clubs-shell">
-<div class="clubs-wrap">
+<div class="sk-page">
 
-    {# ── Flash ── #}
-    <div class="flash-zone">
-        {% for type, messages in app.flashes %}
-            {% for msg in messages %}
-                <div class="flash-msg flash-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }}">
-                    {{ type == 'success' ? '✅' : (type == 'warning' ? '⚠️' : '❌') }} {{ msg }}
-                </div>
-            {% endfor %}
+  {# ══ HERO ══ #}
+  <div class="sk-hero">
+    <div class="sk-hero-ring-l"></div>
+    <div class="sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <h1>🏛️ Explorez nos Clubs</h1>
+      <p>Rejoignez un club et participez à la vie associative de SkillOra</p>
+
+      <form method="get" action="{{ path('user_club_index') }}" class="sk-hero-search-wrap">
+        <input
+          class="sk-hero-search-input"
+          type="text"
+          name="nom"
+          value="{{ searchNom }}"
+          placeholder="Rechercher un club…"
+          autocomplete="off">
+        <button type="submit" class="sk-hero-search-btn">
+          <i class="fas fa-search"></i>
+        </button>
+      </form>
+
+      <div class="sk-hero-stats">
+        <div class="sk-hero-stat">
+          <span class="val">{{ clubs.totalItemCount }}</span>
+          <span class="lbl">Club{{ clubs.totalItemCount > 1 ? 's' : '' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ══ CONTENT ══ #}
+  <div class="sk-content">
+  <div class="sk-inner">
+
+    {# Flash #}
+    <div class="sk-flash">
+      {% for type, messages in app.flashes %}
+        {% for msg in messages %}
+          <div class="sk-flash-msg sk-flash-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }}">
+            {{ type == 'success' ? '✅' : (type == 'warning' ? '⚠️' : '❌') }} {{ msg }}
+          </div>
         {% endfor %}
+      {% endfor %}
     </div>
 
-    {# ── Header ── #}
-    <div class="page-header">
-        <div class="page-header-left">
-            <div class="page-eyebrow">Communauté</div>
-            <h1 class="page-title">Nos <em>Clubs</em></h1>
-            <p class="page-sub">Rejoignez un club et participez à la vie associative de SkillOra.</p>
-        </div>
-        <a href="{{ path('user_club_new') }}" class="btn-creer">
-            <span class="btn-creer-ico">✦</span>
-            Proposer un club
-        </a>
-    </div>
-
-    {# ── Grid ── #}
-    <div class="clubs-grid">
-        {% for club in clubs %}
-        <div class="club-card">
-
-            <div class="club-card-img">
-                {% if club.logo %}
-                    <img src="{{ vich_uploader_asset(club, 'logoFile') }}" alt="{{ club.nom }}">
-                {% else %}
-                    <span class="club-card-img-emoji">🏛️</span>
-                {% endif %}
-            </div>
-
-            <div class="club-card-body">
-                <p class="club-card-name">{{ club.nom }}</p>
-                {% if club.description %}
-                    <p class="club-card-desc">{{ club.description }}</p>
-                {% endif %}
-                <div class="club-card-meta">
-                    {% if club.dateCreation %}
-                        <span class="club-meta-tag">
-                            <i class="fas fa-calendar"></i>
-                            {{ club.dateCreation|date('d/m/Y') }}
-                        </span>
-                    {% endif %}
-                    {% if club.responsable %}
-                        <span class="club-meta-tag">
-                            <i class="fas fa-user-tie"></i>
-                            {{ club.responsable.prenom }} {{ club.responsable.nom }}
-                        </span>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="club-card-footer">
-                <div class="club-card-sep"></div>
-                <form method="post" action="{{ path('user_club_adhesion', {'id': club.id}) }}">
-                    <input type="hidden" name="_token" value="{{ csrf_token('adhesion' ~ club.id) }}">
-                    <button type="submit" class="btn-rejoindre">
-                        <i class="fas fa-plus-circle"></i> Devenir membre
-                    </button>
-                </form>
-                {% if club.siteWeb %}
-                    <a href="{{ club.siteWeb }}" target="_blank" rel="noopener" class="btn-site">
-                        <i class="fas fa-globe"></i> Voir le site
-                    </a>
-                {% endif %}
-            </div>
-
-        </div>
+    {# Filter bar #}
+    <div class="sk-filter-bar">
+      <div class="sk-filter-left">
+        <span class="sk-filter-label"><i class="fas fa-filter"></i> Filtre actif</span>
+        {% if searchNom != '' %}
+          <span class="sk-active-pill">
+            <i class="fas fa-shield-alt"></i> {{ searchNom }}
+          </span>
         {% else %}
-        <div class="empty-state">
-            <span class="empty-state-ico">🏛️</span>
-            <h3>Aucun club disponible</h3>
-            <p>Soyez le premier à proposer un club à la communauté SkillOra.</p>
+          <span style="font-size:0.8rem;color:var(--sk-muted);">Aucun filtre appliqué</span>
+        {% endif %}
+      </div>
+      <div class="sk-filter-right">
+        <span class="sk-result-count">
+          <span>{{ clubs.getTotalItemCount() }}</span>&nbsp;résultat{{ clubs.getTotalItemCount() > 1 ? 's' : '' }}
+        </span>
+        {% if searchNom != '' %}
+          <a href="{{ path('user_club_index') }}" class="sk-btn-reset">
+            <i class="fas fa-times"></i> Réinitialiser
+          </a>
+        {% endif %}
+        <a href="{{ path('user_club_new') }}" class="sk-btn-propose">
+          <i class="fas fa-plus"></i> Proposer un club
+        </a>
+      </div>
+    </div>
+
+    {# Section label #}
+    <div class="sk-label">Tous les clubs</div>
+
+    {# Grid #}
+    <div class="sk-clubs-grid">
+      {% for club in clubs %}
+      <div class="sk-club-card">
+
+        <div class="sk-club-img">
+          {% if club.logo %}
+            <img src="{{ vich_uploader_asset(club, 'logoFile') }}" alt="{{ club.nom }}">
+          {% else %}
+            <span class="sk-club-img-emoji">🏛️</span>
+          {% endif %}
         </div>
-        {% endfor %}
+
+        <div class="sk-club-body">
+          <p class="sk-club-name">{{ club.nom }}</p>
+          {% if club.description %}
+            <p class="sk-club-desc">{{ club.description }}</p>
+          {% endif %}
+          <div class="sk-club-meta">
+            {% if club.dateCreation %}
+              <span class="sk-club-meta-tag">
+                <i class="fas fa-calendar"></i>
+                {{ club.dateCreation|date('d/m/Y') }}
+              </span>
+            {% endif %}
+            {% if club.responsable %}
+              <span class="sk-club-meta-tag">
+                <i class="fas fa-user-tie"></i>
+                {{ club.responsable.prenom }} {{ club.responsable.nom }}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="sk-club-footer">
+          <div class="sk-club-sep"></div>
+          <form method="post" action="{{ path('user_club_adhesion', {'id': club.id}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('adhesion' ~ club.id) }}">
+            <button type="submit" class="sk-btn-join">
+              <i class="fas fa-plus-circle"></i> Devenir membre
+            </button>
+          </form>
+          {% if club.siteWeb %}
+            <a href="{{ club.siteWeb }}" target="_blank" rel="noopener" class="sk-btn-site">
+              <i class="fas fa-globe"></i> Voir le site
+            </a>
+          {% endif %}
+        </div>
+
+      </div>
+      {% else %}
+      <div class="sk-empty">
+        <span class="sk-empty-ico">🏛️</span>
+        {% if searchNom != '' %}
+          <h3>Aucun résultat</h3>
+          <p>Aucun club ne correspond à « {{ searchNom }} ».<br>
+             <a href="{{ path('user_club_index') }}" style="color:var(--sk-red);font-weight:600;">
+               Voir tous les clubs
+             </a>
+          </p>
+        {% else %}
+          <h3>Aucun club disponible</h3>
+          <p>Soyez le premier à proposer un club à la communauté SkillOra.</p>
+        {% endif %}
+      </div>
+      {% endfor %}
     </div>
 
-    {# ✅ Pagination #}
-    <div class="pagination-wrapper">
-        {{ knp_pagination_render(clubs) }}
-        <p class="pagination-info">
-            Page {{ clubs.currentPageNumber }} sur {{ clubs.pageCount }}
-            — {{ clubs.totalItemCount }} clubs au total
-        </p>
+    {# Pagination #}
+    <div class="sk-pagination-wrapper">
+      {{ knp_pagination_render(clubs) }}
+      <p class="sk-pagination-info">
+        Page {{ clubs.currentPageNumber }} sur {{ clubs.pageCount }}
+        — {{ clubs.totalItemCount }} club{{ clubs.totalItemCount > 1 ? 's' : '' }} au total
+      </p>
     </div>
 
-</div>
+  </div>
+  </div>
+
 </div>
 {% endblock %}

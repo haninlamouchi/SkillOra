@@ -1,41 +1,51 @@
 {% extends 'backoffice/base.html.twig' %}
-{% block title %}Club | Admin{% endblock %}
+{% block title %}{{ club.nom }} | Admin{% endblock %}
 
 {% block stylesheets %}
 <style>
-.club-logo-big {
-    width: 120px; height: 120px;
-    object-fit: contain;
-    border-radius: 12px;
-    border: 1px solid #eee;
-    background: #fafafa;
-    padding: 8px;
+.club-logo {
+    width: 120px; height: 80px;
+    object-fit: contain; border-radius: 10px;
+    border: 1px solid #eee; background: #fafafa;
 }
-.no-logo-big {
-    width: 120px; height: 120px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #c10609, #8b0507);
-    color: #fff; font-weight: 800; font-size: 2rem;
+.no-logo {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg,#c10609,#8b0507);
+    color: #fff; font-weight: 800; font-size: 1.4rem;
     display: flex; align-items: center; justify-content: center;
 }
-.info-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #c10609;
-    margin-bottom: 4px;
+.no-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg,#c10609,#8b0507);
+    color: #fff; font-weight: 800; font-size: 0.78rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
 }
-.info-value {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #0d0d0d;
+.detail-label {
+    font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: #6b6b6b; margin-bottom: 5px;
+}
+.detail-value {
+    font-size: 0.92rem; font-weight: 500; color: #0d0d0d;
+    line-height: 1.5;
+}
+.section-divider {
+    border: none; border-top: 1px solid #e4e4e4; margin: 26px 0;
+}
+.section-heading {
+    font-size: 0.62rem; font-weight: 700;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: #6b6b6b;
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 20px;
+}
+.section-heading::after {
+    content: ''; flex: 1; height: 1px; background: #e4e4e4;
 }
 .info-card {
-    background: #fafafa;
-    border-radius: 10px;
-    border: 1px solid rgba(0,0,0,0.07);
-    padding: 16px 20px;
+    background: #f9f9f9; border: 1px solid #efefef;
+    border-radius: 10px; padding: 18px 22px;
 }
 </style>
 {% endblock %}
@@ -46,94 +56,115 @@
         <div class="card" style="border-radius:12px; border-top:3px solid #c10609;">
             <div class="card-body">
 
-                {# Header #}
+                {# ── Flash messages ── #}
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                {# ── Barre du haut ── #}
                 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
                     <h4 class="card-title mb-0">
-                        <i class="mdi mdi-shield-star me-2" style="color:#c10609;"></i>
-                        Instrument Sanss du Club
+                        <i class="mdi mdi-shield-account me-2" style="color:#c10609;"></i>
+                        Détails du club
                     </h4>
-                    <a href="{{ path('admin_club_index') }}"
-                       class="btn btn-sm btn-outline-secondary">
+                    <a href="{{ path('admin_club_index') }}" class="btn btn-sm btn-outline-secondary">
                         <i class="mdi mdi-arrow-left me-1"></i> Retour à la liste
                     </a>
                 </div>
 
-                <div class="row g-4">
-
-                    {# Logo #}
-                    <div class="col-12 col-md-2 text-center">
-                        {% if club.logo %}
-                            <img src="{{ vich_uploader_asset(club, 'logoFile') }}"
-                                 alt="Logo {{ club.nom }}"
-                                 class="club-logo-big">
+                {# ── Logo + nom + site ── #}
+                <div class="d-flex align-items-center gap-4 mb-4 flex-wrap">
+                    {% if club.logo %}
+                        <img src="{{ asset('uploads/clubs/' ~ club.logo) }}"
+                             alt="{{ club.nom }}"
+                             class="club-logo">
+                    {% else %}
+                        <div class="no-logo">
+                            {{ club.nom|slice(0,2)|upper }}
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h3 class="mb-1 fw-bold">{{ club.nom }}</h3>
+                        {% if club.siteWeb %}
+                            <a href="{{ club.siteWeb }}" target="_blank" rel="noopener"
+                               class="text-muted small text-decoration-none">
+                                <i class="mdi mdi-web me-1"></i>{{ club.siteWeb }}
+                            </a>
                         {% else %}
-                            <div class="no-logo-big mx-auto">
-                                {{ club.nom|slice(0,2)|upper }}
-                            </div>
+                            <span class="text-muted small">Aucun site web</span>
                         {% endif %}
                     </div>
+                </div>
 
-                    {# Infos #}
-                    <div class="col-12 col-md-10">
-                        <div class="row g-3">
+                <hr class="section-divider">
 
-                            <div class="col-12 col-md-6">
-                                <div class="info-card">
-                                    <div class="info-label">Nom</div>
-                                    <div class="info-value">{{ club.nom }}</div>
-                                </div>
+                {# ── Informations générales ── #}
+                <div class="section-heading">Informations générales</div>
+
+                <div class="row g-3 mb-2">
+                    <div class="col-md-8">
+                        <div class="info-card h-100">
+                            <div class="detail-label">Description</div>
+                            <div class="detail-value">
+                                {{ club.description ?? '—' }}
                             </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="info-card">
-                                    <div class="info-label">Date de création</div>
-                                    <div class="info-value">
-                                        {{ club.dateCreation ? club.dateCreation|date('d/m/Y') : '—' }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-12">
-                                <div class="info-card">
-                                    <div class="info-label">Description</div>
-                                    <div class="info-value text-muted" style="font-weight:400;">
-                                        {{ club.description ?: '—' }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="info-card">
-                                    <div class="info-label">Site Web</div>
-                                    <div class="info-value">
-                                        {% if club.siteWeb %}
-                                            <a href="{{ club.siteWeb }}" target="_blank" rel="noopener">
-                                                <i class="mdi mdi-web me-1"></i>{{ club.siteWeb }}
-                                            </a>
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="info-card">
-                                    <div class="info-label">Responsable</div>
-                                    <div class="info-value">
-                                        {% if club.responsable %}
-                                            <i class="mdi mdi-account me-1" style="color:#c10609;"></i>
-                                            {{ club.responsable.prenom }} {{ club.responsable.nom }}
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
                         </div>
                     </div>
+                    <div class="col-md-4">
+                        <div class="info-card h-100">
+                            <div class="detail-label">Date de création</div>
+                            <div class="detail-value">
+                                {{ club.dateCreation ? club.dateCreation|date('d/m/Y') : '—' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
+                <hr class="section-divider">
+
+                {# ── Responsable ── #}
+                <div class="section-heading">Responsable</div>
+
+                {% if club.responsable %}
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <div class="no-avatar">
+                            {{ club.responsable.prenom|slice(0,1)|upper ~ club.responsable.nom|slice(0,1)|upper }}
+                        </div>
+                        <div>
+                            <div class="fw-semibold">
+                                {{ club.responsable.prenom }} {{ club.responsable.nom }}
+                            </div>
+                            <div class="text-muted small">{{ club.responsable.email ?? '' }}</div>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-muted small">Aucun responsable assigné.</p>
+                {% endif %}
+
+                <hr class="section-divider">
+
+                {# ── Actions ── #}
+                <div class="section-heading">Actions</div>
+
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ path('admin_club_index') }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="mdi mdi-arrow-left me-1"></i> Retour
+                    </a>
+
+                    <form method="post"
+                          action="{{ path('admin_club_delete', {'id': club.id}) }}"
+                          onsubmit="return confirm('Supprimer définitivement ce club et toutes ses données ?')">
+                        <input type="hidden" name="_token"
+                               value="{{ csrf_token('delete' ~ club.id) }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="mdi mdi-delete me-1"></i> Supprimer le club
+                        </button>
+                    </form>
                 </div>
 
             </div>

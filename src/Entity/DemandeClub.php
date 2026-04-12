@@ -53,6 +53,17 @@ class DemandeClub
     #[ORM\JoinColumn(referencedColumnName: 'id_User')]
     private ?User $responsable = null;
 
+    // ── NOUVEAUX CHAMPS (nullable: true = safe pour la DB) ──
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $cv = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url(message: 'Veuillez entrer une URL LinkedIn valide.')]
+    private ?string $linkedin = null;
+
+    // ── GETTERS / SETTERS EXISTANTS ──
+
     public function getId(): ?int { return $this->id; }
 
     public function getNom(): ?string { return $this->nom; }
@@ -84,4 +95,12 @@ class DemandeClub
 
     public function getResponsable(): ?User { return $this->responsable; }
     public function setResponsable(?User $responsable): static { $this->responsable = $responsable; return $this; }
+
+    // ── NOUVEAUX GETTERS / SETTERS ──
+
+    public function getCv(): ?string { return $this->cv; }
+    public function setCv(?string $cv): static { $this->cv = $cv; return $this; }
+
+    public function getLinkedin(): ?string { return $this->linkedin; }
+    public function setLinkedin(?string $linkedin): static { $this->linkedin = $linkedin; return $this; }
 }

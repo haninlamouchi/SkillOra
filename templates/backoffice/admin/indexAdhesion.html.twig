@@ -17,6 +17,40 @@
 .badge-accepte { background:#d1e7dd; color:#0f5132; padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:700; }
 .badge-refuse  { background:#f8d7da; color:#842029; padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:700; }
 
+/* Bouton CV */
+.btn-cv {
+    display:inline-flex; align-items:center; gap:5px;
+    background:#fff0f0; color:#c10609;
+    border:1.5px solid #fca5a5;
+    border-radius:8px; padding:5px 11px;
+    font-size:0.72rem; font-weight:700;
+    text-decoration:none; transition:all 0.2s;
+    white-space:nowrap;
+}
+.btn-cv:hover {
+    background:#c10609; color:#fff;
+    border-color:#c10609; text-decoration:none;
+    transform:translateY(-1px);
+}
+
+/* Bouton LinkedIn */
+.btn-linkedin {
+    display:inline-flex; align-items:center; gap:5px;
+    background:#f0f4ff; color:#0a66c2;
+    border:1.5px solid #93c5fd;
+    border-radius:8px; padding:5px 11px;
+    font-size:0.72rem; font-weight:700;
+    text-decoration:none; transition:all 0.2s;
+    white-space:nowrap;
+}
+.btn-linkedin:hover {
+    background:#0a66c2; color:#fff;
+    border-color:#0a66c2; text-decoration:none;
+    transform:translateY(-1px);
+}
+
+.no-doc { font-size:0.72rem; color:#bbb; }
+
 /* Pagination */
 .pagination { justify-content:center; gap:4px; }
 .pagination .page-link {
@@ -66,6 +100,7 @@
                                 <th>Utilisateur</th>
                                 <th>Club</th>
                                 <th>Date</th>
+                                <th>Dossier</th>  {# 👈 nouveau #}
                                 <th>Statut</th>
                                 <th style="width:160px;">Actions</th>
                             </tr>
@@ -86,10 +121,42 @@
                                 </div>
                             </td>
 
-                            <td><span class="fw-semibold">{{ demande.club ? demande.club.nom : 'Aucun' }}</span></td>
+                            <td>
+                                <span class="fw-semibold">{{ demande.club ? demande.club.nom : 'Aucun' }}</span>
+                            </td>
 
                             <td class="text-muted small">
                                 {{ demande.dateInscription ? demande.dateInscription|date('d/m/Y') : '—' }}
+                            </td>
+
+                            {# 👇 NOUVEAU — colonne Dossier #}
+                            <td>
+                                <div class="d-flex flex-column gap-1">
+
+                                    {# CV #}
+                                    {% if demande.cv %}
+                                        <a href="{{ asset('uploads/cvs/' ~ demande.cv) }}"
+                                           target="_blank"
+                                           class="btn-cv">
+                                            📄 Voir CV
+                                        </a>
+                                    {% else %}
+                                        <span class="no-doc">Pas de CV</span>
+                                    {% endif %}
+
+                                    {# LinkedIn #}
+                                    {% if demande.linkedin %}
+                                        <a href="{{ demande.linkedin }}"
+                                           target="_blank"
+                                           rel="noopener"
+                                           class="btn-linkedin">
+                                            🔗 LinkedIn
+                                        </a>
+                                    {% else %}
+                                        <span class="no-doc">Pas de LinkedIn</span>
+                                    {% endif %}
+
+                                </div>
                             </td>
 
                             <td>
@@ -124,7 +191,7 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-5">
+                            <td colspan="7" class="text-center text-muted py-5">
                                 <i class="mdi mdi-account-off" style="font-size:2rem;opacity:0.3;"></i>
                                 <p class="mt-2 mb-0">Aucune demande d'adhésion en attente.</p>
                             </td>
