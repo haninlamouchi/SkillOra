@@ -23,29 +23,43 @@ use Knp\Component\Pager\PaginatorInterface;
 #[Route('/admin/club')]
 class AdminClubController extends AbstractController
 {
-    #[Route('/', name: 'admin_club_index', methods: ['GET'])]
-    public function index(
-        Request $request,
-        ClubRepository $clubRepository,
-        PaginatorInterface $paginator  // 👈 ajouter
-    ): Response {
+#[Route('/', name: 'admin_club_index', methods: ['GET'])]
+public function index(
+    Request $request,
+    ClubRepository $clubRepository,
+    PaginatorInterface $paginator
+): Response {
+    $search      = (string) $request->query->get('search', '');
+    $searchNom   = (string) $request->query->get('nom', '');
+    $searchResp  = (string) $request->query->get('responsable', '');
 
-        $query = $clubRepository->createQueryBuilder('c')
-            ->orderBy('c.nom', 'ASC')
-            ->getQuery(); // 👈 sans getResult()
+    $qb = $clubRepository->createQueryBuilder('c')
+        ->leftJoin('c.responsable', 'u')
+        ->addSelect('u')
+        ->orderBy('c.nom', 'ASC');
 
-        // ✅ Pagination
-        $clubs = $paginator->paginate(
-            $query,
-            $request->query->getInt('page', 1),
-            10  // 10 clubs par page
-        );
-
-        return $this->render('backoffice/admin/index.html.twig', [
-            'clubs' => $clubs,
-        ]);
+    if ($searchNom !== '') {
+        $qb->andWhere('c.nom LIKE :nom')
+           ->setParameter('nom', '%' . $searchNom . '%');
     }
 
+    if ($searchResp !== '') {
+        $qb->andWhere('u.nom LIKE :resp OR u.prenom LIKE :resp')
+           ->setParameter('resp', '%' . $searchResp . '%');
+    }
+
+    $clubs = $paginator->paginate(
+        $qb->getQuery(),
+        $request->query->getInt('page', 1),
+        10
+    );
+
+    return $this->render('backoffice/admin/index.html.twig', [
+        'clubs'       => $clubs,
+        'searchNom'   => $searchNom,
+        'searchResp'  => $searchResp,
+    ]);
+}
    
 
     #[Route('/demandes', name: 'admin_club_demandes', methods: ['GET'])]
@@ -56,6 +70,7 @@ class AdminClubController extends AbstractController
         ]);
     }
 
+
     #[Route('/adhesions', name: 'admin_adhesion_index', methods: ['GET'])]
     public function adhesions(DemandeAdhesionRepository $repo): Response
     {
@@ -64,60 +79,84 @@ class AdminClubController extends AbstractController
         ]);
     }
 
+
     #[Route('/demande/{id}/accepter', name: 'admin_club_accepter', methods: ['POST'])]
-    public function accepter(DemandeClub $demande, EntityManagerInterface $entityManager,SmsService $smsService): Response
-    {
-        $club = new Club();
-        $club->setNom($demande->getNom() ?? '');
-        $club->setDescription($demande->getDescription());
-        $club->setLogo($demande->getLogo());
-        $club->setDateCreation($demande->getDateCreation());
-        $club->setSiteWeb($demande->getSiteWeb());
-        $club->setResponsable($demande->getResponsable());
+public function accepter(
+    DemandeClub $demande,
+    EntityManagerInterface $entityManager,
+    SmsService $smsService
+): Response {
+    $club = new Club();
+    $club->setNom($demande->getNom() ?? '');
+    $club->setDescription($demande->getDescription());
+    $club->setLogo($demande->getLogo());
+    $club->setDateCreation($demande->getDateCreation());
+    $club->setSiteWeb($demande->getSiteWeb());
+    $club->setResponsable($demande->getResponsable());
 
-         // récupérer le user demandeur
-        $user = $demande->getResponsable();
-        
-        if (!$user) {
-            $this->addFlash('error', 'Erreur : aucun responsable associé à cette demande.');
-            return $this->redirectToRoute('admin_club_demandes');
-        }
+    $user = $demande->getResponsable();
 
-        // changer son rôle
-        $user->setRole('responsable_club');
-
-        // persist user (bonne pratique)
-        $entityManager->persist($user);
-        $entityManager->persist($club);
-        $entityManager->remove($demande);
-        $entityManager->flush();
-
-        // ✅ SMS au créateur du club
-        if ($user->getTelephone()) {
-            $smsService->send(
-                $user->getTelephone(),
-                '🎉 Félicitations ' . $user->getNom() . ' ! ' .
-                'Votre demande de création du club ' .
-                $demande->getNom() .
-                ' a été acceptée. Vous êtes maintenant responsable !'
-            );
-        }
-
-        $this->addFlash('success', 'Demande acceptée, club créé avec succès.');
+    if (!$user) {
+        $this->addFlash('error', 'Erreur : aucun responsable associé à cette demande.');
         return $this->redirectToRoute('admin_club_demandes');
     }
 
-    #[Route('/demande/{id}/refuser', name: 'admin_club_refuser', methods: ['POST'])]
-    public function refuser(DemandeClub $demande, EntityManagerInterface $entityManager): Response
-    {
-        $entityManager->remove($demande);
-        $entityManager->flush();
+    $user->setRole('responsable_club');
+    $entityManager->persist($user);
+    $entityManager->persist($club);
 
-        $this->addFlash('warning', 'Demande refusée et supprimée.');
-        return $this->redirectToRoute('admin_club_demandes');
+    // ── Supprimer le CV du serveur après acceptation (plus nécessaire) ──
+    if ($demande->getCv()) {
+        $cvPath = $this->getParameter('kernel.project_dir')
+            . '/public/uploads/cvs/'
+            . $demande->getCv();
+        if (file_exists($cvPath)) {
+            unlink($cvPath);
+        }
     }
 
-    #[Route('/adhesion/{id}/accepter', name: 'admin_adhesion_accepter', methods: ['POST'])]
+    $entityManager->remove($demande);
+    $entityManager->flush();
+
+    if ($user->getTelephone()) {
+        $smsService->send(
+            $user->getTelephone(),
+            '🎉 Félicitations ' . $user->getNom() . ' ! ' .
+           'Votre demande de création du club ' . $demande->getNom() .
+           ' a été acceptée avec succès. Vous êtes désormais responsable du club ! ' .
+           'Vous pouvez continuer à utiliser votre compte comme d’habitude.'
+        );
+    }
+
+    $this->addFlash('success', 'Demande acceptée, club créé avec succès.');
+    return $this->redirectToRoute('admin_club_demandes');
+}
+
+
+#[Route('/demande/{id}/refuser', name: 'admin_club_refuser', methods: ['POST'])]
+public function refuser(
+    DemandeClub $demande,
+    EntityManagerInterface $entityManager
+): Response {
+    // ── Supprimer le fichier CV du serveur si existant ──
+    if ($demande->getCv()) {
+        $cvPath = $this->getParameter('kernel.project_dir')
+            . '/public/uploads/cvs/'
+            . $demande->getCv();
+        if (file_exists($cvPath)) {
+            unlink($cvPath);
+        }
+    }
+
+    $entityManager->remove($demande);
+    $entityManager->flush();
+
+    $this->addFlash('warning', 'Demande refusée et supprimée.');
+    return $this->redirectToRoute('admin_club_demandes');
+}
+
+
+   #[Route('/adhesion/{id}/accepter', name: 'admin_adhesion_accepter', methods: ['POST'])]
 public function accepterResponsable(
     DemandeAdhesion $demande,
     EntityManagerInterface $entityManager,
@@ -128,10 +167,10 @@ public function accepterResponsable(
     
     if (!$club || !$nouveauResponsable) {
         $this->addFlash('error', 'Erreur : club ou utilisateur introuvable.');
-        return $this->redirectToRoute('admin_club_adhesions');
+        return $this->redirectToRoute('admin_adhesion_index');
     }
     
-    $ancienResponsable  = $club->getResponsable();
+    $ancienResponsable = $club->getResponsable();
 
     if ($ancienResponsable) {
         // 1. Supprimer l'ancienne demande acceptée de l'ancien responsable
@@ -143,6 +182,15 @@ public function accepterResponsable(
             ]);
 
         if ($ancienneDemande) {
+            // ── Supprimer le CV de l'ancienne demande si existant ──
+            if ($ancienneDemande->getCv()) {
+                $oldCvPath = $this->getParameter('kernel.project_dir')
+                    . '/public/uploads/cvs/'
+                    . $ancienneDemande->getCv();
+                if (file_exists($oldCvPath)) {
+                    unlink($oldCvPath);
+                }
+            }
             $entityManager->remove($ancienneDemande);
         }
 
@@ -162,8 +210,7 @@ public function accepterResponsable(
             $ancienResponsable->setRole($membreAutreClub ? 'membre' : 'etudiant');
             $entityManager->persist($ancienResponsable);
         }
-    } // ← fermeture du if($ancienResponsable)
-
+    }
     // 3. Nouveau responsable
     $nouveauResponsable->setRole('responsable_club');
     $entityManager->persist($nouveauResponsable);
@@ -177,30 +224,41 @@ public function accepterResponsable(
     $entityManager->persist($demande);
 
     $entityManager->flush();
-
-    // SMS
+    // ── SMS ──
     if ($nouveauResponsable->getTelephone()) {
         $smsService->send(
             $nouveauResponsable->getTelephone(),
             '🎉 Félicitations ' . $nouveauResponsable->getNom() . ' ! ' .
-            'Vous êtes maintenant responsable du club ' .
-            $club->getNom() . '. Bonne chance !'
+           'Vous êtes désormais responsable du club ' . $club->getNom() . '. Bonne chance dans cette nouvelle aventure ! ' .
+           'Votre accès reste le même, vous pourrez continuer à utiliser votre profil comme d’habitude.'
         );
     }
 
     $this->addFlash('success', 'L\'utilisateur est maintenant responsable du club.');
     return $this->redirectToRoute('admin_adhesion_index');
-} // ← fermeture de la méthode
+}
 
-    #[Route('/adhesion/{id}/refuser', name: 'admin_adhesion_refuser', methods: ['POST'])]
-    public function refuserResponsable(DemandeAdhesion $demande, EntityManagerInterface $entityManager): Response
-    {
-        $entityManager->remove($demande);
-        $entityManager->flush();
 
-        $this->addFlash('warning', 'Demande de responsable refusée.');
-        return $this->redirectToRoute('admin_adhesion_index');
+#[Route('/adhesion/{id}/refuser', name: 'admin_adhesion_refuser', methods: ['POST'])]
+public function refuserResponsable(
+    DemandeAdhesion $demande,
+    EntityManagerInterface $entityManager
+): Response {
+    // ── Supprimer le fichier CV du serveur si existant ──
+    if ($demande->getCv()) {
+        $cvPath = $this->getParameter('kernel.project_dir')
+            . '/public/uploads/cvs/'
+            . $demande->getCv();
+        if (file_exists($cvPath)) {
+            unlink($cvPath);  // 👈 supprime le fichier physique
+        }
     }
+    $entityManager->remove($demande);
+    $entityManager->flush();
+
+    $this->addFlash('warning', 'Demande de responsable refusée.');
+    return $this->redirectToRoute('admin_adhesion_index');
+}
 
     // ---- routes dynamiques EN DERNIER ----
 
@@ -211,6 +269,7 @@ public function accepterResponsable(
             'club' => $club,
         ]);
     }
+
 
  #[Route('/{id}', name: 'admin_club_delete', methods: ['POST'])]
 public function delete(

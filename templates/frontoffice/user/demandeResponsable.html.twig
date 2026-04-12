@@ -1,0 +1,288 @@
+{% extends 'frontoffice/base.html.twig' %}
+{% block title %}Devenir responsable — {{ club.nom }} — SkillOra{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700;900&display=swap');
+
+:root {
+    --red:      #c10609;
+    --red-mid:  #8b0507;
+    --red-soft: rgba(193,6,9,0.07);
+    --ink:      #0d0d0d;
+    --muted:    #6b6b6b;
+    --border:   #e4e4e4;
+    --bg:       #f2f2f2;
+    --white:    #ffffff;
+    --radius:   18px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--ink); }
+
+.form-shell { min-height: 100vh; padding: 100px 0 80px; }
+.form-wrap  { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+.form-header { margin-bottom: 32px; animation: fadeUp 0.4s ease both; }
+.form-eyebrow {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--red);
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.form-eyebrow::before {
+    content: ''; display: inline-block;
+    width: 22px; height: 2px; background: var(--red);
+}
+.form-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    font-weight: 700; color: var(--ink);
+    line-height: 1.1; margin-bottom: 8px;
+}
+.form-title em { font-style: normal; color: var(--red); }
+.form-subtitle { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
+
+.form-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--red);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    overflow: hidden;
+    animation: fadeUp 0.4s 0.1s ease both;
+}
+
+.form-section { padding: 28px 36px; border-bottom: 1px solid var(--border); }
+.form-section:last-of-type { border-bottom: none; }
+
+.section-label {
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* Info box club */
+.club-info-box {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--red-soft);
+    border: 1px solid rgba(193,6,9,0.15);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 8px;
+}
+.club-info-logo {
+    width: 52px; height: 52px; border-radius: 10px;
+    object-fit: cover; background: #fff;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; flex-shrink: 0; overflow: hidden;
+}
+.club-info-logo img { width: 100%; height: 100%; object-fit: cover; }
+.club-info-text { flex: 1; }
+.club-info-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem; font-weight: 700; color: var(--ink);
+}
+.club-info-sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+/* Candidat info */
+.candidat-box {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px;
+}
+.candidat-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--red); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; font-weight: 700; flex-shrink: 0;
+}
+.candidat-name { font-size: 0.875rem; font-weight: 600; color: var(--ink); }
+.candidat-role { font-size: 0.7rem; color: var(--muted); }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+.field-row.full { grid-template-columns: 1fr; }
+.field-group { display: flex; flex-direction: column; }
+
+.field-label {
+    font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    color: var(--ink); margin-bottom: 7px;
+}
+.field-label .req { color: var(--red); margin-left: 2px; }
+
+.field-group input[type="text"],
+.field-group input[type="url"],
+.field-group input[type="email"],
+.field-group textarea,
+.field-group select {
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem; color: var(--ink);
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    width: 100%; appearance: none;
+}
+.field-group input:focus,
+.field-group textarea:focus {
+    outline: none; border-color: var(--red);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(193,6,9,0.08);
+}
+
+.field-group input[type="file"] {
+    padding: 10px 14px;
+    border: 1.5px dashed var(--border);
+    border-radius: 10px; background: var(--bg);
+    font-size: 0.82rem; color: var(--muted);
+    cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    width: 100%;
+}
+.field-group input[type="file"]:hover {
+    border-color: var(--red); background: var(--red-soft);
+}
+
+.field-errors { font-size: 0.72rem; color: var(--red); margin-top: 5px; font-weight: 600; }
+.field-hint   { font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
+
+.form-actions {
+    padding: 24px 36px;
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 14px;
+    border-top: 1px solid var(--border);
+    background: var(--bg); flex-wrap: wrap;
+}
+.btn-submit {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: var(--red); color: #fff;
+    padding: 13px 30px; border-radius: 11px; border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; font-weight: 700; cursor: pointer;
+    transition: all 0.2s; letter-spacing: 0.3px;
+}
+.btn-submit:hover {
+    background: var(--red-mid); transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(193,6,9,0.3);
+}
+.btn-back {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent; color: var(--muted);
+    padding: 13px 22px; border-radius: 11px;
+    border: 1.5px solid var(--border);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem; font-weight: 600;
+    text-decoration: none; transition: all 0.2s;
+}
+.btn-back:hover { border-color: var(--ink); color: var(--ink); text-decoration: none; }
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+    .field-row { grid-template-columns: 1fr; }
+    .form-section { padding: 22px 20px; }
+    .form-actions { padding: 20px; flex-direction: column; align-items: stretch; }
+    .btn-submit, .btn-back { justify-content: center; }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="form-shell">
+<div class="form-wrap">
+
+    <div class="form-header">
+        <div class="form-eyebrow">Communauté</div>
+        <h1 class="form-title">Devenir <em>responsable</em></h1>
+        <p class="form-subtitle">
+            Votre candidature sera examinée par un administrateur.<br>
+            Complétez votre dossier pour maximiser vos chances.
+        </p>
+    </div>
+
+    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
+
+    <div class="form-card">
+
+        {# ── Section 1 : Club ciblé ── #}
+        <div class="form-section">
+            <div class="section-label">Club ciblé</div>
+            <div class="club-info-box">
+                <div class="club-info-logo">
+                    {% if club.logo %}
+                        <img src="{{ vich_uploader_asset(club, 'logoFile') }}" alt="{{ club.nom }}">
+                    {% else %}
+                        🏛️
+                    {% endif %}
+                </div>
+                <div class="club-info-text">
+                    <div class="club-info-name">{{ club.nom }}</div>
+                    <div class="club-info-sub">
+                        {{ club.membres|length }} membre{{ club.membres|length > 1 ? 's' : '' }}
+                        {% if club.dateCreation %}
+                            · Créé le {{ club.dateCreation|date('d/m/Y') }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── Section 2 : Candidat ── #}
+        <div class="form-section">
+            <div class="section-label">Votre profil</div>
+            <div class="candidat-box">
+                <div class="candidat-avatar">
+                    {{ app.user.nom|first|upper }}
+                </div>
+                <div>
+                    <div class="candidat-name">{{ app.user.nom }} {{ app.user.prenom }}</div>
+                    <div class="candidat-role">Membre du club</div>
+                </div>
+            </div>
+        </div>
+
+{# ── Section 3 : Dossier de candidature ── #}
+<div class="form-section">
+    <div class="section-label">Dossier de candidature</div>
+
+    <div class="field-row full">
+        <div class="field-group">
+            <label class="field-label">CV <span class="req">*</span></label>
+            {{ form_row(form.cvFile) }}
+            <span class="field-hint">Format PDF uniquement — max 5 Mo</span>
+        </div>
+    </div>
+
+    <div class="field-row full">
+        <div class="field-group">
+            <label class="field-label">Profil LinkedIn</label>
+            {{ form_row(form.linkedin) }}
+            <span class="field-hint">Optionnel mais recommandé</span>
+        </div>
+    </div>
+
+</div>
+
+        {# ── Actions ── #}
+        <div class="form-actions">
+            <a href="{{ path('user_mes_clubs') }}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Retour à mes clubs
+            </a>
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-paper-plane"></i> Envoyer ma candidature
+            </button>
+        </div>
+
+    </div>
+
+    {{ form_end(form) }}
+
+</div>
+</div>
+{% endblock %}

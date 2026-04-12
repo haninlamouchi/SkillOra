@@ -3,163 +3,421 @@
 
 {% block stylesheets %}
 {{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap');
-:root{--red:#c10609;--red-mid:#8b0507;--red-soft:rgba(193,6,9,0.07);--ink:#0d0d0d;--muted:#6b6b6b;--border:#e4e4e4;--bg:#f2f2f2;--white:#fff;--amber:#d97706;--green:#059669;--radius:16px;}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--ink);}
-.shell{min-height:100vh;padding:100px 0 80px;}
-.wrap{max-width:1200px;margin:0 auto;padding:0 28px;}
 
-/* Header */
-.page-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:32px;flex-wrap:wrap;animation:fadeUp 0.4s ease both;}
-.page-eyebrow{font-size:0.65rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-.page-eyebrow::before{content:'';width:20px;height:2px;background:var(--red);}
-.page-title{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;color:var(--ink);margin-bottom:4px;}
-.page-title em{font-style:normal;color:var(--red);}
-.page-sub{font-size:0.82rem;color:var(--muted);}
-.btn-voir-tous{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;padding:11px 22px;border-radius:10px;font-size:0.82rem;font-weight:700;text-decoration:none;transition:all 0.2s;white-space:nowrap;}
-.btn-voir-tous:hover{background:var(--red);color:#fff;text-decoration:none;transform:translateY(-1px);}
+:root {
+  --sk-red:       #8b0000;
+  --sk-red-dark:  #4a0000;
+  --sk-red-light: #c0392b;
+  --sk-white:     #ffffff;
+  --sk-ink:       #180808;
+  --sk-muted:     #8a7070;
+  --sk-border:    rgba(139,0,0,0.09);
+  --sk-bg:        #f5f2f2;
+  --sk-amber:     #d97706;
+  --sk-green:     #059669;
+}
 
-/* Flash */
-.flash{padding:12px 16px;border-radius:10px;margin-bottom:14px;font-size:0.875rem;font-weight:600;display:flex;align-items:center;gap:10px;}
-.flash-success{background:#ecfdf5;border-left:4px solid #10b981;color:#065f46;}
-.flash-warning{background:#fffbeb;border-left:4px solid #f59e0b;color:#92400e;}
-.flash-danger{background:#fef2f2;border-left:4px solid var(--red);color:#7f1d1d;}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--sk-bg); font-family: 'DM Sans', sans-serif; color: var(--sk-ink); }
 
-/* Grid */
-.clubs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;animation:fadeUp 0.4s 0.08s ease both;}
+.sk-page { padding-top: 70px; }
 
-/* Card */
-.club-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,0.04);overflow:hidden;display:flex;flex-direction:column;transition:transform 0.25s,box-shadow 0.25s,border-color 0.25s;}
-.club-card:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(0,0,0,0.10);border-color:rgba(193,6,9,0.2);}
-.club-card::before{content:'';display:block;height:3px;background:linear-gradient(90deg,var(--red),var(--red-mid));flex-shrink:0;}
+/* ══ HERO ══ */
+.sk-hero {
+  position: relative;
+  background: linear-gradient(135deg, #3d0000 0%, #8b0000 48%, #c23030 100%);
+  margin-left:  calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  padding: 72px 20px 90px;
+  text-align: center;
+  overflow: hidden;
+  isolation: isolate;
+  animation: sk-up 0.5s cubic-bezier(.22,.68,0,1) both;
+}
+.sk-hero::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+  background-size: 180px; opacity: 0.5;
+}
+.sk-hero-ring-l, .sk-hero-ring-r {
+  position: absolute; z-index: 0; border-radius: 50%;
+  border: 72px solid rgba(255,255,255,0.035);
+}
+.sk-hero-ring-l { width: 520px; height: 520px; top: -210px; left: -160px; }
+.sk-hero-ring-r { width: 380px; height: 380px; bottom: -160px; right: -100px; border-width: 50px; }
+.sk-hero-inner  { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
+
+.sk-hero h1 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  font-weight: 800; letter-spacing: -0.03em;
+  color: #fff; margin: 0 0 14px; line-height: 1.1;
+}
+.sk-hero p {
+  font-family: 'DM Sans', sans-serif;
+  color: rgba(255,255,255,0.60);
+  font-size: 1rem; line-height: 1.7;
+  margin: 0 auto; max-width: 460px;
+}
+
+/* Hero stats */
+.sk-hero-stats { display: flex; justify-content: center; gap: 40px; margin-top: 32px; }
+.sk-hero-stat  { text-align: center; }
+.sk-hero-stat .val {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.8rem; font-weight: 800; color: #fff; display: block; line-height: 1;
+}
+.sk-hero-stat .lbl { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 4px; }
+
+/* ══ CONTENT ══ */
+.sk-content { padding: 0 0 56px; }
+.sk-inner   { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+
+/* ══ TOP BAR (overlaps hero) ══ */
+.sk-top-bar {
+  background: var(--sk-white);
+  border-radius: 16px;
+  padding: 16px 22px;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.09);
+  margin-top: -28px; position: relative; z-index: 10;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  margin-bottom: 36px;
+  animation: sk-up 0.4s 0.1s ease both;
+}
+.sk-top-bar-left  { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sk-top-bar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.sk-filter-label {
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--sk-muted);
+  display: flex; align-items: center; gap: 6px;
+}
+.sk-filter-label i { color: var(--sk-red); }
+
+.sk-count-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(139,0,0,0.07); color: var(--sk-red);
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 0.72rem; font-weight: 700;
+}
+
+.sk-result-count {
+  font-size: 0.82rem; font-weight: 700; color: var(--sk-ink); white-space: nowrap;
+}
+.sk-result-count span { color: var(--sk-red); }
+
+.sk-btn-all {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--sk-ink); color: #fff;
+  padding: 9px 18px; border-radius: 10px; border: none;
+  font-size: 0.82rem; font-weight: 600;
+  text-decoration: none; transition: all 0.2s; white-space: nowrap;
+}
+.sk-btn-all:hover {
+  background: var(--sk-red); color: #fff; text-decoration: none;
+  transform: translateY(-1px); box-shadow: 0 6px 20px rgba(139,0,0,0.3);
+}
+
+/* ══ SECTION LABEL ══ */
+.sk-label {
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--sk-muted);
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 18px;
+  animation: sk-up 0.4s 0.18s ease both;
+}
+.sk-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--sk-border), transparent);
+}
+
+/* ══ FLASH ══ */
+.sk-flash { margin-bottom: 20px; }
+.sk-flash-msg {
+  padding: 13px 18px; border-radius: 12px;
+  font-size: 0.875rem; font-weight: 600;
+  display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+}
+.sk-flash-success { background:#ecfdf5; border-left:4px solid #10b981; color:#065f46; }
+.sk-flash-warning { background:#fffbeb; border-left:4px solid #f59e0b; color:#92400e; }
+.sk-flash-danger  { background:#fef2f2; border-left:4px solid var(--sk-red); color:#7f1d1d; }
+
+/* ══ GRID ══ */
+.sk-clubs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+/* ══ CLUB CARD ══ */
+.sk-club-card {
+  position: relative;
+  background: var(--sk-white);
+  border-radius: 16px;
+  border: 1.5px solid var(--sk-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  overflow: hidden; display: flex; flex-direction: column;
+  transition: transform 0.28s cubic-bezier(.22,.68,0,1.25), box-shadow 0.28s, border-color 0.22s;
+  animation: sk-up 0.4s ease both;
+}
+.sk-club-card::before {
+  content: ''; display: block; height: 3px;
+  background: linear-gradient(90deg, var(--sk-red), var(--sk-red-light));
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.28s ease; flex-shrink: 0;
+}
+.sk-club-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 44px rgba(139,0,0,0.11), 0 4px 12px rgba(0,0,0,0.05);
+  border-color: rgba(139,0,0,0.22);
+}
+.sk-club-card:hover::before { transform: scaleX(1); }
 
 /* Image */
-.club-img{height:110px;background:linear-gradient(135deg,#1a1a1a,#2d2d2d);display:flex;align-items:center;justify-content:center;font-size:2.6rem;position:relative;overflow:hidden;}
-.club-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
-.club-img::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,0.35));}
+.sk-club-img {
+  height: 120px;
+  background: linear-gradient(135deg, #1a0000 0%, #3d0000 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.8rem; position: relative; overflow: hidden; flex-shrink: 0;
+}
+.sk-club-img::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.35));
+}
+.sk-club-img img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
 
 /* Body */
-.club-body{padding:18px 20px 12px;flex:1;display:flex;flex-direction:column;gap:6px;}
-.club-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.club-desc{font-size:0.75rem;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1;}
-.club-meta{display:flex;align-items:center;gap:12px;margin-top:6px;flex-wrap:wrap;}
-.club-meta-item{font-size:0.68rem;color:var(--muted);display:flex;align-items:center;gap:4px;}
-.club-meta-item i{color:var(--red);font-size:0.65rem;}
-.club-meta-item a{color:var(--muted);text-decoration:underline;text-underline-offset:2px;}
-.club-meta-item a:hover{color:var(--red);}
+.sk-club-body {
+  padding: 18px 20px 12px; flex: 1;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.sk-club-name {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1rem; font-weight: 700; color: var(--sk-ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em;
+}
+.sk-club-desc {
+  font-size: 0.75rem; color: var(--sk-muted);
+  line-height: 1.5; flex: 1;
+  display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.sk-club-meta { display: flex; align-items: center; gap: 12px; margin-top: 6px; flex-wrap: wrap; }
+.sk-club-meta-item {
+  font-size: 0.68rem; color: var(--sk-muted);
+  display: flex; align-items: center; gap: 4px;
+}
+.sk-club-meta-item i { color: var(--sk-red); font-size: 0.65rem; }
+.sk-club-meta-item a { color: var(--sk-muted); text-decoration: underline; text-underline-offset: 2px; }
+.sk-club-meta-item a:hover { color: var(--sk-red); }
 
-/* Badge membre */
-.membre-badge{display:inline-flex;align-items:center;gap:5px;font-size:0.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:#ecfdf5;color:var(--green);border:1px solid #a7f3d0;padding:3px 9px;border-radius:20px;margin-top:4px;width:fit-content;}
+.sk-membre-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  background: #ecfdf5; color: var(--sk-green);
+  border: 1px solid #a7f3d0; padding: 3px 9px; border-radius: 20px;
+  margin-top: 4px; width: fit-content;
+}
 
 /* Footer */
-.club-foot{padding:0 20px 18px;}
-.club-sep{height:1px;background:var(--border);margin-bottom:14px;}
+.sk-club-footer { padding: 0 20px 18px; }
+.sk-club-sep    { height: 1px; background: var(--sk-border); margin-bottom: 14px; }
 
-.btn-responsable{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:10px;background:transparent;color:var(--amber);border:1.5px solid #fde68a;border-radius:9px;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.2s;background:#fffbeb;}
-.btn-responsable:hover{background:var(--amber);color:#fff;border-color:var(--amber);transform:translateY(-1px);box-shadow:0 4px 16px rgba(217,119,6,0.25);}
+.sk-btn-responsable {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  width: 100%; padding: 10px;
+  background: #fffbeb; color: var(--sk-amber);
+  border: 1.5px solid #fde68a; border-radius: 9px;
+  font-size: 0.78rem; font-weight: 700;
+  text-decoration: none; transition: all 0.2s;
+}
+.sk-btn-responsable:hover {
+  background: var(--sk-amber); color: #fff; border-color: var(--sk-amber);
+  transform: translateY(-1px); box-shadow: 0 4px 16px rgba(217,119,6,0.25);
+  text-decoration: none;
+}
 
-/* Empty */
-.empty-state{text-align:center;padding:72px 24px;background:var(--white);border-radius:var(--radius);border:1px solid var(--border);animation:fadeUp 0.4s ease both;}
-.empty-ico{font-size:3rem;margin-bottom:16px;opacity:0.35;}
-.empty-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--ink);margin-bottom:8px;}
-.empty-sub{font-size:0.875rem;color:var(--muted);margin-bottom:24px;}
-.btn-discover{display:inline-flex;align-items:center;gap:8px;background:var(--red);color:#fff;padding:12px 26px;border-radius:10px;font-size:0.875rem;font-weight:700;text-decoration:none;transition:all 0.2s;}
-.btn-discover:hover{background:var(--red-mid);color:#fff;text-decoration:none;transform:translateY(-2px);box-shadow:0 6px 20px rgba(193,6,9,0.28);}
+/* ══ EMPTY STATE ══ */
+.sk-empty {
+  text-align: center; padding: 80px 24px;
+  background: var(--sk-white);
+  border-radius: 16px; border: 1.5px solid var(--sk-border);
+  animation: sk-up 0.4s ease both;
+}
+.sk-empty-ico   { font-size: 3rem; margin-bottom: 16px; display: block; opacity: 0.4; }
+.sk-empty-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.3rem; font-weight: 700; color: var(--sk-ink); margin-bottom: 8px;
+}
+.sk-empty-sub { font-size: 0.875rem; color: var(--sk-muted); margin-bottom: 24px; line-height: 1.6; }
+.sk-btn-discover {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--sk-red); color: #fff;
+  padding: 12px 26px; border-radius: 10px;
+  font-size: 0.875rem; font-weight: 700;
+  text-decoration: none; transition: all 0.2s;
+}
+.sk-btn-discover:hover {
+  background: var(--sk-red-dark); color: #fff; text-decoration: none;
+  transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139,0,0,0.28);
+}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
-.club-card{animation:fadeUp 0.4s ease both;}
-.club-card:nth-child(1){animation-delay:0.06s;}.club-card:nth-child(2){animation-delay:0.12s;}.club-card:nth-child(3){animation-delay:0.18s;}
-.club-card:nth-child(4){animation-delay:0.24s;}.club-card:nth-child(5){animation-delay:0.30s;}.club-card:nth-child(6){animation-delay:0.36s;}
-@media(max-width:1024px){.clubs-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:640px){.clubs-grid{grid-template-columns:1fr;}.wrap{padding:0 16px;}.page-header{flex-direction:column;align-items:flex-start;}}
+/* ══ ANIMATIONS ══ */
+@keyframes sk-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.sk-club-card:nth-child(1) { animation-delay:.06s }
+.sk-club-card:nth-child(2) { animation-delay:.12s }
+.sk-club-card:nth-child(3) { animation-delay:.18s }
+.sk-club-card:nth-child(4) { animation-delay:.24s }
+.sk-club-card:nth-child(5) { animation-delay:.30s }
+.sk-club-card:nth-child(6) { animation-delay:.36s }
+
+/* ══ RESPONSIVE ══ */
+@media (max-width: 1024px) { .sk-clubs-grid { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 640px) {
+  .sk-clubs-grid { grid-template-columns: 1fr; }
+  .sk-inner { padding: 0 16px; }
+  .sk-top-bar { flex-direction: column; align-items: stretch; }
+  .sk-top-bar-right { justify-content: space-between; }
+}
 </style>
 {% endblock %}
 
 {% block body %}
-<div class="shell"><div class="wrap">
+<div class="sk-page">
 
-    {% for type, messages in app.flashes %}{% for msg in messages %}
-        <div class="flash flash-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }}">
+  {# ══ HERO ══ #}
+  <div class="sk-hero">
+    <div class="sk-hero-ring-l"></div>
+    <div class="sk-hero-ring-r"></div>
+    <div class="sk-hero-inner">
+      <h1>🏛️ Mes Clubs</h1>
+      <p>
+        {% if clubs|length > 0 %}
+          Vous êtes membre de {{ clubs|length }} club{{ clubs|length > 1 ? 's' : '' }} sur SkillOra
+        {% else %}
+          Rejoignez des clubs et participez à la vie associative de SkillOra
+        {% endif %}
+      </p>
+      <div class="sk-hero-stats">
+        <div class="sk-hero-stat">
+          <span class="val">{{ clubs|length }}</span>
+          <span class="lbl">Club{{ clubs|length > 1 ? 's' : '' }} rejoint{{ clubs|length > 1 ? 's' : '' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ══ CONTENT ══ #}
+  <div class="sk-content">
+  <div class="sk-inner">
+
+    {# Flash #}
+    <div class="sk-flash">
+      {% for type, messages in app.flashes %}
+        {% for msg in messages %}
+          <div class="sk-flash-msg sk-flash-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }}">
             {{ type == 'success' ? '✅' : (type == 'warning' ? '⚠️' : '❌') }} {{ msg }}
-        </div>
-    {% endfor %}{% endfor %}
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
 
-    <div class="page-header">
-        <div>
-            <div class="page-eyebrow">Communauté</div>
-            <h1 class="page-title">Mes <em>Clubs</em></h1>
-            <p class="page-sub">
-                {% if clubs|length > 0 %}
-                    Vous êtes membre de {{ clubs|length }} club{{ clubs|length > 1 ? 's' : '' }}.
-                {% else %}
-                    Vous n'avez pas encore rejoint de club.
-                {% endif %}
-            </p>
-        </div>
-        <a href="{{ path('user_club_index') }}" class="btn-voir-tous">
-            <i class="fas fa-th-large"></i> Tous les clubs
+    {# Top bar #}
+    <div class="sk-top-bar">
+      <div class="sk-top-bar-left">
+        <span class="sk-filter-label"><i class="fas fa-shield-alt"></i> Mes adhésions</span>
+        {% if clubs|length > 0 %}
+          <span class="sk-count-pill">
+            <i class="fas fa-check-circle"></i> {{ clubs|length }} club{{ clubs|length > 1 ? 's' : '' }}
+          </span>
+        {% else %}
+          <span style="font-size:0.8rem;color:var(--sk-muted);">Aucune adhésion pour le moment</span>
+        {% endif %}
+      </div>
+      <div class="sk-top-bar-right">
+        <span class="sk-result-count">
+          <span>{{ clubs|length }}</span>&nbsp;résultat{{ clubs|length > 1 ? 's' : '' }}
+        </span>
+        <a href="{{ path('user_club_index') }}" class="sk-btn-all">
+          <i class="fas fa-th-large"></i> Tous les clubs
         </a>
+      </div>
     </div>
 
     {% if clubs|length > 0 %}
-    <div class="clubs-grid">
+
+      {# Section label #}
+      <div class="sk-label">Clubs dont vous êtes membre</div>
+
+      {# Grid #}
+      <div class="sk-clubs-grid">
         {% for club in clubs %}
-        <div class="club-card">
+        <div class="sk-club-card">
 
-            <div class="club-img">
-                {% if club.logo %}
-                    <img src="{{ vich_uploader_asset(club, 'logoFile') }}" alt="{{ club.nom }}">
-                {% else %}
-                    🏛️
-                {% endif %}
-            </div>
+          <div class="sk-club-img">
+            {% if club.logo %}
+              <img src="{{ vich_uploader_asset(club, 'logoFile') }}" alt="{{ club.nom }}">
+            {% else %}
+              🏛️
+            {% endif %}
+          </div>
 
-            <div class="club-body">
-                <div class="club-name">{{ club.nom }}</div>
-                {% if club.description %}
-                    <div class="club-desc">{{ club.description }}</div>
-                {% endif %}
-                <div class="club-meta">
-                    {% if club.dateCreation %}
-                        <span class="club-meta-item"><i class="fas fa-calendar"></i> {{ club.dateCreation|date('d/m/Y') }}</span>
-                    {% endif %}
-                    {% if club.siteWeb %}
-                        <span class="club-meta-item"><i class="fas fa-globe"></i> <a href="{{ club.siteWeb }}" target="_blank" rel="noopener">Site web</a></span>
-                    {% endif %}
-                </div>
-                <span class="membre-badge"><i class="fas fa-check-circle"></i> Membre</span>
+          <div class="sk-club-body">
+            <div class="sk-club-name">{{ club.nom }}</div>
+            {% if club.description %}
+              <div class="sk-club-desc">{{ club.description }}</div>
+            {% endif %}
+            <div class="sk-club-meta">
+              {% if club.dateCreation %}
+                <span class="sk-club-meta-item">
+                  <i class="fas fa-calendar"></i> {{ club.dateCreation|date('d/m/Y') }}
+                </span>
+              {% endif %}
+              {% if club.siteWeb %}
+                <span class="sk-club-meta-item">
+                  <i class="fas fa-globe"></i>
+                  <a href="{{ club.siteWeb }}" target="_blank" rel="noopener">Site web</a>
+                </span>
+              {% endif %}
             </div>
+            <span class="sk-membre-badge"><i class="fas fa-check-circle"></i> Membre</span>
+          </div>
 
-            <div class="club-foot">
-                <div class="club-sep"></div>
-                <form method="post"
-                      action="{{ path('user_club_responsable', {'id': club.id}) }}"
-                      onsubmit="return confirm('Envoyer une demande pour devenir responsable de ce club ?')">
-                    <input type="hidden" name="_token" value="{{ csrf_token('responsable' ~ club.id) }}">
-                    <button type="submit" class="btn-responsable">
-                        <i class="fas fa-user-tie"></i> Devenir responsable
-                    </button>
-                </form>
-            </div>
+          <div class="sk-club-footer">
+            <div class="sk-club-sep"></div>
+            <a href="{{ path('user_club_responsable', {'id': club.id}) }}" class="sk-btn-responsable">
+              <i class="fas fa-user-tie"></i> Devenir responsable
+            </a>
+          </div>
 
         </div>
         {% endfor %}
-    </div>
+      </div>
 
     {% else %}
 
-    <div class="empty-state">
-        <div class="empty-ico">🏛️</div>
-        <div class="empty-title">Aucun club pour le moment</div>
-        <p class="empty-sub">Vous n'avez pas encore rejoint de club.<br>Découvrez les clubs disponibles et faites une demande d'adhésion.</p>
-        <a href="{{ path('user_club_index') }}" class="btn-discover">
-            <i class="fas fa-compass"></i> Découvrir les clubs
+      <div class="sk-empty">
+        <span class="sk-empty-ico">🏛️</span>
+        <div class="sk-empty-title">Aucun club pour le moment</div>
+        <p class="sk-empty-sub">Vous n'avez pas encore rejoint de club.<br>Découvrez les clubs disponibles et faites une demande d'adhésion.</p>
+        <a href="{{ path('user_club_index') }}" class="sk-btn-discover">
+          <i class="fas fa-compass"></i> Découvrir les clubs
         </a>
-    </div>
+      </div>
 
     {% endif %}
 
-</div></div>
+  </div>
+  </div>
+
+</div>
 {% endblock %}

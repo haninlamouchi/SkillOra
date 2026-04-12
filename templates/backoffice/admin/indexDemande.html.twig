@@ -19,6 +19,26 @@
 .table tbody tr { cursor:default; transition:background 0.15s; }
 .table tbody tr:hover { background:rgba(193,6,9,0.04) !important; }
 .count-badge { background:#c10609; color:#fff; padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:800; }
+
+.cv-link {
+    display:inline-flex; align-items:center; gap:5px;
+    padding:4px 10px; border-radius:20px;
+    font-size:0.72rem; font-weight:700;
+    background:rgba(193,6,9,0.08); color:#c10609;
+    text-decoration:none; transition:background 0.15s;
+    white-space:nowrap;
+}
+.cv-link:hover { background:rgba(193,6,9,0.18); color:#8b0507; }
+
+.li-link {
+    display:inline-flex; align-items:center; gap:5px;
+    padding:4px 10px; border-radius:20px;
+    font-size:0.72rem; font-weight:700;
+    background:rgba(10,102,194,0.09); color:#0a66c2;
+    text-decoration:none; transition:background 0.15s;
+    white-space:nowrap;
+}
+.li-link:hover { background:rgba(10,102,194,0.18); color:#004182; }
 </style>
 {% endblock %}
 
@@ -28,7 +48,6 @@
         <div class="card" style="border-radius:12px; border-top:3px solid #c10609;">
             <div class="card-body">
 
-                {# Flash messages #}
                 {% for type, messages in app.flashes %}
                     {% for message in messages %}
                         <div class="alert alert-{{ type == 'success' ? 'success' : (type == 'warning' ? 'warning' : 'danger') }} alert-dismissible fade show" role="alert">
@@ -45,18 +64,20 @@
                         <span class="count-badge ms-2">{{ demandes|length }}</span>
                     </h4>
                 </div>
-
+                
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover align-middle">
                         <thead style="background:#fafafa;">
                             <tr>
                                 <th>Logo</th>
                                 <th>Nom</th>
                                 <th>Description</th>
-                                <th>Date Création</th>
-                                <th>Site Web</th>
+                                <th>Date création</th>
+                                <th>Site web</th>
                                 <th>Responsable</th>
-                                <th style="width:160px;">Actions</th>
+                                <th>CV</th>
+                                <th>LinkedIn</th>
+                                <th style="width:120px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -110,10 +131,38 @@
                             </td>
 
                             <td>
+                                {% if demande.cv %}
+                                    <a href="{{ asset('uploads/cvs/' ~ demande.cv) }}"
+                                       target="_blank"
+                                       rel="noopener"
+                                       class="cv-link"
+                                       title="Ouvrir le CV">
+                                        <i class="mdi mdi-file-pdf-box"></i> CV
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted small">—</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if demande.linkedin %}
+                                    <a href="{{ demande.linkedin }}"
+                                       target="_blank"
+                                       rel="noopener"
+                                       class="li-link"
+                                       title="Voir le profil LinkedIn">
+                                        <i class="mdi mdi-linkedin"></i> Profil
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted small">—</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
                                 <form method="post"
                                       action="{{ path('admin_club_accepter', {'id': demande.id}) }}"
                                       style="display:inline"
-                                      onsubmit="return confirm('Accepter cette demande ?')">
+                                      onsubmit="return confirm('Accepter cette demande et créer le club ?')">
                                     <button type="submit"
                                             class="btn btn-sm btn-outline-success me-1"
                                             title="Accepter">
@@ -124,7 +173,7 @@
                                 <form method="post"
                                       action="{{ path('admin_club_refuser', {'id': demande.id}) }}"
                                       style="display:inline"
-                                      onsubmit="return confirm('Refuser cette demande ?')">
+                                      onsubmit="return confirm('Refuser et supprimer cette demande ?')">
                                     <button type="submit"
                                             class="btn btn-sm btn-outline-danger"
                                             title="Refuser">
@@ -135,7 +184,7 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-5">
+                            <td colspan="9" class="text-center text-muted py-5">
                                 <i class="mdi mdi-plus-circle-outline" style="font-size:2rem;opacity:0.3;"></i>
                                 <p class="mt-2 mb-0">Aucune demande de création en attente.</p>
                             </td>
